@@ -37,11 +37,11 @@ class GraphicsView(QtGui.QGraphicsView):
         self.box_create_start = QtCore.QPoint()
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.move_box = None
+        self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
             for box in self.scene().items():
-                print box
                 # if hasattr(box, "isSelected") and box.isSelected():
                 if box.isSelected():
                     self.scene().removeItem(box)
@@ -72,7 +72,11 @@ class GraphicsView(QtGui.QGraphicsView):
             self.scrollBarValuesOnMousePress.setX(self.horizontalScrollBar().value())
             self.scrollBarValuesOnMousePress.setY(self.verticalScrollBar().value())
         elif event.button() == QtCore.Qt.LeftButton:
-            pass
+            x, y = event.pos().x(), event.pos().y()
+            item = self.scene().itemAt(x, y)
+            if isinstance(item, QtGui.QGraphicsPixmapItem):
+                self.box_create_start = QtCore.QPoint(event.pos())
+
         elif event.button() == QtCore.Qt.RightButton:
             self.box_create_start = QtCore.QPoint(event.pos())
         # event.accept()
@@ -84,9 +88,7 @@ class GraphicsView(QtGui.QGraphicsView):
             #     self.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.blue, scene=self.scene())
             #     self.scene().addItem(self.move_box)
             self.move_box.setVisible(True)
-            print self.mapToScene(0, 0)  
             s = self.mapToScene(self.box_create_start.x(), self.box_create_start.y())  
-            print s
             pos = event.pos()
             e = self.mapToScene(pos.x(), pos.y())
             # self.move_box.setRect(s.x(), s.y(), e.x() - s.x(), e.y() - e.y())
@@ -114,11 +116,16 @@ class GraphicsView(QtGui.QGraphicsView):
         event.accept()
 
     def mouseReleaseEvent(self, event):
-        if self.move_box:
-            self.move_box.setVisible(False)
+
         QtGui.QGraphicsView.mouseReleaseEvent(self, event) 
         if event.button() == QtCore.Qt.MidButton: 
             self.mousePressPos = QtCore.QPoint()
+        elif event.button() == QtCore.Qt.LeftButton:
+            if self.move_box.isVisible():
+                print "select"
+                items = self.scene().items(self.move_box.sceneBoundingRect())
+                for item in items:
+                    item.setSelected(True)
         elif event.button() == QtCore.Qt.RightButton:
             e = QtCore.QPoint(event.pos())
             s = self.box_create_start
@@ -130,7 +137,9 @@ class GraphicsView(QtGui.QGraphicsView):
             h = np.abs(s.y() - e.y())
             box = BoxResizable(QtCore.QRectF(s.x(), s.y(), w, h),  scene=self.scene())
             self.scene().addItem(box)
-            self.box_create_start = QtCore.QPoint()
+        if self.move_box:
+            self.move_box.setVisible(False)
+            self.box_create_start = QtCore.QPoint()      
         # event.accept() 
 
 class GraphicsScene(QtGui.QGraphicsScene):
@@ -154,6 +163,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
         self._rect = rect
         self._scene = scene
+        self.orig_rect = QtCore.QRectF(rect)
         self.mouseOver = False
         self.resizeHandleSize = 4.0
         self.mousePressPos = None
@@ -162,17 +172,22 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.mousePressArea = None
         self.color = color
         self.setFlags(QtGui.QGraphicsItem.ItemIsFocusable)
-        self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+        # self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
         self.setAcceptsHoverEvents(True)
         self.updateResizeHandles()
         self.setZValue(1000)
 
-    def itemChange(self, event, value):
-        result = QtGui.QGraphicsRectItem.itemChange(self, event, value)
-        self._rect = self.rect()
-        self.updateResizeHandles()
-        return result
+    # def itemChange(self, change, value):
+    #     if change == QtGui.QGraphicsItem.ItemPositionHasChanged:
+    #         # self._rect.moveTopLeft(value)
+    #         # self._rect.x = value.x()
+    #         # self._rect.y = value.y()
+    #         self.updateResizeHandles()
+    #         print self._rect
+    #     result = QtGui.QGraphicsRectItem.itemChange(self, change, value)
+    #     return result
 
     def shape(self):
         path = QtGui.QPainterPath()
@@ -223,9 +238,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             else:
                 self.mousePressArea = None
 
-                QtGui.QGraphicsRectItem.mousePressEvent(self, event)
-                return
-            event.accept()  
+            QtGui.QGraphicsRectItem.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         """
@@ -244,29 +257,30 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         self.mouseMovePos = event.scenePos()
         if self.mouseIsPressed:
-            # Move top left corner
-            if self.mousePressArea=='topleft':
-                self._rect.setTopLeft(self.rectPress.topLeft()-(self.mousePressPos-self.mouseMovePos))
+            if self.mousePressArea:
+                # Move top left corner
+                if self.mousePressArea=='topleft':
+                    self._rect.setTopLeft(self.rectPress.topLeft()-(self.mousePressPos-self.mouseMovePos))
+                # Move top right corner            
+                elif  self.mousePressArea=='topright':
+                    self._rect.setTopRight(self.rectPress.topRight()-(self.mousePressPos-self.mouseMovePos))
+                # Move bottom left corner            
+                elif  self.mousePressArea=='bottomleft':
+                    self._rect.setBottomLeft(self.rectPress.bottomLeft()-(self.mousePressPos-self.mouseMovePos))
+                # Move bottom right corner            
+                elif  self.mousePressArea=='bottomright':
+                    self._rect.setBottomRight(self.rectPress.bottomRight()-(self.mousePressPos-self.mouseMovePos))
                 event.accept()
-            # Move top right corner            
-            elif  self.mousePressArea=='topright':
-                self._rect.setTopRight(self.rectPress.topRight()-(self.mousePressPos-self.mouseMovePos))
-                event.accept()
-            # Move bottom left corner            
-            elif  self.mousePressArea=='bottomleft':
-                self._rect.setBottomLeft(self.rectPress.bottomLeft()-(self.mousePressPos-self.mouseMovePos))
-                event.accept()
-            # Move bottom right corner            
-            elif  self.mousePressArea=='bottomright':
-                self._rect.setBottomRight(self.rectPress.bottomRight()-(self.mousePressPos-self.mouseMovePos))
-                event.accept()
-            # Move entire rectangle, don't resize
-            else:
-                # self._rect.moveCenter(self.rectPress.center()-(self.mousePressPos-self.mouseMovePos))
-                QtGui.QGraphicsRectItem.mouseMoveEvent(self, event)
                 self.updateResizeHandles()
                 self.prepareGeometryChange()
+                return
+            # Move entire rectangle, don't resize
+            else:
+                self._rect.moveCenter(self.rectPress.center()-(self.mousePressPos-self.mouseMovePos))
+            self.updateResizeHandles()
+            self.prepareGeometryChange()
 
+            QtGui.QGraphicsRectItem.mouseMoveEvent(self, event)
 
     def boundingRect(self):
         """
@@ -281,8 +295,16 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.offset = self.resizeHandleSize*(self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
         self._boundingRect = self._rect.adjusted(-self.offset, -self.offset, self.offset, self.offset)
 
-        # self._rect = self._rect.normalized()
-        # Note: this draws correctly on a view with an inverted y axes. i.e. QGraphicsView.scale(1,-1)
+        # print self.boundingRect()
+        # print self._boundingRect
+        # x = self.sceneBoundingRect().x()
+        # y = self.sceneBoundingRect().y()
+        # self.topLeft = QtCore.QRectF(x, y,
+        #                              2*self.offset, 2*self.offset)
+        # print  'brect', QtCore.QRectF(self._boundingRect.topLeft().x(), self._boundingRect.topLeft().y(),
+        #                              2*self.offset, 2*self.offset)
+        # print self.topLeft
+        # print self.sceneBoundingRect()
         self.topLeft = QtCore.QRectF(self._boundingRect.topLeft().x(), self._boundingRect.topLeft().y(),
                                      2*self.offset, 2*self.offset)
         self.topRight = QtCore.QRectF(self._boundingRect.topRight().x() - 2*self.offset, self._boundingRect.topRight().y() ,
@@ -374,7 +396,8 @@ class ImageViewer(QtGui.QMainWindow):
         # self.scene.setSceneRect(-500, 0, 600, 600)
         # self.view = QtGui.QGraphicsView()
         self.view = GraphicsView()
-        self.view.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)
+        # self.view.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)
+        self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         # self.view.scale(1,-1)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing)
