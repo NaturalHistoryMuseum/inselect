@@ -1,49 +1,38 @@
 #!/usr/bin/env python
 
-#############################################################################
-##
-## Copyright (C) 2005-2005 Trolltech AS. All rights reserved.
-##
-## This file is part of the example classes of the Qt Toolkit.
-##
-## This file may be used under the terms of the GNU General Public
-## License version 2.0 as published by the Free Software Foundation
-## and appearing in the file LICENSE.GPL included in the packaging of
-## this file.  Please review the following information to ensure GNU
-## General Public Licensing requirements will be met:
-## http://www.trolltech.com/products/qt/opensource.html
-##
-## If you are unsure which license is appropriate for your use, please
-## review the following information:
-## http://www.trolltech.com/products/qt/licensing.html or contact the
-## sales department at sales@trolltech.com.
-##
-## This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-## WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-##
-#############################################################################
-
 from PySide import QtCore, QtGui
 from segment import segment_edges
 import cv2
+import os
 import numpy as np
+from multiprocessing import Process, Queue
 
 class GraphicsView(QtGui.QGraphicsView):
     def __init__ (self, parent  =None):
         QtGui.QGraphicsView.__init__(self, parent)
         self.is_dragging = False
-        self.mousePressPos = QtCore.QPoint()
+        self.mouse_press_pos = QtCore.QPoint()
         self.box_create_start = QtCore.QPoint()
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.move_box = None
+        self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+        self.items = []
+
+    def add_item(self, item):
+        self.items.append(item)
+        self.scene().addItem(item)
+
+    def remove_item(self, item):
+        self.items.remove(item)    
+        self.scene().removeItem(item)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
-            for box in self.scene().items():
+            for box in list(self.items):
                 # if hasattr(box, "isSelected") and box.isSelected():
                 if box.isSelected():
-                    self.scene().removeItem(box)
+                    self.remove_item(box)
 
         QtGui.QGraphicsView.keyPressEvent(self, event) 
 
@@ -58,28 +47,31 @@ class GraphicsView(QtGui.QGraphicsView):
             else:
                 scale = 0.8
             self.set_scale(scale)
-            
+            return
+        QtGui.QGraphicsView.wheelEvent(self, event)
+
     def mousePressEvent(self, event):
+        print self.is_resizing
         if event.button() == QtCore.Qt.MidButton:
-            self.mousePressPos = QtCore.QPoint(event.pos())
+            self.mouse_press_pos = QtCore.QPoint(event.pos())
             self.scrollBarValuesOnMousePress.setX(self.horizontalScrollBar().value())
             self.scrollBarValuesOnMousePress.setY(self.verticalScrollBar().value())
             event.accept()
             return
-        elif event.button() == QtCore.Qt.LeftButton:
+        elif event.button() == QtCore.Qt.LeftButton and not self.is_resizing:
             # reveal hidden boxes, smallest to the front
-            x, y = event.pos().x(), event.pos().y()
-            items = self.scene().items(event.pos())
-            items = [item for item in items if isinstance(item, BoxResizable)]
-            if len(items) > 1:
+            e = self.mapToScene(event.pos().x(), event.pos().y())
+            items = self.scene().items(e)
+            items = [item for item in items if item in self.items]
+            if items:
                 items.sort(lambda a, b: cmp(a.boundingRect().width() * a.boundingRect().height(), 
                     b.boundingRect().width() * b.boundingRect().height()))
-                print items[0].boundingRect().width() , items[0].boundingRect().height() 
-                for item in items:
+                for item in self.items:
                     item.setZValue(1000)
                 items[0].setZValue(1001)
-                items[0].setSelected(True)
-                items[-1].setSelected(False)
+                self.move_box.setZValue(1002)
+                # items[0].setSelected(True)
+                # items[-1].setSelected(False)
         elif event.button() == QtCore.Qt.RightButton:
             self.box_create_start = QtCore.QPoint(event.pos())
             return
@@ -88,33 +80,20 @@ class GraphicsView(QtGui.QGraphicsView):
     def mouseMoveEvent(self, event):
         QtGui.QGraphicsView.mouseMoveEvent(self, event) 
         if not self.box_create_start.isNull():
-            # if not self.move_box:
-            #     self.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.blue, scene=self.scene())
-            #     self.scene().addItem(self.move_box)
             self.move_box.setVisible(True)
             s = self.mapToScene(self.box_create_start.x(), self.box_create_start.y())  
             pos = event.pos()
             e = self.mapToScene(pos.x(), pos.y())
-            # self.move_box.setRect(s.x(), s.y(), e.x() - s.x(), e.y() - e.y())
-            # self.move_box._rect = QtCore.QRect(s.toPoint(), e.toPoint())
             w, h = e.toPoint().x() - s.toPoint().x(), e.toPoint().y() - s.toPoint().y()
             self.move_box.setPos(s)
             self.move_box._rect = QtCore.QRect(0, 0, w, h)
             self.move_box._boundingRect = QtCore.QRect(0, 0, w, h)
-            # self.move_box._boundingRect = QtCore.QRect(s.toPoint(), e.toPoint())
             self.scene().update()
-            # self.setSceneRect(0.000000, 0, 4544.000000, 4669.000000)
-            # app.processEvents()
-            # import time
-            # time.sleep(0.1) 
-            # self.move_box.resize(200,200)
-
-
-        if self.mousePressPos.isNull():
+        if self.mouse_press_pos.isNull():
             event.ignore()
             return
-        self.horizontalScrollBar().setValue(self.scrollBarValuesOnMousePress.x() - event.pos().x() + self.mousePressPos.x())
-        self.verticalScrollBar().setValue(self.scrollBarValuesOnMousePress.y() - event.pos().y() + self.mousePressPos.y())
+        self.horizontalScrollBar().setValue(self.scrollBarValuesOnMousePress.x() - event.pos().x() + self.mouse_press_pos.x())
+        self.verticalScrollBar().setValue(self.scrollBarValuesOnMousePress.y() - event.pos().y() + self.mouse_press_pos.y())
         self.horizontalScrollBar().update()
         self.verticalScrollBar().update()
         event.accept()
@@ -122,7 +101,7 @@ class GraphicsView(QtGui.QGraphicsView):
     def mouseReleaseEvent(self, event):
         QtGui.QGraphicsView.mouseReleaseEvent(self, event) 
         if event.button() == QtCore.Qt.MidButton: 
-            self.mousePressPos = QtCore.QPoint()
+            self.mouse_press_pos = QtCore.QPoint()
 
         elif event.button() == QtCore.Qt.RightButton:
             e = QtCore.QPoint(event.pos())
@@ -134,14 +113,16 @@ class GraphicsView(QtGui.QGraphicsView):
             w = np.abs(s.x() - e.x())  
             h = np.abs(s.y() - e.y())
             box = BoxResizable(QtCore.QRectF(s.x(), s.y(), w, h),  scene=self.scene())
-            self.scene().addItem(box)
+            box.setZValue(1001)
+            # self.scene().addItem(box)
+            self.add_item(box)
         if self.move_box:
             self.move_box.setVisible(False)
             self.box_create_start = QtCore.QPoint()      
         # event.accept() 
 
 class GraphicsScene(QtGui.QGraphicsScene):
-    def __init__ (self, parent  =None):
+    def __init__ (self, parent=None):
         QtGui.QGraphicsScene.__init__(self, parent)
 
     def mousePressEvent(self, event):
@@ -157,17 +138,17 @@ class GraphicsScene(QtGui.QGraphicsScene):
         self.view = view
 
 class BoxResizable(QtGui.QGraphicsRectItem):
-    def __init__(self, rect, parent=None, color=QtCore.Qt.red, scene=None):
+    def __init__(self, rect, parent=None, color=QtCore.Qt.blue, scene=None):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
         self._rect = rect
         self._scene = scene
         self.orig_rect = QtCore.QRectF(rect)
         self.mouseOver = False
-        self.resizeHandleSize = 4.0
-        self.mousePressPos = None
-        self.mouseMovePos = None
-        self.mouseIsPressed = False
-        self.mousePressArea = None
+        self.handle_size = 4.0
+        self.mouse_press_pos = None
+        self.mouse_move_pos = None
+        self.mouse_is_pressed = False
+        self.mouse_press_area = None
         self.color = color
         self.setFlags(QtGui.QGraphicsItem.ItemIsFocusable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -176,16 +157,6 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.setAcceptsHoverEvents(True)
         self.updateResizeHandles()
         self.setZValue(1000)
-
-    # def itemChange(self, change, value):
-    #     if change == QtGui.QGraphicsItem.ItemPositionHasChanged:
-    #         # self._rect.moveTopLeft(value)
-    #         # self._rect.x = value.x()
-    #         # self._rect.y = value.y()
-    #         self.updateResizeHandles()
-    #         print self._rect
-    #     result = QtGui.QGraphicsRectItem.itemChange(self, change, value)
-    #     return result
 
     def shape(self):
         path = QtGui.QPainterPath()
@@ -199,17 +170,21 @@ class BoxResizable(QtGui.QGraphicsRectItem):
 
     def hoverLeaveEvent(self, event):
         self.mouseOver = False
+        self.scene().view.is_resizing = False
         self.prepareGeometryChange()
 
     def hoverMoveEvent(self, event):
         if self.top_left_handle.contains(event.pos()) or self.bottom_right_handle.contains(event.pos()):
         # if self.topLeft.contains(event.scenePos()) or self.bottomRight.contains(event.scenePos()):
             self.setCursor(QtCore.Qt.SizeFDiagCursor)
+            self.scene().view.is_resizing = True
         elif self.top_right_handle.contains(event.pos()) or self.bottom_left_handle.contains(event.pos()):
         # elif self.topRight.contains(event.scenePos()) or self.bottomLeft.contains(event.scenePos()):
             self.setCursor(QtCore.Qt.SizeBDiagCursor)
+            self.scene().view.is_resizing = True
         else:
             self.setCursor(QtCore.Qt.SizeAllCursor)
+            self.scene().view.is_resizing = False 
 
         QtGui.QGraphicsRectItem.hoverMoveEvent(self, event)
 
@@ -218,25 +193,25 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         Capture mouse press events and find where the mosue was pressed on the object
         """
         if event.button() == QtCore.Qt.LeftButton:
-            self.mousePressPos = event.scenePos()
-            self.mouseIsPressed = True
-            self.rectPress = QtCore.QRectF(self._rect)
+            self.mouse_press_pos = event.scenePos()
+            self.mouse_is_pressed = True
+            self.rect_press = QtCore.QRectF(self._rect)
 
             # Top left corner
             if self.top_left_handle.contains(event.pos()):
-                self.mousePressArea = 'topleft'
+                self.mouse_press_area = 'topleft'
             # top right corner            
             elif self.top_right_handle.contains(event.pos()):
-                self.mousePressArea = 'topright'
+                self.mouse_press_area = 'topright'
             #  bottom left corner            
             elif self.bottom_left_handle.contains(event.pos()):
-                self.mousePressArea = 'bottomleft'
+                self.mouse_press_area = 'bottomleft'
             # bottom right corner            
             elif self.bottom_right_handle.contains(event.pos()):
-                self.mousePressArea = 'bottomright'
+                self.mouse_press_area = 'bottomright'
             # entire rectangle
             else:
-                self.mousePressArea = None
+                self.mouse_press_area = None
 
             QtGui.QGraphicsRectItem.mousePressEvent(self, event)
 
@@ -244,7 +219,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         Capture nmouse press events.
         """
-        self.mouseIsPressed = False
+        self.mouse_is_pressed = False
         self.updateResizeHandles()
         self.prepareGeometryChange()
         self._rect = self._rect.normalized()
@@ -255,30 +230,29 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         Handle mouse move events.
         """
-        self.mouseMovePos = event.scenePos()
-        if self.mouseIsPressed:
-            if self.mousePressArea:
+        self.mouse_move_pos = event.scenePos()
+        if self.mouse_is_pressed:
+            if self.mouse_press_area:
+                self.prepareGeometryChange()
                 # Move top left corner
-                if self.mousePressArea=='topleft':
-                    self._rect.setTopLeft(self.rectPress.topLeft()-(self.mousePressPos-self.mouseMovePos))
+                if self.mouse_press_area=='topleft':
+                    self._rect.setTopLeft(self.rect_press.topLeft()-(self.mouse_press_pos-self.mouse_move_pos))
                 # Move top right corner            
-                elif  self.mousePressArea=='topright':
-                    self._rect.setTopRight(self.rectPress.topRight()-(self.mousePressPos-self.mouseMovePos))
+                elif  self.mouse_press_area=='topright':
+                    self._rect.setTopRight(self.rect_press.topRight()-(self.mouse_press_pos-self.mouse_move_pos))
                 # Move bottom left corner            
-                elif  self.mousePressArea=='bottomleft':
-                    self._rect.setBottomLeft(self.rectPress.bottomLeft()-(self.mousePressPos-self.mouseMovePos))
+                elif  self.mouse_press_area=='bottomleft':
+                    self._rect.setBottomLeft(self.rect_press.bottomLeft()-(self.mouse_press_pos-self.mouse_move_pos))
                 # Move bottom right corner            
-                elif  self.mousePressArea=='bottomright':
-                    self._rect.setBottomRight(self.rectPress.bottomRight()-(self.mousePressPos-self.mouseMovePos))
+                elif  self.mouse_press_area=='bottomright':
+                    self._rect.setBottomRight(self.rect_press.bottomRight()-(self.mouse_press_pos-self.mouse_move_pos))
                 event.accept()
                 self.updateResizeHandles()
-                self.prepareGeometryChange()
                 return
             # Move entire rectangle, don't resize
             # else:
-            #     self._rect.moveCenter(self.rectPress.center()-(self.mousePressPos-self.mouseMovePos))
+            #     self._rect.moveCenter(self.rect_press.center()-(self.mouse_press_pos-self.mouse_move_pos))
             self.updateResizeHandles()
-            self.prepareGeometryChange()
 
             QtGui.QGraphicsRectItem.mouseMoveEvent(self, event)
 
@@ -292,28 +266,10 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         Update bounding rectangle and resize handles
         """
-        self.offset = self.resizeHandleSize*(self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
+        self.offset = self.handle_size*(self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
+        self.offset1 = (self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
         self._boundingRect = self._rect.adjusted(-self.offset, -self.offset, self.offset, self.offset)
-
-        # print self.boundingRect()
-        # print self._boundingRect
-        # x = self.sceneBoundingRect().x()
-        # y = self.sceneBoundingRect().y()
-        # self.topLeft = QtCore.QRectF(x, y,
-        #                              2*self.offset, 2*self.offset)
-        # print  'brect', QtCore.QRectF(self._boundingRect.topLeft().x(), self._boundingRect.topLeft().y(),
-        #                              2*self.offset, 2*self.offset)
-        # print self.topLeft
-        # print self.sceneBoundingRect()
-
-        # self.topLeft = QtCore.QRectF(self._boundingRect.topLeft().x(), self._boundingRect.topLeft().y(),
-        #                              2*self.offset, 2*self.offset)
-        # self.topRight = QtCore.QRectF(self._boundingRect.topRight().x() - 2*self.offset, self._boundingRect.topRight().y() ,
-        #                              2*self.offset, 2*self.offset)
-        # self.bottomLeft = QtCore.QRectF(self._boundingRect.bottomLeft().x(), self._boundingRect.bottomLeft().y() - 2*self.offset,
-        #                              2*self.offset, 2*self.offset)
-        # self.bottomRight = QtCore.QRectF(self._boundingRect.bottomRight().x() - 2*self.offset, self._boundingRect.bottomRight().y() - 2*self.offset,
-        #                              2*self.offset, 2*self.offset)
+        self._innerRect = self._rect.adjusted(self.offset1, self.offset1, -self.offset1, -self.offset1)
 
         b = self._boundingRect
         self.top_left_handle = QtCore.QRectF(b.topLeft().x(), b.topLeft().y(), 2*self.offset, 2*self.offset)
@@ -324,93 +280,58 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.bottom_right_handle = QtCore.QRectF(b.bottomRight().x() - 2*self.offset, b.bottomRight().y() - 2*self.offset,
             2*self.offset, 2*self.offset)
 
+    def map_rect_to_scene(self, map_rect):
+        rect = map_rect
+        target_rect = QtCore.QRectF(rect)
+        t = rect.topLeft()
+        b = rect.bottomRight()
+        target_rect.setTopLeft(QtCore.QPointF(t.x() + self.pos().x(), t.y() + self.pos().y()))
+        target_rect.setBottomRight(QtCore.QPointF(b.x() + self.pos().x(), b.y() + self.pos().y()))
+        return target_rect
 
     def paint(self, painter, option, widget):
         """
         Paint Widget
         """
         # # show boundingRect for debug purposes
-        # painter.setPen(QtGui.QPen(QtCore.Qt.red, 0, QtCore.Qt.DashLine))
-        # painter.drawRect(self._boundingRect)
         # Paint rectangle
         if self.isSelected():
-            color = QtCore.Qt.white
+            color = QtCore.Qt.red
+            print self._rect
+            e = self.mapToScene(self.pos().x(), self.pos().y())
+            print e
+
         else:  
             color = self.color
         painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
         painter.drawRect(self._rect)
+ 
+        # b = self._boundingRect
+        # e = self.pos() #self.mapToScene(self.pos().x(), self.pos().y())
+        # e = self.scenePos() #self.mapToScene(self.pos().x(), self.pos().y())
+        # e = self.mapToParent(self., self.pos().y())
+        # rect = QtCore.QRectF(e.x(), e.(), b.width(), b.height()) 
 
         # If mouse is over, draw handles
         if self.mouseOver:
-            # if self.isSelected():
-            #     painter.setBrush(QtGui.QBrush(QtGui.QColor(0,0,0)))
+            if self.isSelected():
+                rect = self._innerRect
+                target_rect = self.map_rect_to_scene(rect)
+                painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
             painter.drawRect(self.top_left_handle)
             painter.drawRect(self.top_right_handle)
             painter.drawRect(self.bottom_left_handle)
             painter.drawRect(self.bottom_right_handle)
 
-# class ScrollArea(QtGui.QScrollArea):
-#     def __init__(self, parent=None):
-#         QtGui.QScrollArea.__init__(self)
-#         self.is_dragging = False
-#         self.mousePressPos = QtCore.QPoint()
-#         self.scrollBarValuesOnMousePress = QtCore.QPoint()
-
-#     def wheelEvent(self, event):
-#         if (event.modifiers() & QtCore.Qt.ControlModifier):
-#             if event.delta() > 0:
-#                 scale = 1.25
-#             else:
-#                 scale = 0.8
-#             self.window().scaleImage(scale)
-
-#     def mousePressEvent(self, event):
-#         if event.button() == QtCore.Qt.MidButton:
-#             self.mousePressPos = QtCore.QPoint(event.pos())
-#             self.scrollBarValuesOnMousePress.setX(self.horizontalScrollBar().value())
-#             self.scrollBarValuesOnMousePress.setY(self.verticalScrollBar().value())
-#         event.accept()
-
-#     def mouseMoveEvent(self, event):
-#         if self.mousePressPos.isNull():
-#             event.ignore()
-#             return
-#         self.horizontalScrollBar().setValue(self.scrollBarValuesOnMousePress.x() - event.pos().x() + self.mousePressPos.x())
-#         self.verticalScrollBar().setValue(self.scrollBarValuesOnMousePress.y() - event.pos().y() + self.mousePressPos.y())
-#         self.horizontalScrollBar().update()
-#         self.verticalScrollBar().update()
-#         event.accept()
-
-#     def mouseReleaseEvent(self, event):
-#         if event.button() == QtCore.Qt.MidButton: 
-#             self.mousePressPos = QtCore.QPoint()
-#         event.accept()
 
 class ImageViewer(QtGui.QMainWindow):
     def __init__(self, file_name=None):
         super(ImageViewer, self).__init__()
-
-        self.printer = QtGui.QPrinter()
-        self.scaleFactor = 0.0
-
-        self.imageLabel = QtGui.QLabel()
-        self.imageLabel.setBackgroundRole(QtGui.QPalette.Base)
-        self.imageLabel.setSizePolicy(QtGui.QSizePolicy.Ignored,
-                QtGui.QSizePolicy.Ignored)
-        self.imageLabel.setScaledContents(True)
-
-        # self.scrollArea = ScrollArea()
-        # self.scrollArea.setBackgroundRole(QtGui.QPalette.Dark)
-        # self.scrollArea.setWidget(self.imageLabel)
-        # self.setCentralWidget(self.scrollArea)
-        self.scene = GraphicsScene()
-        # self.scene.setSceneRect(-500, 0, 600, 600)
-        # self.view = QtGui.QGraphicsView()
         self.view = GraphicsView()
+        self.scene = GraphicsScene()
         # self.view.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        # self.view.scale(1,-1)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing)
         self.view.setUpdatesEnabled(True)
         self.view.setMouseTracking(True)
@@ -419,15 +340,16 @@ class ImageViewer(QtGui.QMainWindow):
         self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setCentralWidget(self.view)
         # self.box = BoxResizable(QtCore.QRectF(50, 50, 100.0, 100.0),  scene=self.scene)
-        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.blue, scene=self.scene)
+        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.red, scene=self.scene)
         self.scene.addItem(self.view.move_box)
         self.view.move_box.setVisible(False)
         image = QtGui.QImage(file_name)
-
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
         self.scene.addItem(item) 
-        self.createActions()
-        self.createMenus()
+        self.image_item = item
+        self.scene.image = item
+        self.create_actions()
+        self.create_menus()
 
         self.setWindowTitle("Image Viewer")
         self.resize(500, 400)
@@ -446,20 +368,15 @@ class ImageViewer(QtGui.QMainWindow):
                 QtGui.QMessageBox.information(self, "Image Viewer",
                         "Cannot load %s." % file_name)
                 return
+            for item in list(self.view.items):
+                self.view.remove_item(item)
 
-            self.imageLabel.setPixmap(QtGui.QPixmap.fromImage(image))
-
-
-    def print_(self):
-        dialog = QtGui.QPrintDialog(self.printer, self)
-        if dialog.exec_():
-            painter = QtGui.QPainter(self.printer)
-            rect = painter.viewport()
-            size = self.imageLabel.pixmap().size()
-            size.scale(rect.size(), QtCore.Qt.KeepAspectRatio)
-            painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
-            painter.setWindow(self.imageLabel.pixmap().rect())
-            painter.drawPixmap(0, 0, self.imageLabel.pixmap())
+            self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))   
+            self.scene.setSceneRect(0, 0, image.width(), image.height())
+            self.segment_action.setEnabled(True)
+            self.export_action.setEnabled(True)
+            self.zoom_in_action.setEnabled(True)
+            self.zoom_out_action.setEnabled(True)
 
     def zoom_in(self):
         self.view.set_scale(1.2)
@@ -468,67 +385,104 @@ class ImageViewer(QtGui.QMainWindow):
         self.view.set_scale(0.8)
 
     def about(self):
-        QtGui.QMessageBox.about(self, "About Image Viewer",
-                "<p>The <b>Image Viewer</b> example shows how to combine "
-                "QLabel and QScrollArea to display an image. QLabel is "
-                "typically used for displaying text, but it can also display "
-                "an image. QScrollArea provides a scrolling view around "
-                "another widget. If the child widget exceeds the size of the "
-                "frame, QScrollArea automatically provides scroll bars.</p>"
-                "<p>The example demonstrates how QLabel's ability to scale "
-                "its contents (QLabel.scaledContents), and QScrollArea's "
-                "ability to automatically resize its contents "
-                "(QScrollArea.widgetResizable), can be used to implement "
-                "zooming and scaling features.</p>"
-                "<p>In addition the example shows how to use QPainter to "
-                "print an image.</p>")
+        QtGui.QMessageBox.about(self, "Insect Selector",
+                "Stefan van der Walt\nPieter Holtzhausen")
 
     def add_box(self, rect):
         x, y, w, h = rect
         s = QtCore.QPoint(x, y)
         e = QtCore.QPoint(x + w, y + h)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y()) 
-        box = BoxResizable(qrect,  scene=self.scene)
-        self.scene.addItem(box)
+        box = BoxResizable(qrect, scene=self.scene)
+        self.view.add_item(box)
 
     def segment(self):
+        self.progressDialog = QtGui.QProgressDialog(self)
+        self.progressDialog.setWindowTitle("Segmenting...")
+        self.progressDialog.setValue(0)
+        self.progressDialog.setMaximum(0)
+        self.progressDialog.setMinimum(0)
+        self.progressDialog.show()
         image = cv2.imread(self.file_name)
-        rects = segment_edges(image)
-        image = QtGui.QImage(self.file_name)
-        item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
-        self.scene.addItem(item) 
+
+        def f(image, results, window=None):
+            rects = segment_edges(image, window=window, variance_threshold=100, size_filter=1)
+            results.put(rects)
+
+        results = Queue()
+        window = None
+        selected = self.scene.selectedItems()
+        if selected:
+            selected = selected[0]
+            window_rect = selected.map_rect_to_scene(selected._rect)
+            p = window_rect.topLeft()
+            window = [p.x(), p.y(), window_rect.width(), window_rect.height()] 
+            rects = segment_edges(image, window=window, threshold=50, variance_threshold=100, size_filter=0)
+            self.view.remove_item(selected)
+        else:
+            p = Process(target=f, args=[image, results, window])
+            p.start()
+            while results.empty():
+                app.processEvents()
+            p.join()
+            rects = results.get()
         for rect in rects:
             self.add_box(rect)
+        self.progressDialog.hide()
 
 
-    def createActions(self):
+    def export(self):
+        path = QtGui.QFileDialog.getExistingDirectory(self, "Export Destination",
+            QtCore.QDir.currentPath())
+        image = cv2.imread(self.file_name)
+        for i, item in enumerate(self.view.items):
+            b = item.boundingRect()
+            x, y, w, h = b.x(), b.y(), b.width(), b.height()
+            extract = image[y:y+h, x:x+w]
+            cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
+
+    def select_all(self):
+        for item in self.view.items:
+            item.setSelected(True)
+
+    def create_actions(self):
         self.open_action = QtGui.QAction(self.style().standardIcon(
-                QtGui.QStyle.SP_DirIcon), "&Open...", self, shortcut="ctrl+O",
+                QtGui.QStyle.SP_DirIcon), "&Open Image", self, shortcut="ctrl+O",
                 triggered=self.open)
 
         self.exit_action = QtGui.QAction("E&xit", self, shortcut="alt+f4",
                 triggered=self.close)
 
-        self.zoom_in_action = QtGui.QAction("Zoom &In", self,
-                shortcut="Ctrl++", triggered=self.zoom_in)
+        self.select_all_action = QtGui.QAction("Select &All", self, shortcut="ctrl+A",
+                triggered=self.select_all)
 
-        self.zoom_out_action = QtGui.QAction("Zoom &Out", self,
-                shortcut="Ctrl+-", triggered=self.zoom_out)
+        self.zoom_in_action = QtGui.QAction(self.style().standardIcon(QtGui.QStyle.SP_ArrowUp),
+            "Zoom &In", self, enabled=False, shortcut="Ctrl++", triggered=self.zoom_in)
+
+        self.zoom_out_action = QtGui.QAction(self.style().standardIcon(QtGui.QStyle.SP_ArrowDown),
+            "Zoom &Out", self, enabled=False, shortcut="Ctrl+-", triggered=self.zoom_out)
 
         self.about_action = QtGui.QAction("&About", self, triggered=self.about)
 
         self.segment_action = QtGui.QAction(self.style().standardIcon(
                 QtGui.QStyle.SP_ComputerIcon), 
-            "&Segment", self, shortcut="",
+            "&Segment", self, shortcut="f5", enabled=False,
             statusTip="Segment",
             triggered=self.segment)
 
-    def createMenus(self):
+        self.export_action = QtGui.QAction(self.style().standardIcon(
+                QtGui.QStyle.SP_FileIcon), 
+            "&Export Images...", self, shortcut="", enabled=False,
+            statusTip="Export",
+            triggered=self.export)
+
+    def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.segment_action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
+        self.toolbar.addAction(self.export_action)
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QtGui.QMenu("&File", self)
@@ -537,6 +491,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.fileMenu.addAction(self.exit_action)
 
         self.viewMenu = QtGui.QMenu("&View", self)
+        self.viewMenu.addAction(self.select_all_action)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
 
@@ -562,6 +517,8 @@ if __name__ == '__main__':
 
     window = ImageViewer("../data/drawer.jpg")
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
+    # window = ImageViewer("temp.png")
+    # window = ImageViewer()
     window.showMaximized()
 
     window.show()
