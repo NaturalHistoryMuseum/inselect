@@ -138,7 +138,7 @@ class GraphicsScene(QtGui.QGraphicsScene):
         self.view = view
 
 class BoxResizable(QtGui.QGraphicsRectItem):
-    def __init__(self, rect, parent=None, color=QtCore.Qt.blue, scene=None):
+    def __init__(self, rect, parent=None, color=QtCore.Qt.blue, transparent=False, scene=None):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
         self._rect = rect
         self._scene = scene
@@ -150,6 +150,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.mouse_is_pressed = False
         self.mouse_press_area = None
         self.color = color
+        self.transparent = transparent
         self.setFlags(QtGui.QGraphicsItem.ItemIsFocusable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
@@ -164,14 +165,14 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         return path
 
     def hoverEnterEvent(self, event):
+        self.prepareGeometryChange()
         self.updateResizeHandles()
         self.mouseOver = True
-        self.prepareGeometryChange()
 
     def hoverLeaveEvent(self, event):
+        self.prepareGeometryChange()
         self.mouseOver = False
         self.scene().view.is_resizing = False
-        self.prepareGeometryChange()
 
     def hoverMoveEvent(self, event):
         if self.top_left_handle.contains(event.pos()) or self.bottom_right_handle.contains(event.pos()):
@@ -220,10 +221,9 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         Capture nmouse press events.
         """
         self.mouse_is_pressed = False
+        self._rect = self._rect.normalized()
         self.updateResizeHandles()
         self.prepareGeometryChange()
-        self._rect = self._rect.normalized()
-
         QtGui.QGraphicsRectItem.mouseReleaseEvent(self, event)
 
     def mouseMoveEvent(self, event):
@@ -248,6 +248,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
                     self._rect.setBottomRight(self.rect_press.bottomRight()-(self.mouse_press_pos-self.mouse_move_pos))
                 event.accept()
                 self.updateResizeHandles()
+                # self.setZValue(1000 + self._rect.width() * self._rect.height())
+
                 return
             # Move entire rectangle, don't resize
             # else:
@@ -280,6 +282,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.bottom_right_handle = QtCore.QRectF(b.bottomRight().x() - 2*self.offset, b.bottomRight().y() - 2*self.offset,
             2*self.offset, 2*self.offset)
 
+        # self.setZValue(1000 + b.width() * b.height())
+
     def map_rect_to_scene(self, map_rect):
         rect = map_rect
         target_rect = QtCore.QRectF(rect)
@@ -300,7 +304,6 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             print self._rect
             e = self.mapToScene(self.pos().x(), self.pos().y())
             print e
-
         else:  
             color = self.color
         painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
@@ -311,13 +314,16 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         # e = self.scenePos() #self.mapToScene(self.pos().x(), self.pos().y())
         # e = self.mapToParent(self., self.pos().y())
         # rect = QtCore.QRectF(e.x(), e.(), b.width(), b.height()) 
-
+        if not self.transparent:
+            rect = self._innerRect
+            target_rect = self.map_rect_to_scene(rect)
+            painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
         # If mouse is over, draw handles
         if self.mouseOver:
-            if self.isSelected():
-                rect = self._innerRect
-                target_rect = self.map_rect_to_scene(rect)
-                painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
+            # if self.isSelected():
+            #     rect = self._innerRect
+            #     target_rect = self.map_rect_to_scene(rect)
+            #     painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
             painter.drawRect(self.top_left_handle)
             painter.drawRect(self.top_right_handle)
             painter.drawRect(self.bottom_left_handle)
@@ -340,7 +346,8 @@ class ImageViewer(QtGui.QMainWindow):
         self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setCentralWidget(self.view)
         # self.box = BoxResizable(QtCore.QRectF(50, 50, 100.0, 100.0),  scene=self.scene)
-        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.red, scene=self.scene)
+        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.red, 
+            transparent=True, scene=self.scene)
         self.scene.addItem(self.view.move_box)
         self.view.move_box.setVisible(False)
         image = QtGui.QImage(file_name)
@@ -436,9 +443,12 @@ class ImageViewer(QtGui.QMainWindow):
             QtCore.QDir.currentPath())
         image = cv2.imread(self.file_name)
         for i, item in enumerate(self.view.items):
-            b = item.boundingRect()
+            # b = item.boundingRect()
+            b = item._rect
+            print b
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
+            print extract.shape, i
             cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
 
     def select_all(self):
