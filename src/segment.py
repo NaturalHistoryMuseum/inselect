@@ -140,6 +140,27 @@ def segment_edges(image, window=None, threshold=10, variance_threshold=None, siz
     # cv2.imshow('vis2', image)
     return rects
 
+def segment_intensity(image, window=None):
+    if window:
+        subimage = np.array(image)
+        x, y, w, h = window
+        image = subimage[y:y + h, x:x + w]
+    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (25, 25), 9) 
+    threshold = 255 * (gray < 150).astype(np.uint8)
+    # cv2.imshow("main", gray)
+    # cv2.imshow("threshold", threshold)
+    # cv2.waitKey(0)
+    contours, hierarchy = cv2.findContours(threshold.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    rects = [cv2.boundingRect(c) for c in contours]
+    if window:
+        new_rects = []
+        for rect in rects:
+            new_rect = (rect[0] + x, rect[1] + y, rect[2], rect[3])
+            new_rects.append(new_rect)
+        rects = new_rects 
+    return rects
+
 if __name__ == "__main__":
     image = cv2.imread("../data/Plecoptera_Accession_Drawer_4.jpg")
 
@@ -150,7 +171,9 @@ if __name__ == "__main__":
     image = cv2.resize(image, (int(image.shape[1] * scaled), int(image.shape[0] * scaled)))
 
     cv2.imshow("main", image)
-    rects = segment_edges(image, window=(100, 100, 100, 100), size_filter=False)
+    # rects = segment_edges(image, window=(100, 100, 100, 100), size_filter=False)
+    # rects = segment_intensity(image, window=(100, 100, 100, 100))
+    rects = segment_intensity(image)
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     for rect in rects:
         im = gray[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]

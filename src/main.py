@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 from PySide import QtCore, QtGui
-from segment import segment_edges
+from segment import segment_edges, segment_intensity
 import cv2
 import os
 import numpy as np
 from multiprocessing import Process, Queue
 
 class GraphicsView(QtGui.QGraphicsView):
-    def __init__ (self, parent  =None):
+    def __init__ (self, parent=None, wireframe_mode=False):
         QtGui.QGraphicsView.__init__(self, parent)
         self.is_dragging = False
         self.mouse_press_pos = QtCore.QPoint()
@@ -17,6 +17,7 @@ class GraphicsView(QtGui.QGraphicsView):
         self.move_box = None
         self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+        self.wireframe_mode = wireframe_mode
         self.items = []
 
     def add_item(self, item):
@@ -51,7 +52,6 @@ class GraphicsView(QtGui.QGraphicsView):
         QtGui.QGraphicsView.wheelEvent(self, event)
 
     def mousePressEvent(self, event):
-        print self.is_resizing
         if event.button() == QtCore.Qt.MidButton:
             self.mouse_press_pos = QtCore.QPoint(event.pos())
             self.scrollBarValuesOnMousePress.setX(self.horizontalScrollBar().value())
@@ -60,16 +60,17 @@ class GraphicsView(QtGui.QGraphicsView):
             return
         elif event.button() == QtCore.Qt.LeftButton and not self.is_resizing:
             # reveal hidden boxes, smallest to the front
-            e = self.mapToScene(event.pos().x(), event.pos().y())
-            items = self.scene().items(e)
-            items = [item for item in items if item in self.items]
-            if items:
-                items.sort(lambda a, b: cmp(a.boundingRect().width() * a.boundingRect().height(), 
-                    b.boundingRect().width() * b.boundingRect().height()))
-                for item in self.items:
-                    item.setZValue(1000)
-                items[0].setZValue(1001)
-                self.move_box.setZValue(1002)
+            if self.wireframe_mode:
+                e = self.mapToScene(event.pos().x(), event.pos().y())
+                items = self.scene().items(e)
+                items = [item for item in items if item in self.items]
+                if items:
+                    items.sort(lambda a, b: cmp(a.boundingRect().width() * a.boundingRect().height(), 
+                        b.boundingRect().width() * b.boundingRect().height()))
+                    for item in self.items:
+                        item.setZValue(1000)
+                    items[0].setZValue(1001)
+                    self.move_box.setZValue(1002)
                 # items[0].setSelected(True)
                 # items[-1].setSelected(False)
         elif event.button() == QtCore.Qt.RightButton:
@@ -112,10 +113,15 @@ class GraphicsView(QtGui.QGraphicsView):
             e = self.mapToScene(x2, y2)
             w = np.abs(s.x() - e.x())  
             h = np.abs(s.y() - e.y())
-            box = BoxResizable(QtCore.QRectF(s.x(), s.y(), w, h),  scene=self.scene())
-            box.setZValue(1001)
-            # self.scene().addItem(box)
-            self.add_item(box)
+            if w != 0 and h != 0:
+                box = BoxResizable(QtCore.QRectF(s.x(), s.y(), w, h),  scene=self.scene())
+                # box.setZValue(1001)
+                if not self.wireframe_mode:
+                    b = box.boundingRect()
+                    box.setZValue(max(1000, 1E9 - b.width() * b.height()))
+                    box.updateResizeHandles()
+                # self.scene().addItem(box)
+                self.add_item(box)
         if self.move_box:
             self.move_box.setVisible(False)
             self.box_create_start = QtCore.QPoint()      
@@ -157,7 +163,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
         self.setAcceptsHoverEvents(True)
         self.updateResizeHandles()
-        self.setZValue(1000)
+        # self.setZValue(5000)
 
     def shape(self):
         path = QtGui.QPainterPath()
@@ -165,7 +171,6 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         return path
 
     def hoverEnterEvent(self, event):
-        self.prepareGeometryChange()
         self.updateResizeHandles()
         self.mouseOver = True
 
@@ -223,7 +228,6 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.mouse_is_pressed = False
         self._rect = self._rect.normalized()
         self.updateResizeHandles()
-        self.prepareGeometryChange()
         QtGui.QGraphicsRectItem.mouseReleaseEvent(self, event)
 
     def mouseMoveEvent(self, event):
@@ -268,6 +272,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         Update bounding rectangle and resize handles
         """
+        self.prepareGeometryChange()
+
         self.offset = self.handle_size*(self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
         self.offset1 = (self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
         self._boundingRect = self._rect.adjusted(-self.offset, -self.offset, self.offset, self.offset)
@@ -282,7 +288,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.bottom_right_handle = QtCore.QRectF(b.bottomRight().x() - 2*self.offset, b.bottomRight().y() - 2*self.offset,
             2*self.offset, 2*self.offset)
 
-        # self.setZValue(1000 + b.width() * b.height())
+        self.setZValue(max(1000, 1E9 - b.width() * b.height()))
 
     def map_rect_to_scene(self, map_rect):
         rect = map_rect
@@ -297,13 +303,12 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         Paint Widget
         """
-        # # show boundingRect for debug purposes
         # Paint rectangle
         if self.isSelected():
             color = QtCore.Qt.red
-            print self._rect
-            e = self.mapToScene(self.pos().x(), self.pos().y())
-            print e
+            # print self._rect
+            # e = self.mapToScene(self.pos().x(), self.pos().y())
+            # print e
         else:  
             color = self.color
         painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
@@ -316,8 +321,9 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         # rect = QtCore.QRectF(e.x(), e.(), b.width(), b.height()) 
         if not self.transparent:
             rect = self._innerRect
-            target_rect = self.map_rect_to_scene(rect)
-            painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
+            if rect.width() != 0 and rect.height() != 0:
+                target_rect = self.map_rect_to_scene(rect)
+                painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
         # If mouse is over, draw handles
         if self.mouseOver:
             # if self.isSelected():
@@ -333,7 +339,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
 class ImageViewer(QtGui.QMainWindow):
     def __init__(self, file_name=None):
         super(ImageViewer, self).__init__()
-        self.view = GraphicsView()
+        self.wireframe_mode = 0
+        self.view = GraphicsView(wireframe_mode=self.wireframe_mode)
         self.scene = GraphicsScene()
         # self.view.setViewportUpdateMode(QtGui.QGraphicsView.BoundingRectViewportUpdate)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
@@ -350,6 +357,8 @@ class ImageViewer(QtGui.QMainWindow):
             transparent=True, scene=self.scene)
         self.scene.addItem(self.view.move_box)
         self.view.move_box.setVisible(False)
+        if not self.wireframe_mode:
+            self.view.move_box.setZValue(1E9)
         image = QtGui.QImage(file_name)
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
         self.scene.addItem(item) 
@@ -400,8 +409,12 @@ class ImageViewer(QtGui.QMainWindow):
         s = QtCore.QPoint(x, y)
         e = QtCore.QPoint(x + w, y + h)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y()) 
-        box = BoxResizable(qrect, scene=self.scene)
+        box = BoxResizable(qrect, transparent=self.wireframe_mode, scene=self.scene)
         self.view.add_item(box)
+        if not self.wireframe_mode:
+            b = box.boundingRect()
+            box.setZValue(max(1000, 1E9 - b.width() * b.height()))
+            box.updateResizeHandles()
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
@@ -424,7 +437,8 @@ class ImageViewer(QtGui.QMainWindow):
             window_rect = selected.map_rect_to_scene(selected._rect)
             p = window_rect.topLeft()
             window = [p.x(), p.y(), window_rect.width(), window_rect.height()] 
-            rects = segment_edges(image, window=window, threshold=50, variance_threshold=100, size_filter=0)
+            # rects = segment_edges(image, window=window, threshold=50, variance_threshold=100, size_filter=0)
+            rects = segment_intensity(image, window=window)
             self.view.remove_item(selected)
         else:
             p = Process(target=f, args=[image, results, window])
