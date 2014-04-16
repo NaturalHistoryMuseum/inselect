@@ -534,15 +534,12 @@ class ImageViewer(QtGui.QMainWindow):
 
 
 if __name__ == '__main__':
-
     import sys
-
     app = QtGui.QApplication(sys.argv)
-
-    window = ImageViewer("../data/drawer.jpg")
+    # window = ImageViewer("../data/drawer.jpg")
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
     # window = ImageViewer("temp.png")
-    # window = ImageViewer()
+    window = ImageViewer()
     window.showMaximized()
 
     window.show()
