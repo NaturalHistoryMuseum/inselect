@@ -71,8 +71,19 @@ class GraphicsView(QtGui.QGraphicsView):
                         item.setZValue(1000)
                     items[0].setZValue(1001)
                     self.move_box.setZValue(1002)
+                wqer
                 # items[0].setSelected(True)
                 # items[-1].setSelected(False)
+            # else:
+                # e = self.mapToScene(event.pos().x(), event.pos().y())
+                # items = self.scene().items(e)
+                # items = [item for item in items if item in self.items]        
+                # for item in self.items:
+                #     if item.isSelected():
+                #         item.setZValue(1E9)
+                #     else:
+                #         b = item.boundingRect()
+                #         item.setZValue(max(1000, 1E9 - b.width() * b.height()))
         elif event.button() == QtCore.Qt.RightButton:
             self.box_create_start = QtCore.QPoint(event.pos())
             return
@@ -173,11 +184,21 @@ class BoxResizable(QtGui.QGraphicsRectItem):
     def hoverEnterEvent(self, event):
         self.updateResizeHandles()
         self.mouseOver = True
+        b = self.boundingRect()
+        if self.isSelected():
+            self.setZValue(1E9)
+        else:
+            self.setZValue(max(1000, 1E9 - b.width() * b.height()))
 
     def hoverLeaveEvent(self, event):
         self.prepareGeometryChange()
         self.mouseOver = False
         self.scene().view.is_resizing = False
+        b = self.boundingRect()
+        # if self.isSelected():
+        #     self.setZValue(1E9)
+        # else:
+        self.setZValue(max(1000, 1E9 - b.width() * b.height()))
 
     def hoverMoveEvent(self, event):
         if self.top_left_handle.contains(event.pos()) or self.bottom_right_handle.contains(event.pos()):
@@ -192,6 +213,11 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             self.setCursor(QtCore.Qt.SizeAllCursor)
             self.scene().view.is_resizing = False 
 
+        b = self.boundingRect()
+        if self.isSelected():
+            self.setZValue(1E9)
+        else:
+            self.setZValue(max(1000, 1E9 - b.width() * b.height()))
         QtGui.QGraphicsRectItem.hoverMoveEvent(self, event)
 
     def mousePressEvent(self, event):
@@ -287,8 +313,10 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             2*self.offset, 2*self.offset)
         self.bottom_right_handle = QtCore.QRectF(b.bottomRight().x() - 2*self.offset, b.bottomRight().y() - 2*self.offset,
             2*self.offset, 2*self.offset)
-
-        self.setZValue(max(1000, 1E9 - b.width() * b.height()))
+        if self.isSelected():
+            self.setZValue(1E9)
+        else:
+            self.setZValue(max(1000, 1E9 - b.width() * b.height()))
 
     def map_rect_to_scene(self, map_rect):
         rect = map_rect
@@ -536,10 +564,10 @@ class ImageViewer(QtGui.QMainWindow):
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)
-    # window = ImageViewer("../data/drawer.jpg")
+    window = ImageViewer("../data/drawer.jpg")
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
     # window = ImageViewer("temp.png")
-    window = ImageViewer()
+    # window = ImageViewer()
     window.showMaximized()
 
     window.show()
