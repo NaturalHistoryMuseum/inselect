@@ -30,10 +30,10 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
         if right_sized(contours[index], image.shape, size_filter=size_filter):
             # print 'draw'
             color = 230 
-            cv2.drawContours(image, contours, index, color, -1, cv2.CV_AA, hierarchy, -1)
+            # cv2.drawContours(image, contours, index, color, -1, cv2.CV_AA, hierarchy, -1)
             rect = cv2.boundingRect(contours[index])
             x, y, w, h = rect
-            cv2.rectangle(image, (x, y), (x + w, y + h), 0)
+            # cv2.rectangle(image, (x, y), (x + w, y + h), 0)
             result.append(rect)
         else:
             if child != -1:
@@ -43,11 +43,14 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
     return result
 
 
-def segment_edges(image, window=None, threshold=10, variance_threshold=None, size_filter=True):
+def segment_edges(image, window=None, resize_width=None, threshold=10, variance_threshold=None, size_filter=True):
     if window:
         subimage = np.array(image)
         x, y, w, h = window
         image = subimage[y:y + h, x:x + w]
+    if resize_width:
+        scale = float(resize) / image.shape[1] 
+        image = cv2.resize(image, (int(image.shape[1] * scale), int(image.shape[0] * scale)))
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 3) 
     display = gray.copy()
@@ -94,7 +97,11 @@ def segment_edges(image, window=None, threshold=10, variance_threshold=None, siz
             new_rect = (rect[0] + x, rect[1] + y, rect[2], rect[3])
             new_rects.append(new_rect)
         rects = new_rects
-
+    if resize_width:
+        new_rects = []
+        for rect in rects:
+            new_rects.append(tuple(int(x / scale) for x in rect))
+        rects = new_rects
     # image[:,:,2] = display
 
     # print visited.shape
@@ -156,7 +163,9 @@ def segment_intensity(image, window=None):
     if window:
         new_rects = []
         for rect in rects:
-            new_rect = (rect[0] + x, rect[1] + y, rect[2], rect[3])
+            dx = rect[2] / 2
+            dy = rect[3] / 2
+            new_rect = (rect[0] + x - dx, rect[1] + y - dy, rect[2] + 2 * dx, rect[3] + 2 * dy)
             new_rects.append(new_rect)
         rects = new_rects 
     return rects

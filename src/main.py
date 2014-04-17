@@ -71,7 +71,6 @@ class GraphicsView(QtGui.QGraphicsView):
                         item.setZValue(1000)
                     items[0].setZValue(1001)
                     self.move_box.setZValue(1002)
-                wqer
                 # items[0].setSelected(True)
                 # items[-1].setSelected(False)
             # else:
@@ -349,7 +348,11 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         # rect = QtCore.QRectF(e.x(), e.(), b.width(), b.height()) 
         if not self.transparent:
             rect = self._innerRect
-            if rect.width() != 0 and rect.height() != 0:
+            if rect.width() > 0 and rect.height() != 0:
+                # normalize negative widths and heights, during resizing
+                x1, y1 = rect.x(), rect.y()
+                x2, y2 = rect.x() + rect.width(), rect.y() + rect.height()
+                rect = QtCore.QRectF(min(x1, x2), min(y1, y2), abs(rect.width()), abs(rect.height()))
                 target_rect = self.map_rect_to_scene(rect)
                 painter.drawPixmap(rect, self.scene().image.pixmap(), target_rect)
         # If mouse is over, draw handles
@@ -564,10 +567,10 @@ class ImageViewer(QtGui.QMainWindow):
 if __name__ == '__main__':
     import sys
     app = QtGui.QApplication(sys.argv)
-    window = ImageViewer("../data/drawer.jpg")
+    # window = ImageViewer("../data/drawer.jpg")
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
     # window = ImageViewer("temp.png")
-    # window = ImageViewer()
+    window = ImageViewer()
     window.showMaximized()
 
     window.show()
