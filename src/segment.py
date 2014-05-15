@@ -29,7 +29,7 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
         next, previous, child, parent = hierarchy[0][index]
         if right_sized(contours[index], image.shape, size_filter=size_filter):
             # print 'draw'
-            color = 230 
+            # color = 230 
             # cv2.drawContours(image, contours, index, color, -1, cv2.CV_AA, hierarchy, -1)
             rect = cv2.boundingRect(contours[index])
             x, y, w, h = rect
@@ -37,6 +37,9 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
             result.append(rect)
         else:
             if child != -1:
+                # rect = cv2.boundingRect(contours[index])
+                # x, y, w, h = rect
+                # result.append(rect)
                 rects = process_contours(image, contours, hierarchy, child, size_filter=size_filter)
                 result.extend(rects)
         index = next

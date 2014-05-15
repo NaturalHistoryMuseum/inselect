@@ -1,11 +1,32 @@
 #!/usr/bin/env python
+"""Inselect.
 
+Usage:
+    main.py
+    main.py --batch=input_dir
+    main.py --batch=input_dir --recursive
+    main.py --batch=input_dir --output=output_dir
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  --batch=<dir> Input directory 
+  --recursive   Traverse directory structure recursively.
+"""
+
+from docopt import docopt
 from PySide import QtCore, QtGui
 from segment import segment_edges, segment_intensity
 import cv2
 import os
 import numpy as np
 from multiprocessing import Process, Queue
+import sys
+import csv
+
+def is_image_file(file_name):
+    name, ext = os.path.splitext(file_name.lower())
+    return ext in [".jpg", ".tiff", ".png"]
 
 class GraphicsView(QtGui.QGraphicsView):
     def __init__ (self, parent=None, wireframe_mode=False):
@@ -424,6 +445,8 @@ class ImageViewer(QtGui.QMainWindow):
             self.export_action.setEnabled(True)
             self.zoom_in_action.setEnabled(True)
             self.zoom_out_action.setEnabled(True)
+            self.save_action.setEnabled(True)
+            self.import_action.setEnabled(True)
 
     def zoom_in(self):
         self.view.set_scale(1.2)
@@ -494,7 +517,7 @@ class ImageViewer(QtGui.QMainWindow):
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
             print extract.shape, i
-            cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
+            cv2.imwrite(os.path.join(path, "image%s.tiff" % i), extract)
 
     def select_all(self):
         for item in self.view.items:
@@ -521,9 +544,21 @@ class ImageViewer(QtGui.QMainWindow):
 
         self.segment_action = QtGui.QAction(self.style().standardIcon(
                 QtGui.QStyle.SP_ComputerIcon), 
-            "&Segment", self, shortcut="f5", enabled=False,
+            "Se&gment", self, shortcut="f5", enabled=False,
             statusTip="Segment",
             triggered=self.segment)
+
+        self.save_action = QtGui.QAction(self.style().standardIcon(
+                QtGui.QStyle.SP_DesktopIcon), 
+            "&Save Boxes", self, shortcut="ctrl+s", enabled=False,
+            statusTip="Save Boxes",
+            triggered=self.save_boxes)
+
+        self.import_action = QtGui.QAction(self.style().standardIcon(
+                QtGui.QStyle.SP_DesktopIcon), 
+            "&Import Boxes", self, shortcut="ctrl+i", enabled=False,
+            statusTip="Import Boxes",
+            triggered=self.import_boxes)
 
         self.export_action = QtGui.QAction(self.style().standardIcon(
                 QtGui.QStyle.SP_FileIcon), 
@@ -531,17 +566,62 @@ class ImageViewer(QtGui.QMainWindow):
             statusTip="Export",
             triggered=self.export)
 
+    def save_boxes(self):
+        file_name, filtr = QtGui.QFileDialog.getSaveFileName(self,
+                "QFileDialog.getSaveFileName()",
+                self.file_name + ".csv",
+                "All Files (*);;CSV Files (*.csv)", "", QtGui.QFileDialog.Options())
+        if file_name:
+            with open(file_name, 'w') as csvfile:
+                writer = csv.writer(csvfile, delimiter=' ')
+                for item in self.view.items:
+                    rect = item.rect()
+                    box = [rect.left(), rect.top(), rect.width(), rect.height()]
+                    # box = [float(value) for value in box]
+                    width = self.image_item.pixmap().width()
+                    height = self.image_item.pixmap().height()
+                    box[0] /= width
+                    box[1] /= height 
+                    box[2] /= width 
+                    box[3] /= height
+                    writer.writerow(box)
+
+    def import_boxes(self):
+        files, filtr = QtGui.QFileDialog.getOpenFileNames(self,
+                "QFileDialog.getOpenFileNames()", "../data",
+                "All Files (*);;Text Files (*.csv)", "", QtGui.QFileDialog.Options())
+        if files:
+            width = self.image_item.pixmap().width()
+            height = self.image_item.pixmap().height()
+            for file_name in files:
+                with open(file_name, 'r') as csvfile:
+                    reader = csv.reader(csvfile, delimiter=' ')
+                    for row in reader:
+                        rect = [float(x) for x in row]
+                        rect[0] *= width
+                        rect[1] *= height 
+                        rect[2] *= width 
+                        rect[3] *= height
+                        self.add_box(rect)
+
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.segment_action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
+        self.toolbar.addAction(self.save_action)
+        self.toolbar.addAction(self.import_action)
         self.toolbar.addAction(self.export_action)
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QtGui.QMenu("&File", self)
         self.fileMenu.addAction(self.open_action)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.save_action)
+        self.fileMenu.addAction(self.import_action)
+        self.fileMenu.addAction(self.export_action)
+ 
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
@@ -563,15 +643,41 @@ class ImageViewer(QtGui.QMainWindow):
         # if event.key() == Qtcore.Qt.Key_Escape:
             sys.exit(1)
 
-
 if __name__ == '__main__':
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    # window = ImageViewer("../data/drawer.jpg")
-    # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
-    # window = ImageViewer("temp.png")
-    window = ImageViewer()
-    window.showMaximized()
+    arguments = docopt(__doc__, version='Inselect 0.1')
+    if not arguments["--batch"]:
+        print "Launching gui."
+        app = QtGui.QApplication(sys.argv)
+        window = ImageViewer("../data/drawer.jpg")
+        # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
+        # window = ImageViewer("temp.png")
+        # window = ImageViewer()
+        window.showMaximized()
+        window.show()
+        sys.exit(app.exec_())
+    else:
+        print "Batch processing mode"
 
-    window.show()
-    sys.exit(app.exec_())
+        for root, dirs, files in os.walk(arguments["--batch"]):
+            print "Processing", root
+            for file_name in files:
+                if is_image_file(file_name):
+                    file_name = os.path.join(root, file_name)
+                    image = cv2.imread(file_name)
+                    height, width, _ = image.shape
+                    print "Segmenting", file_name, image.shape
+                    rects = segment_edges(image, variance_threshold=100, size_filter=1)
+                    csv_file_name = file_name + '.csv'
+                    print "Writing csv file", csv_file_name 
+                    with open(csv_file_name, 'w') as csvfile:
+                        writer = csv.writer(csvfile, delimiter=' ')
+                        for box in rects:
+                            box = [float(value) for value in box]
+                            box[0] /= width
+                            box[1] /= height 
+                            box[2] /= width 
+                            box[3] /= height
+                            writer.writerow(box)
+            if not arguments["--recursive"]:
+                break
+
