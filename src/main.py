@@ -571,6 +571,10 @@ if __name__ == '__main__':
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
     # window = ImageViewer("temp.png")
     window = ImageViewer()
+
+    if len(sys.argv) > 1:
+        window.open(sys.argv[1])
+
     window.showMaximized()
 
     window.show()
