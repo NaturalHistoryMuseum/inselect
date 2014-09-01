@@ -516,7 +516,7 @@ class ImageViewer(QtGui.QMainWindow):
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
             print extract.shape, i
-            cv2.imwrite(os.path.join(path, "image%s.tiff" % i), extract)
+            cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
 
     def select_all(self):
         for item in self.view.items:
@@ -543,7 +543,7 @@ class ImageViewer(QtGui.QMainWindow):
 
         self.segment_action = QtGui.QAction(self.style().standardIcon(
                 QtGui.QStyle.SP_ComputerIcon), 
-            "Se&gment", self, shortcut="f5", enabled=False,
+            "&Segment", self, shortcut="f5", enabled=False,
             statusTip="Segment",
             triggered=self.segment)
 
@@ -643,39 +643,15 @@ class ImageViewer(QtGui.QMainWindow):
         # if event.key() == Qtcore.Qt.Key_Escape:
             sys.exit(1)
 
-if __name__ == '__main__':
-    arguments = docopt(__doc__, version='Inselect 0.1')
-    if not arguments["--batch"]:
-        print "Launching gui."
-        app = QtGui.QApplication(sys.argv)
-        # window = ImageViewer("../data/drawer.jpg")
-        # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
-        window = ImageViewer()
-        window.showMaximized()
-        window.show()
-        sys.exit(app.exec_())
-    else:
-        print "Batch processing mode"
-        for root, dirs, files in os.walk(arguments["--batch"]):
-            print "Processing", root
-            for file_name in files:
-                if is_image_file(file_name):
-                    file_name = os.path.join(root, file_name)
-                    image = cv2.imread(file_name)
-                    height, width, _ = image.shape
-                    print "Segmenting", file_name, image.shape
-                    rects = segment_edges(image, variance_threshold=100, size_filter=1)
-                    csv_file_name = file_name + '.csv'
-                    print "Writing csv file", csv_file_name 
-                    with open(csv_file_name, 'w') as csvfile:
-                        writer = csv.writer(csvfile, delimiter=' ')
-                        for box in rects:
-                            box = [float(value) for value in box]
-                            box[0] /= width
-                            box[1] /= height 
-                            box[2] /= width 
-                            box[3] /= height
-                            writer.writerow(box)
-            if not arguments["--recursive"]:
-                break
 
+if __name__ == '__main__':
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    # window = ImageViewer("../data/drawer.jpg")
+    # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
+    # window = ImageViewer("temp.png")
+    window = ImageViewer()
+    window.showMaximized()
+
+    window.show()
+    sys.exit(app.exec_())
