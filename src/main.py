@@ -14,7 +14,6 @@ Options:
   --batch=<dir> Input directory 
   --recursive   Traverse directory structure recursively.
 """
-filename = None
 from docopt import docopt
 from PySide import QtCore, QtGui
 from segment import segment_edges, segment_intensity
