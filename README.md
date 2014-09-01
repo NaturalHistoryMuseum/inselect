@@ -14,4 +14,5 @@ A tool for the semi-automated segmentation and annotation of specimen trays.
 - Install OpenCV:
 
     conda install -c https://conda.binstar.org/jjhelmus opencv
+    conda install pyside
 

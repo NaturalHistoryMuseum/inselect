@@ -23,9 +23,13 @@ from multiprocessing import Process, Queue
 import sys
 import csv
 
+from qt_util import read_qt_image
+
+
 def is_image_file(file_name):
     name, ext = os.path.splitext(file_name.lower())
     return ext in [".jpg", ".tiff", ".png"]
+
 
 class GraphicsView(QtGui.QGraphicsView):
     def __init__ (self, parent=None, wireframe_mode=False):
@@ -45,7 +49,7 @@ class GraphicsView(QtGui.QGraphicsView):
         self.scene().addItem(item)
 
     def remove_item(self, item):
-        self.items.remove(item)    
+        self.items.remove(item)
         self.scene().removeItem(item)
 
     def keyPressEvent(self, event):
@@ -55,10 +59,10 @@ class GraphicsView(QtGui.QGraphicsView):
                 if box.isSelected():
                     self.remove_item(box)
 
-        QtGui.QGraphicsView.keyPressEvent(self, event) 
+        QtGui.QGraphicsView.keyPressEvent(self, event)
 
     def set_scale(self, scale):
-        self.scale_factor = scale 
+        self.scale_factor = scale
         self.scale(scale, scale)
 
     def wheelEvent(self, event):
@@ -85,7 +89,7 @@ class GraphicsView(QtGui.QGraphicsView):
                 items = self.scene().items(e)
                 items = [item for item in items if item in self.items]
                 if items:
-                    items.sort(lambda a, b: cmp(a.boundingRect().width() * a.boundingRect().height(), 
+                    items.sort(lambda a, b: cmp(a.boundingRect().width() * a.boundingRect().height(),
                         b.boundingRect().width() * b.boundingRect().height()))
                     for item in self.items:
                         item.setZValue(1000)
@@ -96,7 +100,7 @@ class GraphicsView(QtGui.QGraphicsView):
             # else:
                 # e = self.mapToScene(event.pos().x(), event.pos().y())
                 # items = self.scene().items(e)
-                # items = [item for item in items if item in self.items]        
+                # items = [item for item in items if item in self.items]
                 # for item in self.items:
                 #     if item.isSelected():
                 #         item.setZValue(1E9)
@@ -106,13 +110,13 @@ class GraphicsView(QtGui.QGraphicsView):
         elif event.button() == QtCore.Qt.RightButton:
             self.box_create_start = QtCore.QPoint(event.pos())
             return
-        QtGui.QGraphicsView.mousePressEvent(self, event) 
+        QtGui.QGraphicsView.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
-        QtGui.QGraphicsView.mouseMoveEvent(self, event) 
+        QtGui.QGraphicsView.mouseMoveEvent(self, event)
         if not self.box_create_start.isNull():
             self.move_box.setVisible(True)
-            s = self.mapToScene(self.box_create_start.x(), self.box_create_start.y())  
+            s = self.mapToScene(self.box_create_start.x(), self.box_create_start.y())
             pos = event.pos()
             e = self.mapToScene(pos.x(), pos.y())
             w, h = e.toPoint().x() - s.toPoint().x(), e.toPoint().y() - s.toPoint().y()
@@ -130,8 +134,8 @@ class GraphicsView(QtGui.QGraphicsView):
         event.accept()
 
     def mouseReleaseEvent(self, event):
-        QtGui.QGraphicsView.mouseReleaseEvent(self, event) 
-        if event.button() == QtCore.Qt.MidButton: 
+        QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+        if event.button() == QtCore.Qt.MidButton:
             self.mouse_press_pos = QtCore.QPoint()
 
         elif event.button() == QtCore.Qt.RightButton:
@@ -139,9 +143,9 @@ class GraphicsView(QtGui.QGraphicsView):
             s = self.box_create_start
             x1, y1 = min(s.x(), e.x()), min(s.y(), e.y())
             x2, y2 = max(s.x(), e.x()), max(s.y(), e.y())
-            s = self.mapToScene(x1, y1) 
+            s = self.mapToScene(x1, y1)
             e = self.mapToScene(x2, y2)
-            w = np.abs(s.x() - e.x())  
+            w = np.abs(s.x() - e.x())
             h = np.abs(s.y() - e.y())
             if w != 0 and h != 0:
                 box = BoxResizable(QtCore.QRectF(s.x(), s.y(), w, h),  scene=self.scene())
@@ -154,8 +158,8 @@ class GraphicsView(QtGui.QGraphicsView):
                 self.add_item(box)
         if self.move_box:
             self.move_box.setVisible(False)
-            self.box_create_start = QtCore.QPoint()      
-        # event.accept() 
+            self.box_create_start = QtCore.QPoint()
+        # event.accept()
 
 class GraphicsScene(QtGui.QGraphicsScene):
     def __init__ (self, parent=None):
@@ -230,7 +234,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             self.scene().view.is_resizing = True
         else:
             self.setCursor(QtCore.Qt.SizeAllCursor)
-            self.scene().view.is_resizing = False 
+            self.scene().view.is_resizing = False
 
         b = self.boundingRect()
         if self.isSelected():
@@ -251,13 +255,13 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             # Top left corner
             if self.top_left_handle.contains(event.pos()):
                 self.mouse_press_area = 'topleft'
-            # top right corner            
+            # top right corner
             elif self.top_right_handle.contains(event.pos()):
                 self.mouse_press_area = 'topright'
-            #  bottom left corner            
+            #  bottom left corner
             elif self.bottom_left_handle.contains(event.pos()):
                 self.mouse_press_area = 'bottomleft'
-            # bottom right corner            
+            # bottom right corner
             elif self.bottom_right_handle.contains(event.pos()):
                 self.mouse_press_area = 'bottomright'
             # entire rectangle
@@ -286,13 +290,13 @@ class BoxResizable(QtGui.QGraphicsRectItem):
                 # Move top left corner
                 if self.mouse_press_area=='topleft':
                     self._rect.setTopLeft(self.rect_press.topLeft()-(self.mouse_press_pos-self.mouse_move_pos))
-                # Move top right corner            
+                # Move top right corner
                 elif  self.mouse_press_area=='topright':
                     self._rect.setTopRight(self.rect_press.topRight()-(self.mouse_press_pos-self.mouse_move_pos))
-                # Move bottom left corner            
+                # Move bottom left corner
                 elif  self.mouse_press_area=='bottomleft':
                     self._rect.setBottomLeft(self.rect_press.bottomLeft()-(self.mouse_press_pos-self.mouse_move_pos))
-                # Move bottom right corner            
+                # Move bottom right corner
                 elif  self.mouse_press_area=='bottomright':
                     self._rect.setBottomRight(self.rect_press.bottomRight()-(self.mouse_press_pos-self.mouse_move_pos))
                 event.accept()
@@ -319,14 +323,14 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         """
         self.prepareGeometryChange()
 
-        self.offset = self.handle_size*(self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
-        self.offset1 = (self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()        
+        self.offset = self.handle_size*(self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()
+        self.offset1 = (self._scene.view.mapToScene(1,0)-self._scene.view.mapToScene(0,1)).x()
         self._boundingRect = self._rect.adjusted(-self.offset, -self.offset, self.offset, self.offset)
         self._innerRect = self._rect.adjusted(self.offset1, self.offset1, -self.offset1, -self.offset1)
 
         b = self._boundingRect
         self.top_left_handle = QtCore.QRectF(b.topLeft().x(), b.topLeft().y(), 2*self.offset, 2*self.offset)
-        self.top_right_handle = QtCore.QRectF(b.topRight().x() - 2*self.offset, b.topRight().y(), 
+        self.top_right_handle = QtCore.QRectF(b.topRight().x() - 2*self.offset, b.topRight().y(),
             2*self.offset, 2*self.offset)
         self.bottom_left_handle = QtCore.QRectF(b.bottomLeft().x(), b.bottomLeft().y() - 2*self.offset,
             2*self.offset, 2*self.offset)
@@ -356,16 +360,16 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             # print self._rect
             # e = self.mapToScene(self.pos().x(), self.pos().y())
             # print e
-        else:  
+        else:
             color = self.color
         painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
         painter.drawRect(self._rect)
- 
+
         # b = self._boundingRect
         # e = self.pos() #self.mapToScene(self.pos().x(), self.pos().y())
         # e = self.scenePos() #self.mapToScene(self.pos().x(), self.pos().y())
         # e = self.mapToParent(self., self.pos().y())
-        # rect = QtCore.QRectF(e.x(), e.(), b.width(), b.height()) 
+        # rect = QtCore.QRectF(e.x(), e.(), b.width(), b.height())
         if not self.transparent:
             rect = self._innerRect
             if rect.width() > 0 and rect.height() != 0:
@@ -388,7 +392,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
 
 
 class ImageViewer(QtGui.QMainWindow):
-    def __init__(self, file_name=None):
+    def __init__(self, filename=None):
         super(ImageViewer, self).__init__()
         self.wireframe_mode = 0
         self.view = GraphicsView(wireframe_mode=self.wireframe_mode)
@@ -404,15 +408,20 @@ class ImageViewer(QtGui.QMainWindow):
         self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setCentralWidget(self.view)
         # self.box = BoxResizable(QtCore.QRectF(50, 50, 100.0, 100.0),  scene=self.scene)
-        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.red, 
+        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100), color=QtCore.Qt.red,
             transparent=True, scene=self.scene)
         self.scene.addItem(self.view.move_box)
         self.view.move_box.setVisible(False)
         if not self.wireframe_mode:
             self.view.move_box.setZValue(1E9)
-        image = QtGui.QImage(file_name)
+
+        if filename is None:
+            image = QtGui.QImage()
+        else:
+            image = read_qt_image(filename)
+
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
-        self.scene.addItem(item) 
+        self.scene.addItem(item)
         self.image_item = item
         self.scene.image = item
         self.create_actions()
@@ -420,32 +429,30 @@ class ImageViewer(QtGui.QMainWindow):
 
         self.setWindowTitle("Image Viewer")
         self.resize(500, 400)
-        if file_name:
-            self.open(file_name)
+        if filename:
+            self.open(filename)
 
 
-    def open(self, file_name=None):
-        if not file_name:
-            file_name, _ = QtGui.QFileDialog.getOpenFileName(self, "Open File",
+    def open(self, filename=None):
+        if not filename:
+            filename, _ = QtGui.QFileDialog.getOpenFileName(self, "Open File",
                     QtCore.QDir.currentPath())
-        if file_name:
-            image = QtGui.QImage(file_name)
+        if filename:
+            self.filename = filename
+            image = read_qt_image(filename)
             if image.isNull():
                 QtGui.QMessageBox.information(self, "Image Viewer",
-                        "Cannot load %s." % file_name)
+                                             "Cannot load %s." % filename)
                 return
-            self.file_name = file_name
             for item in list(self.view.items):
                 self.view.remove_item(item)
 
-            self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))   
+            self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
             self.scene.setSceneRect(0, 0, image.width(), image.height())
             self.segment_action.setEnabled(True)
             self.export_action.setEnabled(True)
             self.zoom_in_action.setEnabled(True)
             self.zoom_out_action.setEnabled(True)
-            self.save_action.setEnabled(True)
-            self.import_action.setEnabled(True)
 
     def zoom_in(self):
         self.view.set_scale(1.2)
@@ -461,7 +468,7 @@ class ImageViewer(QtGui.QMainWindow):
         x, y, w, h = rect
         s = QtCore.QPoint(x, y)
         e = QtCore.QPoint(x + w, y + h)
-        qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y()) 
+        qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
         box = BoxResizable(qrect, transparent=self.wireframe_mode, scene=self.scene)
         self.view.add_item(box)
         if not self.wireframe_mode:
@@ -476,7 +483,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.progressDialog.setMaximum(0)
         self.progressDialog.setMinimum(0)
         self.progressDialog.show()
-        image = cv2.imread(self.file_name)
+        image = cv2.imread(self.filename)
 
         def f(image, results, window=None):
             rects = segment_edges(image, window=window, variance_threshold=100, size_filter=1)
@@ -489,7 +496,7 @@ class ImageViewer(QtGui.QMainWindow):
             selected = selected[0]
             window_rect = selected.map_rect_to_scene(selected._rect)
             p = window_rect.topLeft()
-            window = [p.x(), p.y(), window_rect.width(), window_rect.height()] 
+            window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
             # rects = segment_edges(image, window=window, threshold=50, variance_threshold=100, size_filter=0)
             rects = segment_intensity(image, window=window)
             self.view.remove_item(selected)
@@ -506,9 +513,10 @@ class ImageViewer(QtGui.QMainWindow):
 
 
     def export(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, "Export Destination",
-            QtCore.QDir.currentPath())
-        image = cv2.imread(self.file_name)
+        path = QtGui.QFileDialog.getExistingDirectory(
+            self, "Export Destination", QtCore.QDir.currentPath())
+        image = cv2.imread(self.filename)
+
         for i, item in enumerate(self.view.items):
             # b = item.boundingRect()
             b = item._rect
@@ -542,7 +550,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.about_action = QtGui.QAction("&About", self, triggered=self.about)
 
         self.segment_action = QtGui.QAction(self.style().standardIcon(
-                QtGui.QStyle.SP_ComputerIcon), 
+                QtGui.QStyle.SP_ComputerIcon),
             "&Segment", self, shortcut="f5", enabled=False,
             statusTip="Segment",
             triggered=self.segment)
@@ -560,7 +568,7 @@ class ImageViewer(QtGui.QMainWindow):
             triggered=self.import_boxes)
 
         self.export_action = QtGui.QAction(self.style().standardIcon(
-                QtGui.QStyle.SP_FileIcon), 
+                QtGui.QStyle.SP_FileIcon),
             "&Export Images...", self, shortcut="", enabled=False,
             statusTip="Export",
             triggered=self.export)
@@ -651,6 +659,10 @@ if __name__ == '__main__':
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
     # window = ImageViewer("temp.png")
     window = ImageViewer()
+
+    if len(sys.argv) > 1:
+        window.open(sys.argv[1])
+
     window.showMaximized()
 
     window.show()
