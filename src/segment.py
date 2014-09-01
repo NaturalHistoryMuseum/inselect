@@ -46,7 +46,7 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
     return result
 
 
-def segment_edges(image, window=None, resize_width=None, threshold=10, variance_threshold=None, size_filter=True):
+def segment_edges(image, window=None, resize_width=None, threshold=12, variance_threshold=None, size_filter=True):
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -74,7 +74,11 @@ def segment_edges(image, window=None, resize_width=None, threshold=10, variance_
     contour_areas.sort(lambda a, b: cmp(b[0], a[0]))
     # cv2.drawContours(vis, contours, -1, (255,0,255), -1, cv2.CV_AA, hierarchy, 1 )
     # vis = cv2.erode(vis, element)
-    # cv2.imshow("vis", vis)
+    # cv2.imshow("vis", mag2)
+    _, mag2 = cv2.threshold(v_edges, 5, 255, cv2.cv.CV_THRESH_BINARY)
+    mag2 = (255*mag2/np.max(mag2)).astype(np.uint8)
+    # cv2.imshow("vis", mag2)
+    # cv2.waitKey(100)
     # for area, contour in contour_areas:
     #     print area 
     #     cv2.waitKey(0)
@@ -175,17 +179,19 @@ def segment_intensity(image, window=None):
 
 if __name__ == "__main__":
     image = cv2.imread("../data/Plecoptera_Accession_Drawer_4.jpg")
+    # image = cv2.imread("../data/OD995_quarter.jpg")
 
-    image = cv2.imread("../data/drawer.jpg")
+    # image = cv2.imread("../data/drawer.jpg")
     # image = image[250:image.shape[1]-500, 280:image.shape[0]-100]
     scaled = 0.5
     scaled = 1.0 
     image = cv2.resize(image, (int(image.shape[1] * scaled), int(image.shape[0] * scaled)))
 
     cv2.imshow("main", image)
+    rects = segment_edges(image,  window=(100, 100, 2000, 2000), threshold=12, size_filter=1)
     # rects = segment_edges(image, window=(100, 100, 100, 100), size_filter=False)
     # rects = segment_intensity(image, window=(100, 100, 100, 100))
-    rects = segment_intensity(image)
+    # rects = segment_intensity(image)
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     for rect in rects:
         im = gray[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]

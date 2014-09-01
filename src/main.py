@@ -13,7 +13,6 @@ Options:
   --batch=<dir> Input directory 
   --recursive   Traverse directory structure recursively.
 """
-
 from docopt import docopt
 from PySide import QtCore, QtGui
 from segment import segment_edges, segment_intensity
@@ -430,12 +429,12 @@ class ImageViewer(QtGui.QMainWindow):
             file_name, _ = QtGui.QFileDialog.getOpenFileName(self, "Open File",
                     QtCore.QDir.currentPath())
         if file_name:
-            self.file_name = file_name
             image = QtGui.QImage(file_name)
             if image.isNull():
                 QtGui.QMessageBox.information(self, "Image Viewer",
                         "Cannot load %s." % file_name)
                 return
+            self.file_name = file_name
             for item in list(self.view.items):
                 self.view.remove_item(item)
 
@@ -639,6 +638,7 @@ class ImageViewer(QtGui.QMainWindow):
 
 
     def keyPressEvent(self, event):
+        return
         if event.key() == 16777216:
         # if event.key() == Qtcore.Qt.Key_Escape:
             sys.exit(1)
@@ -648,16 +648,14 @@ if __name__ == '__main__':
     if not arguments["--batch"]:
         print "Launching gui."
         app = QtGui.QApplication(sys.argv)
-        window = ImageViewer("../data/drawer.jpg")
+        # window = ImageViewer("../data/drawer.jpg")
         # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
-        # window = ImageViewer("temp.png")
-        # window = ImageViewer()
+        window = ImageViewer()
         window.showMaximized()
         window.show()
         sys.exit(app.exec_())
     else:
         print "Batch processing mode"
-
         for root, dirs, files in os.walk(arguments["--batch"]):
             print "Processing", root
             for file_name in files:
