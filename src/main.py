@@ -53,7 +53,7 @@ class GraphicsView(QtGui.QGraphicsView):
         self.scene().removeItem(item)
 
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Delete:
+        if event.key() in (QtCore.Qt.Key_Delete, QtCore.Qt.Key_Backspace):
             for box in list(self.items):
                 # if hasattr(box, "isSelected") and box.isSelected():
                 if box.isSelected():
@@ -501,12 +501,16 @@ class ImageViewer(QtGui.QMainWindow):
             rects = segment_intensity(image, window=window)
             self.view.remove_item(selected)
         else:
-            p = Process(target=f, args=[image, results, window])
-            p.start()
-            while results.empty():
-                app.processEvents()
-            p.join()
-            rects = results.get()
+            if 'darwin'==sys.platform:
+                # Process() fails on a Mac
+                rects = segment_edges(image, window=window, variance_threshold=100, size_filter=1)
+            else:
+                p = Process(target=f, args=[image, results, window])
+                p.start()
+                while results.empty():
+                    app.processEvents()
+                p.join()
+                rects = results.get()
         for rect in rects:
             self.add_box(rect)
         self.progressDialog.hide()
@@ -653,7 +657,6 @@ class ImageViewer(QtGui.QMainWindow):
 
 
 if __name__ == '__main__':
-    import sys
     app = QtGui.QApplication(sys.argv)
     # window = ImageViewer("../data/drawer.jpg")
     # window = ImageViewer("../data/Plecoptera_Accession_Drawer_4.jpg")
