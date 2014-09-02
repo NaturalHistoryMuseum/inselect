@@ -73,7 +73,7 @@ def segment_edges(image, window=None, threshold=12,
     mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
     _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
-    display = mag2.copy()
+    display = np.dstack((mag2, mag2, mag2))
 
     contours, hierarchy = cv2.findContours(mag2.copy(),
                                            cv2.RETR_TREE,
@@ -103,6 +103,9 @@ def segment_edges(image, window=None, threshold=12,
 
     # return rects
     return rects, display
+    # return display
+    # print display.shape
+    # return display
 
 
 def segment_intensity(image, window=None):
