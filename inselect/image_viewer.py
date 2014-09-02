@@ -144,7 +144,7 @@ class ImageViewer(QtGui.QMainWindow):
                 self.app.processEvents()
                 p.join(0.01)
             rects = results.get()
-            num_display = np.memmap('display.array', dtype='uint8',
+            num_display = np.memmap('display.array', dtype=np.uint8,
                                     mode='r+', shape=image.shape)
             self.segment_display = num_display.copy()
             self.display_segment_action.setEnabled(True)
@@ -170,11 +170,13 @@ class ImageViewer(QtGui.QMainWindow):
             item.setSelected(True)
 
     def display_segment_image(self):
+        """Action method to switch between display of segmentation image and
+        actual image.
+        """
         if not self.show_segment_image:
             image = convert_numpy_to_qt(self.segment_display)
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
         else:
-            # image = convert_numpy_to_qt(self.image)
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(self.image))
         self.show_segment_image = not self.show_segment_image
 
