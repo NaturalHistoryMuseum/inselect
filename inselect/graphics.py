@@ -202,8 +202,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.setZValue(max(1000, 1E9 - b.width() * b.height()))
 
     def hoverMoveEvent(self, event):
-        if any(self.top_left_handle.contains(event.pos()),
-               self.bottom_right_handle.contains(event.pos())):
+        if any([self.top_left_handle.contains(event.pos()),
+               self.bottom_right_handle.contains(event.pos())]):
 
             self.setCursor(QtCore.Qt.SizeFDiagCursor)
             self.scene().view.is_resizing = True
