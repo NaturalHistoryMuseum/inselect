@@ -4,17 +4,16 @@
 Usage:
     main.py
     main.py <filename>
-    main.py --batch=input_dir
-    main.py --batch=input_dir --recursive
-    main.py --batch=input_dir --output=output_dir
+    main.py --batch=input_dir [--recursive --output_dir=<output_dir>]
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
-  --batch=<dir> Input directory
-  --recursive   Traverse directory structure recursively.
+  -h --help             Show this screen.
+  --version             Show version.
+  --batch=<dir>         Input directory
+  --recursive           Traverse directory structure recursively.
+  --output_dir=<dir>    Output directory of CSV file results. Defaults
+                        to the batch input directory.
 """
-
 from PySide import QtGui
 
 import cv2
@@ -45,6 +44,13 @@ if __name__ == '__main__':
         sys.exit(app.exec_())
     else:
         print "Batch processing mode"
+        output_dir = ""
+        if arguments["--output_dir"]:
+            output_dir = arguments["--output_dir"]
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+        else:
+            output_dir = os.path.dirname(filename)
         for root, dirs, files in os.walk(arguments["--batch"]):
             print "Processing", root
             for file_name in files:
