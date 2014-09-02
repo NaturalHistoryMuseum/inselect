@@ -4,8 +4,11 @@ python:
   - "3.4"
 
 install:
-  - sudo apt-get install python-opencv
-
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
+      sudo apt-get install python-opencv python-numpy python-scipy python-matplotlib
+    else
+      sudo apt-get install python-opencv python3-numpy python3-scipy python3-matplotlib
+    fi
   - pip install six
   - pip install -r requirements.txt --find http://wheels.scikit-image.org
   - "export DISPLAY=:99.0"
