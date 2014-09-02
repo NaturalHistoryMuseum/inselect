@@ -132,9 +132,10 @@ class ImageViewer(QtGui.QMainWindow):
             while p.is_alive():
                 self.app.processEvents()
                 p.join(0.1)
-            rects = results.get()
+            rects, display = results.get()
         for rect in rects:
             self.add_box(rect)
+        self.display = display
         self.progressDialog.hide()
 
     def export(self):

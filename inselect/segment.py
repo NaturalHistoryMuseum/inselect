@@ -41,6 +41,25 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
 
 def segment_edges(image, window=None, threshold=12,
                   variance_threshold=None, size_filter=True):
+    """Segments an image based on edge intensities.
+
+    Parameters
+    ----------
+    image : (M, N, 3) array
+        Image to process.
+    window : tuple, (x, y, w, h)
+        Optional subwindow in image.
+    variance_threshold : float
+        Color variance limit for detected regions.
+    size_filter: Boolean
+        Reject large objects.
+
+    Returns:
+    --------
+    (rects, display) : list, (M, N, 3) array
+        Region results and visualization image.
+
+    """
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -54,6 +73,7 @@ def segment_edges(image, window=None, threshold=12,
     mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
     _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+    display = mag2.copy()
 
     contours, hierarchy = cv2.findContours(mag2.copy(),
                                            cv2.RETR_TREE,
@@ -81,7 +101,8 @@ def segment_edges(image, window=None, threshold=12,
             new_rects.append(new_rect)
         rects = new_rects
 
-    return rects
+    # return rects
+    return rects, display
 
 
 def segment_intensity(image, window=None):
