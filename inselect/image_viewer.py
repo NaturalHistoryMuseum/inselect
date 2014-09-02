@@ -58,6 +58,8 @@ class ImageViewer(QtGui.QMainWindow):
         if filename:
             self.open(filename)
 
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
+
     def open(self, filename=None):
         if not filename:
             filename, _ = QtGui.QFileDialog.getOpenFileName(
@@ -309,9 +311,3 @@ class ImageViewer(QtGui.QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
-
-    def keyPressEvent(self, event):
-        return
-        if event.key() == 16777216:
-        # if event.key() == Qtcore.Qt.Key_Escape:
-            sys.exit(1)

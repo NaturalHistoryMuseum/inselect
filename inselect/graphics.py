@@ -39,7 +39,10 @@ class GraphicsView(QtGui.QGraphicsView):
             return
         QtGui.QGraphicsView.wheelEvent(self, event)
 
+    # -----------------------------------------------
     # Qt-specific methods
+    # -----------------------------------------------
+
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
             for box in list(self.items):
