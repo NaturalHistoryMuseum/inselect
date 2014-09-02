@@ -4,16 +4,16 @@
 Usage:
     main.py
     main.py <filename>
-    main.py --batch=input_dir
-    main.py --batch=input_dir --recursive
-    main.py --batch=input_dir --output=output_dir
+    main.py --batch=input_dir [--recursive --output_dir=<output_dir>]
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
-  --batch=<dir> Input directory 
-  --recursive   Traverse directory structure recursively.
+  -h --help             Show this screen.
+  --version             Show version.
+  --batch=<dir>         Input directory 
+  --recursive           Traverse directory structure recursively.
+  --output_dir=<dir>    Output directory of CSV file results.
 """
+
 from docopt import docopt
 from PySide import QtCore, QtGui
 from segment import segment_edges, segment_intensity
@@ -647,7 +647,6 @@ class ImageViewer(QtGui.QMainWindow):
 
 
     def keyPressEvent(self, event):
-        return
         if event.key() == 16777216:
         # if event.key() == Qtcore.Qt.Key_Escape:
             sys.exit(1)
@@ -668,6 +667,12 @@ if __name__ == '__main__':
         sys.exit(app.exec_())
     else:
         print "Batch processing mode"
+        output_dir = ""
+        if arguments["--output_dir"]:
+            output_dir = arguments["--output_dir"]
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+
         for root, dirs, files in os.walk(arguments["--batch"]):
             print "Processing", root
             for file_name in files:
@@ -677,7 +682,7 @@ if __name__ == '__main__':
                     height, width, _ = image.shape
                     print "Segmenting", file_name, image.shape
                     rects = segment_edges(image, variance_threshold=100, size_filter=1)
-                    csv_file_name = file_name + '.csv'
+                    csv_file_name = os.path.join(output_dir, os.path.basename(file_name) + '.csv')
                     print "Writing csv file", csv_file_name 
                     with open(csv_file_name, 'w') as csvfile:
                         writer = csv.writer(csvfile, delimiter=' ')
