@@ -14,8 +14,9 @@ import cv2
 
 
 class ImageViewer(QtGui.QMainWindow):
-    def __init__(self, filename=None):
+    def __init__(self, app, filename=None):
         super(ImageViewer, self).__init__()
+        self.app = app
         self.wireframe_mode = 0
         self.view = GraphicsView(wireframe_mode=self.wireframe_mode)
         self.scene = GraphicsScene()
@@ -128,7 +129,9 @@ class ImageViewer(QtGui.QMainWindow):
         else:
             p = Process(target=f, args=[image, results, window])
             p.start()
-            p.join()
+            while p.is_alive():
+                self.app.processEvents()
+                p.join(0.1)
             rects = results.get()
         for rect in rects:
             self.add_box(rect)

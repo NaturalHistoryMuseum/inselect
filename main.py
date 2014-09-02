@@ -36,7 +36,7 @@ if __name__ == '__main__':
     if not arguments["--batch"]:
         print "Launching gui."
         app = QtGui.QApplication(sys.argv)
-        window = ImageViewer()
+        window = ImageViewer(app)
         if arguments['<filename>']:
             window.open(arguments['<filename>'])
         window.showMaximized()
