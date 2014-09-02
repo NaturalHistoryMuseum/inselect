@@ -148,7 +148,6 @@ class ImageViewer(QtGui.QMainWindow):
                                     mode='r+', shape=image.shape)
             self.segment_display = num_display.copy()
             self.display_segment_action.setEnabled(True)
-            # print rects
         for rect in rects:
             self.add_box(rect)
         self.progressDialog.hide()

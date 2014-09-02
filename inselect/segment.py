@@ -101,11 +101,7 @@ def segment_edges(image, window=None, threshold=12,
             new_rects.append(new_rect)
         rects = new_rects
 
-    # return rects
     return rects, display
-    # return display
-    # print display.shape
-    # return display
 
 
 def segment_intensity(image, window=None):
