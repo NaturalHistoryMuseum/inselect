@@ -1,1 +1,1 @@
-from ._docopt import docopt
+from _docopt import docopt
