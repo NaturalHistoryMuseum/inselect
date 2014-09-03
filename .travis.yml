@@ -1,0 +1,17 @@
+language: python
+python:
+  - "2.7"
+virtualenv:
+  system_site_packages: true
+
+install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
+      sudo apt-get install python-opencv python-numpy python-scipy python-matplotlib python-pyside;
+    fi
+  - pip install six
+  - pip install --find http://wheels.scikit-image.org scikit-image
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+
+script:
+  - nosetests
