@@ -48,7 +48,7 @@ def save_rects(filename, rects):
 
 def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
-    window = ImageViewer()
+    window = ImageViewer(app)
     if filename:
         window.open(filename)
     window.showMaximized()
