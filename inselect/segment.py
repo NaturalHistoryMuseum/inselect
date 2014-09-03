@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from skimage.feature.blob import blob_log
+from skimage import io, color
 
 
 def segment_blobs(image):
@@ -131,6 +132,27 @@ def segment_intensity(image, window=None):
 
 if __name__ == "__main__":
     image = cv2.imread("../data/Plecoptera_Accession_Drawer_4.jpg")
+    scaled = 0.5
+    # scaled = 1.0
+    image = cv2.resize(image, (int(image.shape[1] * scaled),
+                               int(image.shape[0] * scaled)))
+    lab_image = cv2.cvtColor(image, cv2.cv.CV_BGR2Lab)
+    gray = np.array(lab_image[:, :, 0])
+    v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
+
+    mag = abs(v_edges)
+    mag2 = (255*mag/np.max(mag)).astype(np.uint8)
+    threshold = 10
+    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+    cv2.imshow("edge", mag2)
+    while cv2.waitKey(0) != 27: pass
+    qwer
+
+    v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
+    h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
+    mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+    mag2 = (255*mag/np.max(mag)).astype(np.uint8)
+
     scaled = 0.5
     scaled = 1.0
     image = cv2.resize(image, (int(image.shape[1] * scaled),
