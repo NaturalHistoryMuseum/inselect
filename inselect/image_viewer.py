@@ -1,10 +1,10 @@
 from PySide import QtCore, QtGui
 
-from .qt_util import read_qt_image
+from .qt_util import read_qt_image, convert_numpy_to_qt
 from .graphics import GraphicsView, GraphicsScene, BoxResizable
 
 from segment import segment_edges, segment_intensity
-
+import numpy as np
 from multiprocessing import Process, Queue
 import os
 import sys
@@ -44,6 +44,9 @@ class ImageViewer(QtGui.QMainWindow):
             image = read_qt_image(filename)
 
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
+        self.image = None
+        self.segment_display = None
+        self.segment_image_visible = False
         self.scene.addItem(item)
         self.image_item = item
         self.scene.image = item
@@ -62,6 +65,7 @@ class ImageViewer(QtGui.QMainWindow):
         if filename:
             self.filename = filename
             image = read_qt_image(filename)
+            self.image = image
             if image.isNull():
                 QtGui.QMessageBox.information(self, "Image Viewer",
                                               "Cannot load %s." % filename)
@@ -70,7 +74,10 @@ class ImageViewer(QtGui.QMainWindow):
                 self.view.remove_item(item)
 
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
-            self.scene.setSceneRect(0, 0, image.width(), image.height())
+            self.scene.setSceneRect(0, 0, self.image.width(), image.height())
+            self.segment_display = None
+            self.segment_image_visible = False
+            self.toggle_segment_action.setEnabled(False)
             self.segment_action.setEnabled(True)
             self.export_action.setEnabled(True)
             self.zoom_in_action.setEnabled(True)
@@ -110,10 +117,13 @@ class ImageViewer(QtGui.QMainWindow):
         image = cv2.imread(self.filename)
 
         def f(image, results_queue, window=None):
-            rects = segment_edges(image,
-                                  window=window,
-                                  variance_threshold=100,
-                                  size_filter=1)
+            rects, display = segment_edges(image,
+                                           window=window,
+                                           variance_threshold=100,
+                                           size_filter=1)
+            num_display = np.memmap('display.array', dtype=display.dtype,
+                                    mode='w+', shape=display.shape)
+            num_display[:, :] = display
             results_queue.put(rects)
 
         results = Queue()
@@ -131,8 +141,12 @@ class ImageViewer(QtGui.QMainWindow):
             p.start()
             while p.is_alive():
                 self.app.processEvents()
-                p.join(0.1)
+                p.join(0.01)
             rects = results.get()
+            num_display = np.memmap('display.array', dtype=np.uint8,
+                                    mode='r+', shape=image.shape)
+            self.segment_display = num_display.copy()
+            self.toggle_segment_action.setEnabled(True)
         for rect in rects:
             self.add_box(rect)
         self.progressDialog.hide()
@@ -153,6 +167,17 @@ class ImageViewer(QtGui.QMainWindow):
     def select_all(self):
         for item in self.view.items:
             item.setSelected(True)
+
+    def toggle_segment_image(self):
+        """Action method to switch between display of segmentation image and
+        actual image.
+        """
+        if not self.segment_image_visible:
+            image = convert_numpy_to_qt(self.segment_display)
+            self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
+        else:
+            self.image_item.setPixmap(QtGui.QPixmap.fromImage(self.image))
+        self.segment_image_visible = not self.segment_image_visible
 
     def create_actions(self):
         self.open_action = QtGui.QAction(
@@ -175,6 +200,12 @@ class ImageViewer(QtGui.QMainWindow):
             self.style().standardIcon(QtGui.QStyle.SP_ArrowDown),
             "Zoom &Out", self, enabled=False, shortcut="Ctrl+-",
             triggered=self.zoom_out)
+
+        self.toggle_segment_action = QtGui.QAction(
+            self.style().standardIcon(QtGui.QStyle.SP_ComputerIcon),
+            "&Display segmentation", self, shortcut="f3", enabled=False,
+            statusTip="Display segmentation image",
+            triggered=self.toggle_segment_image)
 
         self.about_action = QtGui.QAction("&About", self, triggered=self.about)
 
@@ -270,6 +301,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.viewMenu.addAction(self.select_all_action)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
+        self.viewMenu.addAction(self.toggle_segment_action)
 
         self.helpMenu = QtGui.QMenu("&Help", self)
         self.helpMenu.addAction(self.about_action)
