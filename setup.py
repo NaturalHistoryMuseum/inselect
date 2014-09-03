@@ -1,5 +1,8 @@
 from distutils.core import setup
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setup(
     name='inselect',
     version='0.1',
@@ -9,12 +12,5 @@ setup(
             'inselect = inselect.app:launch'
         ]
     },
-    install_requires = [
-        'numpy>=1.6',
-        'six>=1.7.3',
-        'scikit-image>=0.10',
-        'matplotlib>=1.0',
-        'pyside>=1.2',
-        'scipy>=0.14.0'
-    ]
+    install_requires=required
 )
