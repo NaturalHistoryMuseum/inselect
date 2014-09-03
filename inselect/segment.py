@@ -39,6 +39,39 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
         index = next
     return result
 
+def remove_lines(image):
+    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+    v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
+    h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
+    mag = np.abs(v_edges)
+    mask = np.zeros(gray.shape, dtype=np.uint8)                                     
+    threshold = 20
+    mag2 = (255*mag/np.max(mag)).astype(np.uint8)
+    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+    contours, hierarchy = cv2.findContours(mag2.copy(),
+                                       cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+        _, _, w, h = cv2.boundingRect(contour)
+        print w, h
+        if h > image.shape[0] / 4 and w < 50:
+            print "draw"
+            cv2.drawContours(mask, [contour], -1, 255, -1)
+    mag = np.abs(h_edges)
+    mag2 = (255*mag/np.max(mag)).astype(np.uint8)
+    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+    contours, hierarchy = cv2.findContours(mag2.copy(),
+                                       cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+        _, _, w, h = cv2.boundingRect(contour)
+        print w, h
+        if w > image.shape[1] / 4 and h < 50:
+            print "draw"
+            cv2.drawContours(mask, [contour], -1, 255, -1)
+    cv2.imshow("mask", mask)
+    cv2.imshow("mag", mag2)
+    return mask
 
 def segment_edges(image, window=None, threshold=12,
                   variance_threshold=None, size_filter=True):
@@ -69,13 +102,42 @@ def segment_edges(image, window=None, threshold=12,
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 3)
     display = gray.copy()
-    v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
-    h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
-    mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
-    mag2 = (255*mag/np.max(mag)).astype(np.uint8)
-    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
-    display = np.dstack((mag2, mag2, mag2))
+    if 1:
+        v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
+        h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
+        mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+        mag2 = (255*mag/np.max(mag)).astype(np.uint8)
+        _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+    else:
+        image = cv2.GaussianBlur(image, (3, 3), 3)
+        lab_image = cv2.cvtColor(image, cv2.cv.CV_BGR2Lab)
+        threshold = 10 
+        v_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 1, 0, None, 1)
+        h_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 0, 1, None, 1)
+        mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+        mag0 = (255*mag/np.max(mag)).astype(np.uint8)
+        threshold = 10 
+        _, mag0 = cv2.threshold(mag0, threshold, 255, cv2.cv.CV_THRESH_BINARY)
 
+        v_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 1, 0, None, 1)
+        h_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 0, 1, None, 1)
+        mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+        mag1 = (255*mag/np.max(mag)).astype(np.uint8)
+        threshold = 40 
+        _, mag1 = cv2.threshold(mag1, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+
+        v_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 1, 0, None, 1)
+        h_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 0, 1, None, 1)
+        mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+        mag2 = (255*mag/np.max(mag)).astype(np.uint8)
+        threshold = 40 
+        _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+        # mag2 = mag0 | mag1 | mag2
+        mag2 = mag0 | mag2 
+
+    mask = remove_lines(image)
+    mag2[mask == 255] = 0
+    display = np.dstack((mag2, mag2, mag2))
     contours, hierarchy = cv2.findContours(mag2.copy(),
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
@@ -132,19 +194,48 @@ def segment_intensity(image, window=None):
 
 if __name__ == "__main__":
     image = cv2.imread("../data/Plecoptera_Accession_Drawer_4.jpg")
+    # image = cv2.imread("../data/drawer.jpg")
+    image = image[0:1000, 0:3000, :]
     scaled = 0.5
     # scaled = 1.0
     image = cv2.resize(image, (int(image.shape[1] * scaled),
                                int(image.shape[0] * scaled)))
+    mask = remove_lines(image)
+    # cv2.waitKey(0)
+    image = cv2.GaussianBlur(image, (3, 3), 3)
+
     lab_image = cv2.cvtColor(image, cv2.cv.CV_BGR2Lab)
+
+    v_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 1, 0, None, 1)
+    h_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 0, 1, None, 1)
+
+    mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+    # print np.max(mag)
+    mag0 = (255*mag/np.max(mag)).astype(np.uint8)
+    # mag0 = mag.astype(np.uint8) 
+    threshold = 10 
+    _, mag0 = cv2.threshold(mag0, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+
+    # v_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 1, 0, None, 1)
+    # h_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 0, 1, None, 1)
+    # mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+    # mag1 = (255*mag/np.max(mag)).astype(np.uint8)
+    # threshold = 5 
+    # _, mag1 = cv2.threshold(mag, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+
     v_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 1, 0, None, 1)
     h_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 0, 1, None, 1)
     mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
-
-    # mag = abs(v_edges)
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
-    threshold = 20 
+    threshold = 40 
     _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+    # mag2 = mag0.astype(np.uint8) |  mag2.astype(np.uint8) |  mag1.astype(np.uint8)
+
+    mag0[mask == 255] = 0
+    mag2 = mag0 #| mag2 
+    # mag2 = mag0 | mag1 | mag2
+
+    cv2.imshow("im", image)
     cv2.imshow("edge", mag2)
     while cv2.waitKey(0) != 27: pass
     qwer
