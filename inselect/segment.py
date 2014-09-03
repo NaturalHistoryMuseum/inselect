@@ -137,12 +137,13 @@ if __name__ == "__main__":
     image = cv2.resize(image, (int(image.shape[1] * scaled),
                                int(image.shape[0] * scaled)))
     lab_image = cv2.cvtColor(image, cv2.cv.CV_BGR2Lab)
-    gray = np.array(lab_image[:, :, 0])
-    v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
+    v_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 1, 0, None, 1)
+    h_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 0, 1, None, 1)
+    mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
 
-    mag = abs(v_edges)
+    # mag = abs(v_edges)
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
-    threshold = 10
+    threshold = 20 
     _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
     cv2.imshow("edge", mag2)
     while cv2.waitKey(0) != 27: pass
