@@ -18,14 +18,14 @@ A tool for the semi-automated segmentation and annotation of specimen trays.
 
 ## Installation under Linux (Global)
 
-We do not provide ready-build binaries for Linux. These build instructions will install inselect globally on Ubuntu 12.04-LTS. If you wish to install inselect in a virtual environment, see the instructions in the next section.
+We do not provide ready-built binaries for Linux. These build instructions will install inselect globally on Ubuntu 12.04-LTS. If you wish to install inselect in a virtual environment, see the instructions in the next section.
 
 ```shell
 apt-get install python-pip git python-pyside python-opencv python-numpy python-scipy python-matplotlib python2.7-dev
 pip install git+https://github.com/vls-lab/inselect.git#egg=inselect
 ```
 
-You can then run inselect symply with:
+You can then run inselect simply with:
 
 ```shell
 inselect
