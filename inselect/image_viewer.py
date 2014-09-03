@@ -13,6 +13,18 @@ import csv
 import cv2
 
 
+def segment_worker(image, results_queue, window=None):
+    """ Multiprocessing worker to perform segmentation """
+    rects, display = segment_edges(image,
+                                   window=window,
+                                   variance_threshold=100,
+                                   size_filter=1)
+    num_display = np.memmap('display.array', dtype=display.dtype,
+                            mode='w+', shape=display.shape)
+    num_display[:, :] = display
+    results_queue.put(rects)
+
+
 class ImageViewer(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
         super(ImageViewer, self).__init__()
@@ -116,16 +128,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.progressDialog.show()
         image = cv2.imread(self.filename)
 
-        def f(image, results_queue, window=None):
-            rects, display = segment_edges(image,
-                                           window=window,
-                                           variance_threshold=100,
-                                           size_filter=1)
-            num_display = np.memmap('display.array', dtype=display.dtype,
-                                    mode='w+', shape=display.shape)
-            num_display[:, :] = display
-            results_queue.put(rects)
-
         results = Queue()
         window = None
         selected = self.scene.selectedItems()
@@ -137,7 +139,7 @@ class ImageViewer(QtGui.QMainWindow):
             rects = segment_intensity(image, window=window)
             self.view.remove_item(selected)
         else:
-            p = Process(target=f, args=[image, results, window])
+            p = Process(target=segment_worker, args=[image, results, window])
             p.start()
             while p.is_alive():
                 self.app.processEvents()
