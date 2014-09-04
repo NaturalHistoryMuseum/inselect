@@ -25,12 +25,47 @@ def segment_worker(image, results_queue, window=None):
     results_queue.put(rects)
 
 
+
+class ListItem(QtGui.QListWidgetItem):
+    def __init__(self, icon, text, parent=None, box=None):
+        super(ListItem, self).__init__(icon, text, parent) 
+        # super(ListItem, self).__init__(text, parent) 
+        self.original_icon = icon
+        self.original_text = text
+        self.box = box 
+        # self.window = window
+
+
+class SegmentListWidget(QtGui.QListWidget):
+    def __init__(self, parent=None):
+        super(SegmentListWidget, self).__init__(parent) 
+        self.setIconSize(QtCore.QSize(100, 100))
+        self.setViewMode(QtGui.QListView.IconMode)
+        self.setDragEnabled(False)
+        # self.setMovement(QtGui.QListView.Static)
+        # self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        # self.setDragEnabled(False)
+        # self.setMovement(QtGui.QListView.Snap)
+        # self.setAcceptDrops(True)
+        self.itemClicked.connect(self.on_item_clicked)
+        self.itemDoubleClicked.connect(self.on_item_double_clicked)
+        self.setMinimumWidth(100)
+            
+    def on_item_clicked(self, item):
+        print "clicked"
+
+    def on_item_double_clicked(self, item):
+        print "double clicked"
+
+
 class ImageViewer(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
         super(ImageViewer, self).__init__()
         self.app = app
+ 		self.container = QtGui.QWidget(self)
         self.view = GraphicsView()
         self.scene = GraphicsScene()
+        self.sidebar = SegmentListWidget(self)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -39,14 +74,24 @@ class ImageViewer(QtGui.QMainWindow):
         self.scene.setGraphicsView(self.view)
         self.view.setScene(self.scene)
         self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
-        self.setCentralWidget(self.view)
+
+        self.setCentralWidget(self.container)
+        self.layout = QtGui.QGridLayout(self.container)
+        policy = QtGui.QSizePolicy(
+            QtGui.QSizePolicy.Expanding, 
+            QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(policy)
+        self.layout.addWidget(self.view, 0, 0)
+        self.layout.addWidget(self.sidebar, 0, 1) 
+
         self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100),
                                           color=QtCore.Qt.red,
                                           transparent=True,
                                           scene=self.scene)
         self.scene.addItem(self.view.move_box)
         self.view.move_box.setVisible(False)
-        self.view.move_box.setZValue(1E9)
+        if not self.wireframe_mode:
+            self.view.move_box.setZValue(1E9)
 
         if filename is None:
             image = QtGui.QImage()
@@ -111,13 +156,13 @@ class ImageViewer(QtGui.QMainWindow):
         e = QtCore.QPoint(x + w, y + h)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
         box = BoxResizable(qrect,
-                           transparent=False,
+                           transparent=self.wireframe_mode,
                            scene=self.scene)
         self.view.add_item(box)
-
-        b = box.boundingRect()
-        box.setZValue(max(1000, 1E9 - b.width() * b.height()))
-        box.updateResizeHandles()
+        if not self.wireframe_mode:
+            b = box.boundingRect()
+            box.setZValue(max(1000, 1E9 - b.width() * b.height()))
+            box.updateResizeHandles()
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
