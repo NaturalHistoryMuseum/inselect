@@ -25,33 +25,28 @@ def segment_worker(image, results_queue, window=None):
     results_queue.put(rects)
 
 
-
 class ListItem(QtGui.QListWidgetItem):
     def __init__(self, icon, text, parent=None, box=None):
-        super(ListItem, self).__init__(icon, text, parent) 
+        super(ListItem, self).__init__(icon, text, parent)
         self.original_icon = icon
         self.original_text = text
-        self.box = box 
+        self.box = box
 
 
 class SegmentListWidget(QtGui.QListWidget):
     def __init__(self, parent=None):
-        super(SegmentListWidget, self).__init__(parent) 
+        super(SegmentListWidget, self).__init__(parent)
         self.setIconSize(QtCore.QSize(100, 100))
         self.setViewMode(QtGui.QListView.IconMode)
         self.setDragEnabled(False)
         self.setResizeMode(QtGui.QListView.Adjust)
         self.setMovement(QtGui.QListView.Static)
         self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        # self.itemClicked.connect(self.on_item_clicked)
-        # self.selectionChanged.connect(self.on_select)
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
         self.setMinimumWidth(100)
         self.parent = parent
 
     def selectionChanged(self, selected, deselected):
-        # for box in self.parent.scene.selectedItems():
-        #     box.setSelected(False)
         for item in self.selectedItems():
             item.box.setSelected(True)
 
@@ -61,14 +56,6 @@ class SegmentListWidget(QtGui.QListWidget):
                 self.takeItem(self.row(item))
         self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
-
-    # def on_item_clicked(self, item):
-    #     # if not (event.modifiers() & QtCore.Qt.ControlModifier):
-    #     for box in self.parent.scene.selectedItems():
-    #         box.setSelected(False)
-    #     item.box.setSelected(True)
-
-        # print "clicked"
 
     def on_item_double_clicked(self, item):
         print "double clicked"
@@ -95,15 +82,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.setCentralWidget(self.splitter)
         self.splitter.addWidget(self.view)
         self.splitter.addWidget(self.sidebar)
-        # self.splitter.setStretchFactor(0, 0)
-        # self.splitter.setStretchFactor(1, 0)
-        # self.layout = QtGui.QGridLayout(self.container)
-        # policy = QtGui.QSizePolicy(
-        #     QtGui.QSizePolicy.Expanding, 
-        #     QtGui.QSizePolicy.Expanding)
-        # self.setSizePolicy(policy)
-        # self.layout.addWidget(self.view, 0, 0)
-        # self.layout.addWidget(self.sidebar, 0, 1) 
+        self.splitter.setSizes([1000, 100])
 
         self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100),
                                           color=QtCore.Qt.red,
@@ -169,13 +148,12 @@ class ImageViewer(QtGui.QMainWindow):
     def about(self):
         QtGui.QMessageBox.about(self, "Insect Selector",
                                 "Stefan van der Walt\nPieter Holtzhausen")
-        
+
     def get_icon(self, box):
         pixmap = self.image_item.pixmap().copy(box._rect.toRect())
-        # pixmap = QtGui.QPixmap('/home/tzhau/hacking/inselect/inselect/fin.jpg')
         pixmap = pixmap.scaledToWidth(200, QtCore.Qt.SmoothTransformation)
         icon = QtGui.QIcon()
-        icon.addPixmap(pixmap) 
+        icon.addPixmap(pixmap)
         return icon
 
     def add_box(self, rect):
@@ -190,7 +168,6 @@ class ImageViewer(QtGui.QMainWindow):
         b = box.boundingRect()
         box.setZValue(max(1000, 1E9 - b.width() * b.height()))
         box.updateResizeHandles()
-
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
