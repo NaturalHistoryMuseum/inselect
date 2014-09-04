@@ -10,7 +10,7 @@ from mouse import MouseEvents
 class GraphicsView(MouseEvents, QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
-        MouseEvents.__init__(self)
+        MouseEvents.__init__(self, parent_class=QtGui.QGraphicsView)
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -121,18 +121,10 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
             self.verticalScrollBar().update()
 
 
-class GraphicsScene(QtGui.QGraphicsScene):
+class GraphicsScene(MouseEvents, QtGui.QGraphicsScene):
     def __init__(self, parent=None):
         QtGui.QGraphicsScene.__init__(self, parent)
-
-    def mousePressEvent(self, event):
-        QtGui.QGraphicsScene.mousePressEvent(self, event)
-
-    def mouseMoveEvent(self, event):
-        QtGui.QGraphicsScene.mouseMoveEvent(self, event)
-
-    def mouseReleaseEvent(self, event):
-        QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
+        MouseEvents.__init__(self, parent_class=QtGui.QGraphicsScene)
 
     def setGraphicsView(self, view):
         self.view = view

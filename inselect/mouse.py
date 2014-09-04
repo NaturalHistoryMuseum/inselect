@@ -2,7 +2,9 @@ from PySide import QtGui, QtCore
 
 
 class MouseEvents(object):
-    def __init__(self):
+    def __init__(self, parent_class):
+        self.parent_class = parent_class
+
         self._mouse_state = {
             'button': None,
             'pressed_at': None
@@ -39,7 +41,7 @@ class MouseEvents(object):
         pass
 
     def mousePressEvent(self, event):
-        QtGui.QGraphicsView.mousePressEvent(self, event)
+        self.parent_class.mousePressEvent(self, event)
 
         x = event.pos().x()
         y = event.pos().y()
@@ -60,7 +62,7 @@ class MouseEvents(object):
             state['button'] = 'right'
 
     def mouseMoveEvent(self, event):
-        QtGui.QGraphicsView.mouseMoveEvent(self, event)
+        self.parent_class.mouseMoveEvent(self, event)
 
         if self._mouse_state['button'] is None:
             event.ignore()
@@ -74,7 +76,7 @@ class MouseEvents(object):
         event.accept()
 
     def mouseReleaseEvent(self, event):
-        QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+        self.parent_class.mouseReleaseEvent(self, event)
 
         x = event.pos().x()
         y = event.pos().y()
@@ -90,7 +92,7 @@ class MouseEvents(object):
         self._mouse_state['pressed_at'] = None
 
     def hoverEnterEvent(self, event):
-        QtGui.QGraphicsView.hoverEnterEvent(self, event)
+        self.parent_class.hoverEnterEvent(self, event)
 
         x = event.pos().x()
         y = event.pos().y()
@@ -98,7 +100,7 @@ class MouseEvents(object):
         self._mouse_enter(x, y)
 
     def hoverLeaveEvent(self, event):
-        QtGui.QGraphicsView.hoverLeaveEvent(self, event)
+        self.parent_class.hoverLeaveEvent(self, event)
 
         x = event.pos().x()
         y = event.pos().y()
@@ -106,7 +108,7 @@ class MouseEvents(object):
         self._mouse_leave(x, y)
 
     def wheelEvent(self, event):
-        QtGui.QGraphicsView.wheelEvent(self, event)
+        self.parent_class.wheelEvent(self, event)
 
         delta = event.delta()
 
