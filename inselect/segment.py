@@ -17,6 +17,12 @@ def right_sized(contour, image_size, size_filter=True):
         ratio = float(w) / h
     else:
         ratio = float(h) / w
+
+    # c_area = cv2.contourArea(contour)
+    # if c_area > 0:
+    #     print  w, h, c_area, float(w) * h / c_area
+    #     contour_to_area = float(w) * h / c_area
+    # return ratio < 8 and w * h > area / 8E3 and contour_to_area < 50
     return ratio < 8 and w * h > area / 8E3 and \
         not (size_filter and
              (w > image_size[1] * 0.35 or h > image_size[0] * 0.35)) and \
@@ -39,6 +45,14 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
         index = next
     return result
 
+# def process_contours(image, contours, hierarchy, index=0, size_filter=True):
+#     result = []
+#     for contour in contours:
+#         rect = cv2.boundingRect(contour)
+#         x, y, w, h = rect
+#         result.append(rect)
+#     return result
+
 def remove_lines(image):
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
@@ -53,9 +67,7 @@ def remove_lines(image):
                                        cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
         _, _, w, h = cv2.boundingRect(contour)
-        print w, h
         if h > image.shape[0] / 4 and w < 50:
-            print "draw"
             cv2.drawContours(mask, [contour], -1, 255, -1)
     mag = np.abs(h_edges)
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
@@ -65,16 +77,14 @@ def remove_lines(image):
                                        cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
         _, _, w, h = cv2.boundingRect(contour)
-        print w, h
         if w > image.shape[1] / 4 and h < 50:
-            print "draw"
             cv2.drawContours(mask, [contour], -1, 255, -1)
     cv2.imshow("mask", mask)
     cv2.imshow("mag", mag2)
     return mask
 
 def segment_edges(image, window=None, threshold=12,
-                  variance_threshold=None, size_filter=True):
+                  variance_threshold=None, size_filter=1, line_filter=1):
     """Segments an image based on edge intensities.
 
     Parameters
@@ -87,6 +97,8 @@ def segment_edges(image, window=None, threshold=12,
         Color variance limit for detected regions.
     size_filter: Boolean
         Reject large objects.
+    line_filter: Boolean
+        Remove long line segment edges.
 
     Returns
     -------
@@ -102,15 +114,15 @@ def segment_edges(image, window=None, threshold=12,
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 3)
     display = gray.copy()
-    if 1:
+    if 0:
         v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
         h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
         mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
         mag2 = (255*mag/np.max(mag)).astype(np.uint8)
         _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
     else:
-        image = cv2.GaussianBlur(image, (3, 3), 3)
-        lab_image = cv2.cvtColor(image, cv2.cv.CV_BGR2Lab)
+        image2 = cv2.GaussianBlur(image, (3, 3), 3)
+        lab_image = cv2.cvtColor(image2, cv2.cv.CV_BGR2Lab)
         threshold = 10 
         v_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 1, 0, None, 1)
         h_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 0, 1, None, 1)
@@ -119,12 +131,19 @@ def segment_edges(image, window=None, threshold=12,
         threshold = 10 
         _, mag0 = cv2.threshold(mag0, threshold, 255, cv2.cv.CV_THRESH_BINARY)
 
-        v_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 1, 0, None, 1)
-        h_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 0, 1, None, 1)
-        mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
-        mag1 = (255*mag/np.max(mag)).astype(np.uint8)
-        threshold = 40 
-        _, mag1 = cv2.threshold(mag1, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+        # v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
+        # h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
+        # mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+        # mag1 = (255*mag/np.max(mag)).astype(np.uint8)
+        # threshold = 12
+        # _, mag1 = cv2.threshold(mag1, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+
+        # v_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 1, 0, None, 1)
+        # h_edges = cv2.Sobel(np.array(lab_image[:, :, 1]), cv2.CV_32F, 0, 1, None, 1)
+        # mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
+        # mag1 = (255*mag/np.max(mag)).astype(np.uint8)
+        # threshold = 40 
+        # _, mag1 = cv2.threshold(mag1, threshold, 255, cv2.cv.CV_THRESH_BINARY)
 
         v_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 1, 0, None, 1)
         h_edges = cv2.Sobel(np.array(lab_image[:, :, 2]), cv2.CV_32F, 0, 1, None, 1)
@@ -135,8 +154,9 @@ def segment_edges(image, window=None, threshold=12,
         # mag2 = mag0 | mag1 | mag2
         mag2 = mag0 | mag2 
 
-    mask = remove_lines(image)
-    mag2[mask == 255] = 0
+    if line_filter:
+        mask = remove_lines(image)
+        mag2[mask == 255] = 0
     display = np.dstack((mag2, mag2, mag2))
     contours, hierarchy = cv2.findContours(mag2.copy(),
                                            cv2.RETR_TREE,
@@ -145,6 +165,8 @@ def segment_edges(image, window=None, threshold=12,
     contour_areas = [(cv2.contourArea(contour), contour)
                      for contour in contours]
     contour_areas.sort(lambda a, b: cmp(b[0], a[0]))
+    display = np.zeros(mag2.shape, dtype=np.uint8)
+    for contour in contour_areas:
     _, mag2 = cv2.threshold(v_edges, 5, 255, cv2.cv.CV_THRESH_BINARY)
     mag2 = (255*mag2/np.max(mag2)).astype(np.uint8)
 
