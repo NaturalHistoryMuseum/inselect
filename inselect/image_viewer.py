@@ -18,7 +18,7 @@ def segment_worker(image, results_queue, window=None):
     rects, display = segment_edges(image,
                                    window=window,
                                    variance_threshold=100,
-                                   size_filter=0)
+                                   size_filter=1)
     num_display = np.memmap('display.array', dtype=display.dtype,
                             mode='w+', shape=display.shape)
     num_display[:, :] = display
@@ -44,17 +44,25 @@ class SegmentListWidget(QtGui.QListWidget):
         self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
         self.setMinimumWidth(100)
+        self.enable = True
         self.parent = parent
 
-    def selectionChanged(self, selected, deselected):
-        for item in self.selectedItems():
-            item.box.setSelected(True)
+    def selectionChanged(self, selected_items, deselected_items):
+        if self.enable:
+            for i in range(self.count()):
+                item = self.item(i)
+                selected = item.isSelected()
+                item.box.setSelected(selected)
+        QtGui.QListWidget.selectionChanged(self, selected_items,
+                                           deselected_items)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
+            self.enable = False
             for item in self.selectedItems():
                 self.takeItem(self.row(item))
-        self.parent.view.keyPressEvent(event)
+            self.enable = True
+            self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
 
     def on_item_double_clicked(self, item):
