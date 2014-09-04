@@ -18,7 +18,7 @@ def segment_worker(image, results_queue, window=None):
     rects, display = segment_edges(image,
                                    window=window,
                                    variance_threshold=100,
-                                   size_filter=1)
+                                   size_filter=0)
     num_display = np.memmap('display.array', dtype=display.dtype,
                             mode='w+', shape=display.shape)
     num_display[:, :] = display
@@ -49,15 +49,20 @@ class SegmentListWidget(QtGui.QListWidget):
         self.parent = parent
 
     def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Delete:
+            for item in self.selectedItems():
+                self.takeItem(self.row(item))
         self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
 
 
+
     def on_item_clicked(self, item):
-        for box in self.parent.view.items:
+        # if not (event.modifiers() & QtCore.Qt.ControlModifier):
+        for box in self.parent.scene.selectedItems():
             box.setSelected(False)
         item.box.setSelected(True)
-        print dir(item.box)
+
         print "clicked"
 
     def on_item_double_clicked(self, item):
