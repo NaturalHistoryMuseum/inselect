@@ -10,15 +10,11 @@ from mouse import MouseEvents
 class GraphicsView(MouseEvents, QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
+        MouseEvents.__init__(self)
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.items = []
-
-        self._mouse_state = {
-            'button': None,
-            'pressed_at': None
-        }
 
     def add_item(self, item):
         self.items.append(item)

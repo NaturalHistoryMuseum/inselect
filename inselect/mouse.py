@@ -2,6 +2,12 @@ from PySide import QtGui, QtCore
 
 
 class MouseEvents(object):
+    def __init__(self):
+        self._mouse_state = {
+            'button': None,
+            'pressed_at': None
+        }
+
     def _mouse_left(self, x, y):
         pass
 
