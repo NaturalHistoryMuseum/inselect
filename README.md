@@ -2,11 +2,24 @@
 
 A tool for the semi-automated segmentation and annotation of specimen trays.
 
-## Requirements
+## Installation under Microsoft Windows
 
-- numpy (>= 1.6)
-- scikit-image (>= 0.10)
-- opencv (>= 2.4)
+We provide Microsoft Windows installer packages which can be found [on our downloads page](). Once installed, Inselect will be available in your Programs Menu. You will need to install the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29) as well - however this is usually already included on your operating system, so only download it if Inselect fails to start.
+
+If you would like to install the project from source on Windows, you will need to:
+
+- Install Git from http://git-scm.com/download/win ;
+- Install Anaconda from http://continuum.io/downloads ;
+- Download OpenCV from http://opencv.org/downloads.html (You want a 2.x version) and extract the archive ;
+- Copy the file `<open cv extract root>/build/python/2.7/x86/cv2.pyd` to `<anaconda root>/Lib/site-packages` (Replace x86 by 64 as appropriate) ;
+- Open an Anaconda Shell and run `pip install -e git+https://github.com/vls-lab/inselect.git#egg=inselect`.
+
+From the Anaconda Shell you can now run Inselect by typing `inselect.exe`, and the source code is in `src\inselect`. If you would like to create a Microsoft Installer package, you can do the following:
+
+- Open an Anaconda shell and run (the first time) `pip install cx_Freeze`;
+- cd into `src/inselect` and run `python setup.py bdist_msi`.
+
+The installer can be found in the `dist` subdir.
 
 ## Installation under OSX
 
