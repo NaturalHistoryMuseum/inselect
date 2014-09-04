@@ -9,17 +9,18 @@ from multiprocessing import Process, Queue
 import os
 import sys
 import csv
+import tempfile
 
 import cv2
 
 
-def segment_worker(image, results_queue, window=None):
+def segment_worker(image, results_queue, temp_file_name, window=None):
     """ Multiprocessing worker to perform segmentation """
     rects, display = segment_edges(image,
                                    window=window,
                                    variance_threshold=100,
                                    size_filter=1)
-    num_display = np.memmap('display.array', dtype=display.dtype,
+    num_display = np.memmap(temp_file_name, dtype=display.dtype,
                             mode='w+', shape=display.shape)
     num_display[:, :] = display
     results_queue.put(rects)
@@ -139,13 +140,19 @@ class ImageViewer(QtGui.QMainWindow):
             rects = segment_intensity(image, window=window)
             self.view.remove_item(selected)
         else:
-            p = Process(target=segment_worker, args=[image, results, window])
+            # We cannot share file handles with other processes in Windows. This is the safest
+            # way to create a temporary file name (Note we must close the file as in Windows
+            # it cannot be opened twice)
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            temp_file_name = temp_file.name
+            temp_file.close()
+            p = Process(target=segment_worker, args=[image, results, temp_file_name, window])
             p.start()
             while p.is_alive():
                 self.app.processEvents()
                 p.join(0.01)
             rects = results.get()
-            num_display = np.memmap('display.array', dtype=np.uint8,
+            num_display = np.memmap(temp_file_name, dtype=np.uint8,
                                     mode='r+', shape=image.shape)
             self.segment_display = num_display.copy()
             self.toggle_segment_action.setEnabled(True)
