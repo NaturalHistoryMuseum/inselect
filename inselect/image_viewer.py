@@ -29,8 +29,7 @@ class ImageViewer(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
         super(ImageViewer, self).__init__()
         self.app = app
-        self.wireframe_mode = 0
-        self.view = GraphicsView(wireframe_mode=self.wireframe_mode)
+        self.view = GraphicsView()
         self.scene = GraphicsScene()
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -47,8 +46,7 @@ class ImageViewer(QtGui.QMainWindow):
                                           scene=self.scene)
         self.scene.addItem(self.view.move_box)
         self.view.move_box.setVisible(False)
-        if not self.wireframe_mode:
-            self.view.move_box.setZValue(1E9)
+        self.view.move_box.setZValue(1E9)
 
         if filename is None:
             image = QtGui.QImage()
@@ -113,13 +111,13 @@ class ImageViewer(QtGui.QMainWindow):
         e = QtCore.QPoint(x + w, y + h)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
         box = BoxResizable(qrect,
-                           transparent=self.wireframe_mode,
+                           transparent=False,
                            scene=self.scene)
         self.view.add_item(box)
-        if not self.wireframe_mode:
-            b = box.boundingRect()
-            box.setZValue(max(1000, 1E9 - b.width() * b.height()))
-            box.updateResizeHandles()
+
+        b = box.boundingRect()
+        box.setZValue(max(1000, 1E9 - b.width() * b.height()))
+        box.updateResizeHandles()
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
