@@ -54,8 +54,8 @@ def segment_edges(image, window=None, threshold=12,
     size_filter: Boolean
         Reject large objects.
 
-    Returns:
-    --------
+    Returns
+    -------
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
 
