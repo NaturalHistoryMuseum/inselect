@@ -48,20 +48,15 @@ class SegmentListWidget(QtGui.QListWidget):
         self.parent = parent
 
     def selectionChanged(self, selected_items, deselected_items):
-        if self.enable:
-            for i in range(self.count()):
-                item = self.item(i)
-                selected = item.isSelected()
-                item.box.setSelected(selected)
+        for i in range(self.count()):
+            item = self.item(i)
+            selected = item.isSelected()
+            item.box.setSelected(selected)
         QtGui.QListWidget.selectionChanged(self, selected_items,
                                            deselected_items)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
-            self.enable = False
-            for item in self.selectedItems():
-                self.takeItem(self.row(item))
-            self.enable = True
             self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
 
