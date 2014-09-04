@@ -52,6 +52,7 @@ def launch_gui(filename=None):
     if filename:
         window.open(filename)
     window.showMaximized()
+    window.splitter.setSizes([800, 100])
     window.show()
     sys.exit(app.exec_())
 
