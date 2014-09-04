@@ -15,8 +15,16 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
         self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.items = []
+        self.parent = parent
 
     def add_item(self, item):
+        window = self.parent
+        sidebar = self.parent.sidebar
+        icon = window.get_icon(item)
+        from image_viewer import ListItem
+        list_item = ListItem(icon, str(len(self.items)), box=item)
+        sidebar.addItem(list_item) 
+
         self.items.append(item)
 
     def remove_item(self, item):
@@ -43,11 +51,21 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
+            remove_index = []
+            sidebar = self.parent.sidebar
+            for i in range(sidebar.count()):
+                item = sidebar.item(i)
+                for box in list(self.items):
+                    if box.isSelected() and item.box == box:
+                        remove_index.append(i)
+            for i in reversed(remove_index):
+                sidebar.takeItem(i)
+
             for box in list(self.items):
                 # if hasattr(box, "isSelected") and box.isSelected():
                 if box.isSelected():
                     self.remove_item(box)
-
+            
         QtGui.QGraphicsView.keyPressEvent(self, event)
 
     def _mouse_left(self, x, y):

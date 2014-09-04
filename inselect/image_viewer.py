@@ -43,10 +43,17 @@ class SegmentListWidget(QtGui.QListWidget):
         self.setResizeMode(QtGui.QListView.Adjust)
         self.setMovement(QtGui.QListView.Static)
         self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.itemClicked.connect(self.on_item_clicked)
+        # self.itemClicked.connect(self.on_item_clicked)
+        # self.selectionChanged.connect(self.on_select)
         self.itemDoubleClicked.connect(self.on_item_double_clicked)
         self.setMinimumWidth(100)
         self.parent = parent
+
+    def selectionChanged(self, selected, deselected):
+        # for box in self.parent.scene.selectedItems():
+        #     box.setSelected(False)
+        for item in self.selectedItems():
+            item.box.setSelected(True)
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Delete:
@@ -55,15 +62,13 @@ class SegmentListWidget(QtGui.QListWidget):
         self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
 
+    # def on_item_clicked(self, item):
+    #     # if not (event.modifiers() & QtCore.Qt.ControlModifier):
+    #     for box in self.parent.scene.selectedItems():
+    #         box.setSelected(False)
+    #     item.box.setSelected(True)
 
-
-    def on_item_clicked(self, item):
-        # if not (event.modifiers() & QtCore.Qt.ControlModifier):
-        for box in self.parent.scene.selectedItems():
-            box.setSelected(False)
-        item.box.setSelected(True)
-
-        print "clicked"
+        # print "clicked"
 
     def on_item_double_clicked(self, item):
         print "double clicked"
@@ -75,8 +80,8 @@ class ImageViewer(QtGui.QMainWindow):
         self.app = app
         self.container = QtGui.QWidget(self)
         self.splitter = QtGui.QSplitter(self)
-        self.view = GraphicsView()
-        self.scene = GraphicsScene()
+        self.view = GraphicsView(self)
+        self.scene = GraphicsScene(self)
         self.sidebar = SegmentListWidget(self)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -185,9 +190,7 @@ class ImageViewer(QtGui.QMainWindow):
         b = box.boundingRect()
         box.setZValue(max(1000, 1E9 - b.width() * b.height()))
         box.updateResizeHandles()
-        icon = self.get_icon(box)
-        item = ListItem(icon, str(len(self.view.items) - 1), box=box)
-        self.sidebar.addItem(item) 
+
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
