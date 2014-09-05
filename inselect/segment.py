@@ -166,7 +166,7 @@ def segment_edges(image, window=None, threshold=12,
                      for contour in contours]
     contour_areas.sort(lambda a, b: cmp(b[0], a[0]))
     display = np.zeros(mag2.shape, dtype=np.uint8)
-    for contour in contour_areas:
+    # for contour in contour_areas:
     _, mag2 = cv2.threshold(v_edges, 5, 255, cv2.cv.CV_THRESH_BINARY)
     mag2 = (255*mag2/np.max(mag2)).astype(np.uint8)
 
