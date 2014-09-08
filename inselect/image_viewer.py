@@ -5,25 +5,11 @@ from .graphics import GraphicsView, GraphicsScene, BoxResizable
 
 from segment import segment_edges, segment_intensity
 import numpy as np
-from multiprocessing import Process, Queue
-import os, time
+import os
+import time
 import sys
 import csv
-import tempfile
-
 import cv2
-
-
-def segment_worker(image, results_queue, temp_file_name, window=None):
-    """ Multiprocessing worker to perform segmentation """
-    rects, display = segment_edges(image,
-                                   window=window,
-                                   variance_threshold=100,
-                                   size_filter=1)
-    num_display = np.memmap(temp_file_name, dtype=display.dtype,
-                            mode='w+', shape=display.shape)
-    num_display[:, :] = display
-    results_queue.put(rects)
 
 
 class ListItem(QtGui.QListWidgetItem):
@@ -64,51 +50,26 @@ class SegmentListWidget(QtGui.QListWidget):
     def on_item_double_clicked(self, item):
         print "double clicked"
 
-# very testable class (hint: you can use mock.Mock for the signals)
-class Worker(QtCore.QObject):
-    finished = QtCore.Signal()
-    dataReady = QtCore.Signal(list, dict)
 
-    @QtCore.Slot()
-    def processA(self):
-        print "Worker.processA()"
-        self.finished.emit()
+class WorkerThread(QtCore.QThread):
+    results = QtCore.Signal(list, np.ndarray)
 
-    @QtCore.Slot(str, list, list)
-    def processB(self, foo, bar=None, baz=None):
-        print "Worker.processB()"
-        for thing in bar:
-            # lots of processing...
-            self.dataReady.emit(['dummy', 'data'], {'dummy': ['data']})
-        self.finished.emit()
-
-
-class Thread(QtCore.QThread):
-    def __init__(self, parent=None):
-        QtCore.QThread.__init__(self, parent)
-
-     # this class is solely needed for these two methods, there
-     # appears to be a bug in PyQt 4.6 that requires you to
-     # explicitly call run and start from the subclass in order
-     # to get the thread to actually start an event loop
-
-    def start(self):
-        QtCore.QThread.start(self)
+    def __init__(self, image, window, selected=None, parent=None):
+        super(WorkerThread, self).__init__(parent)
+        self.image = image
+        self.window = window
+        self.selected = selected
 
     def run(self):
-        QtCore.QThread.run(self)
+        if self.window:
+            rects, display = segment_intensity(self.image, window=self.window)
+        else:
+            rects, display = segment_edges(self.image,
+                                           window=self.window,
+                                           variance_threshold=100,
+                                           size_filter=1)
+        self.results.emit(rects, display)
 
-class MyWorkerThread(QtCore.QThread):
-    message = QtCore.Signal(str)
-
-    def __init__(self, id, parent=None):
-        super(MyWorkerThread, self).__init__(parent)
-        self.id = id
-
-    def run(self):
-        for i in range(200000):
-            print i
-            # self.message.emit("%d: %d" % (self.id, i))
 
 class ImageViewer(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
@@ -180,7 +141,8 @@ class ImageViewer(QtGui.QMainWindow):
 
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
             self.scene.setSceneRect(0, 0, self.image.width(), image.height())
-            self.segment_display = None
+            w, h = self.image.width(), self.image.height(),
+            self.segment_display = np.zeros((h, w, 3), dtype=np.uint8) 
             self.segment_image_visible = False
             self.toggle_segment_action.setEnabled(False)
             self.segment_action.setEnabled(True)
@@ -218,9 +180,19 @@ class ImageViewer(QtGui.QMainWindow):
         box.setZValue(max(1000, 1E9 - b.width() * b.height()))
         box.updateResizeHandles()
 
-    def workersFinished(self):
+    def worker_finished(self, rects, display):
         print 'done'
         self.progressDialog.hide()
+        window = self.worker.window
+        if window:
+            x, y, w, h = self.worker.window
+            self.segment_display[y:y+h, x:x+w] = display
+            self.view.remove_item(self.worker.selected)
+        else:
+            self.segment_display = display.copy()
+        self.toggle_segment_action.setEnabled(True)
+        for rect in rects:
+            self.add_box(rect)
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
@@ -232,59 +204,17 @@ class ImageViewer(QtGui.QMainWindow):
         self.app.processEvents()
         image = cv2.imread(self.filename)
 
-        self.worker = MyWorkerThread(1)
-        self.worker.finished.connect(self.workersFinished)
+        window = None
+        selected = self.scene.selectedItems()
+        if selected:
+            selected = selected[0]
+            window_rect = selected.map_rect_to_scene(selected._rect)
+            p = window_rect.topLeft()
+            window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
+
+        self.worker = WorkerThread(image, window, selected)
+        self.worker.results.connect(self.worker_finished)
         self.worker.start()
-
-        # thread = Thread() # no parent!
-        # obj = Worker() # no parent!
-        # obj.moveToThread(thread)
-
-        # # if you want the thread to stop after the worker is done
-        # # you can always call thread.start() again later
-        # obj.finished.connect(self.workersFinished)
-
-        # one way to do it is to start processing as soon as the thread starts
-        # this is okay in some cases... but makes it harder to send data to 
-        # the worker object from the main gui thread.  As you can see I'm calling
-        # processA() which takes no arguments
-        # thread.started.connect(obj.processA)
-        # thread.start()
-
-        # another way to do it, which is a bit fancier, allows you to talk back and
-        # forth with the object in a thread safe way by communicating through signals
-        # and slots (now that the thread is running I can start calling methods on
-        # the worker object)
-        # QtCore.QMetaObject.invokeMethod(obj, 'processB', QtCore.Qt.QueuedConnection,
-        #                                 QtCore.QGenericArgument(QtCore.QString, "Hello World!"))
-        # window = None
-        # selected = self.scene.selectedItems()
-        # if selected:
-        #     selected = selected[0]
-        #     window_rect = selected.map_rect_to_scene(selected._rect)
-        #     p = window_rect.topLeft()
-        #     window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
-        #     rects = segment_intensity(image, window=window)
-        #     self.view.remove_item(selected)
-        # else:
-        #     # We cannot share file handles with other processes in Windows. This is the safest
-        #     # way to create a temporary file name (Note we must close the file as in Windows
-        #     # it cannot be opened twice)
-        #     temp_file = tempfile.NamedTemporaryFile(delete=False)
-        #     temp_file_name = temp_file.name
-        #     temp_file.close()
-        #     p = Process(target=segment_worker, args=[image, results, temp_file_name, window])
-        #     p.start()
-        #     while p.is_alive():
-        #         self.app.processEvents()
-        #         p.join(0.01)
-        #     rects = results.get()
-        #     num_display = np.memmap(temp_file_name, dtype=np.uint8,
-        #                             mode='r+', shape=image.shape)
-        #     self.segment_display = num_display.copy()
-        #     self.toggle_segment_action.setEnabled(True)
-        # for rect in rects:
-        #     self.add_box(rect)
 
     def export(self):
         path = QtGui.QFileDialog.getExistingDirectory(
@@ -293,7 +223,6 @@ class ImageViewer(QtGui.QMainWindow):
 
         for i, item in enumerate(self.view.items):
             b = item._rect
-            print b
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
             print extract.shape, i
