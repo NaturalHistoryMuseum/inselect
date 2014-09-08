@@ -125,7 +125,9 @@ def segment_intensity(image, window=None):
                         rect[2] + 2 * dx, rect[3] + 2 * dy)
             new_rects.append(new_rect)
         rects = new_rects
-    return rects
+    display = np.dstack(3 * [threshold])
+    return rects, display
+
 
 if __name__ == "__main__":
     image = cv2.imread("../data/Plecoptera_Accession_Drawer_4.jpg")
