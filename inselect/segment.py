@@ -120,7 +120,6 @@ def segment_edges(image, window=None, threshold=12, return_contours=False,
     else:
         image2 = cv2.GaussianBlur(image, (3, 3), 3)
         lab_image = cv2.cvtColor(image2, cv2.cv.CV_BGR2Lab)
-        threshold = 10 
         v_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 1, 0, None, 1)
         h_edges = cv2.Sobel(np.array(lab_image[:, :, 0]), cv2.CV_32F, 0, 1, None, 1)
         mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
@@ -235,34 +234,51 @@ def segment_intensity(image, window=None):
     display = np.dstack(3 * [threshold])
     return rects, display
 
-def segment_watershed(image):
-    rects, display = segment_edges(image, size_filter=0)
-    # rects, display = segment_edges(image, return_contours=True)
-    # contour_areas = [(cv2.contourArea(rect[5]), rect)
-    #              for rect in rects]
-    # contour_areas.sort(lambda a, b: cmp(b[0], a[0]))
-    # contours2 = [c[1] for c in contour_areas]
+
+def segment_watershed(image, erode_iterations=3, window=None):
+    if window:
+        subimage = np.array(image)
+        x, y, w, h = window
+        image = subimage[y:y + h, x:x + w]
+    rects, display = segment_edges(image, variance_threshold=100, size_filter=0)
     h, w = image.shape[:2]
     initial = np.zeros((h, w), np.int32)
     for i, rect in enumerate(rects):
         cv2.drawContours(initial, [rect[4]], -1, 1, -1)
+    display = np.zeros(initial.shape, dtype=np.uint8)
 
+    segment_rects = []
     for i, rect in enumerate(rects):
         regions = np.zeros(initial.shape, dtype=np.uint8)
         cv2.drawContours(regions, [rect[4]], -1, 2, -1)
         regions = cv2.erode(regions, None)
+        regions = cv2.erode(regions, None)
         markers = initial.copy()
-        markers[regions == 2] = 2
-        cv2.imshow("dis", markers.astype(np.uint8) * 128)
-        cv2.waitKey(0)
+        markers[regions == 2] = 2 
+        # cv2.imshow("dis", markers.astype(np.uint8) * 128)
+        # cv2.waitKey(0)
         cv2.watershed(image, markers)
-        im = image.copy()
-        im[markers == 2] = [255, 0, 0]
-        print markers
+        display[markers == 2] = 255
+        contours, hierarchy = cv2.findContours(regions.copy(),
+                                       cv2.RETR_EXTERNAL,
+                                       cv2.CHAIN_APPROX_SIMPLE)
+        segment_rects.extend([cv2.boundingRect(c) for c in contours])
 
-        cv2.imshow("dis", markers.astype(np.uint8))
-        cv2.imshow("im", im)
-        cv2.waitKey(0)
+    if window:
+        new_rects = []
+        for rect in segment_rects:
+            dx, dy = 0, 0
+            new_rect = (rect[0] + x - dx, rect[1] + y - dy,
+                        rect[2] + 2 * dx, rect[3] + 2 * dy)
+            new_rects.append(new_rect)
+        segment_rects = new_rects
+        # im[markers == 2] = [255, 0, 0]
+        # print markers
+
+        # cv2.imshow("dis", markers.astype(np.uint8))
+        # cv2.imshow("im", im)
+        # cv2.waitKey(0)
+    return segment_rects, np.dstack(3 * [display])
 
 
 if __name__ == "__main__":
