@@ -6,7 +6,7 @@ from .graphics import GraphicsView, GraphicsScene, BoxResizable
 from segment import segment_edges, segment_intensity
 import numpy as np
 from multiprocessing import Process, Queue
-import os
+import os, time
 import sys
 import csv
 import tempfile
@@ -64,6 +64,51 @@ class SegmentListWidget(QtGui.QListWidget):
     def on_item_double_clicked(self, item):
         print "double clicked"
 
+# very testable class (hint: you can use mock.Mock for the signals)
+class Worker(QtCore.QObject):
+    finished = QtCore.Signal()
+    dataReady = QtCore.Signal(list, dict)
+
+    @QtCore.Slot()
+    def processA(self):
+        print "Worker.processA()"
+        self.finished.emit()
+
+    @QtCore.Slot(str, list, list)
+    def processB(self, foo, bar=None, baz=None):
+        print "Worker.processB()"
+        for thing in bar:
+            # lots of processing...
+            self.dataReady.emit(['dummy', 'data'], {'dummy': ['data']})
+        self.finished.emit()
+
+
+class Thread(QtCore.QThread):
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
+
+     # this class is solely needed for these two methods, there
+     # appears to be a bug in PyQt 4.6 that requires you to
+     # explicitly call run and start from the subclass in order
+     # to get the thread to actually start an event loop
+
+    def start(self):
+        QtCore.QThread.start(self)
+
+    def run(self):
+        QtCore.QThread.run(self)
+
+class MyWorkerThread(QtCore.QThread):
+    message = QtCore.Signal(str)
+
+    def __init__(self, id, parent=None):
+        super(MyWorkerThread, self).__init__(parent)
+        self.id = id
+
+    def run(self):
+        for i in range(200000):
+            print i
+            # self.message.emit("%d: %d" % (self.id, i))
 
 class ImageViewer(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
@@ -173,6 +218,10 @@ class ImageViewer(QtGui.QMainWindow):
         box.setZValue(max(1000, 1E9 - b.width() * b.height()))
         box.updateResizeHandles()
 
+    def workersFinished(self):
+        print 'done'
+        self.progressDialog.hide()
+
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
         self.progressDialog.setWindowTitle("Segmenting...")
@@ -180,38 +229,62 @@ class ImageViewer(QtGui.QMainWindow):
         self.progressDialog.setMaximum(0)
         self.progressDialog.setMinimum(0)
         self.progressDialog.show()
+        self.app.processEvents()
         image = cv2.imread(self.filename)
 
-        results = Queue()
-        window = None
-        selected = self.scene.selectedItems()
-        if selected:
-            selected = selected[0]
-            window_rect = selected.map_rect_to_scene(selected._rect)
-            p = window_rect.topLeft()
-            window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
-            rects = segment_intensity(image, window=window)
-            self.view.remove_item(selected)
-        else:
-            # We cannot share file handles with other processes in Windows. This is the safest
-            # way to create a temporary file name (Note we must close the file as in Windows
-            # it cannot be opened twice)
-            temp_file = tempfile.NamedTemporaryFile(delete=False)
-            temp_file_name = temp_file.name
-            temp_file.close()
-            p = Process(target=segment_worker, args=[image, results, temp_file_name, window])
-            p.start()
-            while p.is_alive():
-                self.app.processEvents()
-                p.join(0.01)
-            rects = results.get()
-            num_display = np.memmap(temp_file_name, dtype=np.uint8,
-                                    mode='r+', shape=image.shape)
-            self.segment_display = num_display.copy()
-            self.toggle_segment_action.setEnabled(True)
-        for rect in rects:
-            self.add_box(rect)
-        self.progressDialog.hide()
+        self.worker = MyWorkerThread(1)
+        self.worker.finished.connect(self.workersFinished)
+        self.worker.start()
+
+        # thread = Thread() # no parent!
+        # obj = Worker() # no parent!
+        # obj.moveToThread(thread)
+
+        # # if you want the thread to stop after the worker is done
+        # # you can always call thread.start() again later
+        # obj.finished.connect(self.workersFinished)
+
+        # one way to do it is to start processing as soon as the thread starts
+        # this is okay in some cases... but makes it harder to send data to 
+        # the worker object from the main gui thread.  As you can see I'm calling
+        # processA() which takes no arguments
+        # thread.started.connect(obj.processA)
+        # thread.start()
+
+        # another way to do it, which is a bit fancier, allows you to talk back and
+        # forth with the object in a thread safe way by communicating through signals
+        # and slots (now that the thread is running I can start calling methods on
+        # the worker object)
+        # QtCore.QMetaObject.invokeMethod(obj, 'processB', QtCore.Qt.QueuedConnection,
+        #                                 QtCore.QGenericArgument(QtCore.QString, "Hello World!"))
+        # window = None
+        # selected = self.scene.selectedItems()
+        # if selected:
+        #     selected = selected[0]
+        #     window_rect = selected.map_rect_to_scene(selected._rect)
+        #     p = window_rect.topLeft()
+        #     window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
+        #     rects = segment_intensity(image, window=window)
+        #     self.view.remove_item(selected)
+        # else:
+        #     # We cannot share file handles with other processes in Windows. This is the safest
+        #     # way to create a temporary file name (Note we must close the file as in Windows
+        #     # it cannot be opened twice)
+        #     temp_file = tempfile.NamedTemporaryFile(delete=False)
+        #     temp_file_name = temp_file.name
+        #     temp_file.close()
+        #     p = Process(target=segment_worker, args=[image, results, temp_file_name, window])
+        #     p.start()
+        #     while p.is_alive():
+        #         self.app.processEvents()
+        #         p.join(0.01)
+        #     rects = results.get()
+        #     num_display = np.memmap(temp_file_name, dtype=np.uint8,
+        #                             mode='r+', shape=image.shape)
+        #     self.segment_display = num_display.copy()
+        #     self.toggle_segment_action.setEnabled(True)
+        # for rect in rects:
+        #     self.add_box(rect)
 
     def export(self):
         path = QtGui.QFileDialog.getExistingDirectory(
