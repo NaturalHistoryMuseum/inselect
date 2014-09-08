@@ -34,6 +34,7 @@ def process_contours(image, contours, hierarchy, index=0, size_filter=True):
         next, previous, child, parent = hierarchy[0][index]
         if right_sized(contours[index], image.shape, size_filter=size_filter):
             rect = cv2.boundingRect(contours[index])
+            rect += (contours[index],)
             result.append(rect)
         else:
             if child != -1:

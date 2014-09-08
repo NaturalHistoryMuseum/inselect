@@ -71,7 +71,7 @@ class WorkerThread(QtCore.QThread):
             rects, display = segment_edges(self.image,
                                            window=None,
                                            variance_threshold=100,
-                                           size_filter=1)
+                                           size_filter=0)
         self.results.emit(rects, display)
 
 
@@ -175,7 +175,7 @@ class ImageViewer(QtGui.QMainWindow):
         return icon
 
     def add_box(self, rect):
-        x, y, w, h = rect
+        x, y, w, h = rect[:4]
         s = QtCore.QPoint(x, y)
         e = QtCore.QPoint(x + w, y + h)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
