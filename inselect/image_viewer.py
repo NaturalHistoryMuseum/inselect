@@ -54,18 +54,19 @@ class SegmentListWidget(QtGui.QListWidget):
 class WorkerThread(QtCore.QThread):
     results = QtCore.Signal(list, np.ndarray)
 
-    def __init__(self, image, window, selected=None, parent=None):
+    def __init__(self, image, resegment_window, selected=None, parent=None):
         super(WorkerThread, self).__init__(parent)
         self.image = image
-        self.window = window
+        self.resegment_window = resegment_window
         self.selected = selected
 
     def run(self):
-        if self.window:
-            rects, display = segment_intensity(self.image, window=self.window)
+        if self.resegment_window:
+            rects, display = segment_intensity(self.image,
+                                               window=self.resegment_window)
         else:
             rects, display = segment_edges(self.image,
-                                           window=self.window,
+                                           window=None,
                                            variance_threshold=100,
                                            size_filter=1)
         self.results.emit(rects, display)
@@ -142,7 +143,7 @@ class ImageViewer(QtGui.QMainWindow):
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
             self.scene.setSceneRect(0, 0, self.image.width(), image.height())
             w, h = self.image.width(), self.image.height(),
-            self.segment_display = np.zeros((h, w, 3), dtype=np.uint8) 
+            self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
             self.segment_image_visible = False
             self.toggle_segment_action.setEnabled(False)
             self.segment_action.setEnabled(True)
@@ -181,16 +182,19 @@ class ImageViewer(QtGui.QMainWindow):
         box.updateResizeHandles()
 
     def worker_finished(self, rects, display):
-        print 'done'
         self.progressDialog.hide()
-        window = self.worker.window
+        window = self.worker.resegment_window
         if window:
-            x, y, w, h = self.worker.window
+            x, y, w, h = window
             self.segment_display[y:y+h, x:x+w] = display
+            # removes the selected box before replacing it with resegmentations
             self.view.remove_item(self.worker.selected)
         else:
             self.segment_display = display.copy()
         self.toggle_segment_action.setEnabled(True)
+        if self.segment_image_visible:
+            self.display_segment_image(self.segment_display)
+        # add detected boxes
         for rect in rects:
             self.add_box(rect)
 
@@ -202,14 +206,16 @@ class ImageViewer(QtGui.QMainWindow):
         self.progressDialog.setMinimum(0)
         self.progressDialog.show()
         image = cv2.imread(self.filename)
-        window = None
+        resegment_window = None
+        # if object selected, resegment the window
         selected = self.scene.selectedItems()
         if selected:
             selected = selected[0]
             window_rect = selected.map_rect_to_scene(selected._rect)
             p = window_rect.topLeft()
-            window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
-        self.worker = WorkerThread(image, window, selected)
+            resegment_window = [p.x(), p.y(), window_rect.width(),
+                                window_rect.height()]
+        self.worker = WorkerThread(image, resegment_window, selected)
         self.worker.results.connect(self.worker_finished)
         self.worker.start()
 
@@ -229,16 +235,28 @@ class ImageViewer(QtGui.QMainWindow):
         for item in self.view.items:
             item.setSelected(True)
 
+    def display_image(self, image):
+        """Displays an image in the user interface.
+
+        Parameters
+        ----------
+        image : np.ndarray, QtCore.QImage
+            Image to be displayed in viewer.
+        """
+        if isinstance(image, np.ndarray):
+            image = convert_numpy_to_qt(image)
+        self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
+
     def toggle_segment_image(self):
         """Action method to switch between display of segmentation image and
         actual image.
         """
-        if not self.segment_image_visible:
-            image = convert_numpy_to_qt(self.segment_display)
-            self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
-        else:
-            self.image_item.setPixmap(QtGui.QPixmap.fromImage(self.image))
         self.segment_image_visible = not self.segment_image_visible
+        if self.segment_image_visible:
+            image = self.segment_display
+        else:
+            image = self.image
+        self.display_image(image)
 
     def create_actions(self):
         self.open_action = QtGui.QAction(
