@@ -201,9 +201,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.progressDialog.setMaximum(0)
         self.progressDialog.setMinimum(0)
         self.progressDialog.show()
-        self.app.processEvents()
         image = cv2.imread(self.filename)
-
         window = None
         selected = self.scene.selectedItems()
         if selected:
@@ -211,7 +209,6 @@ class ImageViewer(QtGui.QMainWindow):
             window_rect = selected.map_rect_to_scene(selected._rect)
             p = window_rect.topLeft()
             window = [p.x(), p.y(), window_rect.width(), window_rect.height()]
-
         self.worker = WorkerThread(image, window, selected)
         self.worker.results.connect(self.worker_finished)
         self.worker.start()
