@@ -7,7 +7,6 @@ from segment import segment_edges, segment_intensity
 from annotator import AnnotateDialog
 import numpy as np
 import os
-import time
 import sys
 import json
 import cv2
@@ -143,7 +142,7 @@ class ImageViewer(QtGui.QMainWindow):
                 return
             for item in list(self.view.items):
                 self.view.remove_item(item)
-
+            self.sidebar.clear()
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
             self.scene.setSceneRect(0, 0, self.image.width(), image.height())
             w, h = self.image.width(), self.image.height(),
