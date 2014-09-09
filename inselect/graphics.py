@@ -336,6 +336,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             self.setZValue(1E9)
         else:
             self.setZValue(max(1000, 1E9 - b.width() * b.height()))
+        icon = self.parent.get_icon(item)
+        self.list_item.setIcon(icon)
 
     def map_rect_to_scene(self, map_rect):
         rect = map_rect
