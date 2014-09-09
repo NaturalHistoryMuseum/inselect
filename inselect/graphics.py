@@ -317,7 +317,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         return path
 
     def mouseDoubleClickEvent(self, event):
-        dialog = AnnotateDialog(self.list_item, parent=self.parent) 
+        dialog = AnnotateDialog(self.list_item, parent=self.parent)
         dialog.exec_()
 
     def hoverEnterEvent(self, event):
