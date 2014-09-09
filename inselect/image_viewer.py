@@ -67,7 +67,7 @@ class WorkerThread(QtCore.QThread):
     def run(self):
         if self.resegment_window:
             rects, display = segment_grabcut(self.image,
-                                               window=self.resegment_window)
+                                             window=self.resegment_window)
         else:
             rects, display = segment_edges(self.image,
                                            window=None,
