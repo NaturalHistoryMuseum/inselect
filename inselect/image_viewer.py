@@ -4,6 +4,7 @@ from .qt_util import read_qt_image, convert_numpy_to_qt
 from .graphics import GraphicsView, GraphicsScene, BoxResizable
 
 from segment import segment_edges, segment_intensity
+from annotator import AnnotateDialog
 import numpy as np
 import os
 import time
@@ -18,6 +19,7 @@ class ListItem(QtGui.QListWidgetItem):
         self.original_icon = icon
         self.original_text = text
         self.box = box
+        self.fields = {}
 
 
 class SegmentListWidget(QtGui.QListWidget):
@@ -43,12 +45,14 @@ class SegmentListWidget(QtGui.QListWidget):
                                            deselected_items)
 
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Delete:
+        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return]:
             self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
 
     def on_item_double_clicked(self, item):
-        print "double clicked"
+        window = self.parent
+        dialog = AnnotateDialog(item, parent=self.parent) 
+        dialog.exec_()
 
 
 class WorkerThread(QtCore.QThread):
@@ -150,6 +154,8 @@ class ImageViewer(QtGui.QMainWindow):
             self.export_action.setEnabled(True)
             self.zoom_in_action.setEnabled(True)
             self.zoom_out_action.setEnabled(True)
+            self.save_action.setEnabled(True)
+            self.import_action.setEnabled(True)
 
     def zoom_in(self):
         self.view.set_scale(1.2)
@@ -317,7 +323,7 @@ class ImageViewer(QtGui.QMainWindow):
         file_name, filtr = QtGui.QFileDialog.getSaveFileName(
             self,
             "QFileDialog.getSaveFileName()",
-            self.file_name + ".csv",
+            self.filename + ".csv",
             "All Files (*);;CSV Files (*.csv)", "",
             QtGui.QFileDialog.Options())
         if file_name:
@@ -338,7 +344,7 @@ class ImageViewer(QtGui.QMainWindow):
     def import_boxes(self):
         files, filtr = QtGui.QFileDialog.getOpenFileNames(
             self,
-            "QFileDialog.getOpenFileNames()", "../data",
+            "QFileDialog.getOpenFileNames()", "data",
             "All Files (*);;Text Files (*.csv)", "",
             QtGui.QFileDialog.Options())
 

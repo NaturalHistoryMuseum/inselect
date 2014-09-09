@@ -7,6 +7,7 @@ from PySide import QtCore, QtGui
 from mouse import MouseEvents
 from key_handler import KeyHandler
 import image_viewer
+from annotator import AnnotateDialog
 
 
 class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
@@ -280,6 +281,7 @@ class GraphicsScene(MouseEvents, QtGui.QGraphicsScene):
     def __init__(self, parent=None):
         QtGui.QGraphicsScene.__init__(self, parent)
         MouseEvents.__init__(self, parent_class=QtGui.QGraphicsScene)
+        self.parent = parent
 
     def setGraphicsView(self, view):
         self.view = view
@@ -291,7 +293,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
         self._rect = rect
         self._scene = scene
-        self.parent = scene.parent()
+        self.parent = scene.parent
         self.list_item = None
         self.orig_rect = QtCore.QRectF(rect)
         self.mouseOver = False
@@ -313,6 +315,10 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         path = QtGui.QPainterPath()
         path.addRect(self.boundingRect())
         return path
+
+    def mouseDoubleClickEvent(self, event):
+        dialog = AnnotateDialog(self.list_item, parent=self.parent) 
+        dialog.exec_()
 
     def hoverEnterEvent(self, event):
         self.updateResizeHandles()
