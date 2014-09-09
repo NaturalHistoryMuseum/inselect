@@ -1,14 +1,5 @@
 import cv2
 import numpy as np
-from skimage.feature.blob import blob_log
-from skimage import io, color
-
-
-def segment_blobs(image):
-    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
-    blobs = blob_log(gray, min_sigma=0.001, max_sigma=5)
-    print blobs
-
 
 def right_sized(contour, image_size, size_filter=True):
     x, y, w, h = cv2.boundingRect(contour)
@@ -80,7 +71,7 @@ def remove_lines(image):
             cv2.drawContours(mask, [contour], -1, 255, -1)
     return mask
 
-def segment_edges(image, window=None, threshold=10,
+def segment_edges(image, window=None, threshold=12,
                   variance_threshold=None, size_filter=1, line_filter=1):
     """Segments an image based on edge intensities.
 
