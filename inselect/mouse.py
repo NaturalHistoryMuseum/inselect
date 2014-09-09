@@ -2,116 +2,206 @@ from PySide import QtGui, QtCore
 
 
 class MouseEvents(object):
+    """Mixin used to map mouse events to methods.
+
+    The mixin implements Qt mouse events methods, so classes should not implement their own
+    """
     def __init__(self, parent_class):
         self.parent_class = parent_class
 
+        self._last_position = (0, 0)
         self._mouse_state = {
             'button': None,
-            'pressed_at': None
+            'pressed_at': None,
+            'delta': (0, 0)
         }
 
-    def _mouse_left(self, x, y):
-        pass
+        self._handlers = {}
 
-    def _mouse_right(self, x, y):
-        pass
+    def add_mouse_handler(self, event, callback, *args):
+        """Add a new mouse handler
 
-    def _mouse_middle(self, x, y):
-        pass
+        Parameters
+        ----------
+        event : str, tuple
+            see `_get_event`
+        callback : function
+            Function to call on event. The function should return True to allow 
+            the event to propagate, False otherwise.
+        *args
+            Additional arguments will be passed to the callback methods, *after* the event
+            specific arguments.
+        """
+        (event, button, modifier) = self._get_event(event)
+        if event not in self._handlers:
+            self._handlers[event] = {}
+        if button not in self._handlers[event]:
+            self._handlers[event][button] = {}
+        if modifier not in self._handlers[event][button]:
+            self._handlers[event][button][modifier] = []
+        self._handlers[event][button][modifier].append((callback, args))
 
-    def _mouse_left_release(self, x, y):
-        pass
+    def _get_event(self, event):
+        """Return a (event, button, modifier) tuple for the given event
 
-    def _mouse_right_release(self, x, y):
-        pass
+        Parameters
+        ----------
+        event : str, tuple
+            May be an event name, a tuple defining (event, button) or a tuple
+            defining (event, button, modifier) where:
+                - event is one of 'press', 'release', 'wheel', 'move', 'enter', 'leave';
+                - button is one of 'right', 'left', 'middle', 'none';
+                - modifier is a Qt modifier constant
+                
+        Returns
+        -------
+        tuple
+            An (event, button, modifier) tuple
+        """
+        event_str = event
+        button = 'none'
+        modifier = int(QtCore.Qt.NoModifier)
+        if isinstance(event, (list, tuple)):
+            event_str = event[0]
+            if len(event) > 1 and event[1] is not None:
+                button = event[1]
+            if len(event) > 2:
+                modifier = int(event[2])
 
-    def _mouse_middle_release(self, x, y):
-        pass
+        return (event_str, button, modifier)
 
-    def _mouse_move(self, x, y):
-        pass
+    def _handle_event(self, event, *args):
+        """Handle an event by calling appropriate handlers
 
-    def _mouse_enter(self, x, y):
-        pass
+        Parameters
+        ----------
+        event : tuple
+            Tuple as (event, button, modifier). See `_get_event`
+        *args
+            Additional arguments, that are passed to the callback function *before*
+            the additional arguments defined when creating the handler.
 
-    def _mouse_leave(self, x, y):
-        pass
-
-    def _mouse_wheel(self, delta, ctrl=False, shift=False):
-        pass
+        Returns
+        -------
+        bool
+            True to allow the event to propagate, False otherwise.
+        """
+        (event_str, button, modifier) = event
+        button = button or 'none'
+        try:
+            handlers = self._handlers[event_str][button][modifier]
+        except KeyError:
+            return True
+        propagate = True
+        for (callback, handler_args) in handlers:
+            propagate = propagate & callback(*(args + handler_args))
+        return propagate
 
     def mousePressEvent(self, event):
-        self.parent_class.mousePressEvent(self, event)
+        """Handle mouse press events
 
+        Parameters
+        ----------
+        event : QtEvent
+        """
         x = event.pos().x()
         y = event.pos().y()
 
         state = self._mouse_state
-        state['pressed_at'] = (x, y)
-
+        state['pressed_at'] = (x,y)
         if event.button() == QtCore.Qt.MidButton:
-            self._mouse_middle(x, y)
             state['button'] = 'middle'
-
         elif event.button() == QtCore.Qt.LeftButton:
-            self._mouse_left(x, y)
             state['button'] = 'left'
-
         elif event.button() == QtCore.Qt.RightButton:
-            self._mouse_right(x, y)
             state['button'] = 'right'
 
+        propagate = self._handle_event(('press', state['button'], int(event.modifiers())), x, y)
+        if propagate:
+            self.parent_class.mousePressEvent(self, event)
+        else:
+            event.accept()
+
     def mouseMoveEvent(self, event):
-        self.parent_class.mouseMoveEvent(self, event)
+        """Handle mouse move events
 
-        if self._mouse_state['button'] is None:
-            event.ignore()
-            return
-
+        Parameters
+        ----------
+        event : QtEvent
+        """
         x = event.pos().x()
         y = event.pos().y()
-
-        self._mouse_move(x, y)
-
-        event.accept()
+        button = self._mouse_state['button']
+        self._mouse_state['delta'] = (self._last_position[0] - x, self._last_position[1] - y)
+        propagate = self._handle_event(('move', button, int(event.modifiers())), x, y)
+        if propagate:
+            self.parent_class.mouseMoveEvent(self, event)
+        else:
+            event.accept()
+        self._last_position = (x, y)
 
     def mouseReleaseEvent(self, event):
-        self.parent_class.mouseReleaseEvent(self, event)
+        """Handle mouse release events
 
+        Parameters
+        ----------
+        event : QtEvent
+        """
         x = event.pos().x()
         y = event.pos().y()
-
-        if event.button() == QtCore.Qt.MidButton:
-            self._mouse_middle_release(x, y)
-        elif event.button() == QtCore.Qt.RightButton:
-            self._mouse_right_release(x, y)
-        elif event.button() == QtCore.Qt.LeftButton:
-            self._mouse_left_release(x, y)
+        button = self._mouse_state['button']
+        propagate = self._handle_event(('release', button, int(event.modifiers())), x, y)
+        if propagate:
+            self.parent_class.mouseReleaseEvent(self, event)
+        else:
+            event.accept()
 
         self._mouse_state['button'] = None
         self._mouse_state['pressed_at'] = None
 
     def hoverEnterEvent(self, event):
-        self.parent_class.hoverEnterEvent(self, event)
+        """Handle mouse hover enter events
 
+        Parameters
+        ----------
+        event : QtEvent
+        """
         x = event.pos().x()
         y = event.pos().y()
-
-        self._mouse_enter(x, y)
+        button = self._mouse_state['button']
+        propagate = self._handle_event(('enter', button, int(event.modifiers())), x, y)
+        if propagate:
+            self.parent_class.hoverEnterEvent(self, event)
+        else:
+            event.accept()
 
     def hoverLeaveEvent(self, event):
-        self.parent_class.hoverLeaveEvent(self, event)
+        """Handle mouse hover enter events
 
+        Parameters
+        ----------
+        event : QtEvent
+        """
         x = event.pos().x()
         y = event.pos().y()
-
-        self._mouse_leave(x, y)
+        button = self._mouse_state['button']
+        propagate = self._handle_event(('leave', button, int(event.modifiers())), x, y)
+        if propagate:
+            self.parent_class.hoverLeaveEvent(self, event)
+        else:
+            event.accept()
 
     def wheelEvent(self, event):
-        self.parent_class.wheelEvent(self, event)
+        """Handle mouse hover enter events
 
+        Parameters
+        ----------
+        event : QtEvent
+        """
         delta = event.delta()
-
-        ctrl = event.modifiers() & QtCore.Qt.ControlModifier
-        shift = event.modifiers() & QtCore.Qt.ShiftModifier
-        self._mouse_wheel(delta, ctrl=ctrl, shift=shift)
+        button = self._mouse_state['button']
+        propagate = self._handle_event(('wheel', button, int(event.modifiers())), delta)
+        if propagate:
+            self.parent_class.wheelEvent(self, event)
+        else:
+            event.accept()
