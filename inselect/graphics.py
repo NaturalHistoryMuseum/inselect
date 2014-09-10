@@ -37,6 +37,12 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left), self.move_boxes, 0, 0, -1, 0)
         self.add_key_handler(QtCore.Qt.Key_N, self.select_next)
         self.add_key_handler(QtCore.Qt.Key_P, self.select_previous)
+        # Add mouse event handlers
+        self.add_mouse_handler(('move', 'middle'), self.scroll_view, True)
+        self.add_mouse_handler(('press', 'right'), self._start_new_box)
+        self.add_mouse_handler(('move', 'right'), self._update_new_box)
+        self.add_mouse_handler(('release', 'right'), self._finish_new_box)
+        self.add_mouse_handler(('wheel', 'none', QtCore.Qt.ControlModifier), self.zoom)
 
     def add_item(self, item):
         # Insert into the list so as to ease prev/next navigation
@@ -75,6 +81,23 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         if box is not None:
             self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1],
                            QtCore.Qt.KeepAspectRatio)
+
+    def zoom(self, delta, factor=0.2):
+        """Zoom the scene in or out.
+
+        Notes
+        -----
+        Only the sign of the delta is important. This sets the scale to 1 + sign(delta) * factor
+
+        Parameters
+        ----------
+        delta : int
+            Positive to zoom in, negative to zoom out
+        factor : float
+            The factor - should be between 0 and 1 (Exclusive)
+        """
+        self.set_scale(1 + cmp(delta, 0) * factor)
+        return False
 
     def move_boxes(self, tl_dx, tl_dy, br_dx=None, br_dy=None):
         """Move the selected boxes
@@ -170,58 +193,59 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
             return None
         return tl, br
 
-    def wheelEvent(self, event):
-        if (event.modifiers() & QtCore.Qt.ControlModifier):
-            if event.delta() > 0:
-                scale = 1.2
-            else:
-                scale = 0.8
-            self.set_scale(scale)
-            return
-        QtGui.QGraphicsView.wheelEvent(self, event)
+    def _start_new_box(self, x, y):
+        """Start drawing a new box
 
-    def _mouse_left(self, x, y):
-        pass
+        Parameters
+        ----------
+        x : int
+            Screen X coordinate of first corner
+        y : int
+            Screen Y coordinate of first corner
+        """
+        s = self.mapToScene(x, y).toPoint()
+        r = self.scene().addRect(s.x(), s.y(), 0, 0, QtCore.Qt.DotLine)
+        r.setZValue(1E9)
+        self._new_box = (s.x(), s.y(), r)
+        return False
 
-    def _mouse_right(self, x, y):
-        pass
+    def _update_new_box(self, x, y):
+        """Update the size of the newly created box
 
-    def _mouse_middle(self, x, y):
-        x = self.horizontalScrollBar().value()
-        y = self.verticalScrollBar().value()
-        self.scrollBarValuesOnMousePress.setX(x)
-        self.scrollBarValuesOnMousePress.setY(y)
-
-    def _mouse_grow_box(self, x, y):
-        state = self._mouse_state
-
-        s = self.mapToScene(*state['pressed_at'])
-        e = self.mapToScene(x, y)
-
-        w, h = (e.toPoint().x() - s.toPoint().x(),
-                e.toPoint().y() - s.toPoint().y())
-
+        Parameters
+        ----------
+        x : int
+            Screen X coordinate of other corner
+        y : int
+            Screen Y coordinate of other corner
+        """
+        u = self.mapToScene(x, y).toPoint()
+        x1, y1 = min(self._new_box[0], u.x()), min(self._new_box[1], u.y())
+        x2, y2 = max(self._new_box[0], u.x()), max(self._new_box[1], u.y())
+        w = x2 - x1
+        h = y2 - y1
+        self._new_box[2].setRect(x1, y1, w, h)
         self.scene().update()
+        return False
 
-    def _mouse_middle_release(self, x, y):
-        pass
+    def _finish_new_box(self, x, y):
+        """Finish drawing a box and add it to the list of objects
 
-    def _mouse_right_release(self, x, y):
-        state = self._mouse_state
-
-        box_x, box_y = state['pressed_at']
-
-        x1, y1 = min(box_x, x), min(box_y, y)
-        x2, y2 = max(box_x, x), max(box_y, y)
-
-        s = self.mapToScene(x1, y1)
-        e = self.mapToScene(x2, y2)
-
-        w = np.abs(s.x() - e.x())
-        h = np.abs(s.y() - e.y())
+        Parameters
+        ----------
+        x : int
+            Screen X coordinate of other corner
+        y : int
+            Screen Y coordinate of other corner
+        """
+        u = self.mapToScene(x, y).toPoint()
+        x1, y1 = min(self._new_box[0], u.x()), min(self._new_box[1], u.y())
+        x2, y2 = max(self._new_box[0], u.x()), max(self._new_box[1], u.y())
+        w = x2 - x1
+        h = y2 - y1
 
         if w > 5 and h > 5:
-            box = BoxResizable(QtCore.QRectF(s.x(), s.y(), w, h),
+            box = BoxResizable(QtCore.QRectF(x1, y1, w, h),
                                scene=self.scene())
 
             b = box.boundingRect()
@@ -230,28 +254,26 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
 
             self.add_item(box)
 
-    def _mouse_left_release(self, x, y):
-        pass
+        # Remove the creation box
+        self.scene().removeItem(self._new_box[2])
+        self._new_box = None
+        return False
 
-    def _mouse_move(self, x, y):
-        state = self._mouse_state
+    def scroll_view(self, x, y, mouse_rel=True):
+        """ Scroll the view
 
-        if state['button'] == 'right':
-            self._mouse_grow_box(x, y)
-
-        if state['button'] == 'middle':
-            press_x, press_y = state['pressed_at']
-
-            x = self.scrollBarValuesOnMousePress.x() - x + \
-                press_x
-            y = self.scrollBarValuesOnMousePress.y() - y + \
-                press_y
-
-            self.horizontalScrollBar().setValue(x)
-            self.horizontalScrollBar().update()
-
-            self.verticalScrollBar().setValue(y)
-            self.verticalScrollBar().update()
+        Parameters
+        ----------
+        x : int
+        y : int
+        mouse_rel : bool
+            If True, the movement should be relative to the coordinates stored in _mouse_state
+        """
+        h = self.horizontalScrollBar()
+        v = self.verticalScrollBar()
+        h.setValue(h.value() + self._mouse_state['delta'][0])
+        v.setValue(v.value() + self._mouse_state['delta'][1])
+        return False
 
 
 class GraphicsScene(MouseEvents, QtGui.QGraphicsScene):
