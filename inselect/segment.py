@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from random import randint
 
 
 def _right_sized(contour, image_size, container_filter=True, size_filter=True):
@@ -200,8 +201,8 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
-    rects = _process_contours(display, contours, hierarchy,
-                              size_filter=size_filter)
+    rects = process_contours(display, contours, hierarchy,
+                             size_filter=size_filter)
     if variance_threshold:
         new_rects = []
         for rect in rects:
@@ -220,20 +221,6 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
 
 
 def segment_intensity(image, window=None):
-    """Segments an image based on colour intensity thresholding.
-
-    Parameters
-    ----------
-    image : (M, N, 3) array
-        Image to process.
-    window : tuple, (x, y, w, h)
-        Optional subwindow in image.
-
-    Returns
-    -------
-    (rects, display) : list, (M, N, 3) array
-        Region results and visualization image.
-    """
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -304,10 +291,9 @@ def segment_grabcut(image, window=None, seeds=[]):
 
     
     display = np.dstack(3 * [255 * mask2.astype(np.uint8)])
-    # return rects, display
     if seeds:
         distance = cv2.distanceTransform(mask2, cv2.cv.CV_DIST_L2, 3)
-        markers = np.zeros(distance.shape, dtype=np.int32) 
+        markers = np.zeros(distance.shape, dtype=np.int32)
         markers[mask2 == 0] = 255
         for i, seed in enumerate(seeds):
             sx, sy = seed
@@ -319,8 +305,9 @@ def segment_grabcut(image, window=None, seeds=[]):
             mask = np.array(markers == i + 1, dtype=np.uint8)
             contours, _ = cv2.findContours(mask,
                                            cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_SIMPLE) 
-            contours.sort(lambda x, y: cmp(cv2.contourArea(y), cv2.contourArea(x)))
+                                           cv2.CHAIN_APPROX_SIMPLE)
+            contours.sort(lambda x, y:
+                          cmp(cv2.contourArea(y), cv2.contourArea(x)))
             new_rects.append(cv2.boundingRect(contours[0]))
             if contours:
                 colour = [randint(100, 255), randint(100, 255), 0]
