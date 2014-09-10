@@ -45,13 +45,14 @@ class SegmentListWidget(QtGui.QListWidget):
                                            deselected_items)
 
     def keyPressEvent(self, event):
-        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return]:
+        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return, 
+                           ord('Z')]:
             self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
 
     def on_item_double_clicked(self, item):
         window = self.parent
-        dialog = AnnotateDialog(item, parent=self.parent)
+        dialog = AnnotateDialog(item.box, parent=self.parent)
         dialog.exec_()
 
 
