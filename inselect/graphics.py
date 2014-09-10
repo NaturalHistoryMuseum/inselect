@@ -7,6 +7,7 @@ from PySide import QtCore, QtGui
 from mouse import MouseEvents
 from key_handler import KeyHandler
 import image_viewer
+from annotator import AnnotateDialog
 
 
 class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
@@ -21,6 +22,7 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         self.parent = parent
         # Setup key handlers
         self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_boxes)
+        self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_boxes)
         self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
         self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
         self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
@@ -120,6 +122,12 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         selected_boxes = self.scene().selectedItems()
         for box in selected_boxes:
             box.move_box(tl_dx, tl_dy, br_dx, br_dy)
+
+    def annotate_boxes(self):
+        """Annotates selected box"""
+        box = self.scene().selectedItems()[0]
+        dialog = AnnotateDialog(box.list_item, parent=self.parent)
+        dialog.exec_()
 
     def delete_boxes(self):
         """Delete all selected boxes"""
@@ -280,6 +288,7 @@ class GraphicsScene(MouseEvents, QtGui.QGraphicsScene):
     def __init__(self, parent=None):
         QtGui.QGraphicsScene.__init__(self, parent)
         MouseEvents.__init__(self, parent_class=QtGui.QGraphicsScene)
+        self.parent = parent
 
     def setGraphicsView(self, view):
         self.view = view
@@ -291,7 +300,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
         self._rect = rect
         self._scene = scene
-        self.parent = scene.parent()
+        self.parent = scene.parent
         self.list_item = None
         self.orig_rect = QtCore.QRectF(rect)
         self.mouseOver = False
@@ -313,6 +322,10 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         path = QtGui.QPainterPath()
         path.addRect(self.boundingRect())
         return path
+
+    def mouseDoubleClickEvent(self, event):
+        dialog = AnnotateDialog(self.list_item, parent=self.parent)
+        dialog.exec_()
 
     def hoverEnterEvent(self, event):
         self.updateResizeHandles()
