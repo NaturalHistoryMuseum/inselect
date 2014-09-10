@@ -2,7 +2,26 @@ import cv2
 import numpy as np
 
 
-def right_sized(contour, image_size, size_filter=True):
+def _right_sized(contour, image_size, container_filter=True, size_filter=True):
+    """Checks if contour size and shape is that of an object of interest.
+
+    Parameters
+    ----------
+    contour : cv2.Contour
+        Contour to be analysed.
+    image_size : tuple
+        Dimensions of operating image.
+    container_filter : boolean
+        Filters with simple heuristic for container contours. These are
+        contours containing other segments such as insect cabinet subdivisions.
+    size_filter : boolean
+        Filters large objects.
+
+    Returns
+    -------
+    result : boolean
+        Object is of correct sizing.
+    """
     x, y, w, h = cv2.boundingRect(contour)
     area = image_size[0] * image_size[1]
     if w > h:
@@ -16,27 +35,44 @@ def right_sized(contour, image_size, size_filter=True):
     is_right_shape = ratio < 8 and w * h > area / 8E3
     # filter to remove containers that are a) large and b) contains
     # too much or too little contour area in bounding box
-    is_not_container = (0.1 < fill_ratio < 0.9 or
+    is_container = not (0.1 < fill_ratio < 0.9 or
                        (w < image_size[1] * 0.35 and
                         h < image_size[0] * 0.35))
     is_too_large = (w > image_size[1] * 0.35 or h > image_size[0] * 0.35)
 
-    return is_right_shape and is_not_container and \
+    return is_right_shape and not (container_filter and is_container) and \
         not (size_filter and is_too_large)
 
 
-def process_contours(image, contours, hierarchy, index=0, size_filter=True):
+def _process_contours(image, contours, hierarchy, index=0, size_filter=True):
+    """Traverse a hierachy of contours (contours containing contours) and
+    returns bounding boxes of the smallest possible objects that still remain
+    of interest.
+
+    Parameters
+    ----------
+    image : ndarray
+        Operating image.
+    contours : list of cv2.Contour
+        List of contours.
+    hierarchy : ndarray
+        Hierarchy of contours.
+    index : int
+        Start of contour index.
+    size_filter : boolean
+        Filters large objects.
+    """
     result = []
     while index >= 0:
         next, previous, child, parent = hierarchy[0][index]
-        if right_sized(contours[index], image.shape, size_filter=size_filter):
+        if _right_sized(contours[index], image.shape, size_filter=size_filter):
             rect = cv2.boundingRect(contours[index])
             rect += (contours[index],)
             result.append(rect)
         else:
             if child != -1:
-                rects = process_contours(image, contours, hierarchy, child,
-                                         size_filter=size_filter)
+                rects = _process_contours(image, contours, hierarchy, child,
+                                          size_filter=size_filter)
                 result.extend(rects)
         index = next
     return result
@@ -55,7 +91,19 @@ def _process_contours_iterate(image, contours, hierarchy, index=0,
 
 
 def remove_lines(image):
-    """Removes long horizontal and vertical edges"""
+    """Removes long horizontal and vertical edges. Operates on the vertical and
+    horizontal sobel images.
+
+    Parameters
+    ----------
+    image : (M, N, 3) array
+        Operating image.
+
+    Returns
+    -------
+    mask : (M, N) array
+        Mask of image without lines.
+    """
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
     h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
@@ -152,8 +200,8 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
-    rects = process_contours(display, contours, hierarchy,
-                             size_filter=size_filter)
+    rects = _process_contours(display, contours, hierarchy,
+                              size_filter=size_filter)
     if variance_threshold:
         new_rects = []
         for rect in rects:
@@ -172,6 +220,20 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
 
 
 def segment_intensity(image, window=None):
+    """Segments an image based on colour intensity thresholding.
+
+    Parameters
+    ----------
+    image : (M, N, 3) array
+        Image to process.
+    window : tuple, (x, y, w, h)
+        Optional subwindow in image.
+
+    Returns
+    -------
+    (rects, display) : list, (M, N, 3) array
+        Region results and visualization image.
+    """
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -201,6 +263,20 @@ def segment_intensity(image, window=None):
 
 
 def segment_grabcut(image, window=None):
+    """Segments an image using grabcut technique. Initialised with edges.
+
+    Parameters
+    ----------
+    image : (M, N, 3) array
+        Image to process.
+    window : tuple, (x, y, w, h)
+        Optional subwindow in image.
+
+    Returns
+    -------
+    (rects, display) : list, (M, N, 3) array
+        Region results and visualization image.
+    """
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -243,6 +319,20 @@ def segment_grabcut(image, window=None):
 
 
 def segment_watershed(image, window=None):
+    """Segments an image using watershed technique.
+
+    Parameters
+    ----------
+    image : (M, N, 3) array
+        Image to process.
+    window : tuple, (x, y, w, h)
+        Optional subwindow in image.
+
+    Returns
+    -------
+    (rects, display) : list, (M, N, 3) array
+        Region results and visualization image.
+    """
     if window:
         subimage = np.array(image)
         x, y, w, h = window
