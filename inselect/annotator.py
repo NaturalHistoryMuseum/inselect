@@ -42,6 +42,8 @@ class AnnotateDialog(QtGui.QDialog):
                 item.setData(QtCore.Qt.EditRole, self.list_item.fields[field])
                 self.table.setItem(row, 0, item)
 
+        self.table.setFocus()
+
     def _item_changed(self, item):
         row = item.row()
         field = self.fields[row]
