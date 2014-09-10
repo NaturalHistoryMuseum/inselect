@@ -2,7 +2,9 @@ from PySide import QtCore, QtGui
 
 
 class AnnotateDialog(QtGui.QDialog):
-    fields = ["Specimen Number", "Current Taxon Name", "Location in Collection"]
+    """ Dialog that handles annotation of a segment. """
+    fields = ["Specimen Number", "Current Taxon Name",
+              "Location in Collection"]
 
     def item_changed(self, item):
         row = item.row()
@@ -15,22 +17,21 @@ class AnnotateDialog(QtGui.QDialog):
         self.parent = parent
         # set size and placement
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Popup)
-        self.resize(max(500, int(0.66 * self.parent.width())), 
+        self.resize(max(500, int(0.66 * self.parent.width())),
                     max(500, int(0.66 * self.parent.height())))
-        screen_rect = self.parent.app.desktop().availableGeometry();
+        screen_rect = self.parent.app.desktop().availableGeometry()
         self.move(screen_rect.center() - self.rect().center())
 
         self.layout = QtGui.QGridLayout(self)
         self.setWindowTitle('Annotate Segment')
-        icon = self.parent.get_icon(item.box) 
+        icon = self.parent.get_icon(item.box)
         label = QtGui.QLabel(self)
         pixmap = icon.pixmap(icon.availableSizes()[0])
         self.num_fields = len(self.fields)
         label.setPixmap(pixmap)
-     
         self.table = QtGui.QTableWidget(self.num_fields, 1)
         self.table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.table.setVerticalHeaderLabels(self.fields) 
+        self.table.setVerticalHeaderLabels(self.fields)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().hide()
         self.table.itemChanged.connect(self.item_changed)
@@ -45,4 +46,3 @@ class AnnotateDialog(QtGui.QDialog):
                 item = QtGui.QTableWidgetItem()
                 item.setData(QtCore.Qt.EditRole, self.list_item.fields[field])
                 self.table.setItem(row, 0, item)
-            
