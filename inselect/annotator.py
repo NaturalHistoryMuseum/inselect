@@ -29,7 +29,7 @@ class AnnotateDialog(QtGui.QDialog):
         self.table.setVerticalHeaderLabels(self.fields)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.horizontalHeader().hide()
-        self.table.itemChanged.connect(self.item_changed)
+        self.table.itemChanged.connect(self._item_changed)
 
         self.layout.addWidget(label, 0, 0)
         self.layout.addWidget(self.table, 0, 1)
@@ -42,7 +42,7 @@ class AnnotateDialog(QtGui.QDialog):
                 item.setData(QtCore.Qt.EditRole, self.list_item.fields[field])
                 self.table.setItem(row, 0, item)
 
-    def item_changed(self, item):
+    def _item_changed(self, item):
         row = item.row()
         field = self.fields[row]
         self.list_item.fields[field] = item.text()
