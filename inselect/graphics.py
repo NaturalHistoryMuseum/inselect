@@ -311,6 +311,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.mouse_press_area = None
         self.color = color
         self.transparent = transparent
+        self.seeds = []
         self.setFlags(QtGui.QGraphicsItem.ItemIsFocusable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
@@ -375,24 +376,30 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         self.mouse_press_pos = event.scenePos().x(), event.scenePos().y()
 
         if event.button() == QtCore.Qt.LeftButton:
-            self.mouse_is_pressed = True
-            self.rect_press = QtCore.QRectF(self._rect)
-
-            # Top left corner
-            if self.top_left_handle.contains(event.pos()):
-                self.mouse_press_area = 'topleft'
-            # top right corner
-            elif self.top_right_handle.contains(event.pos()):
-                self.mouse_press_area = 'topright'
-            #  bottom left corner
-            elif self.bottom_left_handle.contains(event.pos()):
-                self.mouse_press_area = 'bottomleft'
-            # bottom right corner
-            elif self.bottom_right_handle.contains(event.pos()):
-                self.mouse_press_area = 'bottomright'
-            # entire rectangle
+            if event.modifiers() == QtCore.Qt.ShiftModifier:
+                x, y = self.mouse_press_pos
+                rect = self._innerRect
+                self.seeds.append((x - rect.x() - self.pos().x(), 
+                                   y - rect.y() - self.pos().y() ))
             else:
-                self.mouse_press_area = None
+                self.mouse_is_pressed = True
+                self.rect_press = QtCore.QRectF(self._rect)
+
+                # Top left corner
+                if self.top_left_handle.contains(event.pos()):
+                    self.mouse_press_area = 'topleft'
+                # top right corner
+                elif self.top_right_handle.contains(event.pos()):
+                    self.mouse_press_area = 'topright'
+                #  bottom left corner
+                elif self.bottom_left_handle.contains(event.pos()):
+                    self.mouse_press_area = 'bottomleft'
+                # bottom right corner
+                elif self.bottom_right_handle.contains(event.pos()):
+                    self.mouse_press_area = 'bottomright'
+                # entire rectangle
+                else:
+                    self.mouse_press_area = None
 
             QtGui.QGraphicsRectItem.mousePressEvent(self, event)
 
@@ -552,6 +559,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
         painter.drawRect(self._rect)
 
+
         if not self.transparent:
             rect = self._innerRect
             if rect.width() > 0 and rect.height() != 0:
@@ -563,10 +571,16 @@ class BoxResizable(QtGui.QGraphicsRectItem):
                 target_rect = self.map_rect_to_scene(rect)
                 painter.drawPixmap(rect, self.scene().image.pixmap(),
                                    target_rect)
-
         # If mouse is over, draw handles
         if self.mouseOver:
             painter.drawRect(self.top_left_handle)
             painter.drawRect(self.top_right_handle)
             painter.drawRect(self.bottom_left_handle)
             painter.drawRect(self.bottom_right_handle)
+        painter.setPen(QtGui.QPen(color, 3, QtCore.Qt.SolidLine))
+        radius = self._scene.width() / 150
+        for seed in self.seeds:
+            x, y = seed
+            rect = self._innerRect
+            painter.drawEllipse(QtCore.QPointF(x + rect.x(), y + rect.y()), 
+                                radius, radius);
