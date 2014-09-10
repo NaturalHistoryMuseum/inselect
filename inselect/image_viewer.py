@@ -324,7 +324,7 @@ class ImageViewer(QtGui.QMainWindow):
         files, filtr = QtGui.QFileDialog.getOpenFileNames(
             self,
             "QFileDialog.getOpenFileNames()", "data",
-            "All Files (*);;Text Files (*.csv)", "",
+            "All Files (*);;Text Files (*.json)", "",
             QtGui.QFileDialog.Options())
 
         if files:
@@ -345,8 +345,8 @@ class ImageViewer(QtGui.QMainWindow):
         file_name, filtr = QtGui.QFileDialog.getSaveFileName(
             self,
             "QFileDialog.getSaveFileName()",
-            self.filename + ".csv",
-            "All Files (*);;CSV Files (*.csv)", "",
+            self.filename + ".json",
+            "All Files (*);;json Files (*.json)", "",
             QtGui.QFileDialog.Options())
         if file_name:
             data = {'image_name': self.filename}
