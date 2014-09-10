@@ -356,7 +356,8 @@ class ImageViewer(QtGui.QMainWindow):
             data["items"] = []
             for i, box in enumerate(self.view.items):
                 rect = box.rect()
-                rect = [rect.left(), rect.top(),
+                bx, by = box.pos().x(), box.pos().y()
+                rect = [rect.left() + bx, rect.top() + by,
                         rect.width(), rect.height()]
                 width = self.image_item.pixmap().width()
                 height = self.image_item.pixmap().height()
