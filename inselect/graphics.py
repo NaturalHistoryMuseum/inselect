@@ -291,6 +291,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
         self._rect = rect
         self._scene = scene
+        self.parent = scene.parent()
+        self.list_item = None
         self.orig_rect = QtCore.QRectF(rect)
         self.mouseOver = False
         self.handle_size = 4.0
@@ -504,16 +506,24 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             self.setZValue(1E9)
         else:
             self.setZValue(max(1000, 1E9 - b.width() * b.height()))
+        # update the list item icon
+        if self.list_item:
+            icon = self.parent.get_icon(self)
+            self.list_item.setIcon(icon)
 
     def map_rect_to_scene(self, map_rect):
+        """Change from box coordinate system to view coordinate system.
+        Where (0, 0) is the box coordinates at top left corner of the box,
+        the position of the box is added to give the view coordinates.
+        """
         rect = map_rect
         target_rect = QtCore.QRectF(rect)
         t = rect.topLeft()
         b = rect.bottomRight()
-        target_rect.setTopLeft(QtCore.QPointF(t.x() + self.pos().x(),
-                                              t.y() + self.pos().y()))
-        target_rect.setBottomRight(QtCore.QPointF(b.x() + self.pos().x(),
-                                                  b.y() + self.pos().y()))
+        x1, y1 = t.x() + self.pos().x(), t.y() + self.pos().y()
+        x2, y2 = b.x() + self.pos().x(), b.y() + self.pos().y()
+        target_rect.setTopLeft(QtCore.QPointF(min(x1, x2), min(y1, y2)))
+        target_rect.setBottomRight(QtCore.QPointF(max(x1, x2), max(y1, y2)))
         return target_rect
 
     def paint(self, painter, option, widget):

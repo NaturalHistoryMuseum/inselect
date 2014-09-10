@@ -162,7 +162,8 @@ class ImageViewer(QtGui.QMainWindow):
                                 "Stefan van der Walt\nPieter Holtzhausen")
 
     def get_icon(self, box):
-        pixmap = self.image_item.pixmap().copy(box._rect.toRect())
+        rect = box.map_rect_to_scene(box._rect).toRect()
+        pixmap = self.image_item.pixmap().copy(rect)
         pixmap = pixmap.scaledToWidth(200, QtCore.Qt.SmoothTransformation)
         icon = QtGui.QIcon()
         icon.addPixmap(pixmap)
