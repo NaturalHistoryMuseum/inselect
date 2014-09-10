@@ -202,7 +202,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
     rects = _process_contours(display, contours, hierarchy,
-                             size_filter=size_filter)
+                              size_filter=size_filter)
     if variance_threshold:
         new_rects = []
         for rect in rects:
@@ -289,7 +289,6 @@ def segment_grabcut(image, window=None, seeds=[]):
                                            cv2.CHAIN_APPROX_SIMPLE)
     rects = [cv2.boundingRect(c) for c in contours]
 
-    
     display = np.dstack(3 * [255 * mask2.astype(np.uint8)])
     if seeds:
         distance = cv2.distanceTransform(mask2, cv2.cv.CV_DIST_L2, 3)

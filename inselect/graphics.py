@@ -125,8 +125,8 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
 
     def annotate_boxes(self):
         """Annotates selected box"""
-        box = self.scene().selectedItems()[0]
-        dialog = AnnotateDialog(box.list_item, parent=self.parent)
+        boxes = self.scene().selectedItems()
+        dialog = AnnotateDialog(boxes, parent=self.parent)
         dialog.exec_()
 
     def delete_boxes(self):
@@ -325,7 +325,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         return path
 
     def mouseDoubleClickEvent(self, event):
-        dialog = AnnotateDialog(self.list_item, parent=self.parent)
+        dialog = AnnotateDialog(self, parent=self.parent)
         dialog.exec_()
 
     def hoverEnterEvent(self, event):
@@ -553,12 +553,13 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         # Paint rectangle
         if self.isSelected():
             color = QtCore.Qt.red
+            thickness = 3
         else:
             color = self.color
+            thickness = 0
 
-        painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
+        painter.setPen(QtGui.QPen(color, thickness, QtCore.Qt.SolidLine))
         painter.drawRect(self._rect)
-
 
         if not self.transparent:
             rect = self._innerRect
@@ -571,16 +572,18 @@ class BoxResizable(QtGui.QGraphicsRectItem):
                 target_rect = self.map_rect_to_scene(rect)
                 painter.drawPixmap(rect, self.scene().image.pixmap(),
                                    target_rect)
-        # If mouse is over, draw handles
-        if self.mouseOver:
-            painter.drawRect(self.top_left_handle)
-            painter.drawRect(self.top_right_handle)
-            painter.drawRect(self.bottom_left_handle)
-            painter.drawRect(self.bottom_right_handle)
-        painter.setPen(QtGui.QPen(color, 3, QtCore.Qt.SolidLine))
+
         radius = self._scene.width() / 150
         for seed in self.seeds:
             x, y = seed
             rect = self._innerRect
             painter.drawEllipse(QtCore.QPointF(x + rect.x(), y + rect.y()), 
                                 radius, radius);
+
+        painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
+        # If mouse is over, draw handles
+        if self.mouseOver:
+            painter.drawRect(self.top_left_handle)
+            painter.drawRect(self.top_right_handle)
+            painter.drawRect(self.bottom_left_handle)
+            painter.drawRect(self.bottom_right_handle)

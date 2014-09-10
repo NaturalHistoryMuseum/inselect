@@ -6,9 +6,12 @@ class AnnotateDialog(QtGui.QDialog):
     fields = ["Specimen Number", "Current Taxon Name",
               "Location in Collection"]
 
-    def __init__(self, item, parent=None):
+    def __init__(self, boxes, parent=None):
         super(AnnotateDialog, self).__init__(parent)
-        self.list_item = item
+        if isinstance(boxes, list):
+            self.list_items = [box.list_item for box in boxes] 
+        else:
+            self.list_items = [boxes.list_item]
         self.parent = parent
         # set size and placement
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Popup)
@@ -19,11 +22,12 @@ class AnnotateDialog(QtGui.QDialog):
 
         self.layout = QtGui.QGridLayout(self)
         self.setWindowTitle('Annotate Segment')
-        icon = self.parent.get_icon(item.box)
         label = QtGui.QLabel(self)
-        pixmap = icon.pixmap(icon.availableSizes()[0])
+        if len(self.list_items) == 1:
+            icon = self.parent.get_icon(self.list_items[0].box)
+            pixmap = icon.pixmap(icon.availableSizes()[0])
+            label.setPixmap(pixmap)
         self.num_fields = len(self.fields)
-        label.setPixmap(pixmap)
         self.table = QtGui.QTableWidget(self.num_fields, 1)
         self.table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.table.setVerticalHeaderLabels(self.fields)
@@ -35,16 +39,19 @@ class AnnotateDialog(QtGui.QDialog):
         self.layout.addWidget(self.table, 0, 1)
         self.setLayout(self.layout)
 
-        # load data from list item
-        for row, field in enumerate(self.fields):
-            if field in self.list_item.fields:
-                item = QtGui.QTableWidgetItem()
-                item.setData(QtCore.Qt.EditRole, self.list_item.fields[field])
-                self.table.setItem(row, 0, item)
+        if len(self.list_items) == 1:
+            # load data from list item
+            for row, field in enumerate(self.fields):
+                if field in self.list_items[0].fields:
+                    item = QtGui.QTableWidgetItem()
+                    item.setData(QtCore.Qt.EditRole, 
+                                 self.list_items[0].fields[field])
+                    self.table.setItem(row, 0, item)
 
         self.table.setFocus()
 
     def _item_changed(self, item):
         row = item.row()
         field = self.fields[row]
-        self.list_item.fields[field] = item.text()
+        for list_item in self.list_items:
+            list_item.fields[field] = item.text()
