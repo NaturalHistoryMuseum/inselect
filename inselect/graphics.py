@@ -5,28 +5,61 @@ import numpy as np
 from PySide import QtCore, QtGui
 
 from mouse import MouseEvents
+from key_handler import KeyHandler
 import image_viewer
 
 
-class GraphicsView(MouseEvents, QtGui.QGraphicsView):
+class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
         MouseEvents.__init__(self, parent_class=QtGui.QGraphicsView)
+        KeyHandler.__init__(self, parent_class=QtGui.QGraphicsView)
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.items = []
         self.parent = parent
+        # Setup key handlers
+        self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_boxes)
+        self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
+        self.add_key_handler(QtCore.Qt.Key_Right, self.move_boxes, 1, 0)
+        self.add_key_handler(QtCore.Qt.Key_Down, self.move_boxes, 0, 1)
+        self.add_key_handler(QtCore.Qt.Key_Left, self.move_boxes, -1, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up), self.move_boxes, 0, -1, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right), self.move_boxes, 1, 0, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down), self.move_boxes, 0, 1, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left), self.move_boxes, -1, 0, 0, 0)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up), self.move_boxes, 0, 0, 0, -1)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right), self.move_boxes, 0, 0, 1, 0)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down), self.move_boxes, 0, 0, 0, 1)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left), self.move_boxes, 0, 0, -1, 0)
+        self.add_key_handler(QtCore.Qt.Key_N, self.select_next)
+        self.add_key_handler(QtCore.Qt.Key_P, self.select_previous)
 
     def add_item(self, item):
+        # Insert into the list so as to ease prev/next navigation
+        band_size = int(self.scene().height()/20)
+        item_box = item.boundingRect()
+        insert_at = len(self.items)
+        for i in range(len(self.items)):
+            box = self.items[i].boundingRect()
+            item_box_band = int(item_box.y()/band_size)
+            box_band = int(box.y()/band_size)
+            if item_box_band > box_band:
+                continue
+            if item_box_band < box_band or item_box.x() < box.x():
+                insert_at = i
+                break
+        self.items.insert(insert_at, item)
+        # Add the item to the sidebar
         window = self.parent
         sidebar = self.parent.sidebar
         icon = window.get_icon(item)
-        count = len(self.items)
-        list_item = image_viewer.ListItem(icon, str(count), box=item)
+        list_item = image_viewer.ListItem(icon, "", box=item)
         item.list_item = list_item
-        sidebar.addItem(list_item)
-        self.items.append(item)
+        sidebar.insertItem(insert_at, list_item)
 
     def remove_item(self, item):
         self.items.remove(item)
@@ -35,6 +68,107 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
     def set_scale(self, scale):
         self.scale_factor = scale
         self.scale(scale, scale)
+
+    def zoom_to_selection(self):
+        """Zoom the view to the current selection"""
+        box = self._get_selection_box()
+        if box is not None:
+            self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1],
+                           QtCore.Qt.KeepAspectRatio)
+
+    def move_boxes(self, tl_dx, tl_dy, br_dx=None, br_dy=None):
+        """Move the selected boxes
+
+        If only two values are specified, the top left and bottom right corners
+        are moved equally (so the entire box is moved). If four values are
+        specified, then the top left and bottom right corners are moved independently.
+
+        Parameters
+        ----------
+        tl_dx : int
+            X increment for top left corner/box
+        tl_dy : int
+            Y increment for top left corner/box
+        br_dx : int
+            X increment for bottom right corner or None
+        br_dy : int
+            Y increment for bottom right corner or None
+        """
+        selected_boxes = self.scene().selectedItems()
+        for box in selected_boxes:
+            box.move_box(tl_dx, tl_dy, br_dx, br_dy)
+
+    def delete_boxes(self):
+        """Delete all selected boxes"""
+        sidebar = self.parent.sidebar
+        selected_boxes = self.scene().selectedItems()
+        for box in selected_boxes:
+            sidebar.takeItem(sidebar.row(box.list_item))
+            self.remove_item(box)
+
+    def deselect_all(self):
+        """Deselect all items in the scene"""
+        for item in self.scene().selectedItems():
+            item.setSelected(False)
+
+    def select_next(self):
+        """Select the next object in the scene"""
+        if len(self.items) == 0:
+            return
+        selected = self.scene().selectedItems()
+        if len(selected) > 0:
+            to_select = (self.items.index(selected[0]) + 1) % len(self.items)
+        else:
+            to_select = 0
+        self.deselect_all()
+        self.items[to_select].setSelected(True)
+        self.ensure_selection_visible()
+
+    def select_previous(self):
+        """Select the previous object in the scene"""
+        if len(self.items) == 0:
+            return
+        selected = self.scene().selectedItems()
+        if len(selected) > 0:
+            to_select = (self.items.index(selected[0]) - 1) % len(self.items)
+        else:
+            to_select = 0
+        self.deselect_all()
+        self.items[to_select].setSelected(True)
+        self.ensure_selection_visible()
+
+    def ensure_selection_visible(self):
+        """Ensure the selected boxes are visible
+
+        Notes
+        -----
+        Doing on this on a mouse-triggered selection change event might cause the box to move.
+        """
+        box = self._get_selection_box()
+        if box is not None:
+            self.ensureVisible(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1])
+
+    def _get_selection_box(self):
+        """Return the bounding box of selected items
+
+        Returns
+        --------
+        tuple
+            (top_left, bottom_right) where each tuple is formed of (x,y) or None if there is no selection
+        """
+        tl = None
+        br = None
+        for item in self.scene().selectedItems():
+            box = item.boundingRect()
+            if tl is None:
+                tl = (box.left(), box.top())
+                br = (box.right(), box.bottom())
+            else:
+                tl = (min(tl[0], box.left()), min(tl[1], box.top()))
+                br = (max(br[0], box.right()), max(br[1], box.bottom()))
+        if tl is None:
+            return None
+        return tl, br
 
     def wheelEvent(self, event):
         if (event.modifiers() & QtCore.Qt.ControlModifier):
@@ -45,20 +179,6 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
             self.set_scale(scale)
             return
         QtGui.QGraphicsView.wheelEvent(self, event)
-
-    # -----------------------------------------------
-    # Qt-specific methods
-    # -----------------------------------------------
-
-    def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key_Delete:
-            remove_index = []
-            sidebar = self.parent.sidebar
-            selected_boxes = self.scene().selectedItems()
-            for box in selected_boxes:
-                sidebar.takeItem(sidebar.row(box.list_item))
-                self.remove_item(box)
-        QtGui.QGraphicsView.keyPressEvent(self, event)
 
     def _mouse_left(self, x, y):
         pass
@@ -291,6 +411,32 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         Return bounding rectangle
         """
         return self._boundingRect
+
+    def move_box(self, tl_dx, tl_dy, br_dx=None, br_dy=None):
+        """Move the box
+
+        If only two values are specified, the top left and bottom right corners
+        are moved equally (so the entire box is moved). If four values are
+        specified, then the top left and bottom right corners are moved independently.
+
+        Parameters
+        ----------
+        tl_dx : int
+            X increment for top left corner/box
+        tl_dy : int
+            Y increment for top left corner/box
+        br_dx : int
+            X increment for bottom right corner or None
+        br_dy : int
+            Y increment for bottom right corner or None
+        """
+        if br_dx is None or br_dy is None:
+            self._rect.moveTo(self._rect.x() + tl_dx, self._rect.y() + tl_dy)
+        else:
+            tl = self._rect.topLeft()
+            br = self._rect.bottomRight()
+            self._rect.setCoords(tl.x() + tl_dx, tl.y() + tl_dy, br.x() + br_dx, br.y() + br_dy)
+        self.updateResizeHandles()
 
     def updateResizeHandles(self):
         """
