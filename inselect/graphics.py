@@ -42,6 +42,7 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         self.add_mouse_handler(('press', 'right'), self._start_new_box)
         self.add_mouse_handler(('move', 'right'), self._update_new_box)
         self.add_mouse_handler(('release', 'right'), self._finish_new_box)
+        self.add_mouse_handler(('wheel', 'none', QtCore.Qt.ControlModifier), self.zoom)
 
     def add_item(self, item):
         # Insert into the list so as to ease prev/next navigation
@@ -80,6 +81,23 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         if box is not None:
             self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1],
                            QtCore.Qt.KeepAspectRatio)
+
+    def zoom(self, delta, factor=0.2):
+        """Zoom the scene in or out.
+
+        Notes
+        -----
+        Only the sign of the delta is important. This sets the scale to 1 + sign(delta) * factor
+
+        Parameters
+        ----------
+        delta : int
+            Positive to zoom in, negative to zoom out
+        factor : float
+            The factor - should be between 0 and 1 (Exclusive)
+        """
+        self.set_scale(1 + cmp(delta, 0) * factor)
+        return False
 
     def move_boxes(self, tl_dx, tl_dy, br_dx=None, br_dy=None):
         """Move the selected boxes
