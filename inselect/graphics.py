@@ -5,19 +5,46 @@ import numpy as np
 from PySide import QtCore, QtGui
 
 from mouse import MouseEvents
+from key_handler import KeyHandler
 import image_viewer
 from annotator import AnnotateDialog
 
 
-class GraphicsView(MouseEvents, QtGui.QGraphicsView):
+class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
         MouseEvents.__init__(self, parent_class=QtGui.QGraphicsView)
+        KeyHandler.__init__(self, parent_class=QtGui.QGraphicsView)
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.is_resizing = False
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.items = []
         self.parent = parent
+        # Setup key handlers
+        self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_boxes)
+        self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_boxes)
+        self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
+        self.add_key_handler(QtCore.Qt.Key_Right, self.move_boxes, 1, 0)
+        self.add_key_handler(QtCore.Qt.Key_Down, self.move_boxes, 0, 1)
+        self.add_key_handler(QtCore.Qt.Key_Left, self.move_boxes, -1, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up), self.move_boxes, 0, -1, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right), self.move_boxes, 1, 0, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down), self.move_boxes, 0, 1, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left), self.move_boxes, -1, 0, 0, 0)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up), self.move_boxes, 0, 0, 0, -1)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right), self.move_boxes, 0, 0, 1, 0)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down), self.move_boxes, 0, 0, 0, 1)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left), self.move_boxes, 0, 0, -1, 0)
+        self.add_key_handler(QtCore.Qt.Key_N, self.select_next)
+        self.add_key_handler(QtCore.Qt.Key_P, self.select_previous)
+        # Add mouse event handlers
+        self.add_mouse_handler(('move', 'middle'), self.scroll_view, True)
+        self.add_mouse_handler(('press', 'right'), self._start_new_box)
+        self.add_mouse_handler(('move', 'right'), self._update_new_box)
+        self.add_mouse_handler(('release', 'right'), self._finish_new_box)
+        self.add_mouse_handler(('wheel', 'none', QtCore.Qt.ControlModifier), self.zoom)
 
     def add_item(self, item):
         # Insert into the list so as to ease prev/next navigation
@@ -38,11 +65,9 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
         window = self.parent
         sidebar = self.parent.sidebar
         icon = window.get_icon(item)
-        count = len(self.items)
-        list_item = image_viewer.ListItem(icon, str(count), box=item)
+        list_item = image_viewer.ListItem(icon, "", box=item)
         item.list_item = list_item
-        sidebar.addItem(list_item)
-        self.items.append(item)
+        sidebar.insertItem(insert_at, list_item)
 
     def remove_item(self, item):
         self.items.remove(item)
@@ -97,6 +122,12 @@ class GraphicsView(MouseEvents, QtGui.QGraphicsView):
         selected_boxes = self.scene().selectedItems()
         for box in selected_boxes:
             box.move_box(tl_dx, tl_dy, br_dx, br_dy)
+
+    def annotate_boxes(self):
+        """Annotates selected box"""
+        box = self.scene().selectedItems()[0]
+        dialog = AnnotateDialog(box.list_item, parent=self.parent)
+        dialog.exec_()
 
     def delete_boxes(self):
         """Delete all selected boxes"""
