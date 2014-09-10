@@ -125,7 +125,6 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
 
     def annotate_boxes(self):
         """Annotates selected box"""
-        # box = self.scene().selectedItems()[0]
         boxes = self.scene().selectedItems()
         dialog = AnnotateDialog(boxes, parent=self.parent)
         dialog.exec_()
