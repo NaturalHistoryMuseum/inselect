@@ -201,7 +201,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
-    rects = process_contours(display, contours, hierarchy,
+    rects = _process_contours(display, contours, hierarchy,
                              size_filter=size_filter)
     if variance_threshold:
         new_rects = []
