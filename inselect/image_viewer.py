@@ -66,7 +66,8 @@ class WorkerThread(QtCore.QThread):
 
     def run(self):
         if self.resegment_window:
-            rects, display = segment_grabcut(self.image,
+            seeds = self.selected.seeds
+            rects, display = segment_grabcut(self.image, seeds=seeds,
                                              window=self.resegment_window)
         else:
             rects, display = segment_edges(self.image,
@@ -193,7 +194,9 @@ class ImageViewer(QtGui.QMainWindow):
             x, y, w, h = window
             self.segment_display[y:y+h, x:x+w] = display
             # removes the selected box before replacing it with resegmentations
-            self.view.remove_item(self.worker.selected)
+            box = self.worker.selected
+            self.sidebar.takeItem(self.sidebar.row(box.list_item))
+            self.view.remove_item(box)
         else:
             self.segment_display = display.copy()
         self.toggle_segment_action.setEnabled(True)
