@@ -557,7 +557,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             thickness = 3
         else:
             color = self.color
-            thickness = 1
+            thickness = 0
 
         painter.setPen(QtGui.QPen(color, thickness, QtCore.Qt.SolidLine))
         painter.drawRect(self._rect)
@@ -573,16 +573,18 @@ class BoxResizable(QtGui.QGraphicsRectItem):
                 target_rect = self.map_rect_to_scene(rect)
                 painter.drawPixmap(rect, self.scene().image.pixmap(),
                                    target_rect)
-        # If mouse is over, draw handles
-        if self.mouseOver:
-            painter.drawRect(self.top_left_handle)
-            painter.drawRect(self.top_right_handle)
-            painter.drawRect(self.bottom_left_handle)
-            painter.drawRect(self.bottom_right_handle)
-        painter.setPen(QtGui.QPen(color, 3, QtCore.Qt.SolidLine))
+
         radius = self._scene.width() / 150
         for seed in self.seeds:
             x, y = seed
             rect = self._innerRect
             painter.drawEllipse(QtCore.QPointF(x + rect.x(), y + rect.y()), 
                                 radius, radius);
+
+        painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
+        # If mouse is over, draw handles
+        if self.mouseOver:
+            painter.drawRect(self.top_left_handle)
+            painter.drawRect(self.top_right_handle)
+            painter.drawRect(self.bottom_left_handle)
+            painter.drawRect(self.bottom_right_handle)
