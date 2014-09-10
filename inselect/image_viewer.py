@@ -3,11 +3,11 @@ from PySide import QtCore, QtGui
 from .qt_util import read_qt_image, convert_numpy_to_qt
 from .graphics import GraphicsView, GraphicsScene, BoxResizable
 
-from segment import segment_edges, segment_intensity
+from segment import segment_edges, segment_intensity, segment_watershed
+from segment import segment_grabcut
 from annotator import AnnotateDialog
 import numpy as np
 import os
-import time
 import sys
 import json
 import cv2
@@ -66,13 +66,13 @@ class WorkerThread(QtCore.QThread):
 
     def run(self):
         if self.resegment_window:
-            rects, display = segment_intensity(self.image,
-                                               window=self.resegment_window)
+            rects, display = segment_grabcut(self.image,
+                                             window=self.resegment_window)
         else:
             rects, display = segment_edges(self.image,
                                            window=None,
                                            variance_threshold=100,
-                                           size_filter=1)
+                                           size_filter=0)
         self.results.emit(rects, display)
 
 
@@ -143,7 +143,7 @@ class ImageViewer(QtGui.QMainWindow):
                 return
             for item in list(self.view.items):
                 self.view.remove_item(item)
-
+            self.sidebar.clear()
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
             self.scene.setSceneRect(0, 0, self.image.width(), image.height())
             w, h = self.image.width(), self.image.height(),
@@ -154,8 +154,6 @@ class ImageViewer(QtGui.QMainWindow):
             self.export_action.setEnabled(True)
             self.zoom_in_action.setEnabled(True)
             self.zoom_out_action.setEnabled(True)
-            self.save_action.setEnabled(True)
-            self.import_action.setEnabled(True)
 
     def zoom_in(self):
         self.view.set_scale(1.2)
@@ -176,7 +174,7 @@ class ImageViewer(QtGui.QMainWindow):
         return icon
 
     def add_box(self, rect):
-        x, y, w, h = rect
+        x, y, w, h = rect[:4]
         s = QtCore.QPoint(x, y)
         e = QtCore.QPoint(x + w, y + h)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
@@ -187,7 +185,6 @@ class ImageViewer(QtGui.QMainWindow):
         b = box.boundingRect()
         box.setZValue(max(1000, 1E9 - b.width() * b.height()))
         box.updateResizeHandles()
-        return box
 
     def worker_finished(self, rects, display):
         self.progressDialog.hide()
@@ -201,7 +198,7 @@ class ImageViewer(QtGui.QMainWindow):
             self.segment_display = display.copy()
         self.toggle_segment_action.setEnabled(True)
         if self.segment_image_visible:
-            self.display_segment_image(self.segment_display)
+            self.display_image(self.segment_display)
         # add detected boxes
         for rect in rects:
             self.add_box(rect)
@@ -320,50 +317,48 @@ class ImageViewer(QtGui.QMainWindow):
             statusTip="Export",
             triggered=self.export)
 
+    def save_boxes(self):
+        file_name, filtr = QtGui.QFileDialog.getSaveFileName(
+            self,
+            "QFileDialog.getSaveFileName()",
+            self.file_name + ".csv",
+            "All Files (*);;CSV Files (*.csv)", "",
+            QtGui.QFileDialog.Options())
+        if file_name:
+            with open(file_name, 'w') as csvfile:
+                writer = csv.writer(csvfile, delimiter=' ')
+                for item in self.view.items:
+                    rect = item.rect()
+                    box = [rect.left(), rect.top(),
+                           rect.width(), rect.height()]
+                    width = self.image_item.pixmap().width()
+                    height = self.image_item.pixmap().height()
+                    box[0] /= width
+                    box[1] /= height
+                    box[2] /= width
+                    box[3] /= height
+                    writer.writerow(box)
+
     def import_boxes(self):
         files, filtr = QtGui.QFileDialog.getOpenFileNames(
             self,
-            "QFileDialog.getOpenFileNames()", "data",
-            "All Files (*);;Text Files (*.json)", "",
+            "QFileDialog.getOpenFileNames()", "../data",
+            "All Files (*);;Text Files (*.csv)", "",
             QtGui.QFileDialog.Options())
 
         if files:
             width = self.image_item.pixmap().width()
             height = self.image_item.pixmap().height()
             for file_name in files:
-                data = json.load(open(file_name))
-                for item in data["items"]:
-                    rect = [float(x) for x in item["rect"]]
-                    rect[0] *= width
-                    rect[1] *= height
-                    rect[2] *= width
-                    rect[3] *= height
-                    box = self.add_box(rect)
-                    box.list_item.fields = item["fields"]
-
-    def save_boxes(self):
-        file_name, filtr = QtGui.QFileDialog.getSaveFileName(
-            self,
-            "QFileDialog.getSaveFileName()",
-            self.filename + ".json",
-            "All Files (*);;json Files (*.json)", "",
-            QtGui.QFileDialog.Options())
-        if file_name:
-            data = {'image_name': self.filename}
-            data["items"] = []
-            for i, box in enumerate(self.view.items):
-                rect = box.rect()
-                rect = [rect.left(), rect.top(),
-                        rect.width(), rect.height()]
-                width = self.image_item.pixmap().width()
-                height = self.image_item.pixmap().height()
-                rect[0] /= width
-                rect[1] /= height
-                rect[2] /= width
-                rect[3] /= height
-                data['items'].append({'rect': rect,
-                                      'fields': box.list_item.fields})
-            json.dump(data, open(file_name, "w"), indent=4)
+                with open(file_name, 'r') as csvfile:
+                    reader = csv.reader(csvfile, delimiter=' ')
+                    for row in reader:
+                        rect = [float(x) for x in row]
+                        rect[0] *= width
+                        rect[1] *= height
+                        rect[2] *= width
+                        rect[3] *= height
+                        self.add_box(rect)
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
