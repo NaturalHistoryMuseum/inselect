@@ -125,8 +125,9 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
 
     def annotate_boxes(self):
         """Annotates selected box"""
-        box = self.scene().selectedItems()[0]
-        dialog = AnnotateDialog(box.list_item, parent=self.parent)
+        # box = self.scene().selectedItems()[0]
+        boxes = self.scene().selectedItems()
+        dialog = AnnotateDialog(boxes, parent=self.parent)
         dialog.exec_()
 
     def delete_boxes(self):
@@ -325,7 +326,7 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         return path
 
     def mouseDoubleClickEvent(self, event):
-        dialog = AnnotateDialog(self.list_item, parent=self.parent)
+        dialog = AnnotateDialog(self, parent=self.parent)
         dialog.exec_()
 
     def hoverEnterEvent(self, event):
@@ -553,12 +554,13 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         # Paint rectangle
         if self.isSelected():
             color = QtCore.Qt.red
+            thickness = 3
         else:
             color = self.color
+            thickness = 1
 
-        painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
+        painter.setPen(QtGui.QPen(color, thickness, QtCore.Qt.SolidLine))
         painter.drawRect(self._rect)
-
 
         if not self.transparent:
             rect = self._innerRect
