@@ -6,11 +6,6 @@ class AnnotateDialog(QtGui.QDialog):
     fields = ["Specimen Number", "Current Taxon Name",
               "Location in Collection"]
 
-    def item_changed(self, item):
-        row = item.row()
-        field = self.fields[row]
-        self.list_item.fields[field] = item.text()
-
     def __init__(self, item, parent=None):
         super(AnnotateDialog, self).__init__(parent)
         self.list_item = item
@@ -46,3 +41,8 @@ class AnnotateDialog(QtGui.QDialog):
                 item = QtGui.QTableWidgetItem()
                 item.setData(QtCore.Qt.EditRole, self.list_item.fields[field])
                 self.table.setItem(row, 0, item)
+
+    def item_changed(self, item):
+        row = item.row()
+        field = self.fields[row]
+        self.list_item.fields[field] = item.text()
