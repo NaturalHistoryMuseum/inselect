@@ -45,7 +45,7 @@ class SegmentListWidget(QtGui.QListWidget):
                                            deselected_items)
 
     def keyPressEvent(self, event):
-        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return, 
+        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return,
                            ord('Z')]:
             self.parent.view.keyPressEvent(event)
         QtGui.QListWidget.keyPressEvent(self, event)
@@ -133,9 +133,16 @@ class ImageViewer(QtGui.QMainWindow):
 
     def open(self, filename=None):
         if not filename:
+            if sys.platform == 'win32':
+                default = QtCore.QCoreApplication.applicationDirPath()
+            else:
+                default = QtCore.QDir.currentPath()
+            folder = self.app.settings.value("working_directory", default)
             filename, _ = QtGui.QFileDialog.getOpenFileName(
-                self, "Open File", QtCore.QDir.currentPath())
+                self, "Open File", folder)
         if filename:
+            path = os.path.normpath(os.path.dirname(filename))
+            self.app.settings.setValue("working_directory", path)
             self.filename = filename
             image = read_qt_image(filename)
             self.image = image
@@ -234,13 +241,11 @@ class ImageViewer(QtGui.QMainWindow):
     def export(self):
         path = QtGui.QFileDialog.getExistingDirectory(
             self, "Export Destination", QtCore.QDir.currentPath())
-        image = cv2.imread(self.filename)
-
         for i, item in enumerate(self.view.items):
             b = item._rect
+
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
-            print extract.shape, i
             cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
 
     def select_all(self):
