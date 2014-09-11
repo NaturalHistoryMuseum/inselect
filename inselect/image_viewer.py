@@ -241,9 +241,9 @@ class ImageViewer(QtGui.QMainWindow):
     def export(self):
         path = QtGui.QFileDialog.getExistingDirectory(
             self, "Export Destination", QtCore.QDir.currentPath())
+        image = cv2.imread(self.filename)
         for i, item in enumerate(self.view.items):
             b = item._rect
-
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
             cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
