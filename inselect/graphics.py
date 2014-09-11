@@ -29,14 +29,22 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         self.add_key_handler(QtCore.Qt.Key_Right, self.move_boxes, 1, 0)
         self.add_key_handler(QtCore.Qt.Key_Down, self.move_boxes, 0, 1)
         self.add_key_handler(QtCore.Qt.Key_Left, self.move_boxes, -1, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up), self.move_boxes, 0, -1, 0, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right), self.move_boxes, 1, 0, 0, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down), self.move_boxes, 0, 1, 0, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left), self.move_boxes, -1, 0, 0, 0)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up), self.move_boxes, 0, 0, 0, -1)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right), self.move_boxes, 0, 0, 1, 0)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down), self.move_boxes, 0, 0, 0, 1)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left), self.move_boxes, 0, 0, -1, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up),
+                             self.move_boxes, 0, -1, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right),
+                             self.move_boxes, 1, 0, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down),
+                             self.move_boxes, 0, 1, 0, 0)
+        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left),
+                             self.move_boxes, -1, 0, 0, 0)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up),
+                             self.move_boxes, 0, 0, 0, -1)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right),
+                             self.move_boxes, 0, 0, 1, 0)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down),
+                             self.move_boxes, 0, 0, 0, 1)
+        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left),
+                             self.move_boxes, 0, 0, -1, 0)
         self.add_key_handler(QtCore.Qt.Key_N, self.select_next)
         self.add_key_handler(QtCore.Qt.Key_P, self.select_previous)
         # Add mouse event handlers
@@ -44,7 +52,8 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         self.add_mouse_handler(('press', 'right'), self._start_new_box)
         self.add_mouse_handler(('move', 'right'), self._update_new_box)
         self.add_mouse_handler(('release', 'right'), self._finish_new_box)
-        self.add_mouse_handler(('wheel', 'none', QtCore.Qt.ControlModifier), self.zoom)
+        self.add_mouse_handler(('wheel', 'none', QtCore.Qt.ControlModifier),
+                               self.zoom)
 
     def add_item(self, item):
         # Insert into the list so as to ease prev/next navigation
@@ -81,15 +90,16 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         """Zoom the view to the current selection"""
         box = self._get_selection_box()
         if box is not None:
-            self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1],
-                           QtCore.Qt.KeepAspectRatio)
+            self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0],
+                           box[1][1] - box[0][1], QtCore.Qt.KeepAspectRatio)
 
     def zoom(self, delta, factor=0.2):
         """Zoom the scene in or out.
 
         Notes
         -----
-        Only the sign of the delta is important. This sets the scale to 1 + sign(delta) * factor
+        Only the sign of the delta is important. This sets the scale to 1 +
+        sign(delta) * factor
 
         Parameters
         ----------
@@ -106,7 +116,8 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
 
         If only two values are specified, the top left and bottom right corners
         are moved equally (so the entire box is moved). If four values are
-        specified, then the top left and bottom right corners are moved independently.
+        specified, then the top left and bottom right corners are moved
+        independently.
 
         Parameters
         ----------
@@ -173,19 +184,21 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
 
         Notes
         -----
-        Doing on this on a mouse-triggered selection change event might cause the box to move.
+        Doing on this on a mouse-triggered selection change event might cause
+        the box to move.
         """
         box = self._get_selection_box()
         if box is not None:
-            self.ensureVisible(box[0][0], box[0][1], box[1][0] - box[0][0], box[1][1] - box[0][1])
+            self.ensureVisible(box[0][0], box[0][1], box[1][0] - box[0][0],
+                               box[1][1] - box[0][1])
 
     def _get_selection_box(self):
         """Return the bounding box of selected items
 
         Returns
         --------
-        tuple
-            (top_left, bottom_right) where each tuple is formed of (x,y) or None if there is no selection
+        tuple : (top_left, bottom_right) where each tuple is formed of (x,y) or
+            None if there is no selection
         """
         tl = None
         br = None
@@ -275,7 +288,8 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         x : int
         y : int
         mouse_rel : bool
-            If True, the movement should be relative to the coordinates stored in _mouse_state
+            If True, the movement should be relative to the coordinates stored
+            in _mouse_state
         """
         h = self.horizontalScrollBar()
         v = self.verticalScrollBar()
@@ -379,8 +393,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
             if event.modifiers() == QtCore.Qt.ShiftModifier:
                 x, y = self.mouse_press_pos
                 rect = self._innerRect
-                self.seeds.append((x - rect.x() - self.pos().x(), 
-                                   y - rect.y() - self.pos().y() ))
+                self.seeds.append((x - rect.x() - self.pos().x(),
+                                   y - rect.y() - self.pos().y()))
             else:
                 self.mouse_is_pressed = True
                 self.rect_press = QtCore.QRectF(self._rect)
@@ -461,7 +475,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
 
         If only two values are specified, the top left and bottom right corners
         are moved equally (so the entire box is moved). If four values are
-        specified, then the top left and bottom right corners are moved independently.
+        specified, then the top left and bottom right corners are moved
+        independently.
 
         Parameters
         ----------
@@ -479,7 +494,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         else:
             tl = self._rect.topLeft()
             br = self._rect.bottomRight()
-            self._rect.setCoords(tl.x() + tl_dx, tl.y() + tl_dy, br.x() + br_dx, br.y() + br_dy)
+            self._rect.setCoords(tl.x() + tl_dx, tl.y() + tl_dy,
+                                 br.x() + br_dx, br.y() + br_dy)
         self.updateResizeHandles()
 
     def updateResizeHandles(self):
@@ -577,8 +593,8 @@ class BoxResizable(QtGui.QGraphicsRectItem):
         for seed in self.seeds:
             x, y = seed
             rect = self._innerRect
-            painter.drawEllipse(QtCore.QPointF(x + rect.x(), y + rect.y()), 
-                                radius, radius);
+            painter.drawEllipse(QtCore.QPointF(x + rect.x(), y + rect.y()),
+                                radius, radius)
 
         painter.setPen(QtGui.QPen(color, 0, QtCore.Qt.SolidLine))
         # If mouse is over, draw handles
