@@ -40,7 +40,7 @@ def _right_sized(contour, image_size, container_filter=True, size_filter=True):
                        (w > image_size[1] * 0.35 or 
                         h > image_size[0] * 0.35))
     is_too_large = (w > image_size[1] * 0.35 or h > image_size[0] * 0.35)
-
+    print w, h, fill_ratio, is_container
     return is_right_shape and not (container_filter and is_container) and \
         not (size_filter and is_too_large)
 
