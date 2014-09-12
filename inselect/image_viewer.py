@@ -1,4 +1,5 @@
 from PySide import QtCore, QtGui
+from PySide.QtGui import QMessageBox
 from PySide.QtCore import QSettings
 
 from .qt_util import read_qt_image, convert_numpy_to_qt
@@ -243,10 +244,37 @@ class ImageViewer(QtGui.QMainWindow):
     def export(self):
         path = QtGui.QFileDialog.getExistingDirectory(
             self, "Export Destination", QtCore.QDir.currentPath())
-        image = cv2.imread(self.filename)
-        for i, item in enumerate(self.view.items):
-            b = item._rect
-            x, y, w, h = b.x(), b.y(), b.width(), b.height()
+
+        filename = self.filename
+        # check for tiff file image
+        extension = [".tif", ".tiff", ".TIF", ".TIFF"]
+        target_name, _ = os.path.splitext(self.filename)
+        for ext in extension:
+            if os.path.exists(target_name + ext):
+                msgBox = QMessageBox()
+                msgBox.setText("Tiff file detected in input directory")
+                msgBox.setInformativeText("Extract images from tiff file?")
+                msgBox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
+                result = msgBox.exec_()
+                if result == QMessageBox.Ok:
+                    filename = target_name + ext
+                break
+
+        image = cv2.imread(filename)
+
+        for i, box in enumerate(self.view.items):
+            rect = box._rect
+            bx, by = box.pos().x(), box.pos().y()
+            x, y, w, h = [float(rect.left() + bx), float(rect.top() + by),
+                          float(rect.width()), float(rect.height())]
+            width = self.image_item.pixmap().width()
+            height = self.image_item.pixmap().height()
+            new_width = image.shape[1]
+            new_height = image.shape[0]
+            x = int(x / width * new_width)
+            y = int(y / height * new_height)
+            w = int(w / width * new_width)
+            h = int(h / height * new_height)
             extract = image[y:y+h, x:x+w]
             cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
 
