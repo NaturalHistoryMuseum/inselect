@@ -1,4 +1,5 @@
 from PySide import QtCore, QtGui
+from PySide.QtCore import QSettings
 
 from .qt_util import read_qt_image, convert_numpy_to_qt
 from .graphics import GraphicsView, GraphicsScene, BoxResizable
@@ -132,17 +133,18 @@ class ImageViewer(QtGui.QMainWindow):
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
 
     def open(self, filename=None):
+        settings = QSettings('NHM', 'Inselect')
         if not filename:
             if sys.platform == 'win32':
                 default = QtCore.QCoreApplication.applicationDirPath()
             else:
                 default = QtCore.QDir.currentPath()
-            folder = self.app.settings.value("working_directory", default)
+            folder = settings.value("working_directory", default)
             filename, _ = QtGui.QFileDialog.getOpenFileName(
                 self, "Open File", folder)
         if filename:
             path = os.path.normpath(os.path.dirname(filename))
-            self.app.settings.setValue("working_directory", path)
+            settings.setValue("working_directory", path)
             self.filename = filename
             image = read_qt_image(filename)
             self.image = image

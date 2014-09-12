@@ -15,8 +15,7 @@ Options:
 """
 from __future__ import print_function, division
 
-from PySide import QtGui, QtCore
-from PySide.QtCore import QSettings
+from PySide import QtGui
 
 import os
 import sys
@@ -49,7 +48,6 @@ def save_rects(filename, rects):
 
 def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
-    app.settings = QSettings("inselect.ini", QSettings.IniFormat) 
     window = ImageViewer(app)
     if filename:
         window.open(filename)
