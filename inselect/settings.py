@@ -24,6 +24,15 @@ _settings = {
         'type': 'list',
         'validate': validators.not_empty,
         'default': ['Specimen Number', 'Current Taxon Name', 'Location in Collection']
+    },
+    'export_template': {
+        'label': 'Export file name',
+        'description': 'Template for image export file names. You can use any of the annotation fields<br/> between {'
+                       'curly brackets}. To insert plain curly brackets, double them.',
+        'editable': True,
+        'type': 'str',
+        'validate': validators.validate_export_template,
+        'default': 'BMNHE_{Specimen Number}{Current Taxon Name}'
     }
 }
 
