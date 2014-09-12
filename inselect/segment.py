@@ -36,11 +36,10 @@ def _right_sized(contour, image_size, container_filter=True, size_filter=True):
     is_right_shape = ratio < 8 and w * h > area / 8E3
     # filter to remove containers that are a) large and b) contains
     # too much or too little contour area in bounding box
-    is_container = (not 0.1 < fill_ratio < 0.9 and 
+    is_container = (not 0.1 < fill_ratio < 0.8 and 
                        (w > image_size[1] * 0.35 or 
                         h > image_size[0] * 0.35))
     is_too_large = (w > image_size[1] * 0.35 or h > image_size[0] * 0.35)
-    print w, h, fill_ratio, is_container
     return is_right_shape and not (container_filter and is_container) and \
         not (size_filter and is_too_large)
 
