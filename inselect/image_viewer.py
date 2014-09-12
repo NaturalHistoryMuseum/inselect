@@ -4,6 +4,7 @@ from PySide.QtCore import QSettings
 
 from .qt_util import read_qt_image, convert_numpy_to_qt
 from .graphics import GraphicsView, GraphicsScene, BoxResizable
+from . import settings
 
 from segment import segment_edges, segment_intensity, segment_watershed
 from segment import segment_grabcut
@@ -359,6 +360,10 @@ class ImageViewer(QtGui.QMainWindow):
             statusTip="Export",
             triggered=self.export)
 
+        self.settings_action = QtGui.QAction(
+            self.style().standardIcon(QtGui.QStyle.SP_MessageBoxInformation),
+            "Settings", self, triggered=self.open_settings_dialog)
+
     def import_boxes(self):
         files, filtr = QtGui.QFileDialog.getOpenFileNames(
             self,
@@ -424,6 +429,9 @@ class ImageViewer(QtGui.QMainWindow):
         self.fileMenu.addAction(self.export_action)
 
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.settings_action)
+
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
         self.viewMenu = QtGui.QMenu("&View", self)
@@ -438,3 +446,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
+
+    def open_settings_dialog(self):
+        settings.open_settings_dialog()
