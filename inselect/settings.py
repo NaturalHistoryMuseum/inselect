@@ -17,6 +17,14 @@ from . import validators
 # default : object, required
 #     Default value for the setting.
 _settings = {
+    'annotation_fields': {
+        'label': "Annotation fields",
+        'description': 'Comma separated list of fields available in the annotation editor',
+        'editable': True,
+        'type': 'list',
+        'validate': validators.not_empty,
+        'default': ['Specimen Number', 'Current Taxon Name', 'Location in Collection']
+    }
 }
 
 

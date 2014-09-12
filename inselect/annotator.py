@@ -1,13 +1,12 @@
 from PySide import QtCore, QtGui
+from PySide.QtCore import QSettings
 
 
 class AnnotateDialog(QtGui.QDialog):
     """ Dialog that handles annotation of a segment. """
-    fields = ["Specimen Number", "Current Taxon Name",
-              "Location in Collection"]
-
     def __init__(self, boxes, parent=None):
         super(AnnotateDialog, self).__init__(parent)
+        self.fields = QSettings('NHM', 'Inselect').value('annotation_fields')
         if isinstance(boxes, list):
             self.list_items = [box.list_item for box in boxes] 
         else:
