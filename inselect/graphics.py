@@ -141,6 +141,8 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         """Deselect all items in the scene"""
         for item in self.scene().selectedItems():
             item.setSelected(False)
+            b = item.boundingRect()
+            item.setZValue(max(1000, 1E9 - b.width() * b.height()))
 
     def select_next(self):
         """Select the next object in the scene"""
@@ -153,6 +155,7 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
             to_select = 0
         self.deselect_all()
         self.items[to_select].setSelected(True)
+        self.items[to_select].setZValue(1E9)
         self.ensure_selection_visible()
 
     def select_previous(self):
@@ -166,6 +169,7 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
             to_select = 0
         self.deselect_all()
         self.items[to_select].setSelected(True)
+        self.items[to_select].setZValue(1E9)
         self.ensure_selection_visible()
 
     def ensure_selection_visible(self):
