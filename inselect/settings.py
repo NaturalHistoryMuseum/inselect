@@ -71,8 +71,12 @@ def reset(name=None):
 
 class _SettingsDialog(QtGui.QDialog):
     """ Settings Dialog """
-    _description_template = '<html><head/><body><p><span style=" font-size:10pt; font-style:italic;">{content}</span></p></body></html>'
-    _error_template = '<html><head/><body><p><span style=" font-size:12pt; color: #F00;">{content}</span></p></body></html>'
+    _description_template = """
+        <html><head/><body><p><span style=" font-size:10pt; font-style:italic;">{content}</span></p></body></html>
+    """
+    _error_template = """
+        <html><head/><body><p><span style=" font-size:12pt; color: #F00;">{content}</span></p></body></html>
+    """
 
     def __init__(self, parent=None):
         super(_SettingsDialog, self).__init__(parent)
