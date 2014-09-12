@@ -4,6 +4,8 @@ from PySide.QtCore import QSettings
 
 from .qt_util import read_qt_image, convert_numpy_to_qt
 from .graphics import GraphicsView, GraphicsScene, BoxResizable
+from . import settings
+from . import utils
 
 from segment import segment_edges, segment_intensity, segment_watershed
 from segment import segment_grabcut
@@ -244,7 +246,6 @@ class ImageViewer(QtGui.QMainWindow):
     def export(self):
         path = QtGui.QFileDialog.getExistingDirectory(
             self, "Export Destination", QtCore.QDir.currentPath())
-
         filename = self.filename
         # check for tiff file image
         extension = [".tif", ".tiff", ".TIF", ".TIFF"]
@@ -261,22 +262,20 @@ class ImageViewer(QtGui.QMainWindow):
                 break
 
         image = cv2.imread(filename)
-
-        for i, box in enumerate(self.view.items):
-            rect = box._rect
-            bx, by = box.pos().x(), box.pos().y()
-            x, y, w, h = [float(rect.left() + bx), float(rect.top() + by),
-                          float(rect.width()), float(rect.height())]
-            width = self.image_item.pixmap().width()
-            height = self.image_item.pixmap().height()
-            new_width = image.shape[1]
-            new_height = image.shape[0]
-            x = int(x / width * new_width)
-            y = int(y / height * new_height)
-            w = int(w / width * new_width)
-            h = int(h / height * new_height)
+        qsettings = QSettings('NHM', 'Inselect')
+        field_defaults = [(field, '-') for field in qsettings.value('annotation_fields')]
+        export_template = qsettings.value('export_template')
+        image_names = []
+        for i, item in enumerate(self.view.items):
+            b = item._rect
+            x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
-            cv2.imwrite(os.path.join(path, "image%s.png" % i), extract)
+            # Generate file name from template
+            placeholders = dict(field_defaults + item.list_item.fields.items())
+            file_name = utils.unique_file_name(path, export_template.format(**placeholders), '.png')
+            image_names.append(file_name)
+            cv2.imwrite(file_name, extract)
+        self._save_box_data(utils.unique_file_name(path, 'metadata', '.json'), image_names)
 
     def select_all(self):
         for item in self.view.items:
@@ -359,6 +358,10 @@ class ImageViewer(QtGui.QMainWindow):
             statusTip="Export",
             triggered=self.export)
 
+        self.settings_action = QtGui.QAction(
+            self.style().standardIcon(QtGui.QStyle.SP_MessageBoxInformation),
+            "Settings", self, triggered=self.open_settings_dialog)
+
     def import_boxes(self):
         files, filtr = QtGui.QFileDialog.getOpenFileNames(
             self,
@@ -388,22 +391,27 @@ class ImageViewer(QtGui.QMainWindow):
             "All Files (*);;json Files (*.json)", "",
             QtGui.QFileDialog.Options())
         if file_name:
-            data = {'image_name': self.filename}
-            data["items"] = []
-            for i, box in enumerate(self.view.items):
-                rect = box.rect()
-                bx, by = box.pos().x(), box.pos().y()
-                rect = [rect.left() + bx, rect.top() + by,
-                        rect.width(), rect.height()]
-                width = self.image_item.pixmap().width()
-                height = self.image_item.pixmap().height()
-                rect[0] /= width
-                rect[1] /= height
-                rect[2] /= width
-                rect[3] /= height
-                data['items'].append({'rect': rect,
-                                      'fields': box.list_item.fields})
-            json.dump(data, open(file_name, "w"), indent=4)
+            self._save_box_data(file_name)
+
+    def _save_box_data(self, file_name, image_names=None):
+        data = {'image_name': self.filename}
+        data["items"] = []
+        for i, box in enumerate(self.view.items):
+            rect = box.rect()
+            bx, by = box.pos().x(), box.pos().y()
+            rect = [rect.left() + bx, rect.top() + by,
+                    rect.width(), rect.height()]
+            width = self.image_item.pixmap().width()
+            height = self.image_item.pixmap().height()
+            rect[0] /= width
+            rect[1] /= height
+            rect[2] /= width
+            rect[3] /= height
+            export = {'rect': rect, 'fields': box.list_item.fields}
+            if image_names:
+                export['image_name'] = image_names[i]
+            data['items'].append(export)
+        json.dump(data, open(file_name, "w"), indent=4)
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
@@ -424,6 +432,9 @@ class ImageViewer(QtGui.QMainWindow):
         self.fileMenu.addAction(self.export_action)
 
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.settings_action)
+
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
         self.viewMenu = QtGui.QMenu("&View", self)
@@ -438,3 +449,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
+
+    def open_settings_dialog(self):
+        settings.open_settings_dialog()

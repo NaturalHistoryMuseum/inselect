@@ -24,6 +24,7 @@ import csv
 from .image_viewer import ImageViewer
 from .segment import segment_edges
 from . import docopt
+from . import settings
 
 from skimage import io
 
@@ -105,6 +106,7 @@ def launch_batch(input_dir=None, output_dir=None, recursive=None):
 
 def launch():
     arguments = docopt(__doc__, version='Inselect 0.1')
+    settings.init()
     if not arguments["--batch"]:
         print("Launching gui")
         filename = arguments['<filename>']
