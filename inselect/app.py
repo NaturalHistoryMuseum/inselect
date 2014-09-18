@@ -21,9 +21,9 @@ import os
 import sys
 import csv
 
+import inselect.settings
 from inselect.gui.app import InselectMainWindow
 from inselect.lib.segment import segment_edges
-from inselect import settings
 
 from skimage import io
 from docopt import docopt
@@ -105,7 +105,7 @@ def launch_batch(input_dir=None, output_dir=None, recursive=None):
 
 def launch():
     arguments = docopt(__doc__, version='Inselect 0.1')
-    settings.init()
+    inselect.settings.init()
     if not arguments["--batch"]:
         print("Launching gui")
         filename = arguments['<filename>']

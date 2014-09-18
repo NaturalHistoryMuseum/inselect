@@ -1,19 +1,17 @@
 import numpy as np
 import os
-import sys
 import json
 import cv2
 
 from PySide import QtCore, QtGui
 from PySide.QtGui import QMessageBox
-from PySide.QtCore import QSettings
 
-from inselect import settings
 from inselect.lib import utils
 from inselect.lib.qt_util import read_qt_image, convert_numpy_to_qt
 from inselect.lib.segment import segment_edges, segment_grabcut
 from inselect.gui.sidebar import SegmentListWidget
 from inselect.gui.graphics import GraphicsView, GraphicsScene, BoxResizable
+import inselect.settings
 
 
 class WorkerThread(QtCore.QThread):
@@ -92,18 +90,13 @@ class InselectMainWindow(QtGui.QMainWindow):
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
 
     def open(self, filename=None):
-        settings = QSettings('NHM', 'Inselect')
         if not filename:
-            if sys.platform == 'win32':
-                default = QtCore.QCoreApplication.applicationDirPath()
-            else:
-                default = QtCore.QDir.currentPath()
-            folder = settings.value("working_directory", default)
+            folder = inselect.settings.get("working_directory")
             filename, _ = QtGui.QFileDialog.getOpenFileName(
                 self, "Open File", folder)
         if filename:
             path = os.path.normpath(os.path.dirname(filename))
-            settings.setValue("working_directory", path)
+            inselect.settings.set_value('working_directory', path)
             self.filename = filename
             image = read_qt_image(filename)
             self.image = image
@@ -218,9 +211,8 @@ class InselectMainWindow(QtGui.QMainWindow):
                 break
 
         image = cv2.imread(filename)
-        qsettings = QSettings('NHM', 'Inselect')
-        field_defaults = [(field, '-') for field in qsettings.value('annotation_fields')]
-        export_template = qsettings.value('export_template')
+        field_defaults = [(field, '-') for field in inselect.settings.get('annotation_fields')]
+        export_template = inselect.settings.get('export_template')
         image_names = []
         for i, item in enumerate(self.view.items):
             b = item._rect
@@ -407,4 +399,4 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
     def open_settings_dialog(self):
-        settings.open_settings_dialog()
+        inselect.settings.open_settings_dialog()
