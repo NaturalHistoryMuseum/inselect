@@ -3,7 +3,7 @@ __all__ = ['GraphicsView', 'GraphicsScene', 'BoxResizable']
 
 from PySide import QtCore, QtGui
 
-from inselect.lib.mouse_handler import MouseHandler
+from inselect.lib.mouse_handler import MouseHandler, MouseState
 from inselect.lib.key_handler import KeyHandler
 from inselect.gui.sidebar import SegmentListItem
 from inselect.gui.annotator import AnnotateDialog
@@ -22,35 +22,95 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_boxes)
         self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_boxes)
         self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
-        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
-        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, 0, -1)
-        self.add_key_handler(QtCore.Qt.Key_Right, self.move_boxes, 1, 0)
-        self.add_key_handler(QtCore.Qt.Key_Down, self.move_boxes, 0, 1)
-        self.add_key_handler(QtCore.Qt.Key_Left, self.move_boxes, -1, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up),
-                             self.move_boxes, 0, -1, 0, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right),
-                             self.move_boxes, 1, 0, 0, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down),
-                             self.move_boxes, 0, 1, 0, 0)
-        self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left),
-                             self.move_boxes, -1, 0, 0, 0)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up),
-                             self.move_boxes, 0, 0, 0, -1)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right),
-                             self.move_boxes, 0, 0, 1, 0)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down),
-                             self.move_boxes, 0, 0, 0, 1)
-        self.add_key_handler((QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left),
-                             self.move_boxes, 0, 0, -1, 0)
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, [0, -1])
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, [0, -1])
+        self.add_key_handler(QtCore.Qt.Key_Right, self.move_boxes, [1, 0])
+        self.add_key_handler(QtCore.Qt.Key_Down, self.move_boxes, [0, 1])
+        self.add_key_handler(QtCore.Qt.Key_Left, self.move_boxes, [-1, 0])
+        self.add_key_handler(
+            key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up),
+            callback=self.move_boxes,
+            args=[0, -1, 0, 0]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right),
+            callback=self.move_boxes,
+            args=[1, 0, 0, 0]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down),
+            callback=self.move_boxes,
+            args=[0, 1, 0, 0]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left),
+            callback=self.move_boxes,
+            args=[-1, 0, 0, 0]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up),
+            callback=self.move_boxes,
+            args=[0, 0, 0, -1]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right),
+            callback=self.move_boxes,
+            args=[0, 0, 1, 0]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down),
+            callback=self.move_boxes,
+            args=[0, 0, 0, 1]
+        )
+        self.add_key_handler(
+            key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left),
+            callback=self.move_boxes,
+            args=[0, 0, -1, 0]
+        )
         self.add_key_handler(QtCore.Qt.Key_N, self.select_next)
         self.add_key_handler(QtCore.Qt.Key_P, self.select_previous)
         # Add mouse event handlers
-        self.add_mouse_handler(('move', {'button': 'middle'}), self.scroll_view, args=[True])
-        self.add_mouse_handler(('press', {'button': 'right'}), self._start_new_box)
-        self.add_mouse_handler(('move', {'button': 'right'}), self._update_new_box)
-        self.add_mouse_handler(('release', {'button': 'right'}), self._finish_new_box)
-        self.add_mouse_handler(('wheel', {'button': None, 'modifier': QtCore.Qt.ControlModifier}), self.zoom)
+        self.add_mouse_handler(
+            event={
+                'event': 'move',
+                'button': 'middle'
+            },
+            callback=self.scroll_view,
+            args=[MouseState('delta_x'), MouseState('delta_y')]
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'press',
+                'button': 'right'
+            },
+            callback=self._start_new_box,
+            args=[MouseState('x'), MouseState('y')]
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'move',
+                'button': 'right'
+            },
+            callback=self._update_new_box,
+            args=[MouseState('x'), MouseState('y')]
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'release',
+                'button': 'right'
+            },
+            callback=self._finish_new_box,
+            args=[MouseState('x'), MouseState('y')]
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'wheel',
+                'button': None,
+                'modifier': QtCore.Qt.ControlModifier
+            },
+            callback=self.zoom,
+            args=[MouseState('wheel_delta')]
+        )
 
     def add_item(self, item):
         # Insert into the list so as to ease prev/next navigation
@@ -278,22 +338,18 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         self.scene().removeItem(self._new_box[2])
         self._new_box = None
 
-    def scroll_view(self, x, y, mouse_rel=True):
+    def scroll_view(self, delta_x, delta_y):
         """ Scroll the view
 
         Parameters
         ----------
-        x : int
-        y : int
-        mouse_rel : bool
-            If True, the movement should be relative to the coordinates stored
-            in _mouse_state
+        delta_x : int
+        delta_y : int
         """
         h = self.horizontalScrollBar()
         v = self.verticalScrollBar()
-        delta = self.get_mouse_state('delta')
-        h.setValue(h.value() + delta[0])
-        v.setValue(v.value() + delta[1])
+        h.setValue(h.value() + delta_x)
+        v.setValue(v.value() + delta_y)
 
 
 class GraphicsScene(QtGui.QGraphicsScene):
@@ -327,18 +383,68 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
         # Set mouse handlers
         self.setAcceptsHoverEvents(True)
         self.add_mouse_handler('double-click', self.open_annotation_dialog)
-        self.add_mouse_handler(('press', {'button': 'left', 'modifier': QtCore.Qt.ShiftModifier}), self.add_seed)
+        self.add_mouse_handler(
+            event={
+                'event': 'press',
+                'button': 'left',
+                'modifier': QtCore.Qt.ShiftModifier
+            },
+            callback=self.add_seed,
+            args=[MouseState('x'), MouseState('y')]
+        )
         # Box resizing events
-        self.add_mouse_handler(('press', {'button': 'left', 'modifier': QtCore.Qt.NoModifier}),
-                               self._start_move_resize, delegate=True)
-        self.add_mouse_handler(('move', {'button': 'left', 'modifier': QtCore.Qt.NoModifier}), self._move_resize,
-                               delegate=True)
-        self.add_mouse_handler(('release', {'button': 'left', 'modifier': QtCore.Qt.NoModifier}),
-                               self._end_move_resize, delegate=True)
-        # Ensure that resize handles are updated when the mouse is active over the element
-        self.add_mouse_handler('enter', self._update_graphics, delegate=True)
-        self.add_mouse_handler('leave', self._update_graphics, delegate=True)
-        self.add_mouse_handler(('move', {'over': True}), self._update_graphics, delegate=True)
+        self.add_mouse_handler(
+            event={
+                'event': 'press',
+                'button': 'left',
+                'modifier': QtCore.Qt.NoModifier
+            },
+            callback=self._start_move_resize,
+            args=[MouseState('x'), MouseState('y')],
+            delegate=True
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'move',
+                'button': 'left',
+                'modifier': QtCore.Qt.NoModifier
+            },
+            callback=self._move_resize,
+            args=[MouseState('x'), MouseState('y')],
+            delegate=True
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'release',
+                'button': 'left',
+                'modifier': QtCore.Qt.NoModifier
+            },
+            callback=self._end_move_resize,
+            delegate=True
+        )
+        # Ensure that resize handles are updated when the mouse is active over
+        # the element
+        self.add_mouse_handler(
+            event='enter',
+            callback=self._update_graphics,
+            args=[MouseState('x'), MouseState('y')],
+            delegate=True
+        )
+        self.add_mouse_handler(
+            event='leave',
+            callback=self._update_graphics,
+            args=[MouseState('x'), MouseState('y')],
+            delegate=True
+        )
+        self.add_mouse_handler(
+            event={
+                'event': 'move',
+                'over': True
+            },
+            callback=self._update_graphics,
+            args=[MouseState('x'), MouseState('y')],
+            delegate=True
+        )
         self.updateResizeHandles()
 
     def shape(self):
@@ -346,7 +452,7 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
         path.addRect(self.boundingRect())
         return path
 
-    def open_annotation_dialog(self, event):
+    def open_annotation_dialog(self):
         dialog = AnnotateDialog(self, parent=self.parent)
         dialog.exec_()
 
@@ -413,16 +519,8 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
         # Propagate to ensure the box gets selected
         return True
 
-    def _end_move_resize(self, x, y):
-        """End moving/resizing the box
-
-        Parameters
-        ----------
-        x : int
-            X Screen coordinate
-        y : int
-            Y Screen coordinate
-        """
+    def _end_move_resize(self):
+        """End moving/resizing the box"""
         self._rect = self._rect.normalized()
         self.updateResizeHandles()
         # Propagate to ensure the box gets selected/etc.
@@ -439,8 +537,10 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
             Y Screen coordinate
         """
         self.prepareGeometryChange()
-        pressed_at = self.get_mouse_state('pressed_at')
-        delta = QtCore.QPoint(pressed_at[0] - x, pressed_at[1] - y)
+        delta = QtCore.QPoint(
+            self.get_mouse_state('pressed_x') - x,
+            self.get_mouse_state('pressed_y') - y
+        )
         if self.mouse_press_area:
             if self.mouse_press_area == 'topleft':
                 self._rect.setTopLeft(self.rect_press.topLeft() - delta)

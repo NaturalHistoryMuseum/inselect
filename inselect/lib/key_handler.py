@@ -10,7 +10,7 @@ class KeyHandler(object):
         self._handlers = {}
         self._parent_class = parent_class
 
-    def add_key_handler(self, key, callback, *args):
+    def add_key_handler(self, key, callback, args=None):
         """Add a new key handler
 
         Parameters
@@ -19,14 +19,16 @@ class KeyHandler(object):
             Either a key constant, or a tuple defining a modifier constant and a key constant
         callback : function
             Function to call on key press
-        *args
-            Additional arguments will be passed to the callback method
+        args : List
+            Arguments will be passed to the callback method
         """
         (modifier, key_code) = self._get_key_code(key)
         if modifier not in self._handlers:
             self._handlers[modifier] = {}
         if key_code not in self._handlers[modifier]:
             self._handlers[modifier][key_code] = []
+        if args is None:
+            args = []
         self._handlers[modifier][key_code].append((callback, args))
 
     def remove_key_handlers(self, key):

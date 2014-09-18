@@ -1,17 +1,49 @@
 from PySide import QtCore
 
 
+class MouseState(object):
+    """Class used to represent a property of a mouse state.
+
+    This is used to represent callback arguments that must be defined when the event is fired - eg. MouseState('x')
+    will represent the 'x' property of the mouse state when the event is fired
+
+    Parameters
+    ----------
+    state : str
+        The mouse state to represent
+
+    Attributes
+    ----------
+    state : str
+        The mouse state to represent
+    """
+    def __init__(self, state):
+        self.state = state
+
+
 class MouseHandler(object):
     """Mixin used to map mouse events to methods.
 
     This mixin uses the following event names: 'press', 'release', 'double-click', 'wheel', 'move', 'enter', 'leave'.
     The mouse state contains the following properties:
+        event : str
+            The event name
+        x : int
+            Current X mouse position
+        y : int
+            Current Y mouse position
         button : str, None
             The current button state. One of 'left', 'right', 'middle', None
-        pressed_at : tuple, None
-            A tuple defining (x, y) where the button was pressed (if still pressed) or None
-        delta : tuple
-            A tuple definine (delta_x, delta_y) of the current mouse movement
+        pressed_x : int, None
+            The X coordinate where the mouse was pressed (if applicable) or None
+        pressed_y : int, None
+            The Y coordinate where the mouse was pressed (if applicable) or None
+        delta_x : int
+            The X delta of the mouse movement
+        delta_y : int
+            The Y delta of the mouse movement
+        wheel_delta : int
+            The delta sent by the mouse wheel on wheel events or None
         over : bool
             True if the mouse is over the current item, false if not
         modifier : int
@@ -29,11 +61,19 @@ class MouseHandler(object):
 
     You can then add handlers for any combination of events and mouse state:
 
-            self.add_mouse_handler(('move', {'button': 'middle'}), self.scroll_view, args=[True])
-            self.add_mouse_handler(('wheel', {'button': None, 'modifier': QtCore.Qt.ControlModifier}), self.zoom)
+            self.add_mouse_handler({
+                'event': 'move',
+                'button': 'middle'
+            }), self.scroll_view, args=[MouseState('x'), MouseState('y'), True])
+            self.add_mouse_handler({
+                'event': 'wheel',
+                'button': None,
+                'modifier': QtCore.Qt.ControlModifier
+            }, self.zoom)
+
 
     The functions will be called with event-specific arguments:
-        def scroll_view(self, x, y):
+        def scroll_view(self, x, y, refresh=False):
             h = self.horizontalScrollBar()
             v = self.verticalScrollBar()
             delta = self.get_mouse_state('delta')
@@ -47,16 +87,21 @@ class MouseHandler(object):
       events unless a button is pressed. To change that behaviour, you need to call
       `setAcceptHoverEvents` to True. Qt will then fire different events whether a button is
       pressed or not. The MouseEvents abstracts this behaviour - so you can rely on the event
-      ('move', {'over': True}) to work in both instances.
+      {'event': 'move', 'over': True} to work in both instances.
     """
     def __init__(self, parent_class):
         self.parent_class = parent_class
 
         self._last_position = (0, 0)
         self._mouse_state = {
+            'event': None,
             'button': None,
-            'pressed_at': None,
-            'delta': (0, 0),
+            'x': 0,
+            'y': 0,
+            'pressed_x': None,
+            'pressed_y': None,
+            'delta_x': 0,
+            'delta_y': 0,
             'over': False,
             'modifier': QtCore.Qt.NoModifier
         }
@@ -68,7 +113,7 @@ class MouseHandler(object):
 
         Parameters
         ----------
-        event : str, tuple
+        event : str, object
             see `_get_event`
         callback : function
             Function to call on event. If delegate is True, the function should return True to
@@ -78,8 +123,8 @@ class MouseHandler(object):
             If True, the value of the callback function will determine whether events should
             propagate (True to propagate)
         args : list, None
-            Additional arguments will be passed to the callback methods, *after* the event
-            specific arguments.
+            Additional arguments will be passed to the callback methods. Arguments that are
+            instances of MouseState will be set to the given mouse state when the event is fired.
         """
         (event, state) = self._get_event(event)
         if args is None:
@@ -111,11 +156,9 @@ class MouseHandler(object):
 
         Parameters
         ----------
-        event : str, tuple
-            May be an event name, a tuple defining (event, state) where:
-                - event is one of 'press', 'release', 'double-click', 'wheel', 'move', 'enter', 'leave';
-                - state is an object mapping mouse_state properties to values
-                
+        event : str, dictionary
+            May be an event name, or a dictionary mapping 'event' and any other mouse_state properties to values.
+
         Returns
         -------
         tuple
@@ -123,16 +166,15 @@ class MouseHandler(object):
         """
         event_str = event
         state = {}
-        if isinstance(event, (list, tuple)):
-            event_str = event[0]
-            if len(event) > 1:
-                state = dict(event[1])
-                if 'modifier' in state:
-                    state['modifier'] = int(state['modifier'])
+        if isinstance(event, dict):
+            event_str = event['event']
+            state = event
+            if 'modifier' in state:
+                state['modifier'] = int(state['modifier'])
 
         return event_str, state
 
-    def _handle_event(self, event, event_name, default_callback, args=None):
+    def _handle_event(self, event, event_name, default_callback):
         """Handle an event by calling appropriate handlers
 
         Parameters
@@ -143,9 +185,6 @@ class MouseHandler(object):
             Event name. See `_get_event`
         default_callback : function
             Function to call for propagation
-        args : list
-            Additional arguments, that are passed to the callback function *before*
-            the additional arguments defined when creating the handler.
         """
         # Get handlers
         try:
@@ -154,10 +193,14 @@ class MouseHandler(object):
             default_callback(self, event)
             return
         # Set non-event specific mouse state
+        self._mouse_state['event'] = event_name
         self._mouse_state['modifier'] = int(event.modifiers())
+        self._mouse_state['x'] = event.pos().x()
+        self._mouse_state['y'] = event.pos().y()
+        self._mouse_state['delta_x'] = self._last_position[0] - self._mouse_state['x']
+        self._mouse_state['delta_y'] = self._last_position[1] - self._mouse_state['y']
+        self._last_position = (self._mouse_state['x'], self._mouse_state['y'])
         # Call handlers that match the state
-        if args is None:
-            args = []
         propagate = True
         for (callback, state, delegate, handler_args) in handlers:
             cancel = False
@@ -167,7 +210,13 @@ class MouseHandler(object):
                     break
             if cancel:
                 continue
-            r = callback(*(args + handler_args))
+            args = []
+            for a in handler_args:
+                if isinstance(a, MouseState):
+                    args.append(self.get_mouse_state(a.state))
+                else:
+                    args.append(a)
+            r = callback(*args)
             if delegate:
                 propagate = propagate & r
             else:
@@ -185,17 +234,16 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
-        self._mouse_state['pressed_at'] = (x, y)
-        if event.button() == QtCore.Qt.MidButton:
-            self._mouse_state['button'] = 'middle'
-        elif event.button() == QtCore.Qt.LeftButton:
-            self._mouse_state['button'] = 'left'
-        elif event.button() == QtCore.Qt.RightButton:
-            self._mouse_state['button'] = 'right'
+        button_map = {
+            QtCore.Qt.MidButton: 'middle',
+            QtCore.Qt.LeftButton: 'left',
+            QtCore.Qt.RightButton: 'right'
+        }
+        self._mouse_state['pressed_x'] = event.pos().x()
+        self._mouse_state['pressed_y'] = event.pos().y()
+        self._mouse_state['button'] = button_map[event.button()]
 
-        self._handle_event(event, 'press', self.parent_class.mousePressEvent, args=[x, y])
+        self._handle_event(event, 'press', self.parent_class.mousePressEvent)
 
     def mouseMoveEvent(self, event):
         """Handle mouse move events
@@ -204,11 +252,7 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
-        self._mouse_state['delta'] = (self._last_position[0] - x, self._last_position[1] - y)
-        self._handle_event(event, 'move', self.parent_class.mouseMoveEvent, args=[x, y])
-        self._last_position = (x, y)
+        self._handle_event(event, 'move', self.parent_class.mouseMoveEvent)
 
     def mouseReleaseEvent(self, event):
         """Handle mouse release events
@@ -217,9 +261,7 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
-        self._handle_event(event, 'release', self.parent_class.mouseReleaseEvent, args=[x, y])
+        self._handle_event(event, 'release', self.parent_class.mouseReleaseEvent)
         self._mouse_state['button'] = None
         self._mouse_state['pressed_at'] = None
 
@@ -230,9 +272,7 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
-        self._handle_event(event, 'double-click', self.parent_class.mouseDoubleClickEvent, args=[x, y])
+        self._handle_event(event, 'double-click', self.parent_class.mouseDoubleClickEvent)
 
     def hoverEnterEvent(self, event):
         """Handle mouse hover enter events
@@ -241,10 +281,8 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
         self._mouse_state['over'] = True
-        self._handle_event(event, 'enter', self.parent_class.hoverEnterEvent, args=[x, y])
+        self._handle_event(event, 'enter', self.parent_class.hoverEnterEvent)
 
     def hoverMoveEvent(self, event):
         """Handle hoverMoveEvent
@@ -253,13 +291,9 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
         over = self._mouse_state['over']
         self._mouse_state['over'] = True
-        self._mouse_state['delta'] = (self._last_position[0] - x, self._last_position[1] - y)
-        self._handle_event(event, 'move', self.parent_class.hoverMoveEvent, args=[x, y])
-        self._last_position = (x, y)
+        self._handle_event(event, 'move', self.parent_class.hoverMoveEvent)
         self._mouse_state['over'] = over
 
     def hoverLeaveEvent(self, event):
@@ -269,10 +303,8 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        x = event.pos().x()
-        y = event.pos().y()
         self._mouse_state['over'] = False
-        self._handle_event(event, 'leave', self.parent_class.hoverLeaveEvent, args=[x, y])
+        self._handle_event(event, 'leave', self.parent_class.hoverLeaveEvent)
 
     def wheelEvent(self, event):
         """Handle mouse hover enter events
@@ -281,5 +313,6 @@ class MouseHandler(object):
         ----------
         event : QtEvent
         """
-        delta = event.delta()
-        self._handle_event(event, 'wheel', self.parent_class.wheelEvent, args=[delta])
+        self._mouse_state['wheel_delta'] = event.delta()
+        self._handle_event(event, 'wheel', self.parent_class.wheelEvent)
+        self._mouse_state['wheel_delta'] = None
