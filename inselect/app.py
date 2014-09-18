@@ -23,11 +23,10 @@ import csv
 
 from inselect.gui.app import InselectMainWindow
 from inselect.lib.segment import segment_edges
-from inselect import docopt
 from inselect import settings
 
 from skimage import io
-
+from docopt import docopt
 
 def is_image_file(file_name):
     name, ext = os.path.splitext(file_name.lower())
