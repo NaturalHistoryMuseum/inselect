@@ -1,7 +1,7 @@
-from PySide import QtGui, QtCore
+from PySide import QtCore
 
 
-class MouseEvents(object):
+class MouseHandler(object):
     """Mixin used to map mouse events to methods.
 
     This mixin uses the following event names: 'press', 'release', 'double-click', 'wheel', 'move', 'enter', 'leave'.

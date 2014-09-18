@@ -1,6 +1,6 @@
 from PySide import QtCore, QtGui
 from PySide.QtCore import QSettings
-from . import validators
+from inselect.lib import validators
 
 
 # Define the available settings. Each entry associates the internal setting name to a dictionary defining:

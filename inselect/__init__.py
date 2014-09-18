@@ -1,1 +1,1 @@
-from ._docopt import docopt
+from inselect._docopt import docopt

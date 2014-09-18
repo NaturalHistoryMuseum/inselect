@@ -21,10 +21,10 @@ import os
 import sys
 import csv
 
-from .image_viewer import ImageViewer
-from .segment import segment_edges
-from . import docopt
-from . import settings
+from inselect.gui.app import InselectMainWindow
+from inselect.lib.segment import segment_edges
+from inselect import docopt
+from inselect import settings
 
 from skimage import io
 
@@ -49,7 +49,7 @@ def save_rects(filename, rects):
 
 def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
-    window = ImageViewer(app)
+    window = InselectMainWindow(app)
     if filename:
         window.open(filename)
     window.showMaximized()

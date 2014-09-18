@@ -1,63 +1,19 @@
-from PySide import QtCore, QtGui
-from PySide.QtGui import QMessageBox
-from PySide.QtCore import QSettings
-
-from .qt_util import read_qt_image, convert_numpy_to_qt
-from .graphics import GraphicsView, GraphicsScene, BoxResizable
-from . import settings
-from . import utils
-
-from segment import segment_edges, segment_intensity, segment_watershed
-from segment import segment_grabcut
-from annotator import AnnotateDialog
 import numpy as np
 import os
 import sys
 import json
 import cv2
 
+from PySide import QtCore, QtGui
+from PySide.QtGui import QMessageBox
+from PySide.QtCore import QSettings
 
-class ListItem(QtGui.QListWidgetItem):
-    def __init__(self, icon, text, parent=None, box=None):
-        super(ListItem, self).__init__(icon, text, parent)
-        self.original_icon = icon
-        self.original_text = text
-        self.box = box
-        self.fields = {}
-
-
-class SegmentListWidget(QtGui.QListWidget):
-    def __init__(self, parent=None):
-        super(SegmentListWidget, self).__init__(parent)
-        self.setIconSize(QtCore.QSize(100, 100))
-        self.setViewMode(QtGui.QListView.IconMode)
-        self.setDragEnabled(False)
-        self.setResizeMode(QtGui.QListView.Adjust)
-        self.setMovement(QtGui.QListView.Static)
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.itemDoubleClicked.connect(self.on_item_double_clicked)
-        self.setMinimumWidth(100)
-        self.enable = True
-        self.parent = parent
-
-    def selectionChanged(self, selected_items, deselected_items):
-        for i in range(self.count()):
-            item = self.item(i)
-            selected = item.isSelected()
-            item.box.setSelected(selected)
-        QtGui.QListWidget.selectionChanged(self, selected_items,
-                                           deselected_items)
-
-    def keyPressEvent(self, event):
-        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return,
-                           ord('Z')]:
-            self.parent.view.keyPressEvent(event)
-        QtGui.QListWidget.keyPressEvent(self, event)
-
-    def on_item_double_clicked(self, item):
-        window = self.parent
-        dialog = AnnotateDialog(item.box, parent=self.parent)
-        dialog.exec_()
+from inselect import settings
+from inselect.lib import utils
+from inselect.lib.qt_util import read_qt_image, convert_numpy_to_qt
+from inselect.lib.segment import segment_edges, segment_grabcut
+from inselect.gui.sidebar import SegmentListWidget
+from inselect.gui.graphics import GraphicsView, GraphicsScene, BoxResizable
 
 
 class WorkerThread(QtCore.QThread):
@@ -82,9 +38,9 @@ class WorkerThread(QtCore.QThread):
         self.results.emit(rects, display)
 
 
-class ImageViewer(QtGui.QMainWindow):
+class InselectMainWindow(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
-        super(ImageViewer, self).__init__()
+        super(InselectMainWindow, self).__init__()
         self.app = app
         self.container = QtGui.QWidget(self)
         self.splitter = QtGui.QSplitter(self)
