@@ -1,5 +1,4 @@
 from skimage import io, img_as_ubyte
-import matplotlib.pyplot as plt
 from PySide import QtGui
 import numpy as np
 

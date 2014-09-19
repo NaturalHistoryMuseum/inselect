@@ -1,5 +1,4 @@
 import string
-from PySide.QtCore import QSettings
 
 
 class ValidationError(Exception):
@@ -42,7 +41,8 @@ def validate_export_template(value):
                 placeholders.append(name)
     except ValueError:
         raise ValidationError("Curly brackets must either {{surround}} a value or be doubled (eg. {{{{)")
-    fields = QSettings('NHM', 'Inselect').value('annotation_fields')
+    import inselect.settings
+    fields = inselect.settings.get('annotation_fields')
     unknown = set(placeholders) - set(fields)
     if len(unknown) > 0:
         raise ValidationError("Unknown placeholder(s): " + ", ".join(unknown) + ".<br/>Note that placeholders are case "

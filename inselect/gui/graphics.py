@@ -1,19 +1,18 @@
 __all__ = ['GraphicsView', 'GraphicsScene', 'BoxResizable']
 
 
-import numpy as np
 from PySide import QtCore, QtGui
 
-from mouse import MouseEvents
-from key_handler import KeyHandler
-import image_viewer
-from annotator import AnnotateDialog
+from inselect.lib.mouse_handler import MouseHandler
+from inselect.lib.key_handler import KeyHandler
+from inselect.gui.sidebar import SegmentListItem
+from inselect.gui.annotator import AnnotateDialog
 
 
-class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
+class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
-        MouseEvents.__init__(self, parent_class=QtGui.QGraphicsView)
+        MouseHandler.__init__(self, parent_class=QtGui.QGraphicsView)
         KeyHandler.__init__(self, parent_class=QtGui.QGraphicsView)
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -72,7 +71,7 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         window = self.parent
         sidebar = self.parent.sidebar
         icon = window.get_icon(item)
-        list_item = image_viewer.ListItem(icon, "", box=item)
+        list_item = SegmentListItem(icon, "", box=item)
         item.list_item = list_item
         sidebar.insertItem(insert_at, list_item)
 
@@ -297,21 +296,20 @@ class GraphicsView(KeyHandler, MouseEvents, QtGui.QGraphicsView):
         v.setValue(v.value() + delta[1])
 
 
-class GraphicsScene(MouseEvents, QtGui.QGraphicsScene):
+class GraphicsScene(QtGui.QGraphicsScene):
     def __init__(self, parent=None):
         QtGui.QGraphicsScene.__init__(self, parent)
-        MouseEvents.__init__(self, parent_class=QtGui.QGraphicsScene)
         self.parent = parent
 
     def setGraphicsView(self, view):
         self.view = view
 
 
-class BoxResizable(MouseEvents, QtGui.QGraphicsRectItem):
+class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
     def __init__(self, rect, parent=None, color=QtCore.Qt.blue,
                  transparent=False, scene=None):
         QtGui.QGraphicsRectItem.__init__(self, rect, parent, scene)
-        MouseEvents.__init__(self, parent_class=QtGui.QGraphicsRectItem)
+        MouseHandler.__init__(self, parent_class=QtGui.QGraphicsRectItem)
         self._rect = rect
         self._scene = scene
         self.parent = scene.parent

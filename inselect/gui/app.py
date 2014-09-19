@@ -1,63 +1,17 @@
-from PySide import QtCore, QtGui
-from PySide.QtGui import QMessageBox
-from PySide.QtCore import QSettings
-
-from .qt_util import read_qt_image, convert_numpy_to_qt
-from .graphics import GraphicsView, GraphicsScene, BoxResizable
-from . import settings
-from . import utils
-
-from segment import segment_edges, segment_intensity, segment_watershed
-from segment import segment_grabcut
-from annotator import AnnotateDialog
 import numpy as np
 import os
-import sys
 import json
 import cv2
 
+from PySide import QtCore, QtGui
+from PySide.QtGui import QMessageBox
 
-class ListItem(QtGui.QListWidgetItem):
-    def __init__(self, icon, text, parent=None, box=None):
-        super(ListItem, self).__init__(icon, text, parent)
-        self.original_icon = icon
-        self.original_text = text
-        self.box = box
-        self.fields = {}
-
-
-class SegmentListWidget(QtGui.QListWidget):
-    def __init__(self, parent=None):
-        super(SegmentListWidget, self).__init__(parent)
-        self.setIconSize(QtCore.QSize(100, 100))
-        self.setViewMode(QtGui.QListView.IconMode)
-        self.setDragEnabled(False)
-        self.setResizeMode(QtGui.QListView.Adjust)
-        self.setMovement(QtGui.QListView.Static)
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.itemDoubleClicked.connect(self.on_item_double_clicked)
-        self.setMinimumWidth(100)
-        self.enable = True
-        self.parent = parent
-
-    def selectionChanged(self, selected_items, deselected_items):
-        for i in range(self.count()):
-            item = self.item(i)
-            selected = item.isSelected()
-            item.box.setSelected(selected)
-        QtGui.QListWidget.selectionChanged(self, selected_items,
-                                           deselected_items)
-
-    def keyPressEvent(self, event):
-        if event.key() in [QtCore.Qt.Key_Delete, QtCore.Qt.Key_Return,
-                           ord('Z')]:
-            self.parent.view.keyPressEvent(event)
-        QtGui.QListWidget.keyPressEvent(self, event)
-
-    def on_item_double_clicked(self, item):
-        window = self.parent
-        dialog = AnnotateDialog(item.box, parent=self.parent)
-        dialog.exec_()
+from inselect.lib import utils
+from inselect.lib.qt_util import read_qt_image, convert_numpy_to_qt
+from inselect.lib.segment import segment_edges, segment_grabcut
+from inselect.gui.sidebar import SegmentListWidget
+from inselect.gui.graphics import GraphicsView, GraphicsScene, BoxResizable
+import inselect.settings
 
 
 class WorkerThread(QtCore.QThread):
@@ -82,9 +36,9 @@ class WorkerThread(QtCore.QThread):
         self.results.emit(rects, display)
 
 
-class ImageViewer(QtGui.QMainWindow):
+class InselectMainWindow(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
-        super(ImageViewer, self).__init__()
+        super(InselectMainWindow, self).__init__()
         self.app = app
         self.container = QtGui.QWidget(self)
         self.splitter = QtGui.QSplitter(self)
@@ -136,18 +90,13 @@ class ImageViewer(QtGui.QMainWindow):
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
 
     def open(self, filename=None):
-        settings = QSettings('NHM', 'Inselect')
         if not filename:
-            if sys.platform == 'win32':
-                default = QtCore.QCoreApplication.applicationDirPath()
-            else:
-                default = QtCore.QDir.currentPath()
-            folder = settings.value("working_directory", default)
+            folder = inselect.settings.get("working_directory")
             filename, _ = QtGui.QFileDialog.getOpenFileName(
                 self, "Open File", folder)
         if filename:
             path = os.path.normpath(os.path.dirname(filename))
-            settings.setValue("working_directory", path)
+            inselect.settings.set_value('working_directory', path)
             self.filename = filename
             image = read_qt_image(filename)
             self.image = image
@@ -262,9 +211,8 @@ class ImageViewer(QtGui.QMainWindow):
                 break
 
         image = cv2.imread(filename)
-        qsettings = QSettings('NHM', 'Inselect')
-        field_defaults = [(field, '-') for field in qsettings.value('annotation_fields')]
-        export_template = qsettings.value('export_template')
+        field_defaults = [(field, '-') for field in inselect.settings.get('annotation_fields')]
+        export_template = inselect.settings.get('export_template')
         image_names = []
         for i, item in enumerate(self.view.items):
             b = item._rect
@@ -451,4 +399,4 @@ class ImageViewer(QtGui.QMainWindow):
         self.menuBar().addMenu(self.helpMenu)
 
     def open_settings_dialog(self):
-        settings.open_settings_dialog()
+        inselect.settings.open_settings_dialog()

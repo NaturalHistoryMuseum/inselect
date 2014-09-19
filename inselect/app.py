@@ -21,13 +21,12 @@ import os
 import sys
 import csv
 
-from .image_viewer import ImageViewer
-from .segment import segment_edges
-from . import docopt
-from . import settings
+import inselect.settings
+from inselect.gui.app import InselectMainWindow
+from inselect.lib.segment import segment_edges
 
 from skimage import io
-
+from docopt import docopt
 
 def is_image_file(file_name):
     name, ext = os.path.splitext(file_name.lower())
@@ -49,7 +48,7 @@ def save_rects(filename, rects):
 
 def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
-    window = ImageViewer(app)
+    window = InselectMainWindow(app)
     if filename:
         window.open(filename)
     window.showMaximized()
@@ -106,7 +105,7 @@ def launch_batch(input_dir=None, output_dir=None, recursive=None):
 
 def launch():
     arguments = docopt(__doc__, version='Inselect 0.1')
-    settings.init()
+    inselect.settings.init()
     if not arguments["--batch"]:
         print("Launching gui")
         filename = arguments['<filename>']
