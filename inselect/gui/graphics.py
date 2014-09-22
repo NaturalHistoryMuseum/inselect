@@ -321,6 +321,11 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         u = self.mapToScene(x, y).toPoint()
         x1, y1 = min(self._new_box[0], u.x()), min(self._new_box[1], u.y())
         x2, y2 = max(self._new_box[0], u.x()), max(self._new_box[1], u.y())
+        x1 = max(0, x1)
+        y1 = max(0, y1)
+        x2 = min(x2, self.scene().width())
+        y2 = min(y2, self.scene().height())
+
         w = x2 - x1
         h = y2 - y1
 
