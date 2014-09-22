@@ -231,9 +231,8 @@ class InselectMainWindow(QtGui.QMainWindow):
                 break
 
         image = cv2.imread(filename)
-        qsettings = QSettings('NHM', 'Inselect')
-        field_defaults = [(field, '-') for field in qsettings.value('annotation_fields')]
-        export_template = qsettings.value('export_template')
+        field_defaults = [(field, '-') for field in inselect.settings.get('annotation_fields')]
+        export_template = inselect.settings.get('export_template')
         image_names = []
         for i, item in enumerate(self.view.items):
             b = item._rect
