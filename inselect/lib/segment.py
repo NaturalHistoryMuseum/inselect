@@ -411,7 +411,8 @@ def segment_watershed(image, window=None):
 
 
 if __name__ == "__main__":
-    image = cv2.imread("data/drawer.jpg")
+    image = cv2.imread("../../data/drawer.jpg")
+    scaled = 1.0
     image = cv2.resize(image, (int(image.shape[1] * scaled),
                                int(image.shape[0] * scaled)))
     test_grabcut = False
