@@ -74,6 +74,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
         self.image = None
+        self.padding = 0
         self.segment_display = None
         self.segment_image_visible = False
         self.scene.addItem(item)
@@ -138,10 +139,29 @@ class InselectMainWindow(QtGui.QMainWindow):
         icon.addPixmap(pixmap)
         return icon
 
-    def add_box(self, rect):
+    def add_box(self, rect, padding=0.05):
+        """Adds a box to the viewer.
+
+        Parameters
+        ----------
+        rect : (x, y, w, h) tuple
+            The rectangle specifying the box.
+        padding : int (default 0.05)
+            The percentage padding added to box width and height.
+        """
         x, y, w, h = rect[:4]
-        s = QtCore.QPoint(x, y)
-        e = QtCore.QPoint(x + w, y + h)
+        pad_w = padding * w
+        pad_h = padding * h
+        x -= pad_w
+        y -= pad_h
+        w += 2 * pad_w
+        h += 2 * pad_h
+        sx = max(0, x)
+        sy = max(0, y)
+        ex = min(x + w, self.image.width())
+        ey = min(y + h, self.image.height())
+        s = QtCore.QPoint(sx, sy)
+        e = QtCore.QPoint(ex, ey)
         qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
         box = BoxResizable(qrect,
                            transparent=False,
@@ -169,7 +189,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.display_image(self.segment_display)
         # add detected boxes
         for rect in rects:
-            self.add_box(rect)
+            self.add_box(rect, padding=self.padding)
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
@@ -241,6 +261,13 @@ class InselectMainWindow(QtGui.QMainWindow):
             image = convert_numpy_to_qt(image)
         self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
 
+    def toggle_padding(self):
+        """Action method to toggle box padding."""
+        if self.padding == 0:
+            self.padding = 0.05
+        else:
+            self.padding = 0
+
     def toggle_segment_image(self):
         """Action method to switch between display of segmentation image and
         actual image.
@@ -277,8 +304,13 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.toggle_segment_action = QtGui.QAction(
             self.style().standardIcon(QtGui.QStyle.SP_ComputerIcon),
             "&Display segmentation", self, shortcut="f3", enabled=False,
-            statusTip="Display segmentation image",
+            statusTip="Display segmentation image", checkable=True,
             triggered=self.toggle_segment_image)
+
+        self.toggle_padding_action = QtGui.QAction(
+            "&Toggle padding", self, shortcut="", enabled=True,
+            statusTip="Toggle padding", checkable=True,
+            triggered=self.toggle_padding)
 
         self.about_action = QtGui.QAction("&About", self, triggered=self.about)
 
@@ -385,6 +417,9 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
+        self.editMenu = QtGui.QMenu("&Edit", self)
+        self.editMenu.addAction(self.toggle_padding_action)
+
         self.viewMenu = QtGui.QMenu("&View", self)
         self.viewMenu.addAction(self.select_all_action)
         self.viewMenu.addAction(self.zoom_in_action)
@@ -395,6 +430,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.helpMenu.addAction(self.about_action)
 
         self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.editMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
