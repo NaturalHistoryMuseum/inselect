@@ -411,10 +411,11 @@ def segment_watershed(image, window=None):
 
 
 if __name__ == "__main__":
-    image = cv2.imread("/home/tzhau/datasets/drawers_mfn/ZMB_Phasm_D068.jpg")
+    image = cv2.imread("data/drawer.jpg")
     image = cv2.resize(image, (int(image.shape[1] * scaled),
                                int(image.shape[0] * scaled)))
-    if 0:
+    test_grabcut = False
+    if test_grabcut:
         seeds = [[800, 400], [820, 740], [830, 840], [630, 240], [560, 270]]
         rects, display = segment_grabcut(image, seeds=seeds)
         display = np.array(display[:, :, 0])
