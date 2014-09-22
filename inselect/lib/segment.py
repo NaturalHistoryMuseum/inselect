@@ -3,6 +3,7 @@ import numpy as np
 from random import randint
 from skimage.morphology import watershed
 
+
 def _right_sized(contour, image, container_filter=True, size_filter=True):
     """Checks if contour size and shape is that of an object of interest.
 
@@ -33,7 +34,7 @@ def _right_sized(contour, image, container_filter=True, size_filter=True):
 
     # compares contour area to bounding rectangle area
     fill_ratio = cv2.contourArea(contour) / (w * h)
-    # filter very long narrow objects and samll objects
+    # filter very long narrow objects and small objects
     is_right_shape = ratio < 8 and w * h > area / 8E3
     # filter to remove containers that are a) large and b) contains
     # too much or too little contour area in bounding box
@@ -41,10 +42,11 @@ def _right_sized(contour, image, container_filter=True, size_filter=True):
                     (w > image_size[1] * 0.35 or
                      h > image_size[0] * 0.35))
     is_too_large = (w > image_size[1] * 0.85 and h > image_size[0] * 0.85)
-    if (w > image_size[1] * 0.35 or h > image_size[0] * 0.35):
+    debug = False
+    if debug and (w > image_size[1] * 0.35 or h > image_size[0] * 0.35):
         print w, h, fill_ratio, is_container
-        # cv2.imshow('im', image[y:y+h, x:x+w])
-        # cv2.waitKey(0)
+        cv2.imshow('im', image[y:y+h, x:x+w])
+        cv2.waitKey(0)
 
     return is_right_shape and not (container_filter and is_container) and \
         not (size_filter and is_too_large)
@@ -141,7 +143,7 @@ def remove_lines(image):
 
 
 def segment_edges(image, window=None, threshold=12, lab_based=True,
-                  variance_threshold=None, resize=False, size_filter=1, 
+                  variance_threshold=None, resize=False, size_filter=1,
                   line_filter=1):
     """Segments an image based on edge intensities.
 
@@ -172,7 +174,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
 
     if resize:
         original_width, original_height = image.shape[1], image.shape[0]
-        image = cv2.resize(image, resize) 
+        image = cv2.resize(image, resize)
 
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 3)
@@ -202,11 +204,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         mag2 = (255*mag/np.max(mag)).astype(np.uint8)
         threshold = 40
         _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
-
-        # (k, mag1) = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV |
-        #                           cv2.THRESH_OTSU)
         mag2 = mag0 | mag2
-        # mag2 = mag0 | mag1 | mag2
     if line_filter:
         mask = remove_lines(image)
         mag2[mask == 255] = 0
@@ -288,6 +286,7 @@ def segment_grabcut(image, window=None, seeds=[]):
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
     """
+    use_opencv_watershed = False
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -326,8 +325,10 @@ def segment_grabcut(image, window=None, seeds=[]):
         for i, seed in enumerate(seeds):
             sx, sy = seed
             markers[sy, sx] = i + 1
-        markers = watershed(mask2, markers, mask=mask2)
-        # cv2.watershed(display, markers)
+        if use_opencv_watershed:
+            cv2.watershed(display, markers)
+        else:
+            markers = watershed(mask2, markers, mask=mask2)
         new_rects = []
         for i, seed in enumerate(seeds):
             mask = np.array(markers == i + 1, dtype=np.uint8)
@@ -421,10 +422,10 @@ if __name__ == "__main__":
         cv2.imshow("disp", (display).astype(np.uint8))
     else:
         rects, display = segment_edges(image,
-                               window=None, 
-                               resize=(5000, 5000),
-                               variance_threshold=100,
-                               size_filter=1)
+                                       window=None,
+                                       resize=(5000, 5000),
+                                       variance_threshold=100,
+                                       size_filter=1)
         cv2.imshow("disp", (display).astype(np.uint8))
 
     while cv2.waitKey(0) != 27:

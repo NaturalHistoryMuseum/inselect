@@ -30,7 +30,7 @@ class WorkerThread(QtCore.QThread):
                                              window=self.resegment_window)
         else:
             rects, display = segment_edges(self.image,
-                                           window=None, 
+                                           window=None,
                                            resize=(5000, 5000),
                                            variance_threshold=100,
                                            size_filter=1)
