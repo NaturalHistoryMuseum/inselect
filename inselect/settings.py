@@ -28,7 +28,8 @@ from inselect.gui.settings import SettingsDialog
 # Settings namespace
 namespace = ('NHM', 'Inselect')
 
-# Define the available settings. Each entry associates the internal setting name to a dictionary defining:
+# Define the available settings. Each entry associates the internal setting
+# name to a dictionary defining:
 # label : str, required
 #     Label as shown to the user.
 # description : str, optional
@@ -40,7 +41,9 @@ namespace = ('NHM', 'Inselect')
 # validate : function, optional
 #     Validation function, returns a boolean.
 # default : object, required
-#     Default value for the setting.
+#     Default value for the setting
+# reset : bool, optional
+#     If present and true, reset the value to default value on start up
 _settings = {
     'annotation_fields': {
         'label': "Annotation fields",
@@ -49,6 +52,14 @@ _settings = {
         'type': 'list',
         'validate': validators.not_empty,
         'default': ['Specimen Number', 'Current Taxon Name', 'Location in Collection']
+    },
+    'label_field': {
+        'label': "Label field",
+        'description': 'Field (from the annotation fields) to display for each item (eg. in the sidebar)',
+        'editable': True,
+        'type': 'str',
+        'validate': validators.is_annotation_field,
+        'default': 'Specimen Number'
     },
     'export_template': {
         'label': 'Export file name',
@@ -64,6 +75,32 @@ _settings = {
         'editable': False,
         'type': 'str',
         'default': None
+    },
+    'about_label': {
+        'label': 'About (label)',
+        'editable': False,
+        'default': "Insect Selector"
+    },
+    'about_text': {
+        'label': 'About',
+        'editable': False,
+        'reset': True,
+        'default': """
+            <h1>Inselect</h1>
+            <p>Insect selector, v.0.1.3</p>
+            <h2>Contributors</h2>
+            <p>
+                <strong>Stefan van der Walt</strong>: Application development
+                and segmentation algorithm
+            </p>
+            <p>
+                <strong>Pieter Holtzhausen</strong>: Application development
+                and segmentation algorithm
+            </p>
+            <p>
+                <strong>Alice Heaton</strong>: Application development
+            </p>
+        """
     }
 }
 _q_settings = None
@@ -78,7 +115,8 @@ def init():
         _settings['working_directory']['default'] = QtCore.QDir.currentPath()
     _q_settings = QtCore.QSettings(*namespace)
     for name in _settings:
-        if not _q_settings.contains(name):
+        reset_setting = 'reset' in _settings[name] and _settings[name]['reset']
+        if not _q_settings.contains(name) or reset_setting:
             _q_settings.setValue(name, _settings[name]['default'])
 
 
@@ -105,6 +143,8 @@ def set_value(name, value):
     name: Name of setting
     value: Value of setting
     """
+    #TODO: Should components be notified? For instance the sidebar needs
+    # to know if the label field is changed.
     return _q_settings.setValue(name, value)
 
 

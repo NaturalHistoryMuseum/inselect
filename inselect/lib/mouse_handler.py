@@ -151,6 +151,22 @@ class MouseHandler(object):
         else:
             return self._mouse_state[prop]
 
+    def set_mouse_state(self, prop, value):
+        """Set a mouse state value
+
+        This may be called to set custom mouse state values. It can also be
+        used to override existing mouse state values, though those may get
+        overwritten at the next update.
+
+        Parameters
+        ----------
+        prop : str
+            The name of a property
+        value : object
+            The value to set
+        """
+        self._mouse_state[prop] = value
+
     def _get_event(self, event):
         """Return a (event, state) tuple for the given event
 

@@ -23,6 +23,27 @@ def not_empty(value):
     return len(value) > 0
 
 
+def is_annotation_field(value):
+    """Ensures that the value is a field from the annotation fields
+
+    Parameters
+    ----------
+    value : str
+
+    Raises
+    ------
+    ValidationError
+    """
+    #TODO: Check if this works if the field has just been added.
+    import inselect.settings
+    fields = inselect.settings.get('annotation_fields')
+    if value not in fields:
+        raise ValidationError(
+            ("{} is not one of the annotation fields.<br/>Note that these are "
+             + "case sensitive").format(value)
+        )
+
+
 def validate_export_template(value):
     """Ensure that all placeholders exist as fields
 
@@ -41,6 +62,7 @@ def validate_export_template(value):
                 placeholders.append(name)
     except ValueError:
         raise ValidationError("Curly brackets must either {{surround}} a value or be doubled (eg. {{{{)")
+    #TODO: Check if this works if the field has just been added.
     import inselect.settings
     fields = inselect.settings.get('annotation_fields')
     unknown = set(placeholders) - set(fields)
