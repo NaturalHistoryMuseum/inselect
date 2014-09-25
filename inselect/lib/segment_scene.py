@@ -1,4 +1,5 @@
 import weakref
+import inselect.settings
 from inselect.lib.segment_object import Segment
 from PySide import QtCore, QtGui
 
@@ -405,8 +406,7 @@ class SegmentScene(object):
         -------
         QtGui.QIcon
         """
-        icon_width = 200
-        icon_height = 200
+        icon_size = inselect.settings.get('icon_size')
         icon_padding = 16
         icon_background = '#EEE'
         self.get_segment_index(segment)
@@ -418,24 +418,24 @@ class SegmentScene(object):
             int(segment.height() * self._width)
         )
         if pixmap.width() > pixmap.height():
-            scale_factor = float(icon_width - icon_padding)/float(pixmap.width())
+            scale = float(icon_size - icon_padding)/float(pixmap.width())
         else:
-            scale_factor = float(icon_height - icon_padding)/float(pixmap.height())
+            scale = float(icon_size - icon_padding)/float(pixmap.height())
         pixmap = pixmap.scaled(
-            pixmap.width() * scale_factor,
-            pixmap.height() * scale_factor,
+            pixmap.width() * scale,
+            pixmap.height() * scale,
             transformMode=QtCore.Qt.SmoothTransformation
         )
         # Create a background pixmap
-        background = QtGui.QPixmap(icon_width, icon_height)
+        background = QtGui.QPixmap(icon_size, icon_size)
         painter = QtGui.QPainter(background)
-        painter.fillRect(QtCore.QRectF(0, 0, icon_width-1, icon_height-1),
+        painter.fillRect(QtCore.QRectF(0, 0, icon_size-1, icon_size-1),
                          QtGui.QColor(icon_background))
         painter.setPen(QtCore.Qt.DashLine)
-        painter.drawRect(QtCore.QRectF(0, 0, icon_width-1, icon_height-1))
+        painter.drawRect(QtCore.QRectF(0, 0, icon_size-1, icon_size-1))
         painter.drawPixmap(
-            (icon_width - pixmap.width()) / 2,
-            (icon_height - pixmap.height()) / 2,
+            (icon_size - pixmap.width()) / 2,
+            (icon_size - pixmap.height()) / 2,
             pixmap
         )
         painter.end()
