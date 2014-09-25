@@ -7,10 +7,12 @@ from PySide import QtCore, QtGui
 from PySide.QtGui import QMessageBox
 
 from inselect.lib import utils
+from inselect.lib.segment_scene import SegmentScene
 from inselect.lib.qt_util import read_qt_image, convert_numpy_to_qt
 from inselect.lib.segment import segment_edges, segment_grabcut
 from inselect.gui.sidebar import SegmentListWidget
-from inselect.gui.graphics import GraphicsView, GraphicsScene, BoxResizable
+from inselect.gui.graphics_scene import GraphicsScene
+from inselect.gui.graphics_view import GraphicsView
 import inselect.settings
 
 
@@ -25,7 +27,7 @@ class WorkerThread(QtCore.QThread):
 
     def run(self):
         if self.resegment_window:
-            seeds = self.selected.seeds
+            seeds = self.selected.seeds()
             rects, display = segment_grabcut(self.image, seeds=seeds,
                                              window=self.resegment_window)
         else:
@@ -40,33 +42,25 @@ class WorkerThread(QtCore.QThread):
 class InselectMainWindow(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
         super(InselectMainWindow, self).__init__()
+        # Segment container
+        self.segment_scene = SegmentScene(1, 1)
         self.app = app
         self.container = QtGui.QWidget(self)
         self.splitter = QtGui.QSplitter(self)
-        self.view = GraphicsView(self)
-        self.scene = GraphicsScene(self)
-        self.sidebar = SegmentListWidget(self)
+        self.scene = GraphicsScene(self.segment_scene)
+        self.view = GraphicsView(self.scene, self.segment_scene, self)
+        self.sidebar = SegmentListWidget(self.segment_scene, self)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing)
         self.view.setUpdatesEnabled(True)
         self.view.setMouseTracking(True)
-        self.scene.setGraphicsView(self.view)
-        self.view.setScene(self.scene)
         self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
 
         self.setCentralWidget(self.splitter)
         self.splitter.addWidget(self.view)
         self.splitter.addWidget(self.sidebar)
         self.splitter.setSizes([1000, 100])
-
-        self.view.move_box = BoxResizable(QtCore.QRectF(10, 10, 100, 100),
-                                          color=QtCore.Qt.red,
-                                          transparent=True,
-                                          scene=self.scene)
-        self.scene.addItem(self.view.move_box)
-        self.view.move_box.setVisible(False)
-        self.view.move_box.setZValue(1E9)
 
         if filename is None:
             image = QtGui.QImage()
@@ -106,8 +100,7 @@ class InselectMainWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.information(self, "Image Viewer",
                                               "Cannot load %s." % filename)
                 return
-            for item in list(self.view.items):
-                self.view.remove_item(item)
+            self.segment_scene.empty()
             self.sidebar.clear()
             self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
             self.scene.setSceneRect(0, 0, self.image.width(), image.height())
@@ -121,57 +114,22 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.zoom_out_action.setEnabled(True)
             self.save_action.setEnabled(True)
             self.import_action.setEnabled(True)
+            # Reset the segment scene
+            self.segment_scene.empty()
+            self.segment_scene.set_pixmap(self.image_item.pixmap())
 
     def zoom_in(self):
-        self.view.set_scale(1.2)
+        self.view.scale(1.2)
 
     def zoom_out(self):
-        self.view.set_scale(0.8)
+        self.view.scale(0.8)
 
     def about(self):
-        QtGui.QMessageBox.about(self, "Insect Selector",
-                                "Stefan van der Walt\nPieter Holtzhausen")
-
-    def get_icon(self, box):
-        rect = box.map_rect_to_scene(box._rect).toRect()
-        pixmap = self.image_item.pixmap().copy(rect)
-        pixmap = pixmap.scaledToWidth(200, QtCore.Qt.SmoothTransformation)
-        icon = QtGui.QIcon()
-        icon.addPixmap(pixmap)
-        return icon
-
-    def add_box(self, rect, padding=0.05):
-        """Adds a box to the viewer.
-
-        Parameters
-        ----------
-        rect : (x, y, w, h) tuple
-            The rectangle specifying the box.
-        padding : int (default 0.05)
-            The percentage padding added to box width and height.
-        """
-        x, y, w, h = rect[:4]
-        pad_w = padding * w
-        pad_h = padding * h
-        x -= pad_w
-        y -= pad_h
-        w += 2 * pad_w
-        h += 2 * pad_h
-        sx = max(0, x)
-        sy = max(0, y)
-        ex = min(x + w, self.image.width())
-        ey = min(y + h, self.image.height())
-        s = QtCore.QPoint(sx, sy)
-        e = QtCore.QPoint(ex, ey)
-        qrect = QtCore.QRectF(s.x(), s.y(), e.x() - s.x(), e.y() - s.y())
-        box = BoxResizable(qrect,
-                           transparent=False,
-                           scene=self.scene)
-        self.view.add_item(box)
-        b = box.boundingRect()
-        box.setZValue(max(1000, 1E9 - b.width() * b.height()))
-        box.updateResizeHandles()
-        return box
+        QtGui.QMessageBox.about(
+            self,
+            inselect.settings.get('about_label'),
+            inselect.settings.get('about_text')
+        )
 
     def worker_finished(self, rects, display):
         self.progressDialog.hide()
@@ -180,9 +138,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             x, y, w, h = window
             self.segment_display[y:y+h, x:x+w] = display
             # removes the selected box before replacing it with resegmentations
-            box = self.worker.selected
-            self.sidebar.takeItem(self.sidebar.row(box.list_item))
-            self.view.remove_item(box)
+            self.segment_scene.remove(self.worker.selected)
         else:
             self.segment_display = display.copy()
         self.toggle_segment_action.setEnabled(True)
@@ -190,7 +146,12 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.display_image(self.segment_display)
         # add detected boxes
         for rect in rects:
-            self.add_box(rect, padding=self.padding)
+            x, y, w, h = rect[:4]
+            x -= w * self.padding
+            y -= w * self.padding
+            w += 2 * w * self.padding
+            h += 2 * h * self.padding
+            self.segment_scene.add((x, y), (x + w, y + h))
 
     def segment(self):
         self.progressDialog = QtGui.QProgressDialog(self)
@@ -202,10 +163,10 @@ class InselectMainWindow(QtGui.QMainWindow):
         image = cv2.imread(self.filename)
         resegment_window = None
         # if object selected, resegment the window
-        selected = self.scene.selectedItems()
+        selected = self.scene.selected_segments()
         if selected:
             selected = selected[0]
-            window_rect = selected.map_rect_to_scene(selected._rect)
+            window_rect = self.segment_scene.get_q_rect_f(selected)
             p = window_rect.topLeft()
             resegment_window = [p.x(), p.y(), window_rect.width(),
                                 window_rect.height()]
@@ -235,20 +196,19 @@ class InselectMainWindow(QtGui.QMainWindow):
         field_defaults = [(field, '-') for field in inselect.settings.get('annotation_fields')]
         export_template = inselect.settings.get('export_template')
         image_names = []
-        for i, item in enumerate(self.view.items):
-            b = item._rect
+        for i, segment in enumerate(self.segment_scene.segments()):
+            b = self.segment_scene.get_q_rect_f(segment)
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
             # Generate file name from template
-            placeholders = dict(field_defaults + item.list_item.fields.items())
+            placeholders = dict(field_defaults + segment.fields().items())
             file_name = utils.unique_file_name(path, export_template.format(**placeholders), '.png')
             image_names.append(file_name)
             cv2.imwrite(file_name, extract)
         self._save_box_data(utils.unique_file_name(path, 'metadata', '.json'), image_names)
 
     def select_all(self):
-        for item in self.view.items:
-            item.setSelected(True)
+        self.view.select_all()
 
     def display_image(self, image):
         """Displays an image in the user interface.
@@ -351,18 +311,15 @@ class InselectMainWindow(QtGui.QMainWindow):
             QtGui.QFileDialog.Options())
 
         if files:
-            width = self.image_item.pixmap().width()
-            height = self.image_item.pixmap().height()
             for file_name in files:
                 data = json.load(open(file_name))
                 for item in data["items"]:
-                    rect = [float(x) for x in item["rect"]]
-                    rect[0] *= width
-                    rect[1] *= height
-                    rect[2] *= width
-                    rect[3] *= height
-                    box = self.add_box(rect)
-                    box.list_item.fields = item["fields"]
+                    rect = [float(x) for x in item['rect']]
+                    self.segment_scene.add_normalized(
+                        (rect[0], rect[1]),
+                        (rect[0] + rect[2], rect[1] + rect[3]),
+                        item['fields']
+                    )
 
     def save_boxes(self):
         file_name, filtr = QtGui.QFileDialog.getSaveFileName(
@@ -377,18 +334,12 @@ class InselectMainWindow(QtGui.QMainWindow):
     def _save_box_data(self, file_name, image_names=None):
         data = {'image_name': self.filename}
         data["items"] = []
-        for i, box in enumerate(self.view.items):
-            rect = box.rect()
-            bx, by = box.pos().x(), box.pos().y()
-            rect = [rect.left() + bx, rect.top() + by,
-                    rect.width(), rect.height()]
-            width = self.image_item.pixmap().width()
-            height = self.image_item.pixmap().height()
-            rect[0] /= width
-            rect[1] /= height
-            rect[2] /= width
-            rect[3] /= height
-            export = {'rect': rect, 'fields': box.list_item.fields}
+        for i, segment in enumerate(self.segment_scene.segments()):
+            export = {
+                'rect': [segment.left(), segment.top(),
+                         segment.width(), segment.height()],
+                'fields': segment.fields()
+            }
             if image_names:
                 export['image_name'] = image_names[i]
             data['items'].append(export)
