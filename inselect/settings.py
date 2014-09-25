@@ -101,6 +101,13 @@ _settings = {
                 <strong>Alice Heaton</strong>: Application development
             </p>
         """
+    },
+    'icon_size': {
+        'label': 'Icon size',
+        'editable': False,
+        'type': 'int',
+        'reset': True,
+        'default': 200
     }
 }
 _q_settings = None
@@ -132,7 +139,19 @@ def get(name):
     object
         Setting value
     """
-    return _q_settings.value(name)
+    if 'type' in _settings[name]:
+        value_type = _settings[name]['type']
+    else:
+        value_type = 'str'
+    value = _q_settings.value(name)
+    # QSettings handles list and strings, but not ints and floats!
+    if value_type == 'int':
+        return int(value)
+    elif value_type == 'float':
+        return float(value)
+    elif value_type == 'bool':
+        return bool(value)
+    return value
 
 
 def set_value(name, value):
