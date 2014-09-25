@@ -22,6 +22,7 @@ Usage
 
 import sys
 from PySide import QtCore
+from inselect import __version__ as inselect_version
 from inselect.lib import validators
 from inselect.gui.settings import SettingsDialog
 
@@ -87,7 +88,7 @@ _settings = {
         'reset': True,
         'default': """
             <h1>Inselect</h1>
-            <p>Insect selector, v.0.1.3</p>
+            <p>Insect selector, v.{version}</p>
             <h2>Contributors</h2>
             <p>
                 <strong>Stefan van der Walt</strong>: Application development
@@ -100,7 +101,7 @@ _settings = {
             <p>
                 <strong>Alice Heaton</strong>: Application development
             </p>
-        """
+        """.format(version=inselect_version)
     },
     'icon_size': {
         'label': 'Icon size',

@@ -1,4 +1,5 @@
 import sys
+from inselect import __version__ as inselect_version
 
 # Generic setup data used for both the distutils setup and the cx_Freeze setup.
 # win32.extra_packages and win32.include_files indicate extra packages/files that are
@@ -6,7 +7,7 @@ import sys
 # of numpy/scipy.
 setup_data = {
     'name': 'inselect',
-    'version': '0.1',
+    'version': inselect_version,
     'packages': ['inselect'],
     'entry_points': {
         'console_scripts': [
