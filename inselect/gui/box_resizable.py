@@ -26,8 +26,6 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
     ----------
     graphics_scene : QtGui.QGraphicsScene
         The graphics scene this box is part of
-    segment_scene : SegmentScene
-        The segment scene used to manage segments in this graphics scene
     segment : Segment
         The segment associated with this box
     parent : object
@@ -38,13 +36,12 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
     scene : QGraphicsScene, optional
         The graphics scene this box belongs to
     """
-    def __init__(self, graphics_scene, segment_scene, segment,
+    def __init__(self, graphics_scene, segment,
                  color=QtCore.Qt.blue, transparent=False):
         # Set up members
         self._graphics_scene = graphics_scene
-        self._segment_scene = segment_scene
         self._segment = segment
-        self._segment_rect = self._segment_scene.get_q_rect_f(segment)
+        self._segment_rect = self._segment.get_q_rect_f()
         self._visible_rect = QtCore.QRectF(self._segment_rect)
         self._bounding_rect = None
         self._handles = {
@@ -160,7 +157,7 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
         segment : Segment
         """
         self._segment = segment
-        self._segment_rect = self._segment_scene.get_q_rect_f(self._segment)
+        self._segment_rect = self._segment.get_q_rect_f()
         # Translate this into this item's coordinate system.
         self._segment_rect.translate(-self.pos().x(), -self.pos().y())
         self.prepareGeometryChange()
@@ -296,8 +293,7 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
     def _end_move_resize(self):
         """End moving/resizing the box"""
         segment_corners = self._map_rect_to_scene(self._segment_rect)
-        self._segment_scene.set_segment_corners(
-            self._segment,
+        self._segment.set_corners(
             (segment_corners.left(), segment_corners.top()),
             (segment_corners.right(), segment_corners.bottom())
         )
@@ -352,6 +348,8 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
         Where (0, 0) is the box coordinates at top left corner of the box,
         the position of the box is added to give the view coordinates.
         """
+        #TODO: Implement this class separately from QGraphicsRectItem
+        #Then we won't need _map_rect_to_scene anymore.
         rect = map_rect
         target_rect = QtCore.QRectF(rect)
         t = rect.topLeft()
@@ -381,7 +379,7 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
             rect = self._segment_rect
             if rect.width() > 0 and rect.height() > 0:
                 target_rect = self._map_rect_to_scene(rect)
-                painter.drawPixmap(rect, self.scene().image.pixmap(),
+                painter.drawPixmap(rect, self._graphics_scene.pixmap(),
                                    target_rect)
 
         radius = self._graphics_scene.width() / 150

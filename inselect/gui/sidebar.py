@@ -5,13 +5,14 @@ from inselect.gui.annotator import AnnotateDialog
 
 
 class SegmentListWidget(QtGui.QListWidget):
-    def __init__(self, segment_scene, parent=None):
+    def __init__(self, graphics_scene, parent=None):
         # Constructors
         super(SegmentListWidget, self).__init__(parent)
         # Set up members
         self.enable = True
         self.parent = parent
-        self.segment_scene = segment_scene
+        self.graphics_scene = graphics_scene
+        self.segment_scene = graphics_scene.segment_scene()
         # Setup UI
         self.setIconSize(QtCore.QSize(100, 100))
         self.setViewMode(QtGui.QListView.IconMode)
@@ -27,13 +28,14 @@ class SegmentListWidget(QtGui.QListWidget):
                                  self._before_segment_remove)
 
     def selectionChanged(self, selected_items, deselected_items):
+        self.graphics_scene.deselect_all_segments()
         for i in range(self.count()):
             item = self.item(i)
             selected = item.isSelected()
             segment = self.segment_scene.get_associated_segment(item)
-            box = self.segment_scene.get_associated_object('boxResizable',
-                                                           segment)
-            box.setSelected(selected)
+            if selected:
+                self.graphics_scene.select_segment(segment,
+                                                   deselect_others=False)
         QtGui.QListWidget.selectionChanged(self, selected_items,
                                            deselected_items)
 
@@ -45,7 +47,7 @@ class SegmentListWidget(QtGui.QListWidget):
 
     def on_item_double_clicked(self, item):
         segment = self.segment_scene.get_associated_segment(item)
-        dialog = AnnotateDialog(self.segment_scene, segment,
+        dialog = AnnotateDialog(self.graphics_scene, segment,
                                 parent=self.parent)
         dialog.exec_()
 
@@ -59,8 +61,7 @@ class SegmentListWidget(QtGui.QListWidget):
         list_item = QtGui.QListWidgetItem()
         index = self.segment_scene.get_segment_index(segment)
         self.insertItem(index, list_item)
-        self.segment_scene.associate_object('listWidgetItem',
-                                            list_item, segment)
+        segment.associate_object(list_item)
         # Watch the segment to update the icon/label.
         segment.watch('after-corners-update', self._update_segment)
         segment.watch('after-fields-update', self._update_segment)
@@ -75,14 +76,16 @@ class SegmentListWidget(QtGui.QListWidget):
         segment : Segment
         """
         # TODO: Re-order the list.
-        icon = self.segment_scene.get_segment_icon(segment)
+        size = inselect.settings.get('icon_size')
+        pixmap = self.graphics_scene.get_segment_pixmap(segment, size)
+        icon = QtGui.QIcon()
+        icon.addPixmap(pixmap)
         default_label = inselect.settings.get('label_field')
         fields = segment.fields()
         text = ""
         if default_label in fields:
             text = fields[default_label]
-        list_item = self.segment_scene.get_associated_object('listWidgetItem',
-                                                             segment)
+        list_item = segment.get_associated_object(QtGui.QListWidgetItem)
         list_item.setIcon(icon)
         list_item.setText(text)
 
@@ -93,6 +96,5 @@ class SegmentListWidget(QtGui.QListWidget):
         ----------
         segment : Segment
         """
-        list_item = self.segment_scene.get_associated_object('listWidgetItem',
-                                                             segment)
+        list_item = segment.get_associated_object(QtGui.QListWidgetItem)
         self.takeItem(self.row(list_item))

@@ -10,28 +10,27 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
     """This is the GraphicsView that is used to display the main Graphics
     Scene.
 
-    The data about the segments is held in the SegmentScene, while the
-    graphical data (the image and the boxes) are held in the GraphicsScene.
-    The GraphicsView is a view on the scene, and handles the user interaction.
+    The GraphicsView handles the view port (zooming, etc.) as well as user
+    interactions. Modification of the segments themselves is done via
+    the SegmentScene, while the handling of selected segments is done via
+    the GraphicsScene
 
     Parameters
     -----------
     graphics_scene : QtGui.GraphicsScene
         The Qt object that holds all the graphics element (image and boxes)
-    segment_scene : SegmentScene
-        The SegmentScene object which holds the segments for this scene
     parent : object
         the parent widget
     """
-    def __init__(self, graphics_scene, segment_scene, parent=None):
+    def __init__(self, graphics_scene, parent=None):
         # Call constructors
         QtGui.QGraphicsView.__init__(self, parent)
         MouseHandler.__init__(self, parent_class=QtGui.QGraphicsView)
         KeyHandler.__init__(self, parent_class=QtGui.QGraphicsView)
         # Initialize members
         self._parent = parent
-        self._segment_scene = segment_scene
-        self._boxes_with_keyboard_focus = []
+        self._graphics_scene = graphics_scene
+        self._segment_scene = self._graphics_scene.segment_scene()
         # UI setup
         self.scrollBarValuesOnMousePress = QtCore.QPoint()
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -39,55 +38,55 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         self._setup_mouse_navigation()
         self._setup_key_navigation()
         # Register the scene
-        self.setScene(graphics_scene)
+        self.setScene(self._graphics_scene)
 
     def _setup_key_navigation(self):
         """Setups the key handlers for this view"""
-        self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_boxes)
-        self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_boxes)
+        self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_segments)
+        self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_segments)
         self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
-        self.add_key_handler(QtCore.Qt.Key_Up, self.move_boxes, [(0, -1)])
-        self.add_key_handler(QtCore.Qt.Key_Right, self.move_boxes, [(1, 0)])
-        self.add_key_handler(QtCore.Qt.Key_Down, self.move_boxes, [(0, 1)])
-        self.add_key_handler(QtCore.Qt.Key_Left, self.move_boxes, [(-1, 0)])
+        self.add_key_handler(QtCore.Qt.Key_Up, self.move_segments, [(0, -1)])
+        self.add_key_handler(QtCore.Qt.Key_Right, self.move_segments, [(1, 0)])
+        self.add_key_handler(QtCore.Qt.Key_Down, self.move_segments, [(0, 1)])
+        self.add_key_handler(QtCore.Qt.Key_Left, self.move_segments, [(-1, 0)])
         self.add_key_handler(
             key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Up),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(0, -1), (0, 0)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Right),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(1, 0), (0, 0)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Down),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(0, 1), (0, 0)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ControlModifier, QtCore.Qt.Key_Left),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(-1, 0), (0, 0)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Up),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(0, 0), (0, -1)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Right),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(0, 0), (1, 0)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Down),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(0, 0), (0, 1)]
         )
         self.add_key_handler(
             key=(QtCore.Qt.ShiftModifier, QtCore.Qt.Key_Left),
-            callback=self.move_boxes,
+            callback=self.move_segments,
             args=[(0, 0), (-1, 0)]
         )
         self.add_key_handler(QtCore.Qt.Key_N, self.select_next)
@@ -102,7 +101,7 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         )
         self.add_mouse_handler(
             event='double-click',
-            callback=self.annotate_boxes
+            callback=self.annotate_segments
         )
         self.add_mouse_handler(
             event={
@@ -148,15 +147,13 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
 
     def _remove_keyboard_focus(self):
         """Remove the keyboard focus from all the boxes that have it"""
-        for box in self._boxes_with_keyboard_focus:
-            box.set_keyboard_focus(False)
-        self._boxes_with_keyboard_focus = []
+        self._graphics_scene.remove_keyboard_focus()
         # Return True to delegate when this is invoked as a mouse handler
         return True
 
     def zoom_to_selection(self):
         """Zoom the view to the current selection"""
-        box = self._get_selection_box()
+        box = self._graphics_scene.get_selection_box()
         if box is not None:
             self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0],
                            box[1][1] - box[0][1], QtCore.Qt.KeepAspectRatio)
@@ -179,7 +176,7 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         scale_value = 1 + cmp(delta, 0) * factor
         self.scale(scale_value, scale_value)
 
-    def move_boxes(self, top_left_delta, bottom_right_delta=None):
+    def move_segments(self, top_left_delta, bottom_right_delta=None):
         """Move the currently selected segments
 
         If only the top left delta is specified, then both the top left and
@@ -194,80 +191,60 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         bottom_right_delta : tuple, optional
             (x_delta, y_delta)
         """
-        selected_boxes = self.scene().selectedItems()
-        self._remove_keyboard_focus()
-        for box in selected_boxes:
-            segment = self._segment_scene.get_associated_segment(box)
-            self._segment_scene.move_segment_corners(
-                segment, top_left_delta, bottom_right_delta
-            )
-            box.set_keyboard_focus(True)
-            self._boxes_with_keyboard_focus.append(box)
+        for segment in self._graphics_scene.selected_segments():
+            segment.move_corners(top_left_delta, bottom_right_delta)
+            #TODO: we always assume this is triggered by keyboard.
+            self._graphics_scene.set_keyboard_focus(segment, True)
 
-    def annotate_boxes(self):
+    def annotate_segments(self):
         """Open the annotation dialog for the currently selected segments"""
-        segments = []
-        for box in self.scene().selectedItems():
-            segment = self._segment_scene.get_associated_segment(box)
-            segments.append(segment)
-        dialog = AnnotateDialog(self._segment_scene, segments,
+        segments = self._graphics_scene.selected_segments()
+        dialog = AnnotateDialog(self._graphics_scene, segments,
                                 parent=self._parent)
         dialog.exec_()
 
-    def delete_boxes(self):
+    def delete_segments(self):
         """Delete the currently selected segments"""
-        selected_boxes = self.scene().selectedItems()
         self._remove_keyboard_focus()
-        for box in selected_boxes:
-            segment = self._segment_scene.get_associated_segment(box)
+        for segment in self._graphics_scene.selected_segments():
             self._segment_scene.remove(segment)
 
     def deselect_all(self):
         """Deselect all items in the scene"""
-        self._remove_keyboard_focus()
-        for box in self.scene().selectedItems():
-            box.setSelected(False)
+        self._graphics_scene.remove_keyboard_focus()
+        self._graphics_scene.deselect_all_segments()
 
     def select_all(self):
         """Select all items in the scene"""
-        self._remove_keyboard_focus()
-        for box in self.scene().items():
-            box.setSelected(True)
+        self._graphics_scene.remove_keyboard_focus()
+        self._graphics_scene.select_all_segments()
 
     def select_next(self):
         """Select the next object in the scene"""
-        self._remove_keyboard_focus()
-        selected = self.scene().selectedItems()
+        self._graphics_scene.remove_keyboard_focus()
+        selected = self._graphics_scene.selected_segments()
         segment = None
         if len(selected) > 0:
-            segment = self._segment_scene.get_associated_segment(selected[0])
+            segment = selected[0]
         next_segment = self._segment_scene.get_next_segment(segment)
         if next_segment:
-            self.deselect_all()
-            next_box = self._segment_scene.get_associated_object(
-                'boxResizable', next_segment
-            )
-            next_box.setSelected(True)
-            next_box.set_keyboard_focus(True)
-            self._boxes_with_keyboard_focus.append(next_box)
+            self._graphics_scene.select_segment(next_segment)
+            #TODO: we always assume this is triggered by keyboard.
+            self._graphics_scene.set_keyboard_focus(next_segment, True)
             self.ensure_selection_visible()
 
     def select_previous(self):
         """Select the previous object in the scene"""
         self._remove_keyboard_focus()
-        selected = self.scene().selectedItems()
+        selected = self._graphics_scene.selected_segments()
         segment = None
         if len(selected) > 0:
-            segment = self._segment_scene.get_associated_segment(selected[0])
+            segment = selected[0]
         previous_segment = self._segment_scene.get_previous_segment(segment)
         if previous_segment:
-            self.deselect_all()
-            previous_box = self._segment_scene.get_associated_object(
-                'boxResizable', previous_segment
-            )
-            previous_box.setSelected(True)
-            previous_box.set_keyboard_focus(True)
-            self._boxes_with_keyboard_focus.append(previous_box)
+            self._graphics_scene.select_segment(previous_segment)
+            #TODO: we always assume this is triggered by keyboard.
+            self._graphics_scene.set_keyboard_focus(previous_segment, True)
             self.ensure_selection_visible()
 
     def ensure_selection_visible(self):
@@ -278,32 +255,10 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         Doing on this on a mouse-triggered selection change event might cause
         the box to move.
         """
-        box = self._get_selection_box()
+        box = self._graphics_scene.get_selection_box()
         if box is not None:
             self.ensureVisible(box[0][0], box[0][1], box[1][0] - box[0][0],
                                box[1][1] - box[0][1])
-
-    def _get_selection_box(self):
-        """Return the bounding box of selected items
-
-        Returns
-        --------
-        tuple : (top_left, bottom_right) where each tuple is formed of (x,y) or
-            None if there is no selection
-        """
-        tl = None
-        br = None
-        for item in self.scene().selectedItems():
-            box = item.boundingRect()
-            if tl is None:
-                tl = (box.left(), box.top())
-                br = (box.right(), box.bottom())
-            else:
-                tl = (min(tl[0], box.left()), min(tl[1], box.top()))
-                br = (max(br[0], box.right()), max(br[1], box.bottom()))
-        if tl is None:
-            return None
-        return tl, br
 
     def _start_new_box(self, x, y):
         """Start drawing a new box
