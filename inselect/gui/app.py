@@ -43,13 +43,13 @@ class InselectMainWindow(QtGui.QMainWindow):
     def __init__(self, app, filename=None):
         super(InselectMainWindow, self).__init__()
         # Segment container
-        self.segment_scene = SegmentScene(1, 1)
+        self.segment_scene = SegmentScene()
         self.app = app
         self.container = QtGui.QWidget(self)
         self.splitter = QtGui.QSplitter(self)
         self.scene = GraphicsScene(self.segment_scene)
-        self.view = GraphicsView(self.scene, self.segment_scene, self)
-        self.sidebar = SegmentListWidget(self.segment_scene, self)
+        self.view = GraphicsView(self.scene, self)
+        self.sidebar = SegmentListWidget(self.scene, self)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing)
@@ -62,24 +62,19 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.splitter.addWidget(self.sidebar)
         self.splitter.setSizes([1000, 100])
 
-        if filename is None:
-            image = QtGui.QImage()
-        else:
-            image = read_qt_image(filename)
-
-        item = QtGui.QGraphicsPixmapItem(QtGui.QPixmap.fromImage(image))
-        self.image = None
         self.padding = 0
         self.segment_display = None
         self.segment_image_visible = False
-        self.scene.addItem(item)
-        self.image_item = item
-        self.scene.image = item
+
         self.create_actions()
         self.create_menus()
 
         self.setWindowTitle("Image Viewer")
-        self.resize(500, 400)
+        self.resize(500, 500)
+
+        empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
+        empty_image.fill('#FFF')
+        self.scene.set_image(empty_image)
         if filename:
             self.open(filename)
 
@@ -95,16 +90,12 @@ class InselectMainWindow(QtGui.QMainWindow):
             inselect.settings.set_value('working_directory', path)
             self.filename = filename
             image = read_qt_image(filename)
-            self.image = image
             if image.isNull():
                 QtGui.QMessageBox.information(self, "Image Viewer",
                                               "Cannot load %s." % filename)
                 return
-            self.segment_scene.empty()
-            self.sidebar.clear()
-            self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
-            self.scene.setSceneRect(0, 0, self.image.width(), image.height())
-            w, h = self.image.width(), self.image.height(),
+            # Setup GUI actions
+            w, h = image.width(), image.height(),
             self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
             self.segment_image_visible = False
             self.toggle_segment_action.setEnabled(False)
@@ -114,9 +105,11 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.zoom_out_action.setEnabled(True)
             self.save_action.setEnabled(True)
             self.import_action.setEnabled(True)
-            # Reset the segment scene
+            # Update the graphics scene, segment scene and sidebar elements
             self.segment_scene.empty()
-            self.segment_scene.set_pixmap(self.image_item.pixmap())
+            self.sidebar.clear()
+            self.scene.set_image(image)
+            self.segment_scene.set_size(w, h)
 
     def zoom_in(self):
         self.view.scale(1.2)
@@ -166,7 +159,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         selected = self.scene.selected_segments()
         if selected:
             selected = selected[0]
-            window_rect = self.segment_scene.get_q_rect_f(selected)
+            window_rect = selected.get_q_rect_f()
             p = window_rect.topLeft()
             resegment_window = [p.x(), p.y(), window_rect.width(),
                                 window_rect.height()]
@@ -197,7 +190,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         export_template = inselect.settings.get('export_template')
         image_names = []
         for i, segment in enumerate(self.segment_scene.segments()):
-            b = self.segment_scene.get_q_rect_f(segment)
+            b = segment.get_q_rect_f()
             x, y, w, h = b.x(), b.y(), b.width(), b.height()
             extract = image[y:y+h, x:x+w]
             # Generate file name from template
@@ -336,8 +329,10 @@ class InselectMainWindow(QtGui.QMainWindow):
         data["items"] = []
         for i, segment in enumerate(self.segment_scene.segments()):
             export = {
-                'rect': [segment.left(), segment.top(),
-                         segment.width(), segment.height()],
+                'rect': [segment.left(normalized=True),
+                         segment.top(normalized=True),
+                         segment.width(normalized=True),
+                         segment.height(normalized=True)],
                 'fields': segment.fields()
             }
             if image_names:
