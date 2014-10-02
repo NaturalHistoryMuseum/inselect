@@ -2,6 +2,8 @@
 
 A tool for the semi-automated segmentation and annotation of specimen trays.
 
+Project page: http://naturalhistorymuseum.github.io/inselect
+
 ## Installation under Microsoft Windows
 
 We provide Microsoft Windows installer packages which can be found [on our downloads page](). Once installed, Inselect will be available in your Programs Menu. You will need to install the [Microsoft Visual C++ 2008 Redistributable Package](http://www.microsoft.com/en-us/download/details.aspx?id=29) as well - however this is usually already included on your operating system, so only download it if Inselect fails to start.
