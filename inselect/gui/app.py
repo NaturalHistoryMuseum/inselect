@@ -13,6 +13,7 @@ from inselect.lib.segment import segment_edges, segment_grabcut
 from inselect.gui.sidebar import SegmentListWidget
 from inselect.gui.graphics_scene import GraphicsScene
 from inselect.gui.graphics_view import GraphicsView
+from inselect.gui.help_dialog import HelpDialog
 import inselect.settings
 
 
@@ -123,6 +124,11 @@ class InselectMainWindow(QtGui.QMainWindow):
             inselect.settings.get('about_label'),
             inselect.settings.get('about_text')
         )
+
+    def help(self):
+        """Open the help dialog"""
+        d = HelpDialog(self)
+        d.exec_()
 
     def worker_finished(self, rects, display):
         self.progressDialog.hide()
@@ -268,6 +274,8 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         self.about_action = QtGui.QAction("&About", self, triggered=self.about)
 
+        self.help_action = QtGui.QAction("&Help", self, triggered=self.help)
+
         self.segment_action = QtGui.QAction(
             self.style().standardIcon(QtGui.QStyle.SP_ComputerIcon),
             "&Segment", self, shortcut="f5", enabled=False,
@@ -374,6 +382,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.toggle_segment_action)
 
         self.helpMenu = QtGui.QMenu("&Help", self)
+        self.helpMenu.addAction(self.help_action)
         self.helpMenu.addAction(self.about_action)
 
         self.menuBar().addMenu(self.fileMenu)

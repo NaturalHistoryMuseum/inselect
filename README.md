@@ -70,3 +70,6 @@ From within the virtual environment, you can then run inselect with:
 ```shell
 inselect
 ```
+## License
+
+Inselect is Copyright (c) 2014, The Trustees of the Natural History Museum, London and licensed under the Modified BSD License. See the [LICENSE](https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md) file for more information.
