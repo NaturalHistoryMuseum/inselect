@@ -10,11 +10,11 @@ We provide Microsoft Windows installer packages which can be found [on our downl
 
 If you would like to install the project from source on Windows, you will need to:
 
-- Install Git from http://git-scm.com/download/win ;
-- Install Anaconda from http://continuum.io/downloads ;
-- Download OpenCV from http://opencv.org/downloads.html (You want a 2.x version) and extract the archive ;
+- Install [git](http://git-scm.com/download/win) ;
+- Download the latest build of [Anaconda](https://store.continuum.io/cshop/anaconda/), Python 2.7.x build, and install using default options;
+- Download [OpenCV](http://opencv.org/downloads.html) (You want a 2.x version) and extract the archive ;
 - Copy the file `<open cv extract root>/build/python/2.7/x86/cv2.pyd` to `<anaconda root>/Lib/site-packages` (Replace x86 by 64 as appropriate) ;
-- Open an Anaconda Shell and run `pip install -e git+https://github.com/vls-lab/inselect.git#egg=inselect`.
+- Open an Anaconda Shell and run `pip install -e git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect`.
 
 From the Anaconda Shell you can now run Inselect by typing `inselect.exe`, and the source code is in `src\inselect`. If you would like to create a Microsoft Installer package, you can do the following:
 
@@ -23,13 +23,36 @@ From the Anaconda Shell you can now run Inselect by typing `inselect.exe`, and t
 
 The installer can be found in the `dist` subdir.
 
-## Installation under OSX
+## Installation under OS X
 
-- Install Anaconda
-- Install OpenCV:
+We do not provide ready-built binaries for OS X. These build instructions will install inselect within a local anaconda environment.
 
-    conda install -c https://conda.binstar.org/jjhelmus opencv
-    conda install pyside
+- Install [git](http://git-scm.com/download/mac) ;
+- Download the latest build of [Anaconda](https://store.continuum.io/cshop/anaconda/), Python 2.7.x build, and install using default options ;
+- Install [OpenCV](http://opencv.org/):
+
+```shell
+~/anaconda/bin/conda install -c https://conda.binstar.org/jjhelmus opencv
+```
+
+- Install other dependencies:
+
+```shell
+~/anaconda/bin/conda install PySide
+~/anaconda/bin/pip install docopt
+```
+
+- Install inselect source:
+
+```shell
+~/anaconda/bin/pip install -e git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
+```
+
+- Run inselect:
+
+```shell
+~/anaconda/bin/inselect
+```
 
 ## Installation under Linux (Global)
 
@@ -37,7 +60,7 @@ We do not provide ready-built binaries for Linux. These build instructions will 
 
 ```shell
 apt-get install python-pip git python-pyside python-opencv python-numpy python-scipy python-matplotlib python2.7-dev
-pip install git+https://github.com/vls-lab/inselect.git#egg=inselect
+pip install git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
 ```
 
 You can then run inselect simply with:
@@ -62,7 +85,7 @@ cd inselect
 . bin/activate
 cp /usr/lib/pymodules/python2.7/cv* ./lib/python2.7/site-packages
 
-pip install git+https://github.com/vls-lab/inselect.git#egg=inselect
+pip install git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
 ```
 
 From within the virtual environment, you can then run inselect with:
