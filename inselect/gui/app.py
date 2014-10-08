@@ -74,7 +74,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.resize(500, 500)
 
         empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
-        empty_image.fill('#FFF')
+        empty_image.fill(0xffffff)
         self.scene.set_image(empty_image)
         if filename:
             self.open(filename)
