@@ -76,6 +76,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
         empty_image.fill(0xffffff)
         self.scene.set_image(empty_image)
+        self.image = empty_image
         if filename:
             self.open(filename)
 
@@ -111,6 +112,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.sidebar.clear()
             self.scene.set_image(image)
             self.segment_scene.set_size(w, h)
+            self.image = image
 
     def zoom_in(self):
         self.view.zoom(1)
@@ -219,7 +221,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         """
         if isinstance(image, np.ndarray):
             image = convert_numpy_to_qt(image)
-        self.image_item.setPixmap(QtGui.QPixmap.fromImage(image))
+        self.scene._image_item.setPixmap(QtGui.QPixmap.fromImage(image))
 
     def toggle_padding(self):
         """Action method to toggle box padding."""

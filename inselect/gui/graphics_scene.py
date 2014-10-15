@@ -18,7 +18,6 @@ class GraphicsScene(QtGui.QGraphicsScene):
         self._segment_scene = segment_scene
         self._boxes_with_keyboard_focus = []
         self._image_item = None
-        self._pixmap = None
         # Watch modifications on the segment scene
         self._segment_scene.watch('after-segment-add', self._after_segment_add)
         self._segment_scene.watch('before-segment-remove',
@@ -31,12 +30,12 @@ class GraphicsScene(QtGui.QGraphicsScene):
         ----------
         image : QtCore.QImage
         """
-        self._pixmap = QtGui.QPixmap.fromImage(image)
+        pixmap = QtGui.QPixmap.fromImage(image)
         if self._image_item is None:
-            self._image_item = QtGui.QGraphicsPixmapItem(self._pixmap)
+            self._image_item = QtGui.QGraphicsPixmapItem(pixmap)
             self.addItem(self._image_item)
         else:
-            self._image_item.setPixmap(self._pixmap)
+            self._image_item.setPixmap(pixmap)
         self.setSceneRect(0, 0, image.width(), image.height())
 
     def pixmap(self):
@@ -46,7 +45,7 @@ class GraphicsScene(QtGui.QGraphicsScene):
         -------
         QtGui.QPixmap
         """
-        return self._pixmap
+        return self._image_item.pixmap()
 
     def segment_scene(self):
         """Return the segment scene associated with this graphics scene
@@ -175,7 +174,7 @@ class GraphicsScene(QtGui.QGraphicsScene):
         scale = min(w_scale, h_scale)
 
         # Extract the pixmap
-        pixmap = self._pixmap.copy(
+        pixmap = self.pixmap().copy(
             int(rect.left()), int(rect.top()),
             int(rect.width()), int(rect.height())
         )
