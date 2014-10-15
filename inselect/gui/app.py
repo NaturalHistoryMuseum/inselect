@@ -113,10 +113,10 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.segment_scene.set_size(w, h)
 
     def zoom_in(self):
-        self.view.scale(1.2)
+        self.view.zoom(1)
 
     def zoom_out(self):
-        self.view.scale(0.8)
+        self.view.zoom(-1)
 
     def about(self):
         QtGui.QMessageBox.about(
