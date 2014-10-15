@@ -179,9 +179,9 @@ class SegmentScene(object):
 
     def empty(self):
         """Remove all the segments"""
-        for segment in self._segments:
-            segment.prepare_for_remove()
-        self._segments = []
+        # self remove alters self._segments => cannot use a for loop
+        while self._segments:
+            self.remove(self._segments[0])
 
     def get_segment_index(self, segment):
         """Get the index of the given segment
