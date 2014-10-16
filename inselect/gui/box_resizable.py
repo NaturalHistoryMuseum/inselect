@@ -203,7 +203,7 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
 
     def _update_cursor(self, x, y):
         """Update the cursor shape."""
-        cursor = QtCore.Qt.SizeAllCursor
+        cursor = QtCore.Qt.ArrowCursor
         if (self._handles['top-left'].contains(x, y) or
                 self._handles['bottom-right'].contains(x, y)):
             cursor = QtCore.Qt.SizeFDiagCursor

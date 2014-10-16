@@ -52,6 +52,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.view = GraphicsView(self.scene, self)
         self.sidebar = SegmentListWidget(self.scene, self)
         self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
+        self.view.setCursor(QtCore.Qt.CrossCursor)
         self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.view.setRenderHint(QtGui.QPainter.Antialiasing)
         self.view.setUpdatesEnabled(True)
