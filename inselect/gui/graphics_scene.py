@@ -1,5 +1,7 @@
 from PySide import QtGui, QtCore
+
 from inselect.gui.box_resizable import BoxResizable
+from inselect.lib.utils import debug_print
 
 
 class GraphicsScene(QtGui.QGraphicsScene):
@@ -16,7 +18,7 @@ class GraphicsScene(QtGui.QGraphicsScene):
         QtGui.QGraphicsScene.__init__(self)
         # Setup members
         self._segment_scene = segment_scene
-        self._boxes_with_keyboard_focus = []
+        self._boxes_with_keyboard_focus = set()
         self._image_item = None
         # Watch modifications on the segment scene
         self._segment_scene.watch('after-segment-add', self._after_segment_add)
@@ -56,26 +58,42 @@ class GraphicsScene(QtGui.QGraphicsScene):
         """
         return self._segment_scene
 
-    def selected_segments(self):
-        """Return the currently selected segments
+    def boxes(self):
+        """Returns boxes
 
         Returns
         -------
-        list of Segment
+        list of BoxResizable instances
         """
-        segments = []
-        for box in self.selectedItems():
-            segment = self._segment_scene.get_associated_segment(box)
-            segments.append(segment)
-        return segments
+        # self.items() contains other types of objects e.g., QGraphicsPixmapItem
+        return [b for b in self.items() if isinstance(b, BoxResizable)]
 
-    def select_all_segments(self):
-        """Select all segments in the scene"""
-        for box in self.items():
+    def segments_of_boxes(self, boxes):
+        """A list of Segments associated with boxes
+
+        Parameters
+        ----------
+        boxes : iterable of BoxResizable instances
+
+        Returns
+        -------
+        list of Segment instances
+        """
+        f = self._segment_scene.get_associated_segment
+        return [f(b) for b in boxes]
+
+    def selected_segments(self):
+        """Return the currently selected segments
+        """
+        return self.segments_of_boxes(self.selectedItems())
+
+    def select_all_boxes(self):
+        """Select all boxes in the scene"""
+        for box in self.boxes():
             box.setSelected(True)
 
-    def deselect_all_segments(self):
-        """Deselect all segments in the scene"""
+    def deselect_all_boxes(self):
+        """Deselect all boxes in the scene"""
         for box in self.selectedItems():
             box.setSelected(False)
 
@@ -91,7 +109,7 @@ class GraphicsScene(QtGui.QGraphicsScene):
             segments.
         """
         if deselect_others:
-            self.deselect_all_segments()
+            self.deselect_all_boxes()
         box = segment.get_associated_object(BoxResizable)
         box.setSelected(True)
 
@@ -105,35 +123,31 @@ class GraphicsScene(QtGui.QGraphicsScene):
         """
         box = segment.get_associated_object(BoxResizable)
         box.set_keyboard_focus(focus)
-        self._boxes_with_keyboard_focus.append(box)
+        self._boxes_with_keyboard_focusself.add(box)
 
     def remove_keyboard_focus(self):
         """Remove the keyboard focus from all the segments that have it"""
         for box in self._boxes_with_keyboard_focus:
             box.set_keyboard_focus(False)
-        self._boxes_with_keyboard_focus = []
+        self._boxes_with_keyboard_focus = set()
 
     def get_selection_box(self):
         """Return the bounding box of selected items
 
         Returns
         --------
-        tuple : (top_left, bottom_right) where each tuple is formed of (x,y) or
+        tuple : (x, y, width, height)
             None if there is no selection
         """
-        tl = None
-        br = None
-        for item in self.selectedItems():
-            box = item.boundingRect()
-            if tl is None:
-                tl = (box.left(), box.top())
-                br = (box.right(), box.bottom())
-            else:
-                tl = (min(tl[0], box.left()), min(tl[1], box.top()))
-                br = (max(br[0], box.right()), max(br[1], box.bottom()))
-        if tl is None:
+        bounds = [i.boundingRect() for i in self.selectedItems()]
+        if bounds:
+            top = reduce(min, [b.top() for b in bounds])
+            left = reduce(min, [b.left() for b in bounds])
+            bottom = reduce(max, [b.bottom() for b in bounds])
+            right = reduce(max, [b.right() for b in bounds])
+            return (left, top, right-left, bottom-top)
+        else:
             return None
-        return tl, br
 
     def get_segment_pixmap(self, segment, width, height=None, fit=True,
                            background='#EEE', border=True, padding=16):

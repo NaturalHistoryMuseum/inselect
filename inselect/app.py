@@ -1,15 +1,16 @@
 """Inselect.
 
 Usage:
-    main.py
-    main.py <filename>
-    main.py --batch=input_dir [--recursive --output_dir=<output_dir>]
+    main.py [--verbose] 
+    main.py [--verbose] <filename>
+    main.py [--verbose] --batch=input_dir [--recursive --output_dir=<output_dir>]
 
 Options:
   -h --help             Show this screen.
   --version             Show version.
   --batch=<dir>         Input directory
   --recursive           Traverse directory structure recursively.
+  --verbose             Print debug output.
   --output_dir=<dir>    Output directory of CSV file results. Defaults
                         to the batch input directory.
 """
@@ -21,12 +22,15 @@ import os
 import sys
 import csv
 
+from skimage import io
+from docopt import docopt
+
+import inselect
+import inselect.lib.utils
 import inselect.settings
 from inselect.gui.app import InselectMainWindow
 from inselect.lib.segment import segment_edges
 
-from skimage import io
-from docopt import docopt
 
 def is_image_file(file_name):
     name, ext = os.path.splitext(file_name.lower())
@@ -50,7 +54,7 @@ def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
     window = InselectMainWindow(app)
     if filename:
-        window.open(filename)
+        window.open_document(filename)
     window.showMaximized()
     window.splitter.setSizes([800, 100])
     window.show()
@@ -104,8 +108,10 @@ def launch_batch(input_dir=None, output_dir=None, recursive=None):
 
 
 def launch():
-    arguments = docopt(__doc__, version='Inselect 0.1')
+    # TODO Remove docopt and use argparse - loose a dependency and gain flexibiity
+    arguments = docopt(__doc__, version='Inselect [{0}]'.format(inselect.__version__))
     inselect.settings.init()
+    inselect.lib.utils.DEBUG_PRINT = arguments['--verbose']
     if not arguments["--batch"]:
         print("Launching gui")
         filename = arguments['<filename>']

@@ -1,5 +1,14 @@
+from __future__ import print_function
+
 import os
 
+
+DEBUG_PRINT = False
+
+
+def debug_print(*args, **kwargs):
+    if DEBUG_PRINT:
+        print(*args, **kwargs)
 
 def get_corners(x1, y1, x2, y2):
     """Given two diagonally opposite corners of a box, return the top left and

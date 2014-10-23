@@ -3,18 +3,23 @@ import os
 import json
 import cv2
 
+from pathlib import Path
+
 from PySide import QtCore, QtGui
-from PySide.QtGui import QMessageBox
+
+import inselect.settings
 
 from inselect.lib import utils
-from inselect.lib.segment_scene import SegmentScene
-from inselect.lib.qt_util import read_qt_image, convert_numpy_to_qt
+from inselect.lib.document import InselectDocument
+from inselect.lib.inselect_error import InselectError
+from inselect.lib.qt_util import qimage_of_bgr
 from inselect.lib.segment import segment_edges, segment_grabcut
-from inselect.gui.sidebar import SegmentListWidget
+from inselect.lib.segment_scene import SegmentScene
+from inselect.lib.utils import debug_print
+from inselect.gui.help_dialog import HelpDialog
 from inselect.gui.graphics_scene import GraphicsScene
 from inselect.gui.graphics_view import GraphicsView
-from inselect.gui.help_dialog import HelpDialog
-import inselect.settings
+from inselect.gui.sidebar import SegmentListWidget
 
 
 class WorkerThread(QtCore.QThread):
@@ -71,49 +76,114 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.create_actions()
         self.create_menus()
 
-        self.setWindowTitle("Image Viewer")
         self.resize(500, 500)
 
-        empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
-        empty_image.fill(0xffffff)
-        self.scene.set_image(empty_image)
-        self.image = empty_image
-        if filename:
-            self.open(filename)
+        self.worker = self.progressDialog = None
 
+        # TODO LH Remove the need for empty image
+        # A QImage that is shown when no document is open
+        self.empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
+        self.empty_image.fill(0xffffff)
+
+        self.empty_document()
+
+        if filename:
+            self.open_document(filename)
+
+        # TODO LH Why is this here and not in create_actions?
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
 
-    def open(self, filename=None):
+    def open_document(self, filename=None):
+        debug_print('open_document', '[{0}]'.format(str(filename)))
+
         if not filename:
             folder = inselect.settings.get("working_directory")
             filename, _ = QtGui.QFileDialog.getOpenFileName(
-                self, "Open File", folder)
+                self, "Open", folder, "inselect files (*.inselect)")
+
+
         if filename:
-            path = os.path.normpath(os.path.dirname(filename))
-            inselect.settings.set_value('working_directory', path)
-            self.filename = filename
-            image = read_qt_image(filename)
-            if image.isNull():
-                QtGui.QMessageBox.information(self, "Image Viewer",
-                                              "Cannot load %s." % filename)
-                return
+            filename = Path(filename)
+            document = InselectDocument.load(filename)
+            inselect.settings.set_value('working_directory', str(filename.parent))
+
+            if document.thumbnail:
+                debug_print('Will display thumbnail')
+                image_array = document.thumbnail.array
+            else:
+                debug_print('Will display full-res scan')
+                image_array = document.scanned.array
+
+            qimage = qimage_of_bgr(image_array)
+
             # Setup GUI actions
-            w, h = image.width(), image.height(),
-            self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
-            self.segment_image_visible = False
-            self.toggle_segment_action.setEnabled(False)
-            self.segment_action.setEnabled(True)
-            self.export_action.setEnabled(True)
-            self.zoom_in_action.setEnabled(True)
-            self.zoom_out_action.setEnabled(True)
-            self.save_action.setEnabled(True)
-            self.import_action.setEnabled(True)
+            w, h = qimage.width(), qimage.height()
+
             # Update the graphics scene, segment scene and sidebar elements
             self.segment_scene.empty()
             self.sidebar.clear()
-            self.scene.set_image(image)
+            self.scene.set_image(qimage)
             self.segment_scene.set_size(w, h)
-            self.image = image
+
+            self.document = document
+            self.image_array = image_array
+            self.qimage = qimage
+            self.document_path = filename
+
+            # TODO LH Prefer setWindowFilePath to setWindowTitle?
+            self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
+
+            for item in document.items:
+                rect = item['rect']
+                self.segment_scene.add_normalized(
+                    (rect[0], rect[1]),
+                    (rect[0] + rect[2], rect[1] + rect[3]),
+                    item['fields']
+                )
+
+            self.sync_ui()
+
+    def save_document(self):
+        debug_print('save_document')
+        items = []
+
+        for segment in self.segment_scene.segments():
+           items.append({
+               'rect': [segment.left(normalized=True),
+                        segment.top(normalized=True),
+                        segment.width(normalized=True),
+                        segment.height(normalized=True)],
+               'fields': segment.fields()
+               })
+        self.document.set_items(items)
+        self.document.save()
+
+    def close_document(self):
+        debug_print('close_document')
+        # TODO LH If not dirty or dirty and user saved
+
+        self.empty_document()
+
+    def empty_document(self):
+        """Creates an empty document
+        """
+        debug_print('empty_document')
+        self.document = None
+
+        self.scene.set_image(self.empty_image)
+        self.qimage = self.empty_image
+        self.image_array = None
+        self.segment_display = None
+        self.segment_image_visible = False
+
+        # TODO LH Prefer setWindowFilePath to setWindowTitle?
+        self.setWindowTitle("inselect")
+
+        self.view.delete_all_boxes()
+
+        self.sync_ui()
+
+        # TODO LH Default zoom
 
     def zoom_in(self):
         self.view.zoom(1)
@@ -134,16 +204,25 @@ class InselectMainWindow(QtGui.QMainWindow):
         d.exec_()
 
     def worker_finished(self, rects, display):
+        debug_print('worker_finished')
+        worker, self.worker = self.worker, None
         self.progressDialog.hide()
-        window = self.worker.resegment_window
+        self.progressDialog = None
+
+        self.toggle_segment_action.setEnabled(True)
+        window = worker.resegment_window
         if window:
+            if not self.segment_display:
+                h, w = self.image_array.shape[:2]
+                self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
             x, y, w, h = window
             self.segment_display[y:y+h, x:x+w] = display
             # removes the selected box before replacing it with resegmentations
-            self.segment_scene.remove(self.worker.selected)
+            self.segment_scene.remove(worker.selected)
         else:
+            self.view.delete_all_boxes()
             self.segment_display = display.copy()
-        self.toggle_segment_action.setEnabled(True)
+
         if self.segment_image_visible:
             self.display_image(self.segment_display)
         # add detected boxes
@@ -155,62 +234,43 @@ class InselectMainWindow(QtGui.QMainWindow):
             h += 2 * h * self.padding
             self.segment_scene.add((x, y), (x + w, y + h))
 
+        self.sync_ui()
+
     def segment(self):
-        self.progressDialog = QtGui.QProgressDialog(self)
-        self.progressDialog.setWindowTitle("Segmenting...")
-        self.progressDialog.setValue(0)
-        self.progressDialog.setMaximum(0)
-        self.progressDialog.setMinimum(0)
-        self.progressDialog.show()
-        image = cv2.imread(self.filename)
-        resegment_window = None
-        # if object selected, resegment the window
-        selected = self.scene.selected_segments()
-        if selected:
-            selected = selected[0]
-            window_rect = selected.get_q_rect_f()
-            p = window_rect.topLeft()
-            resegment_window = [p.x(), p.y(), window_rect.width(),
-                                window_rect.height()]
-        self.worker = WorkerThread(image, resegment_window, selected)
-        self.worker.results.connect(self.worker_finished)
-        self.worker.start()
+        # TODO LH Should be modal
+        # TODO LH Allow cancel
+        # TODO LH Possible to show progress?
 
-    def export(self):
-        path = QtGui.QFileDialog.getExistingDirectory(
-            self, "Export Destination", QtCore.QDir.currentPath())
-        filename = self.filename
-        # check for tiff file image
-        extension = [".tif", ".tiff", ".TIF", ".TIFF"]
-        target_name, _ = os.path.splitext(self.filename)
-        for ext in extension:
-            if os.path.exists(target_name + ext):
-                msgBox = QMessageBox()
-                msgBox.setText("Tiff file detected in input directory")
-                msgBox.setInformativeText("Extract images from tiff file?")
-                msgBox.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
-                result = msgBox.exec_()
-                if result == QMessageBox.Ok:
-                    filename = target_name + ext
-                break
-
-        image = cv2.imread(filename)
-        field_defaults = [(field, '-') for field in inselect.settings.get('annotation_fields')]
-        export_template = inselect.settings.get('export_template')
-        image_names = []
-        for i, segment in enumerate(self.segment_scene.segments()):
-            b = segment.get_q_rect_f()
-            x, y, w, h = b.x(), b.y(), b.width(), b.height()
-            extract = image[y:y+h, x:x+w]
-            # Generate file name from template
-            placeholders = dict(field_defaults + segment.fields().items())
-            file_name = utils.unique_file_name(path, export_template.format(**placeholders), '.png')
-            image_names.append(file_name)
-            cv2.imwrite(file_name, extract)
-        self._save_box_data(utils.unique_file_name(path, 'metadata', '.json'), image_names)
+        if self.worker:
+            raise InselectError('Reenter segment()')
+        else:
+            debug_print('segment')
+            self.toggle_segment_action.setEnabled(True)
+            self.progressDialog = QtGui.QProgressDialog(self)
+            self.progressDialog.setWindowTitle("Segmenting...")
+            self.progressDialog.setCancelButton(None)
+            self.progressDialog.setValue(0)
+            self.progressDialog.setMaximum(0)
+            self.progressDialog.setMinimum(0)
+            self.progressDialog.show()
+            resegment_window = None
+            # if object selected, resegment the window
+            selected = self.scene.selected_segments()
+            if selected:
+                selected = selected[0]
+                window_rect = selected.get_q_rect_f()
+                p = window_rect.topLeft()
+                resegment_window = [p.x(), p.y(), window_rect.width(),
+                                    window_rect.height()]
+            self.worker = WorkerThread(self.image_array, resegment_window, selected)
+            self.worker.results.connect(self.worker_finished)
+            self.worker.start()
 
     def select_all(self):
         self.view.select_all()
+
+    def select_none(self):
+        self.view.select_none()
 
     def display_image(self, image):
         """Displays an image in the user interface.
@@ -239,147 +299,81 @@ class InselectMainWindow(QtGui.QMainWindow):
         if self.segment_image_visible:
             image = self.segment_display
         else:
-            image = self.image
+            image = self.qimage
         self.display_image(image)
 
     def create_actions(self):
+        # File menu
         self.open_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DirIcon),
-            "&Open Image", self, shortcut="ctrl+O",
-            triggered=self.open)
-
+            self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton),
+            "&Open...", self, shortcut="ctrl+O", triggered=self.open_document)
+        self.save_action = QtGui.QAction(
+            self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton),
+            "&Save", self, shortcut="ctrl+s", enabled=False,
+            triggered=self.save_document)
+        self.close_action = QtGui.QAction(
+            "&Close", self, shortcut="ctrl+w", triggered=self.close_document)
         self.exit_action = QtGui.QAction(
             "E&xit", self, shortcut="alt+f4", triggered=self.close)
+        # TODO LH Also Ctrl+Q?
 
-        self.select_all_action = QtGui.QAction(
-            "Select &All", self, shortcut="ctrl+A", triggered=self.select_all)
-
-        self.zoom_in_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ArrowUp),
-            "Zoom &In", self, enabled=False, shortcut="Ctrl++",
-            triggered=self.zoom_in)
-
-        self.zoom_out_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ArrowDown),
-            "Zoom &Out", self, enabled=False, shortcut="Ctrl+-",
-            triggered=self.zoom_out)
-
-        self.toggle_segment_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ComputerIcon),
-            "&Display segmentation", self, shortcut="f3", enabled=False,
-            statusTip="Display segmentation image", checkable=True,
-            triggered=self.toggle_segment_image)
-
+        # Edit menu
         self.toggle_padding_action = QtGui.QAction(
             "&Toggle padding", self, shortcut="", enabled=True,
             statusTip="Toggle padding", checkable=True,
             triggered=self.toggle_padding)
-
-        self.about_action = QtGui.QAction("&About", self, triggered=self.about)
-
-        self.help_action = QtGui.QAction("&Help", self, triggered=self.help)
-
+        self.select_all_action = QtGui.QAction(
+            "Select &All", self, shortcut="ctrl+A", triggered=self.select_all)
+        self.select_none_action = QtGui.QAction(
+            "Select &None", self, shortcut="ctrl+D", triggered=self.select_none)
         self.segment_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ComputerIcon),
+            self.style().standardIcon(QtGui.QStyle.SP_BrowserReload),
             "&Segment", self, shortcut="f5", enabled=False,
             statusTip="Segment",
             triggered=self.segment)
 
-        self.save_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DesktopIcon),
-            "&Save Boxes", self, shortcut="ctrl+s", enabled=False,
-            statusTip="Save Boxes",
-            triggered=self.save_boxes)
+        # View menu
+        self.zoom_in_action = QtGui.QAction(
+            self.style().standardIcon(QtGui.QStyle.SP_ArrowUp),
+            "Zoom &In", self, enabled=False, shortcut="Ctrl++",
+            triggered=self.zoom_in)
+        self.zoom_out_action = QtGui.QAction(
+            self.style().standardIcon(QtGui.QStyle.SP_ArrowDown),
+            "Zoom &Out", self, enabled=False, shortcut="Ctrl+-",
+            triggered=self.zoom_out)
+        self.toggle_segment_action = QtGui.QAction(
+            "&Display segmentation", self, shortcut="f3", enabled=False,
+            statusTip="Display segmentation image", checkable=True,
+            triggered=self.toggle_segment_image)
 
-        self.import_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DesktopIcon),
-            "&Import Boxes", self, shortcut="ctrl+i", enabled=False,
-            statusTip="Import Boxes",
-            triggered=self.import_boxes)
-
-        self.export_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_FileIcon),
-            "&Export Images...", self, shortcut="", enabled=False,
-            statusTip="Export",
-            triggered=self.export)
-
-        self.settings_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_MessageBoxInformation),
-            "Settings", self, triggered=self.open_settings_dialog)
-
-    def import_boxes(self):
-        files, filtr = QtGui.QFileDialog.getOpenFileNames(
-            self,
-            "QFileDialog.getOpenFileNames()", "data",
-            "All Files (*);;Text Files (*.json)", "",
-            QtGui.QFileDialog.Options())
-
-        if files:
-            for file_name in files:
-                data = json.load(open(file_name))
-                for item in data["items"]:
-                    rect = [float(x) for x in item['rect']]
-                    self.segment_scene.add_normalized(
-                        (rect[0], rect[1]),
-                        (rect[0] + rect[2], rect[1] + rect[3]),
-                        item['fields']
-                    )
-
-    def save_boxes(self):
-        file_name, filtr = QtGui.QFileDialog.getSaveFileName(
-            self,
-            "QFileDialog.getSaveFileName()",
-            self.filename + ".json",
-            "All Files (*);;json Files (*.json)", "",
-            QtGui.QFileDialog.Options())
-        if file_name:
-            self._save_box_data(file_name)
-
-    def _save_box_data(self, file_name, image_names=None):
-        data = {'image_name': self.filename}
-        data["items"] = []
-        for i, segment in enumerate(self.segment_scene.segments()):
-            export = {
-                'rect': [segment.left(normalized=True),
-                         segment.top(normalized=True),
-                         segment.width(normalized=True),
-                         segment.height(normalized=True)],
-                'fields': segment.fields()
-            }
-            if image_names:
-                export['image_name'] = image_names[i]
-            data['items'].append(export)
-        json.dump(data, open(file_name, "w"), indent=4)
+        # Help menu
+        self.about_action = QtGui.QAction("&About", self, triggered=self.about)
+        self.help_action = QtGui.QAction("&Help", self, triggered=self.help)
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
+        self.toolbar.addAction(self.save_action)
         self.toolbar.addAction(self.segment_action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
-        self.toolbar.addAction(self.save_action)
-        self.toolbar.addAction(self.import_action)
-        self.toolbar.addAction(self.export_action)
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QtGui.QMenu("&File", self)
         self.fileMenu.addAction(self.open_action)
-        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.save_action)
-        self.fileMenu.addAction(self.import_action)
-        self.fileMenu.addAction(self.export_action)
-
-        self.fileMenu.addSeparator()
-        self.fileMenu.addAction(self.settings_action)
-
+        self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
         self.editMenu = QtGui.QMenu("&Edit", self)
         self.editMenu.addAction(self.toggle_padding_action)
+        self.editMenu.addAction(self.select_all_action)
+        self.editMenu.addAction(self.select_none_action)
+        self.fileMenu.addSeparator()
+        self.editMenu.addAction(self.segment_action)
 
         self.viewMenu = QtGui.QMenu("&View", self)
-        self.viewMenu.addAction(self.select_all_action)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
         self.viewMenu.addAction(self.toggle_segment_action)
@@ -393,5 +387,20 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
-    def open_settings_dialog(self):
-        inselect.settings.open_settings_dialog()
+    def sync_ui(self):
+        """Synchronise the user interface with the application state
+        """
+        if self.document:
+            self.toggle_segment_action.setEnabled(self.segment_display is not None)
+            self.segment_action.setEnabled(True)
+            self.zoom_in_action.setEnabled(True)
+            self.zoom_out_action.setEnabled(True)
+            self.save_action.setEnabled(True)
+            self.close_action.setEnabled(True)
+        else:
+            self.toggle_segment_action.setEnabled(False)
+            self.segment_action.setEnabled(False)
+            self.zoom_in_action.setEnabled(False)
+            self.zoom_out_action.setEnabled(False)
+            self.save_action.setEnabled(False)
+            self.close_action.setEnabled(False)
