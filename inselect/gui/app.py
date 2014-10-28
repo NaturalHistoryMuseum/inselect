@@ -157,6 +157,11 @@ class InselectMainWindow(QtGui.QMainWindow):
                })
         self.document.set_items(items)
         self.document.save()
+        res = QtGui.QMessageBox.question(self, 'Write cropped specimen images?',
+            'Write cropped specimen images?', QtGui.QMessageBox.No,
+            QtGui.QMessageBox.Yes)
+        if res==QtGui.QMessageBox.Yes:
+            self.document.save_crops()
 
     def close_document(self):
         debug_print('close_document')
@@ -281,7 +286,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             Image to be displayed in viewer.
         """
         if isinstance(image, np.ndarray):
-            image = convert_numpy_to_qt(image)
+            image = qimage_of_bgr(image)
         self.scene._image_item.setPixmap(QtGui.QPixmap.fromImage(image))
 
     def toggle_padding(self):

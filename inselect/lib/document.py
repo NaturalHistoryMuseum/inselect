@@ -1,4 +1,6 @@
 import json
+import shutil
+import tempfile
 
 from itertools import izip
 from pathlib import Path
@@ -9,7 +11,6 @@ from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
-VERSION = 1
 
 def validate_normalised(boxes):
     # TODO LH raise error on first failure
@@ -35,6 +36,13 @@ class InselectImage(object):
         self._path = path
         self._npimage = None
 
+    def __repr__(self):
+        return "InselectImage('{0}')".format(str(self._path))
+
+    def __str__(self):
+        loaded = 'Unloaded' if self._npimage is None else 'Loaded'
+        return "InselectImage ['{0}'] [{1}]".format(str(self._path), loaded)
+
     @property
     def path(self):
         return self._path
@@ -57,7 +65,7 @@ class InselectImage(object):
         validate_normalised(boxes)
         h, w = self.array.shape[:2]
         for left, top, width, height in boxes:
-            yield Rect(int(w*left), int(h*top), int(w*(left+width)), int(h*(top+height)))
+            yield Rect(int(w*left), int(h*top), int(w*width), int(h*height))
 
     def validate_in_bounds(self, boxes):
         h, w = self.array.shape[:2]
@@ -70,8 +78,8 @@ class InselectImage(object):
         self.validate_in_bounds(boxes)
         h, w = self.array.shape[:2]
         for left, top, width, height in boxes:
-            yield Rect(float(left)/w, float(top)/h, float(left+width)/w,
-                       float(top+height)/h)
+            yield Rect(float(left)/w, float(top)/h, float(width)/w,
+                       float(height)/h)
 
     def save_crops(self, normalised, paths):
         for box,path in izip(self.from_normalised(normalised), paths):
@@ -84,20 +92,38 @@ class InselectDocument(object):
     """Simple represention of an Inselect document
     """
 
+    VERSION = 1
+
     # TODO LH repr
     # TODO LH str
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rects instances within item
 
-    def __init__(self, scanned, thumbnail, items):
+    def __init__(self, scanned, items):
         validate_normalised([i['rect'] for i in items])
 
-        self.scanned, self.thumbnail, self.items = scanned, thumbnail, items
-        self.modified = False
+        self.scanned = InselectImage(scanned)
+
+        thumbnail = scanned.parent / (scanned.stem + '_thumbnail.jpg')
+        self.thumbnail = InselectImage(thumbnail) if thumbnail.is_file() else None
+
+        self._items = items
+
+    def __repr__(self):
+        s = "InselectDocument ['{0}'] [{1} items]"
+        return s.format(str(self.scanned.path), len(self._items))
+
+    @property
+    def crops_dir(self):
+        return self.scanned.path.parent / (self.scanned.path.stem + '_crops')
+
+    @property
+    def items(self):
+        return self._items
 
     def set_items(self, items):
-        _validate_boxes(items)
-        self.items = items
+        validate_normalised(i['rect'] for i in items)
+        self._items = items
 
     @classmethod
     def load(cls, path):
@@ -109,32 +135,58 @@ class InselectDocument(object):
         v = doc.get('inselect version')
         if not v:
             raise InselectError('Not an inselect document')
-        elif v > VERSION:
+        elif v > cls.VERSION:
             raise InselectError('Unsupported version [{0}]'.format(v))
 
-        scanned = path.parent / (str(path.stem) + doc['scanned extension'])
-        scanned = InselectImage(scanned)
-
-        thumbnail = path.parent / (str(path.stem) + '_thumbnail.jpg')
-        if thumbnail.is_file():
-            thumbnail = InselectImage(thumbnail)
-        else:
-            thumbnail = None
+        scanned = path.with_suffix(doc['scanned extension'])
 
         debug_print('Loaded [{0}] items from [{1}]'.format(len(doc['items']), path))
 
-        return InselectDocument(scanned, thumbnail, doc['items'])
+        return InselectDocument(scanned, doc['items'])
 
     def save(self):
         path = self.scanned.path
-        path = path.parent / (str(path.stem) + '.inselect')
-        debug_print('Saving [{0}] items to [{1}]'.format(len(self.items), path))
+        path = path.with_suffix('.inselect')
+        debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
 
-        doc = { 'inselect version': VERSION,
+        doc = { 'inselect version': self.VERSION,
                 'scanned extension': self.scanned.path.suffix,
-                'items' : self.items,
+                'items' : self._items,
               }
 
         json.dump(doc, open(str(path), "w"), indent=4)
 
-        debug_print('Saved [{0}] items to [{1}]'.format(len(self.items), path))
+        debug_print('Saved [{0}] items to [{1}]'.format(len(self._items), path))
+
+    def save_crops(self, crop_ext='.tiff'):
+        # TODO LH Take a progress function, which will be passed a number 
+        #          between 0 and 100. Function can raise an exception to cancel
+        #          export.
+        # TODO LH Test that cancel of export leaves existing crops dir.
+
+        # Create temp dir alongside scan
+        tempdir = tempfile.mkdtemp(dir=str(self.scanned.path.parent),
+            prefix=self.scanned.path.stem + '_temp_crops')
+        tempdir = Path(tempdir)
+        debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
+        try:
+            # Save crops
+            boxes = [i['rect'] for i in self.items]
+            template = '{0:03}' + crop_ext
+            paths = [tempdir / template.format(1+i) for i in xrange(0, len(self.items))]
+            self.scanned.save_crops(boxes, paths)
+
+            # rm existing crops dir
+            crops_dir = self.crops_dir
+            shutil.rmtree(str(crops_dir), ignore_errors=True)
+
+            # Rename temp dir
+            tempdir.rename(crops_dir)
+            tempdir = None
+
+            debug_print('Saved [{0}] crops to [{1}]'.format(len(boxes), crops_dir))
+
+            return crops_dir
+        finally:
+            if tempdir:
+                shutil.rmtree(str(tempdir))
