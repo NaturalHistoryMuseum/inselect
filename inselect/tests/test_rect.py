@@ -29,20 +29,21 @@ class TestRect(unittest.TestCase):
         self.assertRaises(InselectError, Rect, 0, 1, 0, 3)
         self.assertRaises(InselectError, Rect, 0, 1, 2, 0)
 
-    def test_str(self):
-        self.assertEqual('0, 1, 2, 3 (Area 6)', str(self.R))
-
-    def test_repr(self):
-        self.assertEqual('Rect(0, 1, 2, 3)', repr(self.R))
-
     def test_iter(self):
-        self.assertEqual([0, 1, 2, 3], list(self.R))
+        left, top, width, height = self.R
+        self.assertEqual([0, 1, 2, 3], [left, top, width, height])
 
     def test_area(self):
         self.assertEqual(6, self.R.area)
 
     def test_coordinates(self):
         self.assertEqual(Coordinates(0, 1, 2, 4), self.R.coordinates)
+
+    def test_topleft(self):
+        self.assertEqual(Point(0, 1), self.R.topleft)
+
+    def test_bottomright(self):
+        self.assertEqual(Point(2, 4), self.R.bottomright)
 
     def test_centre(self):
         self.assertEqual(Point(1, 2), self.R.centre)

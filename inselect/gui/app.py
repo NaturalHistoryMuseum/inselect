@@ -136,9 +136,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             for item in document.items:
                 rect = item['rect']
                 self.segment_scene.add_normalized(
-                    (rect[0], rect[1]),
-                    (rect[0] + rect[2], rect[1] + rect[3]),
-                    item['fields']
+                    rect.topleft, rect.bottomright, item['fields']
                 )
 
             self.sync_ui()

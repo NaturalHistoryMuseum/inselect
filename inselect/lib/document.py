@@ -2,6 +2,7 @@ import json
 import shutil
 import tempfile
 
+from copy import deepcopy
 from itertools import izip
 from pathlib import Path
 
@@ -97,9 +98,10 @@ class InselectDocument(object):
     # TODO LH repr
     # TODO LH str
     # TODO LH __eq__, __ne__?
-    # TODO LH Store Rects instances within item
+    # TODO LH Store Rect instances within items
 
     def __init__(self, scanned, items):
+        items = self._preprocess_items(items)
         validate_normalised([i['rect'] for i in items])
 
         self.scanned = InselectImage(scanned)
@@ -114,6 +116,10 @@ class InselectDocument(object):
         return s.format(str(self.scanned.path), len(self._items))
 
     @property
+    def document_path(self):
+        return self.scanned.path.with_suffix('.inselect')
+
+    @property
     def crops_dir(self):
         return self.scanned.path.parent / (self.scanned.path.stem + '_crops')
 
@@ -122,8 +128,17 @@ class InselectDocument(object):
         return self._items
 
     def set_items(self, items):
+        items = deepcopy(items)
+        items = self._preprocess_items(items)
         validate_normalised(i['rect'] for i in items)
         self._items = items
+
+    def _preprocess_items(self, items):
+        # Returns items with tuples of boxes replaced with Rect instances
+        for i in xrange(0, len(items)):
+            l,t,w,h = items[i]['rect']
+            items[i]['rect'] = Rect(l,t,w,h)
+        return items
 
     @classmethod
     def load(cls, path):
@@ -145,18 +160,23 @@ class InselectDocument(object):
         return InselectDocument(scanned, doc['items'])
 
     def save(self):
-        path = self.scanned.path
-        path = path.with_suffix('.inselect')
+        path = self.document_path
         debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
+
+        # Convert Rect instances to lists
+        items = deepcopy(self._items)
+        for i in xrange(0, len(items)):
+            l,t,w,h = items[i]['rect']
+            items[i]['rect'] = [l,t,w,h]
 
         doc = { 'inselect version': self.VERSION,
                 'scanned extension': self.scanned.path.suffix,
-                'items' : self._items,
+                'items' : items,
               }
 
         json.dump(doc, open(str(path), "w"), indent=4)
 
-        debug_print('Saved [{0}] items to [{1}]'.format(len(self._items), path))
+        debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 
     def save_crops(self, crop_ext='.tiff'):
         # TODO LH Take a progress function, which will be passed a number 

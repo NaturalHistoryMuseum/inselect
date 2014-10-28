@@ -8,39 +8,37 @@ Point = collections.namedtuple('Point', ['x', 'y'])
 Coordinates = collections.namedtuple('Coordinates', ['x0', 'y0', 'x1', 'y1'])
 
 
-class Rect(object):
-    def __init__(self, left, top, width, height):
+class Rect(collections.namedtuple('Rect', ['left', 'top', 'width', 'height'])):
+    def __new__(cls, left, top, width, height):
         if left<0 or top<0 or width<=0 or height<=0:
             raise InselectError('Bad rectangle')
-        self.left, self.top, self.width, self.height = left, top, width, height
-
-    def __repr__(self):
-        return 'Rect({0}, {1}, {2}, {3})'.format(self.left,
-                                                 self.top,
-                                                 self.width,
-                                                 self.height)
-
-    def __str__(self):
-        return '{0}, {1}, {2}, {3} (Area {4})'.format(self.left,
-                                                      self.top,
-                                                      self.width,
-                                                      self.height,
-                                                      self.area)
-
-    def __iter__(self):
-        return iter( (self.left, self.top, self.width, self.height) )
+        else:
+            return super(Rect, cls).__new__(cls, left, top, width, height)
 
     @property
     def area(self):
+        "The product of width and height"
         return self.width*self.height
 
     @property
     def coordinates(self):
+        "Coordinates(left, top, right, bottom)"
         return Coordinates(self.left, self.top, self.left+self.width,
                            self.top+self.height)
 
     @property
+    def topleft(self):
+        "Point(x, y)"
+        return Point(self.left, self.top)
+
+    @property
+    def bottomright(self):
+        "Point(x, y)"
+        return Point(self.left+self.width, self.top+self.height)
+
+    @property
     def centre(self):
+        "Point(x, y)"
         return Point(self.left+self.width/2, self.top+self.height/2)
 
     def __eq__(self, other):

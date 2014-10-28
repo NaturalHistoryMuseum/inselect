@@ -2,9 +2,12 @@ import unittest
 import shutil
 import tempfile
 
+from itertools import izip
 from pathlib import Path
 
 import numpy as np
+
+import cv2
 
 from inselect.lib.document import InselectImage, InselectDocument
 from inselect.lib.document import validate_normalised
@@ -13,6 +16,15 @@ from inselect.lib.rect import Rect
 
 
 TESTDATA = Path(__file__).parent / 'test_data'
+
+
+class TestValidateNormalised(unittest.TestCase):
+    def test_validate_normalised(self):
+        validate_normalised([Rect(0,0,1,1)])
+        self.assertRaises(InselectError, validate_normalised, [(-0.1, 0,    1,   1)])
+        self.assertRaises(InselectError, validate_normalised, [( 0,  -0.1,  1,   1)])
+        self.assertRaises(InselectError, validate_normalised, [( 0,   0,    1.1, 1)])
+        self.assertRaises(InselectError, validate_normalised, [( 0,   0,    1,   1.1)])
 
 
 class TestImage(unittest.TestCase):
@@ -62,10 +74,12 @@ class TestImage(unittest.TestCase):
         self.assertEqual([Rect(0, 0, 1, 1), Rect(0, 0, 1.0/3, 1.0/19)],
                          list(i.to_normalised(boxes)))
 
-    def test_out_of_bounds(self):
+    def test_validate_in_bounds(self):
         i = InselectImage(TESTDATA / 'test_segment.png')
-        self.assertRaises(i.to_normalised([Rect(0, 0, 460, 437)]))
-        self.assertRaises(i.to_normalised([Rect(0, 0, 459, 438)]))
+        self.assertRaises(InselectError, i.validate_in_bounds, [(-1,  0, 459, 437)])
+        self.assertRaises(InselectError, i.validate_in_bounds, [( 0, -1, 459, 437)])
+        self.assertRaises(InselectError, i.validate_in_bounds, [( 0,  0, 460, 437)])
+        self.assertRaises(InselectError, i.validate_in_bounds, [( 0,  0, 459, 438)])
 
     def test_save_crops(self):
         temp = tempfile.mkdtemp()
@@ -87,14 +101,14 @@ class TestImage(unittest.TestCase):
 
 
 class TestDocument(unittest.TestCase):
-    def test_open(self):
+    def test_load(self):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
         self.assertEqual(5, len(doc.items))
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
         self.assertTrue(doc.thumbnail is None)
 
-    def test_save(self):
+    def test_load_images(self):
         source = TESTDATA / 'test_segment.inselect'
         temp = tempfile.mkdtemp()
         try:
@@ -120,6 +134,26 @@ class TestDocument(unittest.TestCase):
         finally:
              shutil.rmtree(temp)
 
+    def test_save(self):
+        source = TESTDATA / 'test_segment.inselect'
+        temp = tempfile.mkdtemp()
+        try:
+            doc_temp = Path(temp) / 'test_segment.inselect'
+            open(str(doc_temp), 'w').write(source.open().read())
+
+            scanned_temp = Path(temp) / 'test_segment.png'
+            open(str(scanned_temp), 'wb')       # File only needs to exist
+
+            items = [ {'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
+
+            d = InselectDocument.load(doc_temp)
+            d.set_items(items)
+            d.save()
+
+            self.assertEqual(items, InselectDocument.load(doc_temp).items)
+        finally:
+             shutil.rmtree(temp)
+
     def test_repr(self):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
@@ -131,12 +165,29 @@ class TestDocument(unittest.TestCase):
         doc = InselectDocument.load(path)
 
         crops_dir = doc.save_crops()
-
         try:
             self.assertTrue(crops_dir.is_dir())
             self.assertEqual(5, len(list(crops_dir.glob('*.tiff'))))
+
+            boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
+            for box,path in izip(boxes, crops_dir.glob('*.tiff')):
+                x0, y0, x1, y1 = box.coordinates
+                self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
+                                       cv2.imread(str(path))))
         finally:
              shutil.rmtree(str(crops_dir))
+
+    def test_set_items(self):
+        path = TESTDATA / 'test_segment.inselect'
+        doc = InselectDocument.load(path)
+
+        items = [ {'rect': Rect(0, 0, 0.5, 0.5)}, ]
+        doc.set_items(items)
+        self.assertEqual(items, doc.items)
+
+        # Not normalised
+        items = [ {'rect': Rect(0, 0, 1, 2)}, ]
+        self.assertRaises(InselectError, doc.set_items, items)
 
 
 if __name__=='__main__':
