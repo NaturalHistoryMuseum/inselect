@@ -21,27 +21,32 @@ def validate_normalised(boxes):
             raise InselectError('One or more boxes are not normalised')
 
 
+class CancelWriteCropsError(Exception):
+    pass
+
+
+# TODO LH InselectDocument.EXTENSION = '.inselect' - this is currently
+# duplicated all over the code
+
 class InselectImage(object):
     """Simple representation of an inselect image
     """
 
-    # TODO LH repr
-    # TODO LH str
     # TODO LH __eq__, __ne__?
 
     def __init__(self, path):
         path = Path(path)
         if not path.is_file():
             raise InselectError('Image file [{0}] does not exist'.format(str(path)))
-
-        self._path = path
-        self._npimage = None
+        else:
+            self._path = path
+            self._array = None
 
     def __repr__(self):
         return "InselectImage('{0}')".format(str(self._path))
 
     def __str__(self):
-        loaded = 'Unloaded' if self._npimage is None else 'Loaded'
+        loaded = 'Unloaded' if self._array is None else 'Loaded'
         return "InselectImage ['{0}'] [{1}]".format(str(self._path), loaded)
 
     @property
@@ -52,15 +57,15 @@ class InselectImage(object):
     def array(self):
         """ Lazy-load np.array of the image
         """
-        if self._npimage is None:
+        if self._array is None:
             p = str(self._path)
             debug_print('Reading from image file [{0}]'.format(p))
             image = cv2.imread(p)
             if image is None:
                 raise InselectError('[{0}] could not be read as an image'.format(p))
             else:
-                self._npimage = image
-        return self._npimage
+                self._array = image
+        return self._array
 
     def from_normalised(self, boxes):
         validate_normalised(boxes)
@@ -83,7 +88,10 @@ class InselectImage(object):
                        float(height)/h)
 
     def save_crops(self, normalised, paths):
-        for box,path in izip(self.from_normalised(normalised), paths):
+        "Saves crops given in normalised to paths."
+        # TODO Copy EXIF tags?
+        # TODO Make read-only?
+        for box, path in izip(self.from_normalised(normalised), paths):
             x0, y0, x1, y1 = box.coordinates
             cv2.imwrite(str(path), self.array[y0:y1, x0:x1])
             debug_print('Wrote [{0}]'.format(path))
@@ -95,8 +103,6 @@ class InselectDocument(object):
 
     VERSION = 1
 
-    # TODO LH repr
-    # TODO LH str
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
 
@@ -106,7 +112,7 @@ class InselectDocument(object):
 
         self.scanned = InselectImage(scanned)
 
-        thumbnail = scanned.parent / (scanned.stem + '_thumbnail.jpg')
+        thumbnail = self._thumbnail_path()
         self.thumbnail = InselectImage(thumbnail) if thumbnail.is_file() else None
 
         self._items = items
@@ -114,6 +120,9 @@ class InselectDocument(object):
     def __repr__(self):
         s = "InselectDocument ['{0}'] [{1} items]"
         return s.format(str(self.scanned.path), len(self._items))
+
+    def _thumbnail_path(self):
+        return self.scanned.path.parent / (self.scanned.path.stem + '_thumbnail.jpg')
 
     @property
     def document_path(self):
@@ -125,11 +134,14 @@ class InselectDocument(object):
 
     @property
     def items(self):
+        "Returns a list of dicts of items"
         return self._items
 
     def set_items(self, items):
+        "Replace self.items with items"
         items = deepcopy(items)
         items = self._preprocess_items(items)
+        # TODO Validate metadata
         validate_normalised(i['rect'] for i in items)
         self._items = items
 
@@ -141,7 +153,23 @@ class InselectDocument(object):
         return items
 
     @classmethod
+    def new_from_scan(cls, scanned):
+        "Creates, saves and returns a new InselectDocument on the scanned image"
+        scanned = Path(scanned)
+        if not scanned.is_file():
+            raise InselectError('Image file [{0}] does not exist'.format(scanned))
+        else:
+            debug_print('Creating on image [{0}]'.format(scanned))
+            doc = InselectDocument(scanned, items=[])
+            if doc.document_path.is_file():
+                raise InselectError('Document file [{0}] already exists'.format(doc.document_path))
+            else:
+                doc.save()
+                return doc
+
+    @classmethod
     def load(cls, path):
+        "Returns a new InselectDocument"
         debug_print('Loading from [{0}]'.format(path))
 
         path = Path(path)
@@ -160,6 +188,8 @@ class InselectDocument(object):
         return InselectDocument(scanned, doc['items'])
 
     def save(self):
+        "Saves to self.document_path"
+        # TODO LH Clear existing crops dir?
         path = self.document_path
         debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
 
@@ -178,7 +208,15 @@ class InselectDocument(object):
 
         debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 
-    def save_crops(self, crop_ext='.tiff'):
+    def save_crops_from_image(self, dir, image):
+        "Saves images cropped from image to dir. dir must exist."
+        boxes = [i['rect'] for i in self.items]
+        template = '{0:03}' + image.path.suffix
+        paths = [dir / template.format(1+i) for i in xrange(0, len(self.items))]
+        image.save_crops(boxes, paths)
+
+    def save_crops(self):
+        "Saves images cropped from self.scanned to self.crops_dir"
         # TODO LH Take a progress function, which will be passed a number 
         #          between 0 and 100. Function can raise an exception to cancel
         #          export.
@@ -191,10 +229,7 @@ class InselectDocument(object):
         debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
         try:
             # Save crops
-            boxes = [i['rect'] for i in self.items]
-            template = '{0:03}' + crop_ext
-            paths = [tempdir / template.format(1+i) for i in xrange(0, len(self.items))]
-            self.scanned.save_crops(boxes, paths)
+            self.save_crops_from_image(tempdir, self.scanned)
 
             # rm existing crops dir
             crops_dir = self.crops_dir
@@ -204,9 +239,33 @@ class InselectDocument(object):
             tempdir.rename(crops_dir)
             tempdir = None
 
-            debug_print('Saved [{0}] crops to [{1}]'.format(len(boxes), crops_dir))
+            debug_print('Saved [{0}] crops to [{1}]'.format(len(self.items), crops_dir))
 
             return crops_dir
         finally:
             if tempdir:
                 shutil.rmtree(str(tempdir))
+
+    def ensure_thumbnail(self, width=4096):
+        if self.thumbnail is None:
+            p = self._thumbnail_path()
+
+            # File might have been created since this instance
+            if not p.is_file():
+                debug_print('Creating [{0}] with width of [{1}] pixels'.format(p, width))
+                # TODO LH Sensible limits?
+                # TODO LH What if self.scanned.width<width?
+                min, max = 512, 8192
+                if not min<width<max:
+                    raise InselectError('width should be between [{0}] and [{1}]'.format(min, max))
+                else:
+                    img = self.scanned.array
+                    factor  = float(width)/img.shape[1]
+                    debug_print('Resizing to [{0}] pixels wide'.format(width))
+                    thumbnail = cv2.resize(img, (0,0), fx=factor, fy=factor)
+                    debug_print('Writing to [{0}]'.format(p))
+                    # TODO Copy EXIF tags?
+                    cv2.imwrite(str(p), thumbnail)
+
+            # Load it
+            self.thumbnail = InselectImage(p)

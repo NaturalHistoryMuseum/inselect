@@ -1,7 +1,9 @@
 from __future__ import print_function
 
 import os
+import stat
 
+from pathlib import Path
 
 DEBUG_PRINT = False
 
@@ -31,29 +33,7 @@ def get_corners(x1, y1, x2, y2):
         y1, y2 = y2, y1
     return (x1, y1), (x2, y2)
 
-
-def unique_file_name(path, base, suffix):
-    """Return a unique file name by using numerical suffixes
-
-    Parameters
-    ----------
-    path : str
-        Path to create the file in
-    base : str
-        Base file name
-    suffix : str
-        File name suffix
-
-    Returns
-    -------
-    str
-        A unique file name, with the path prepended and suffix appended
-    """
-    base_name = os.path.join(path, base)
-    file_name = base_name + suffix
-    if os.path.exists(file_name):
-        count = 1
-        while os.path.exists(base_name + "-" + str(count) + suffix):
-            count += 1
-        file_name = base_name + "-" + str(count) + suffix
-    return file_name
+def make_readonly(path):
+    path = Path(path)
+    mode = path.stat()[stat.ST_MODE]
+    path.chmod(mode ^ (stat.S_IWUSR & stat.S_IWGRP & stat.S_IWOTH))

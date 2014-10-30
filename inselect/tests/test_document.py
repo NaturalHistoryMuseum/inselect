@@ -18,6 +18,8 @@ from inselect.lib.rect import Rect
 TESTDATA = Path(__file__).parent / 'test_data'
 
 
+# TODO LH Test read-only attributes
+
 class TestValidateNormalised(unittest.TestCase):
     def test_validate_normalised(self):
         validate_normalised([Rect(0,0,1,1)])
@@ -28,9 +30,12 @@ class TestValidateNormalised(unittest.TestCase):
 
 
 class TestImage(unittest.TestCase):
-    def test_open(self):
-        i = InselectImage(TESTDATA / 'test_segment.png')
-        self.assertFalse(i._npimage)
+    def test_path(self):
+        p = TESTDATA / 'test_segment.png'
+        i = InselectImage(p)
+        self.assertEqual(p, i.path)
+        with self.assertRaises(AttributeError):
+            i.path = ''
 
     def test_non_existent_file(self):
         self.assertRaises(InselectError, InselectImage, TESTDATA / 'i am not a file.png')
@@ -55,7 +60,10 @@ class TestImage(unittest.TestCase):
 
     def test_array(self):
         i = InselectImage(TESTDATA / 'test_segment.png')
+        self.assertFalse(i._array)
         self.assertEqual((437, 459), i.array.shape[:2])
+        with self.assertRaises(AttributeError):
+            i.array = ''
 
     def test_from_normalised(self):
         i = InselectImage(TESTDATA / 'test_segment.png')
@@ -104,7 +112,15 @@ class TestDocument(unittest.TestCase):
     def test_load(self):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
+
+        self.assertEqual(doc.document_path, path)
+        with self.assertRaises(AttributeError):
+            doc.document_path = ''
+
         self.assertEqual(5, len(doc.items))
+        with self.assertRaises(AttributeError):
+            doc.items = []
+
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
         self.assertTrue(doc.thumbnail is None)
 
@@ -120,15 +136,15 @@ class TestDocument(unittest.TestCase):
 
             # Document load with scanned image file present
             scanned_temp = Path(temp) / 'test_segment.png'
-            open(str(scanned_temp), 'wb')       # File only needs to exist
-            actual  = InselectDocument.load(doc_temp)
+            open(str(scanned_temp), 'w')       # File only needs to exist
+            actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
             self.assertFalse(actual.thumbnail)
 
             # Document load with scanned and thumbnail files present
             thumbnail_temp = Path(temp) / 'test_segment_thumbnail.jpg'
-            open(str(thumbnail_temp), 'wb')       # File only needs to exist
-            actual  = InselectDocument.load(doc_temp)
+            open(str(thumbnail_temp), 'w')       # File only needs to exist
+            actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
             self.assertTrue(actual.thumbnail)
         finally:
@@ -142,7 +158,7 @@ class TestDocument(unittest.TestCase):
             open(str(doc_temp), 'w').write(source.open().read())
 
             scanned_temp = Path(temp) / 'test_segment.png'
-            open(str(scanned_temp), 'wb')       # File only needs to exist
+            open(str(scanned_temp), 'w')       # File only needs to exist
 
             items = [ {'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
 
@@ -160,6 +176,12 @@ class TestDocument(unittest.TestCase):
         expected = "InselectDocument ['{0}'] [5 items]".format(str(doc.scanned.path))
         self.assertEqual(expected, repr(doc))
 
+    def test_crops_dir(self):
+        doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
+        self.assertEqual(TESTDATA / 'test_segment_crops', doc.crops_dir)
+        with self.assertRaises(AttributeError):
+            doc.crops_dir = ''
+
     def test_save_crops(self):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
@@ -167,10 +189,11 @@ class TestDocument(unittest.TestCase):
         crops_dir = doc.save_crops()
         try:
             self.assertTrue(crops_dir.is_dir())
-            self.assertEqual(5, len(list(crops_dir.glob('*.tiff'))))
+            self.assertEqual(crops_dir, doc.crops_dir)
+            self.assertEqual(5, len(list(crops_dir.glob('*.png'))))
 
             boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-            for box,path in izip(boxes, crops_dir.glob('*.tiff')):
+            for box,path in izip(boxes, crops_dir.glob('*.png')):
                 x0, y0, x1, y1 = box.coordinates
                 self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
                                        cv2.imread(str(path))))
@@ -188,6 +211,40 @@ class TestDocument(unittest.TestCase):
         # Not normalised
         items = [ {'rect': Rect(0, 0, 1, 2)}, ]
         self.assertRaises(InselectError, doc.set_items, items)
+
+    def test_new_from_scan(self):
+        temp = tempfile.mkdtemp()
+        try:
+            temp = Path(temp)
+            img = temp / 'test.jpg'
+            open(str(img), 'w')       # File only needs to exist
+
+            doc = InselectDocument.new_from_scan(img)
+            self.assertTrue(doc.document_path.is_file())
+            self.assertEqual(img, doc.scanned.path)
+
+            self.assertRaises(InselectError, InselectDocument.new_from_scan, img)
+        finally:
+             shutil.rmtree(str(temp))
+
+    def test_ensure_thumbnail(self):
+        source_doc = TESTDATA / 'test_segment.inselect'
+        source_img = TESTDATA / 'test_segment.png'
+        temp = tempfile.mkdtemp()
+        try:
+            doc_temp = Path(temp) / 'test_segment.inselect'
+            open(str(doc_temp), 'w').write(source_doc.open().read())
+
+            scan_tmp = Path(temp) / 'test_segment.png'
+            open(str(scan_tmp), 'wb').write(source_img.open('rb').read())
+
+            # Document load with no scanned image file
+            doc = InselectDocument.load(doc_temp)
+            self.assertTrue(doc.thumbnail is None)
+            doc.ensure_thumbnail(width=2048)
+            self.assertEqual(2048, doc.thumbnail.array.shape[1])
+        finally:
+             shutil.rmtree(str(temp))
 
 
 if __name__=='__main__':
