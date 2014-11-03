@@ -1,3 +1,4 @@
+import json
 import unittest
 import shutil
 import tempfile
@@ -124,6 +125,18 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
         self.assertTrue(doc.thumbnail is None)
 
+    def test_load_bad_document(self):
+        f = tempfile.NamedTemporaryFile()
+        json.dump({'x': 1}, f)
+        f.seek(0)
+        self.assertRaises(InselectError, InselectDocument.load, f.name)
+
+    def test_load_bad_version(self):
+        f = tempfile.NamedTemporaryFile()
+        json.dump({'inselect version': 1000}, f)
+        f.seek(0)
+        self.assertRaises(InselectError, InselectDocument.load, f.name)
+
     def test_load_images(self):
         source = TESTDATA / 'test_segment.inselect'
         temp = tempfile.mkdtemp()
@@ -182,6 +195,17 @@ class TestDocument(unittest.TestCase):
         with self.assertRaises(AttributeError):
             doc.crops_dir = ''
 
+    def test_crops(self):
+        path = TESTDATA / 'test_segment.inselect'
+        doc = InselectDocument.load(path)
+
+        self.assertEqual(5, len(doc.items))
+        boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
+        for box, crop in izip(boxes, doc.crops):
+            x0, y0, x1, y1 = box.coordinates
+            self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
+                                   crop))
+
     def test_save_crops(self):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
@@ -193,7 +217,7 @@ class TestDocument(unittest.TestCase):
             self.assertEqual(5, len(list(crops_dir.glob('*.png'))))
 
             boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-            for box,path in izip(boxes, crops_dir.glob('*.png')):
+            for box, path in izip(boxes, crops_dir.glob('*.png')):
                 x0, y0, x1, y1 = box.coordinates
                 self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
                                        cv2.imread(str(path))))
@@ -222,10 +246,16 @@ class TestDocument(unittest.TestCase):
             doc = InselectDocument.new_from_scan(img)
             self.assertTrue(doc.document_path.is_file())
             self.assertEqual(img, doc.scanned.path)
-
-            self.assertRaises(InselectError, InselectDocument.new_from_scan, img)
         finally:
              shutil.rmtree(str(temp))
+
+    def test_new_from_scan_doc_exists(self):
+        path = TESTDATA / 'test_segment.png'
+        self.assertRaises(InselectError, InselectDocument.new_from_scan, path)
+
+    def test_new_from_scan_no_image(self):
+        # Image does not exist
+        self.assertRaises(InselectError, InselectDocument.new_from_scan, 'i am not a file')
 
     def test_ensure_thumbnail(self):
         source_doc = TESTDATA / 'test_segment.inselect'
@@ -243,6 +273,24 @@ class TestDocument(unittest.TestCase):
             self.assertTrue(doc.thumbnail is None)
             doc.ensure_thumbnail(width=2048)
             self.assertEqual(2048, doc.thumbnail.array.shape[1])
+        finally:
+             shutil.rmtree(str(temp))
+
+    def test_ensure_thumbnail_bad_width(self):
+        source_doc = TESTDATA / 'test_segment.inselect'
+        source_img = TESTDATA / 'test_segment.png'
+        temp = tempfile.mkdtemp()
+        try:
+            doc_temp = Path(temp) / 'test_segment.inselect'
+            open(str(doc_temp), 'w').write(source_doc.open().read())
+
+            scan_tmp = Path(temp) / 'test_segment.png'
+            open(str(scan_tmp), 'wb').write(source_img.open('rb').read())
+
+            doc = InselectDocument.load(doc_temp)
+
+            self.assertRaises(InselectError, doc.ensure_thumbnail, 50)
+            self.assertRaises(InselectError, doc.ensure_thumbnail, 20000)
         finally:
              shutil.rmtree(str(temp))
 

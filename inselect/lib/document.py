@@ -87,13 +87,18 @@ class InselectImage(object):
             yield Rect(float(left)/w, float(top)/h, float(width)/w,
                        float(height)/h)
 
+    def crops(self, normalised):
+        "Iterate over crops."
+        for box in self.from_normalised(normalised):
+            x0, y0, x1, y1 = box.coordinates
+            yield self.array[y0:y1, x0:x1]
+
     def save_crops(self, normalised, paths):
         "Saves crops given in normalised to paths."
         # TODO Copy EXIF tags?
         # TODO Make read-only?
-        for box, path in izip(self.from_normalised(normalised), paths):
-            x0, y0, x1, y1 = box.coordinates
-            cv2.imwrite(str(path), self.array[y0:y1, x0:x1])
+        for crop, path in izip(self.crops(normalised), paths):
+            cv2.imwrite(str(path), crop)
             debug_print('Wrote [{0}]'.format(path))
 
 
@@ -135,7 +140,7 @@ class InselectDocument(object):
     @property
     def items(self):
         "Returns a list of dicts of items"
-        return self._items
+        return deepcopy(self._items)
 
     def set_items(self, items):
         "Replace self.items with items"
@@ -207,6 +212,11 @@ class InselectDocument(object):
         json.dump(doc, open(str(path), "w"), indent=4)
 
         debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
+
+    @property
+    def crops(self):
+        "Iterate over cropped specimen image arrays"
+        return self.scanned.crops([i['rect'] for i in self.items])
 
     def save_crops_from_image(self, dir, image):
         "Saves images cropped from image to dir. dir must exist."
