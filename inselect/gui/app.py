@@ -216,7 +216,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.toggle_segment_action.setEnabled(True)
         window = worker.resegment_window
         if window:
-            if not self.segment_display:
+            if self.segment_display is None:
                 h, w = self.image_array.shape[:2]
                 self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
             x, y, w, h = window
