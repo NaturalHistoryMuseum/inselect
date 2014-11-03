@@ -1,26 +1,28 @@
+"""Segment documents
+"""
+import argparse
 import traceback
 
 
 from pathlib import Path
 
 
+import inselect.lib.utils
+
+from inselect.lib import config
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment import segment_edges
 from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
 
-import inselect.lib.utils
-inselect.lib.utils.DEBUG_PRINT = True
-
-
 def segment_pending(dir):
     dir = Path(dir)
-    for p in dir.glob('*.inselect'):
+    for p in dir.glob('*' + InselectDocument.EXTENSION):
         doc = InselectDocument.load(p)
         if not doc.items:
             try:
-                print('Will segment [{0}]'.format(p))
+                debug_print('Will segment [{0}]'.format(p))
 
                 # TODO LH This logic belongs in a Segmenter class
                 if doc.thumbnail:
@@ -45,7 +47,16 @@ def segment_pending(dir):
         else:
             print('Skipping [{0}] as it already contains items'.format(p))
 
+def main():
+    parser = argparse.ArgumentParser(description='Segments pending documents')
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('-v', '--version', action='version', 
+                        version='%(prog)s ' + inselect.__version__)
+    args = parser.parse_args()
+
+    inselect.lib.utils.DEBUG_PRINT = args.verbose
+
+    segment_pending(config.inselect)
 
 if __name__=='__main__':
-    import config
-    segment_pending(config.inselect)
+    main()

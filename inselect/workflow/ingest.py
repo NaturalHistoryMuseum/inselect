@@ -1,16 +1,20 @@
+"""Ingest scanned images
+"""
+
+import argparse
 import stat
 import traceback
 
 from pathlib import Path
 
 
+import inselect
+import inselect.lib.utils
+
+from inselect.lib import config
 from inselect.lib.document import InselectDocument, InselectImage
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, make_readonly
-
-
-import inselect.lib.utils
-inselect.lib.utils.DEBUG_PRINT = True
 
 
 def ingest_image(source, dest):
@@ -52,7 +56,16 @@ def ingest(inbox, docs):
             print('Error ingesting [{0}]'.format(source))
             traceback.print_exc()
 
+def main():
+    parser = argparse.ArgumentParser(description='Ingests images into inselect')
+    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('-v', '--version', action='version', 
+                        version='%(prog)s ' + inselect.__version__)
+    args = parser.parse_args()
+
+    inselect.lib.utils.DEBUG_PRINT = args.verbose
+
+    ingest(config.inbox, config.inselect)
 
 if __name__=='__main__':
-    import config
-    ingest(config.inbox, config.inselect)
+    main()
