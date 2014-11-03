@@ -25,9 +25,6 @@ class CancelWriteCropsError(Exception):
     pass
 
 
-# TODO LH InselectDocument.EXTENSION = '.inselect' - this is currently
-# duplicated all over the code
-
 class InselectImage(object):
     """Simple representation of an inselect image
     """
@@ -107,6 +104,7 @@ class InselectDocument(object):
     """
 
     VERSION = 1
+    EXTENSION = '.inselect'
 
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
@@ -131,7 +129,7 @@ class InselectDocument(object):
 
     @property
     def document_path(self):
-        return self.scanned.path.with_suffix('.inselect')
+        return self.scanned.path.with_suffix(self.EXTENSION)
 
     @property
     def crops_dir(self):

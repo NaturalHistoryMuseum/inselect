@@ -98,8 +98,9 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         if not filename:
             folder = inselect.settings.get("working_directory")
+            filter = "inselect files (*{0})".format(InselectDocument.EXTENSION)
             filename, _ = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, "inselect files (*.inselect)")
+                self, "Open", folder, filter)
 
 
         if filename:
