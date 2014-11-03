@@ -1,3 +1,5 @@
+import sys
+
 from PySide import QtCore, QtGui
 
 from inselect.lib import utils
@@ -43,6 +45,11 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
     def _setup_key_navigation(self):
         """Setups the key handlers for this view"""
         self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_segments)
+        if 'darwin'==sys.platform:
+            # CMD+backspace is the OS X standard for 'delete objects'. Not all
+            # Mac keyboards have a delete key.
+            self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Backspace),
+                                 self.delete_segments)
         self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_segments)
         self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
         self.add_key_handler(QtCore.Qt.Key_Up, self.move_segments, [(0, -1)])
