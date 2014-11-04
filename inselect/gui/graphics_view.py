@@ -200,9 +200,10 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
     def annotate_segments(self):
         """Open the annotation dialog for the currently selected segments"""
         segments = self._graphics_scene.selected_segments()
-        dialog = AnnotateDialog(self._graphics_scene, segments,
-                                parent=self._parent)
-        dialog.exec_()
+        if segments:
+            dialog = AnnotateDialog(self._graphics_scene, segments,
+                                    parent=self._parent)
+            dialog.exec_()
 
     def delete_items(self, delete):
         self._remove_keyboard_focus()
