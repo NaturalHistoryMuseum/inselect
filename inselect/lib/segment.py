@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
 from random import randint
-from skimage.morphology import watershed
+
+# Breaks pyinstaller build
+# from skimage.morphology import watershed
+use_opencv_watershed = True
 
 
 def _right_sized(contour, image, container_filter=True, size_filter=True):
@@ -286,7 +289,6 @@ def segment_grabcut(image, window=None, seeds=[]):
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
     """
-    use_opencv_watershed = False
     if window:
         subimage = np.array(image)
         x, y, w, h = window

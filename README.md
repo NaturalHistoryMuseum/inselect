@@ -25,7 +25,7 @@ The installer can be found in the `dist` subdir.
 
 ## Installation under OS X
 
-We do not provide ready-built binaries for OS X. These build instructions will install inselect within a local anaconda environment.
+A Mac installer can be found [on our downloads page](). To build inselect from source:
 
 - Install [git](http://git-scm.com/download/mac) ;
 - Download the latest build of [Anaconda](https://store.continuum.io/cshop/anaconda/), Python 2.7.x build, and install using default options ;
@@ -39,19 +39,24 @@ We do not provide ready-built binaries for OS X. These build instructions will i
 
 ```shell
 ~/anaconda/bin/conda install PySide
-~/anaconda/bin/pip install docopt
+~/anaconda/bin/pip install docopt pyinstaller
+brew install upx
 ```
 
-- Install inselect source:
+- Install inselect source and build:
 
 ```shell
 ~/anaconda/bin/pip install -e git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
-```
-
-- Run inselect:
-
-```shell
-~/anaconda/bin/inselect
+VERSION=`~/anaconda/bin/python inselect.py --version | sed 's/inselect //g'`
+echo Building $VERSION
+rm -rf build dist inselect-$VERSION.dmg
+~/anaconda/bin/pyinstaller --onefile --windowed inselect.py
+plutil -replace CFBundleShortVersionString -string $VERSION dist/inselect.app/Contents/Info.plist
+install -c -m 644 data/inselect.icns dist/inselect.app/Contents/Resources/icon-windowed.icns
+install -c -m 644 data/Plecoptera_Accession_Drawer_4.jpg dist/
+install -c -m 644 data/Plecoptera_Accession_Drawer_4.inselect dist/
+rm dist/inselect
+hdiutil create inselect-$VERSION.dmg -volname inselect-$VERSION -srcfolder dist
 ```
 
 ## Installation under Linux (Global)
