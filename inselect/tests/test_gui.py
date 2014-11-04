@@ -54,7 +54,7 @@ class TestSegment(unittest.TestCase):
                 super(self.__class__, self).__init__()
                 self.eventLoop = QtCore.QEventLoop(self)
 
-            def stop_waiting(self, rects, display):                   
+            def stop_waiting(self, rects, display):
                 self.eventLoop.exit()
 
             def wait_for_input(self):
