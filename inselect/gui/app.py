@@ -3,6 +3,7 @@ import os
 import json
 import cv2
 
+from functools import wraps
 from pathlib import Path
 
 from PySide import QtCore, QtGui
@@ -20,7 +21,7 @@ from inselect.gui.help_dialog import HelpDialog
 from inselect.gui.graphics_scene import GraphicsScene
 from inselect.gui.graphics_view import GraphicsView
 from inselect.gui.sidebar import SegmentListWidget
-
+from inselect.workflow.ingest import ingest_image
 
 class WorkerThread(QtCore.QThread):
     results = QtCore.Signal(list, np.ndarray)
@@ -45,7 +46,23 @@ class WorkerThread(QtCore.QThread):
         self.results.emit(rects, display)
 
 
+def report_to_user(f):
+    """A decorator for class methods that reports exceptions to the user
+    """
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return f(self, *args, **kwargs)
+        except Exception as e:
+            QtGui.QMessageBox.critical(self, u'An error occurred',
+                u'An error occurred [{0}]'.format(e))
+            raise e
+    return wrapper
+
+
 class InselectMainWindow(QtGui.QMainWindow):
+    FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
+
     def __init__(self, app, filename=None):
         super(InselectMainWindow, self).__init__()
         # Segment container
@@ -93,15 +110,33 @@ class InselectMainWindow(QtGui.QMainWindow):
         # TODO LH Why is this here and not in create_actions?
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
 
+    @report_to_user
+    def new_document(self):
+        debug_print('new_document')
+
+        self.close_document()
+
+        # Source image
+        folder = inselect.settings.get("working_directory")
+        source, selected_filter = QtGui.QFileDialog.getOpenFileName(
+                self, "Choose image for the new inselect document", folder,
+                filter='Images (*.tiff *.png *.jpeg *.jpg)')
+
+        if source:
+            source = Path(source)
+            doc = ingest_image(source, source.parent)
+            self.open_document(doc.document_path)
+            QtGui.QMessageBox.information(self, "Document created",
+                'New inselect document [{0}] created in [{1}]'.format(doc.document_path.stem, doc.document_path.parent))
+
+    @report_to_user
     def open_document(self, filename=None):
         debug_print('open_document', '[{0}]'.format(str(filename)))
 
         if not filename:
             folder = inselect.settings.get("working_directory")
-            filter = "inselect files (*{0})".format(InselectDocument.EXTENSION)
             filename, _ = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, filter)
-
+                self, "Open", folder, self.FILE_FILTER)
 
         if filename:
             filename = Path(filename)
@@ -142,6 +177,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
             self.sync_ui()
 
+    @report_to_user
     def save_document(self):
         debug_print('save_document')
         items = []
@@ -162,12 +198,14 @@ class InselectMainWindow(QtGui.QMainWindow):
         if res==QtGui.QMessageBox.Yes:
             self.document.save_crops()
 
+    @report_to_user
     def close_document(self):
         debug_print('close_document')
         # TODO LH If not dirty or dirty and user saved
 
         self.empty_document()
 
+    @report_to_user
     def empty_document(self):
         """Creates an empty document
         """
@@ -189,12 +227,15 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         # TODO LH Default zoom
 
+    @report_to_user
     def zoom_in(self):
         self.view.zoom(1)
 
+    @report_to_user
     def zoom_out(self):
         self.view.zoom(-1)
 
+    @report_to_user
     def about(self):
         QtGui.QMessageBox.about(
             self,
@@ -202,11 +243,13 @@ class InselectMainWindow(QtGui.QMainWindow):
             inselect.settings.get('about_text')
         )
 
+    @report_to_user
     def help(self):
         """Open the help dialog"""
         d = HelpDialog(self)
         d.exec_()
 
+    @report_to_user
     def worker_finished(self, rects, display):
         debug_print('worker_finished')
         worker, self.worker = self.worker, None
@@ -240,6 +283,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         self.sync_ui()
 
+    @report_to_user
     def segment(self):
         # TODO LH Should be modal
         # TODO LH Allow cancel
@@ -270,12 +314,15 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.worker.results.connect(self.worker_finished)
             self.worker.start()
 
+    @report_to_user
     def select_all(self):
         self.view.select_all()
 
+    @report_to_user
     def select_none(self):
         self.view.select_none()
 
+    @report_to_user
     def display_image(self, image):
         """Displays an image in the user interface.
 
@@ -288,6 +335,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             image = qimage_of_bgr(image)
         self.scene._image_item.setPixmap(QtGui.QPixmap.fromImage(image))
 
+    @report_to_user
     def toggle_padding(self):
         """Action method to toggle box padding."""
         if self.padding == 0:
@@ -295,6 +343,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         else:
             self.padding = 0
 
+    @report_to_user
     def toggle_segment_image(self):
         """Action method to switch between display of segmentation image and
         actual image.
@@ -308,6 +357,8 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     def create_actions(self):
         # File menu
+        self.new_action = QtGui.QAction(
+            "&New...", self, shortcut="ctrl+N", triggered=self.new_document)
         self.open_action = QtGui.QAction(
             self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton),
             "&Open...", self, shortcut="ctrl+O", triggered=self.open_document)
@@ -364,6 +415,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QtGui.QMenu("&File", self)
+        self.fileMenu.addAction(self.new_action)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
         self.fileMenu.addAction(self.close_action)
