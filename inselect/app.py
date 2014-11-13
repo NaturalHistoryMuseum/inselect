@@ -36,7 +36,7 @@ def launch_gui(filename=None):
 
 def launch():
     # TODO Remove docopt and use argparse - loose a dependency and gain flexibiity
-    arguments = docopt(__doc__, version='Inselect [{0}]'.format(inselect.__version__))
+    arguments = docopt(__doc__, version='inselect {0}'.format(inselect.__version__))
     inselect.settings.init()
     inselect.lib.utils.DEBUG_PRINT = arguments['--verbose']
     print("Launching gui")
