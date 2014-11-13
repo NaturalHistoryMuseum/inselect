@@ -90,8 +90,10 @@ class InselectImage(object):
         # TODO Copy EXIF tags?
         # TODO Make read-only?
         for crop, path in izip(self.crops(normalised), paths):
-            cv2.imwrite(str(path), crop)
-            debug_print('Wrote [{0}]'.format(path))
+            if not cv2.imwrite(str(path), crop):
+                raise InselectError('Unable to write crop [{0}]'.format(path))
+            else:
+                debug_print('Wrote crop [{0}]'.format(path))
 
 
 class InselectDocument(object):
@@ -253,7 +255,7 @@ class InselectDocument(object):
         if self.thumbnail is None:
             p = self._thumbnail_path()
 
-            # File might have been created since this instance
+            # File might have been created after this instance
             if not p.is_file():
                 debug_print('Creating [{0}] with width of [{1}] pixels'.format(p, width))
                 # TODO LH Sensible limits?
@@ -268,7 +270,9 @@ class InselectDocument(object):
                     thumbnail = cv2.resize(img, (0,0), fx=factor, fy=factor)
                     debug_print('Writing to [{0}]'.format(p))
                     # TODO Copy EXIF tags?
-                    cv2.imwrite(str(p), thumbnail)
+                    res = cv2.imwrite(str(p), thumbnail)
+                    if not res:
+                        raise InselectError('Unable to write thumbnail [{0}]'.format(p))
 
             # Load it
             self.thumbnail = InselectImage(p)
