@@ -1,7 +1,7 @@
 import json
-import unittest
 import shutil
 import tempfile
+import unittest
 
 from itertools import izip
 from pathlib import Path
@@ -14,6 +14,7 @@ from inselect.lib.document import InselectImage, InselectDocument
 from inselect.lib.document import validate_normalised
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.rect import Rect
+from inselect.lib.utils import make_readonly
 
 
 TESTDATA = Path(__file__).parent / 'test_data'
@@ -101,10 +102,28 @@ class TestImage(unittest.TestCase):
             self.assertTrue(np.all(i.array==InselectImage(p).array))
 
             # Subsection of image
+            # Make sure that existing file is overwritten
             p = Path(temp) / 'partial.png'
+            p.open('w')    # File just needs to exist
             i.save_crops([Rect(0.1, 0.2, 0.4, 0.3)], [p])
             expected = i.array[87:218, 45:228]
             self.assertTrue(np.all(expected==InselectImage(p).array))
+        finally:
+             shutil.rmtree(temp)
+
+    def test_save_crops_read_only(self):
+        # Try to save to existing read-only file
+        temp = tempfile.mkdtemp()
+        try:
+            i = InselectImage(TESTDATA / 'test_segment.png')
+
+            p = Path(temp) / 'readonly.png'
+            p.open('w')    # File just needs to exist
+            make_readonly(p)
+
+            # Entire image
+            with self.assertRaises(InselectError):
+                i.save_crops([Rect(0, 0, 1, 1)], [p])
         finally:
              shutil.rmtree(temp)
 
@@ -142,21 +161,21 @@ class TestDocument(unittest.TestCase):
         temp = tempfile.mkdtemp()
         try:
             doc_temp = Path(temp) / 'test_segment.inselect'
-            open(str(doc_temp), 'w').write(source.open().read())
+            doc_temp.open('w').write(source.open().read())
 
             # Document load with no scanned image file
             self.assertRaises(InselectError, InselectDocument.load, doc_temp)
 
             # Document load with scanned image file present
             scanned_temp = Path(temp) / 'test_segment.png'
-            open(str(scanned_temp), 'w')       # File only needs to exist
+            scanned_temp.open('w')       # File only needs to exist
             actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
             self.assertFalse(actual.thumbnail)
 
             # Document load with scanned and thumbnail files present
             thumbnail_temp = Path(temp) / 'test_segment_thumbnail.jpg'
-            open(str(thumbnail_temp), 'w')       # File only needs to exist
+            thumbnail_temp.open('w')       # File only needs to exist
             actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
             self.assertTrue(actual.thumbnail)
@@ -168,10 +187,10 @@ class TestDocument(unittest.TestCase):
         temp = tempfile.mkdtemp()
         try:
             doc_temp = Path(temp) / 'test_segment.inselect'
-            open(str(doc_temp), 'w').write(source.open().read())
+            doc_temp.open('w').write(source.open().read())
 
             scanned_temp = Path(temp) / 'test_segment.png'
-            open(str(scanned_temp), 'w')       # File only needs to exist
+            scanned_temp.open('w')       # File only needs to exist
 
             items = [ {'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
 
@@ -241,7 +260,7 @@ class TestDocument(unittest.TestCase):
         try:
             temp = Path(temp)
             img = temp / 'test.jpg'
-            open(str(img), 'w')       # File only needs to exist
+            img.open('w')       # File only needs to exist
 
             doc = InselectDocument.new_from_scan(img)
             self.assertTrue(doc.document_path.is_file())
@@ -263,10 +282,10 @@ class TestDocument(unittest.TestCase):
         temp = tempfile.mkdtemp()
         try:
             doc_temp = Path(temp) / 'test_segment.inselect'
-            open(str(doc_temp), 'w').write(source_doc.open().read())
+            doc_temp.open('w').write(source_doc.open().read())
 
             scan_tmp = Path(temp) / 'test_segment.png'
-            open(str(scan_tmp), 'wb').write(source_img.open('rb').read())
+            scan_tmp.open('wb').write(source_img.open('rb').read())
 
             # Document load with no scanned image file
             doc = InselectDocument.load(doc_temp)
@@ -276,23 +295,25 @@ class TestDocument(unittest.TestCase):
         finally:
              shutil.rmtree(str(temp))
 
-    def test_ensure_thumbnail_bad_width(self):
+    def test_ensure_thumbnail_failures(self):
         source_doc = TESTDATA / 'test_segment.inselect'
         source_img = TESTDATA / 'test_segment.png'
         temp = tempfile.mkdtemp()
         try:
             doc_temp = Path(temp) / 'test_segment.inselect'
-            open(str(doc_temp), 'w').write(source_doc.open().read())
+            doc_temp.open('w').write(source_doc.open().read())
 
             scan_tmp = Path(temp) / 'test_segment.png'
-            open(str(scan_tmp), 'wb').write(source_img.open('rb').read())
+            scan_tmp.open('wb').write(source_img.open('rb').read())
 
             doc = InselectDocument.load(doc_temp)
 
             self.assertRaises(InselectError, doc.ensure_thumbnail, 50)
             self.assertRaises(InselectError, doc.ensure_thumbnail, 20000)
+
+            # TODO LH Assert that failure to create thumbnail raises
         finally:
-             shutil.rmtree(str(temp))
+            shutil.rmtree(str(temp))
 
 
 if __name__=='__main__':

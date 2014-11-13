@@ -7,22 +7,26 @@ import traceback
 
 from pathlib import Path
 
+# Import numpy here to prevent PyInstaller build from breaking
+# TODO LH find a better solution
+import numpy
 
 import inselect
 import inselect.lib.utils
 
-from inselect.lib import config
 from inselect.lib.document import InselectDocument, InselectImage
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, make_readonly
 
 
-def ingest_image(source, dest):
+def ingest_image(source, dest_dir):
+    dest = dest_dir / source.name
     if source!=dest and dest.is_file():
         raise InselectError('Destination image [{0}] exists'.format(dest))
     else:
         debug_print('Ingesting [{0}] to [{1}]'.format(source, dest))
-        source.rename(dest)
+        if source!=dest:
+            source.rename(dest)
 
         # Raises if the document already exists
         doc = InselectDocument.new_from_scan(dest)
@@ -50,22 +54,23 @@ def ingest(inbox, docs):
 
     for source in inbox.glob('*tiff'):
         try:
-            dest = docs / source.name
-            ingest_image(source, dest)
+            ingest_image(source, docs)
         except Exception:
-            print('Error ingesting [{0}]'.format(source))
+            print('Error reading barcodes in [{0}] [{1}]'.format(p, source))
             traceback.print_exc()
 
 def main():
     parser = argparse.ArgumentParser(description='Ingests images into inselect')
+    parser.add_argument("inbox", help='Source directory containing scanned images')
+    parser.add_argument("docs", help='Destination directory')
     parser.add_argument('--verbose', action='store_true')
-    parser.add_argument('-v', '--version', action='version', 
+    parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
     args = parser.parse_args()
 
     inselect.lib.utils.DEBUG_PRINT = args.verbose
 
-    ingest(config.inbox, config.inselect)
+    ingest(args.inbox, args.docs)
 
 if __name__=='__main__':
     main()

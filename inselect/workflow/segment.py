@@ -3,20 +3,21 @@
 import argparse
 import traceback
 
-
 from pathlib import Path
 
+# Import numpy here to prevent PyInstaller build from breaking
+# TODO LH find a better solution
+import numpy
 
 import inselect.lib.utils
 
-from inselect.lib import config
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment import segment_edges
 from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
 
-def segment_pending(dir):
+def segment(dir):
     dir = Path(dir)
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         doc = InselectDocument.load(p)
@@ -48,15 +49,16 @@ def segment_pending(dir):
             print('Skipping [{0}] as it already contains items'.format(p))
 
 def main():
-    parser = argparse.ArgumentParser(description='Segments pending documents')
+    parser = argparse.ArgumentParser(description='Segments inselect documents')
+    parser.add_argument("dir", help='Directory containing inselect documents')
     parser.add_argument('--verbose', action='store_true')
-    parser.add_argument('-v', '--version', action='version', 
+    parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
     args = parser.parse_args()
 
     inselect.lib.utils.DEBUG_PRINT = args.verbose
 
-    segment_pending(config.inselect)
+    segment(args.dir)
 
 if __name__=='__main__':
     main()
