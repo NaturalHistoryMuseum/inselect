@@ -36,4 +36,4 @@ def get_corners(x1, y1, x2, y2):
 def make_readonly(path):
     path = Path(path)
     mode = path.stat()[stat.ST_MODE]
-    path.chmod(mode ^ (stat.S_IWUSR & stat.S_IWGRP & stat.S_IWOTH))
+    path.chmod(mode ^ (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
