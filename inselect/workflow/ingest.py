@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Ingest scanned images
 """
 
@@ -56,7 +57,7 @@ def ingest(inbox, docs):
         try:
             ingest_image(source, docs)
         except Exception:
-            print('Error reading barcodes in [{0}] [{1}]'.format(p, source))
+            print('Error ingesting [{0}]'.format(source))
             traceback.print_exc()
 
 def main():
