@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Segment documents
 """
 import argparse
