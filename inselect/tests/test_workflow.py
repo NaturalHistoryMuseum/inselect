@@ -13,7 +13,6 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.workflow.ingest import ingest, ingest_image
 from inselect.workflow.segment import segment
-from inselect.workflow.read_barcodes import read_barcodes
 
 
 TESTDATA = Path(__file__).parent / 'test_data'
@@ -99,7 +98,7 @@ class TestSegment(TestWorkflow):
         # TODO LH assert that segment again does not touch this document
 
 
-# TODO LH test read_barcodes
+# TODO LH test read barcodes
 
 
 if __name__=='__main__':
