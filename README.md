@@ -32,25 +32,25 @@ A Mac installer can be found [on our downloads page](). To build inselect from s
 - Install [OpenCV](http://opencv.org/):
 
 ```shell
-~/anaconda/bin/conda install -c https://conda.binstar.org/jjhelmus opencv
+conda install -c https://conda.binstar.org/jjhelmus opencv
 ```
 
 - Install other dependencies:
 
 ```shell
-~/anaconda/bin/conda install PySide
-~/anaconda/bin/pip install docopt pyinstaller
+conda install PySide
+pip install docopt pyinstaller
 brew install upx
 ```
 
 - Install inselect source and build:
 
 ```shell
-~/anaconda/bin/pip install -e git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
-VERSION=`~/anaconda/bin/python inselect.py --version | sed 's/inselect //g'`
+pip install -e git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
+VERSION=`python inselect.py --version | sed 's/inselect //g'`
 echo Building $VERSION
 rm -rf build dist inselect-$VERSION.dmg
-~/anaconda/bin/pyinstaller --onefile --windowed inselect.py
+pyinstaller --onefile --windowed inselect.py
 plutil -replace CFBundleShortVersionString -string $VERSION dist/inselect.app/Contents/Info.plist
 install -c -m 644 data/inselect.icns dist/inselect.app/Contents/Resources/icon-windowed.icns
 install -c -m 644 data/Plecoptera_Accession_Drawer_4.jpg dist/
