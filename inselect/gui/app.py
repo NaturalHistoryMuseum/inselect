@@ -55,7 +55,7 @@ def report_to_user(f):
             return f(self, *args, **kwargs)
         except Exception as e:
             QtGui.QMessageBox.critical(self, u'An error occurred',
-                u'An error occurred [{0}]'.format(e))
+                u'An error occurred:\n{0}'.format(e))
             raise e
     return wrapper
 
