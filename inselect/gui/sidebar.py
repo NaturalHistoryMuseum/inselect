@@ -28,7 +28,7 @@ class SegmentListWidget(QtGui.QListWidget):
                                  self._before_segment_remove)
 
     def selectionChanged(self, selected_items, deselected_items):
-        self.graphics_scene.deselect_all_segments()
+        self.graphics_scene.deselect_all_boxes()
         for i in range(self.count()):
             item = self.item(i)
             selected = item.isSelected()

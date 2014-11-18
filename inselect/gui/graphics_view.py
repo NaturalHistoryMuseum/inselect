@@ -3,6 +3,7 @@ import sys
 from PySide import QtCore, QtGui
 
 from inselect.lib import utils
+from inselect.lib.utils import debug_print
 from inselect.lib.mouse_handler import MouseHandler, MouseState
 from inselect.lib.key_handler import KeyHandler
 from inselect.gui.annotator import AnnotateDialog
@@ -44,12 +45,12 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
 
     def _setup_key_navigation(self):
         """Setups the key handlers for this view"""
-        self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_segments)
+        self.add_key_handler(QtCore.Qt.Key_Delete, self.delete_selected)
         if 'darwin'==sys.platform:
             # CMD+backspace is the OS X standard for 'delete objects'. Not all
             # Mac keyboards have a delete key.
             self.add_key_handler((QtCore.Qt.ControlModifier, QtCore.Qt.Key_Backspace),
-                                 self.delete_segments)
+                                 self.delete_selected)
         self.add_key_handler(QtCore.Qt.Key_Return, self.annotate_segments)
         self.add_key_handler(QtCore.Qt.Key_Z, self.zoom_to_selection)
         self.add_key_handler(QtCore.Qt.Key_Up, self.move_segments, [(0, -1)])
@@ -162,8 +163,8 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         """Zoom the view to the current selection"""
         box = self._graphics_scene.get_selection_box()
         if box is not None:
-            self.fitInView(box[0][0], box[0][1], box[1][0] - box[0][0],
-                           box[1][1] - box[0][1], QtCore.Qt.KeepAspectRatio)
+            x, y, width, height = box
+            self.fitInView(x, y, width, height, QtCore.Qt.KeepAspectRatio)
 
     def zoom(self, delta, factor=0.2):
         """Zoom the view in or out.
@@ -206,25 +207,33 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
     def annotate_segments(self):
         """Open the annotation dialog for the currently selected segments"""
         segments = self._graphics_scene.selected_segments()
-        dialog = AnnotateDialog(self._graphics_scene, segments,
-                                parent=self._parent)
-        dialog.exec_()
+        if segments:
+            dialog = AnnotateDialog(self._graphics_scene, segments,
+                                    parent=self._parent)
+            dialog.exec_()
 
-    def delete_segments(self):
-        """Delete the currently selected segments"""
+    def delete_items(self, delete):
         self._remove_keyboard_focus()
-        for segment in self._graphics_scene.selected_segments():
+        for segment in delete:
             self._segment_scene.remove(segment)
 
-    def deselect_all(self):
-        """Deselect all items in the scene"""
+    def delete_all_boxes(self):
+        all_boxes = self._graphics_scene.boxes()
+        self.delete_items(self._graphics_scene.segments_of_boxes(all_boxes))
+
+    def delete_selected(self):
+        """Delete the currently selected segments"""
+        self.delete_items(self._graphics_scene.selected_segments())
+
+    def select_none(self):
+        """Clear selection"""
         self._graphics_scene.remove_keyboard_focus()
-        self._graphics_scene.deselect_all_segments()
+        self._graphics_scene.deselect_all_boxes()
 
     def select_all(self):
         """Select all items in the scene"""
         self._graphics_scene.remove_keyboard_focus()
-        self._graphics_scene.select_all_segments()
+        self._graphics_scene.select_all_boxes()
 
     def select_next(self):
         """Select the next object in the scene"""
@@ -264,8 +273,8 @@ class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):
         """
         box = self._graphics_scene.get_selection_box()
         if box is not None:
-            self.ensureVisible(box[0][0], box[0][1], box[1][0] - box[0][0],
-                               box[1][1] - box[0][1])
+            x, y, width, height = box
+            self.ensureVisible(x, y, width, height)
 
     def _start_new_box(self, x, y):
         """Start drawing a new box

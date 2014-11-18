@@ -1,0 +1,2 @@
+class InselectError(Exception):
+    pass

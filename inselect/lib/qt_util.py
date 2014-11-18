@@ -1,27 +1,21 @@
-from skimage import io, img_as_ubyte
-from PySide import QtGui
+import cv2
 import numpy as np
 
+from PySide import QtGui
 
-def read_qt_image(filename):
-    """Read image from file and convert to Qt format.
 
+
+def qimage_of_bgr(bgr):
+    """ A QtGui.QImage representation of a BGR numpy array
     """
-    return convert_numpy_to_qt(io.imread(filename, plugin='matplotlib'))
+    bgr = cv2.cvtColor(bgr.astype('uint8'), cv2.COLOR_BGR2RGB)
+    bgr = np.ascontiguousarray(bgr)
+    qt_image = QtGui.QImage(bgr.data,
+                            bgr.shape[1], bgr.shape[0],
+                            bgr.strides[0], QtGui.QImage.Format_RGB888)
 
-
-def convert_numpy_to_qt(num_array):
-    """Convert numpy array to Qt format.
-
-    """
-    image = img_as_ubyte(num_array)[..., :3]
-    image = np.ascontiguousarray(image)
-    qt_image = QtGui.QImage(image.data,
-                            image.shape[1], image.shape[0],
-                            image.strides[0], QtGui.QImage.Format_RGB888)
-
-    # Attach the array to the QtImage so that it doesn't go out of scope
-    # before the QtImage is used
-    qt_image.array = image
-
+    # QImage does not take a deep copy of np_arr.data so hold a reference
+    # to it
+    assert(not hasattr(qt_image, 'bgr_array'))
+    qt_image.bgr_array = bgr
     return qt_image
