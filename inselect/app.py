@@ -28,9 +28,6 @@ def launch_gui(filename=None):
     window = InselectMainWindow(app)
     if filename:
         window.open_document(filename)
-    window.showMaximized()
-    window.splitter.setSizes([800, 100])
-    window.show()
     sys.exit(app.exec_())
 
 

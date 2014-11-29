@@ -6,7 +6,7 @@ from inselect.lib import utils
 from inselect.lib.utils import debug_print
 from inselect.lib.mouse_handler import MouseHandler, MouseState
 from inselect.lib.key_handler import KeyHandler
-from inselect.gui.annotator import AnnotateDialog
+from .annotator import AnnotateDialog
 
 
 class GraphicsView(KeyHandler, MouseHandler, QtGui.QGraphicsView):

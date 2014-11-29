@@ -15,12 +15,11 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.qt_util import qimage_of_bgr
 from inselect.lib.segment import segment_edges, segment_grabcut
-from inselect.lib.segment_scene import SegmentScene
 from inselect.lib.utils import debug_print
+
 from inselect.gui.help_dialog import HelpDialog
-from inselect.gui.graphics_scene import GraphicsScene
-from inselect.gui.graphics_view import GraphicsView
-from inselect.gui.sidebar import SegmentListWidget
+from inselect.gui.tabs.boxes import BoxesPage
+from inselect.gui.tabs.metadata import MetadataPage
 from inselect.workflow.ingest import ingest_image
 
 class WorkerThread(QtCore.QThread):
@@ -65,26 +64,24 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     def __init__(self, app, filename=None):
         super(InselectMainWindow, self).__init__()
-        # Segment container
-        self.segment_scene = SegmentScene()
         self.app = app
-        self.container = QtGui.QWidget(self)
-        self.splitter = QtGui.QSplitter(self)
-        self.scene = GraphicsScene(self.segment_scene)
-        self.view = GraphicsView(self.scene, self)
-        self.sidebar = SegmentListWidget(self.scene, self)
-        self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-        self.view.setCursor(QtCore.Qt.CrossCursor)
-        self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.view.setRenderHint(QtGui.QPainter.Antialiasing)
-        self.view.setUpdatesEnabled(True)
-        self.view.setMouseTracking(True)
-        self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
 
-        self.setCentralWidget(self.splitter)
-        self.splitter.addWidget(self.view)
-        self.splitter.addWidget(self.sidebar)
-        self.splitter.setSizes([1000, 100])
+        # Top-level container
+        self.tabs = QtGui.QTabWidget(self)
+        self.tabs.currentChanged.connect(self.tab_changed)
+        self.setCentralWidget(self.tabs)
+
+        # First tab - boxes view
+        boxes = BoxesPage(self)
+        self.tabs.addTab(boxes, 'Boxes')
+        self.scene = boxes.scene
+        self.segment_scene = boxes.segment_scene
+        self.sidebar = boxes.sidebar
+        self.splitter = boxes
+        self.view = boxes.view
+
+        # Second tab - metadata
+        self.tabs.addTab(MetadataPage(), 'Metadata')
 
         self.padding = 0
         self.segment_display = None
@@ -104,11 +101,21 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         self.empty_document()
 
+        self.showMaximized()
+        self.splitter.setSizes([800, 100])
+        self.show()
+
         if filename:
             self.open_document(filename)
 
         # TODO LH Why is this here and not in create_actions?
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
+
+    def tab_changed(self, index):
+        if 0==index:
+            debug_print('Boxes tab')
+        else:
+            debug_print('Metadata tab')
 
     @report_to_user
     def new_document(self):

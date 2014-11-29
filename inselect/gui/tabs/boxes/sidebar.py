@@ -1,7 +1,7 @@
 from PySide import QtGui, QtCore
 
 import inselect.settings
-from inselect.gui.annotator import AnnotateDialog
+from .annotator import AnnotateDialog
 
 
 class SegmentListWidget(QtGui.QListWidget):

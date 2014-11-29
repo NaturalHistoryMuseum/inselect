@@ -1,6 +1,6 @@
 from PySide import QtGui, QtCore
 
-from inselect.gui.box_resizable import BoxResizable
+from .box_resizable import BoxResizable
 from inselect.lib.utils import debug_print
 
 
