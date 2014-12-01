@@ -2,7 +2,7 @@ import sys
 
 from PySide import QtCore, QtGui
 
-from inselect.lib import utils
+from inselect.gui.utils import get_corners
 from inselect.lib.utils import debug_print
 from inselect.lib.mouse_handler import MouseHandler, MouseState
 from inselect.lib.key_handler import KeyHandler

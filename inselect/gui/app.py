@@ -17,12 +17,17 @@ from inselect.lib.qt_util import qimage_of_bgr
 from inselect.lib.segment import segment_edges, segment_grabcut
 from inselect.lib.utils import debug_print
 
+from inselect.gui.model import Model
 from inselect.gui.help_dialog import HelpDialog
-from inselect.gui.tabs.boxes import BoxesPage
-from inselect.gui.tabs.metadata import MetadataPage
+from inselect.gui.views.boxes import BoxesView, GraphicsHookView
+from inselect.gui.views.grid import GridView
+from inselect.gui.views.metadata import MetadataView
+from inselect.gui.views.summary import SummaryView
 from inselect.workflow.ingest import ingest_image
 
 class WorkerThread(QtCore.QThread):
+    """Segmentation
+    """
     results = QtCore.Signal(list, np.ndarray)
 
     def __init__(self, image, resegment_window, selected=None, parent=None):
@@ -46,7 +51,7 @@ class WorkerThread(QtCore.QThread):
 
 
 def report_to_user(f):
-    """A decorator for class methods that reports exceptions to the user
+    """A decorator that reports exceptions to the user
     """
     @wraps(f)
     def wrapper(self, *args, **kwargs):
@@ -60,28 +65,60 @@ def report_to_user(f):
 
 
 class InselectMainWindow(QtGui.QMainWindow):
+    """The application's main window
+    """
     FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
 
-    def __init__(self, app, filename=None):
+    def __init__(self, app, filename=None, tabbed=True):
         super(InselectMainWindow, self).__init__()
         self.app = app
 
-        # Top-level container
-        self.tabs = QtGui.QTabWidget(self)
-        self.tabs.currentChanged.connect(self.tab_changed)
-        self.setCentralWidget(self.tabs)
+        # Boxes view
+        self.view_hook = GraphicsHookView()
+        self.view_boxes = BoxesView(self.view_hook.scene)
 
-        # First tab - boxes view
-        boxes = BoxesPage(self)
-        self.tabs.addTab(boxes, 'Boxes')
-        self.scene = boxes.scene
-        self.segment_scene = boxes.segment_scene
-        self.sidebar = boxes.sidebar
-        self.splitter = boxes
-        self.view = boxes.view
+        # Metadata view
+        self.view_grid = GridView()
+        self.view_metadata = MetadataView()
+        metadata = QtGui.QSplitter()
+        metadata.addWidget(self.view_grid)
+        metadata.addWidget(self.view_metadata.widget)
+        metadata.setSizes([450, 50])
 
-        # Second tab - metadata
-        self.tabs.addTab(MetadataPage(), 'Metadata')
+        if tabbed:
+            # Views in tabs
+            self.tabs = QtGui.QTabWidget(self)
+            self.tabs.addTab(self.view_boxes, 'Boxes')
+            self.tabs.addTab(metadata, 'Metadata')
+            self.tabs.setCurrentIndex(1)
+        else:
+            # Views in a splitter
+            self.tabs = QtGui.QSplitter(self)
+            self.tabs.addWidget(self.view_boxes)
+            self.tabs.addWidget(metadata)
+            self.tabs.setSizes([500, 500])
+
+        # Summary view
+        self.view_summary = SummaryView()
+
+        # Main window layout
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.view_summary.widget)
+        layout.addWidget(self.tabs)
+        box = QtGui.QWidget()
+        box.setLayout(layout)
+        self.setCentralWidget(box)
+
+        # Model
+        self.model = Model()
+        self.view_hook.setModel(self.model)
+        self.view_grid.setModel(self.model)
+        self.view_metadata.setModel(self.model)
+        self.view_summary.setModel(self.model)
+
+        self.view_hook.setSelectionModel(self.view_grid.selectionModel())
+        self.view_metadata.setSelectionModel(self.view_grid.selectionModel())
+        self.view_summary.setSelectionModel(self.view_grid.selectionModel())
 
         self.padding = 0
         self.segment_display = None
@@ -90,32 +127,15 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.create_actions()
         self.create_menus()
 
-        self.resize(500, 500)
-
         self.worker = self.progressDialog = None
 
-        # TODO LH Remove the need for empty image
-        # A QImage that is shown when no document is open
-        self.empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
-        self.empty_image.fill(0xffffff)
-
         self.empty_document()
-
-        self.showMaximized()
-        self.splitter.setSizes([800, 100])
-        self.show()
 
         if filename:
             self.open_document(filename)
 
         # TODO LH Why is this here and not in create_actions?
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
-
-    def tab_changed(self, index):
-        if 0==index:
-            debug_print('Boxes tab')
-        else:
-            debug_print('Metadata tab')
 
     @report_to_user
     def new_document(self):
@@ -150,37 +170,12 @@ class InselectMainWindow(QtGui.QMainWindow):
             document = InselectDocument.load(filename)
             inselect.settings.set_value('working_directory', str(filename.parent))
 
-            if document.thumbnail:
-                debug_print('Will display thumbnail')
-                image_array = document.thumbnail.array
-            else:
-                debug_print('Will display full-res scan')
-                image_array = document.scanned.array
-
-            qimage = qimage_of_bgr(image_array)
-
-            # Setup GUI actions
-            w, h = qimage.width(), qimage.height()
-
-            # Update the graphics scene, segment scene and sidebar elements
-            self.segment_scene.empty()
-            self.sidebar.clear()
-            self.scene.set_image(qimage)
-            self.segment_scene.set_size(w, h)
-
             self.document = document
-            self.image_array = image_array
-            self.qimage = qimage
             self.document_path = filename
+            self.model.from_document(self.document)
 
             # TODO LH Prefer setWindowFilePath to setWindowTitle?
             self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
-
-            for item in document.items:
-                rect = item['rect']
-                self.segment_scene.add_normalized(
-                    rect.topleft, rect.bottomright, item['fields']
-                )
 
             self.sync_ui()
 
@@ -189,15 +184,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         debug_print('save_document')
         items = []
 
-        for segment in self.segment_scene.segments():
-           items.append({
-               'rect': [segment.left(normalized=True),
-                        segment.top(normalized=True),
-                        segment.width(normalized=True),
-                        segment.height(normalized=True)],
-               'fields': segment.fields()
-               })
-        self.document.set_items(items)
+        self.model.to_document(self.document)
         self.document.save()
         res = QtGui.QMessageBox.question(self, 'Write cropped specimen images?',
             'Write cropped specimen images?', QtGui.QMessageBox.No,
@@ -218,21 +205,18 @@ class InselectMainWindow(QtGui.QMainWindow):
         """
         debug_print('empty_document')
         self.document = None
-
-        self.scene.set_image(self.empty_image)
-        self.qimage = self.empty_image
-        self.image_array = None
-        self.segment_display = None
-        self.segment_image_visible = False
+        self.model.clear()
 
         # TODO LH Prefer setWindowFilePath to setWindowTitle?
         self.setWindowTitle("inselect")
 
-        self.view.delete_all_boxes()
-
         self.sync_ui()
 
         # TODO LH Default zoom
+
+    def closeEvent(self, event):
+        debug_print('closeEvent')
+        self.close_document()
 
     @report_to_user
     def zoom_in(self):
@@ -258,6 +242,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def worker_finished(self, rects, display):
+        raise NotImplementedError('worker_finished')
         debug_print('worker_finished')
         worker, self.worker = self.worker, None
         self.progressDialog.hide()
@@ -292,6 +277,8 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def segment(self):
+        raise NotImplementedError('worker_finished')
+
         # TODO LH Should be modal
         # TODO LH Allow cancel
         # TODO LH Possible to show progress?
@@ -323,14 +310,16 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def select_all(self):
-        self.view.select_all()
+        raise NotImplementedError('select_all')
 
     @report_to_user
     def select_none(self):
-        self.view.select_none()
+        raise NotImplementedError('select_none')
 
     @report_to_user
     def display_image(self, image):
+        return
+
         """Displays an image in the user interface.
 
         Parameters
@@ -384,8 +373,8 @@ class InselectMainWindow(QtGui.QMainWindow):
             "&Toggle padding", self, shortcut="", enabled=True,
             statusTip="Toggle padding", checkable=True,
             triggered=self.toggle_padding)
-        self.select_all_action = QtGui.QAction(
-            "Select &All", self, shortcut="ctrl+A", triggered=self.select_all)
+        # self.select_all_action = QtGui.QAction(
+        #     "Select &All", self, shortcut="ctrl+A", triggered=self.select_all)
         self.select_none_action = QtGui.QAction(
             "Select &None", self, shortcut="ctrl+D", triggered=self.select_none)
         self.segment_action = QtGui.QAction(
@@ -431,7 +420,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
         self.editMenu = QtGui.QMenu("&Edit", self)
         self.editMenu.addAction(self.toggle_padding_action)
-        self.editMenu.addAction(self.select_all_action)
+        # self.editMenu.addAction(self.select_all_action)
         self.editMenu.addAction(self.select_none_action)
         self.fileMenu.addSeparator()
         self.editMenu.addAction(self.segment_action)

@@ -1,1 +1,0 @@
-from .page import BoxesPage

@@ -1,7 +1,7 @@
 import weakref
 import inspect
 from PySide import QtCore
-from inselect.lib import utils
+from inselect.gui  import utils
 
 
 class NoAssociatedObject(Exception):

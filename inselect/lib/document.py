@@ -105,6 +105,7 @@ class InselectDocument(object):
 
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
+    # TODO LH Validate rotation?
 
     def __init__(self, scanned, items):
         items = self._preprocess_items(items)
