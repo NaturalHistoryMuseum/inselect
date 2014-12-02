@@ -2,6 +2,7 @@ from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
 
 from inselect.lib.utils import debug_print
+from inselect.gui.utils import contiguous
 from inselect.gui.roles import RectRole, ImageRole, RotationRole
 
 class PaintState(object):
@@ -166,3 +167,22 @@ class GridView(QtGui.QListView):
         self.setWrapping(True)
         self.setResizeMode(self.Adjust)
         self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+
+    def keyPressEvent(self, event):
+        """QListView protected
+        """
+        if event.key() == Qt.Key_Delete:
+            # Delete contiguous blocks of rows
+            selected = sorted([i.row() for i in self.selectedIndexes()])
+
+            # Clear selection before deleting
+            self.clearSelection()
+
+            # TODO LH We shouldn't need to remove blocks in reverse order -
+            # stems from crummy GraphicsItemView
+            for row, count in reversed(list(contiguous(selected))):
+                self.model().removeRows(row, count)
+
+            return True
+        else:
+            return super(GridView, self).keyPressEvent(event)

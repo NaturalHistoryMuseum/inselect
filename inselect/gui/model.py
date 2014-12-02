@@ -1,8 +1,7 @@
 import json
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import (Qt, QAbstractItemModel, QModelIndex,
-                           QPersistentModelIndex)
+from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex
 
 from inselect.lib.utils import debug_print
 from .utils import qimage_of_bgr
@@ -78,12 +77,7 @@ class Model(QAbstractItemModel):
         """QAbstractItemModel
         """
         if self.hasIndex(row, column, parent):
-            index = self.createIndex(row, column, self._data[row])
-            # What is the right thing to do here?
-            if True:
-                return index
-            else:
-                return QPersistentModelIndex(index)
+            return self.createIndex(row, column, self._data[row])
         else:
             return QModelIndex()
 
@@ -135,16 +129,28 @@ class Model(QAbstractItemModel):
         # TODO LH Validation?
         if RectRole == role:
             current = self._data[index.row()]['rect']
-            debug_print('Update rect for [{0}] from [{1}] to [{2}]'.format(index.row(), current, value))
+            debug_print('Model.setData rect for [{0}] from [{1}] to [{2}]'.format(index.row(), current, value))
             self._data[index.row()]['rect'] = value
             self.dataChanged.emit(index, index)
             return True
         elif RotationRole == role:
             current = self._data[index.row()]['rotation']
-            debug_print('Update rotation for [{0}] from [{1}] to [{2}]'.format(index.row(), current, value))
+            value = (value+360) % 360
+            debug_print('Model.setData rotation for [{0}] from [{1}] to [{2}]'.format(index.row(), current, value))
             # Constrain angle to be in range 0:360
-            self._data[index.row()]['rotation'] = ((value+360) % 360)
+            self._data[index.row()]['rotation'] = value
             self.dataChanged.emit(index, index)
             return True
         else:
             return super(Model, self).setData(index, value, role)
+
+    def removeRows(self, row, count, parent=QModelIndex()):
+        debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
+
+        first, last = row, row+count
+
+        self.beginRemoveRows(parent, first, last)
+        del self._data[first:last]
+        self.endRemoveRows()
+
+        return True

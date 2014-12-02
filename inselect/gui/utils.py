@@ -1,3 +1,6 @@
+from itertools import groupby
+from operator import itemgetter
+
 import cv2
 import numpy as np
 
@@ -47,3 +50,20 @@ def get_corners(x1, y1, x2, y2):
     if y1 > y2:
         y1, y2 = y2, y1
     return (x1, y1), (x2, y2)
+
+def contiguous(values):
+    """yields tuples (value, count) of contiguous blocks of integers in values
+
+    >>> for value, count in contiguous([0, 15, 16, 17, 18, 22, 25, 26, 27, 28]):
+        print(value, count)
+    (0, 1)
+    (15, 4)
+    (22, 1)
+    (25, 4)
+    """
+    # http://stackoverflow.com/questions/2361945/detecting-consecutive-integers-in-a-list
+    for k, g in groupby(enumerate(values), lambda (i,x):i-x):
+        g = list(g)
+        lower, upper = g[0][1], g[-1][1]
+        count = upper - lower + 1
+        yield lower, count

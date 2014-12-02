@@ -1,1 +1,1 @@
-from .boxes import BoxesView, GraphicsHookView
+from .boxes import BoxesView, GraphicsItemView

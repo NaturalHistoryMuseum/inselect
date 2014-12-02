@@ -1,19 +1,18 @@
+from functools import partial
 from itertools import izip
 from enum import Enum
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
 
-from bidict import bidict
-
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import ImageRole, RectRole
-from inselect.gui.utils import unite_rects
+from inselect.gui.utils import unite_rects, contiguous
 
 from PySide import QtCore, QtGui
 
 
-class GraphicsHookView(QtGui.QAbstractItemView):
+class GraphicsItemView(QtGui.QAbstractItemView):
     """Qt have used 'view' in two different contexts: the model-view
     architecture and the graphics/view framework, henceforth MV and GV
     respectively.
@@ -30,9 +29,11 @@ class GraphicsHookView(QtGui.QAbstractItemView):
     # http://stackoverflow.com/questions/3188584/how-to-use-qt-model-view-framework-with-the-graphics-view-framework
 
     def __init__(self, parent=None):
-        super(GraphicsHookView, self).__init__(parent)
+        super(GraphicsItemView, self).__init__(parent)
         self.scene = Scene(self, parent)
-        self._mapping = bidict()
+
+        # List of QGraphicsRectItem
+        self._rows = []
 
         self.handling_selection_update = False
         self.scene.selectionChanged.connect(self.scene_selection_changed)
@@ -40,38 +41,29 @@ class GraphicsHookView(QtGui.QAbstractItemView):
     def reset(self):
         """QAbstractItemView virtual
         """
-        debug_print('GraphicsHookView.reset')
-        super(GraphicsHookView, self).reset()
+        debug_print('GraphicsItemView.reset')
+        super(GraphicsItemView, self).reset()
 
         model = self.model()
         self.scene.new_document(model.index(0, 0).data(ImageRole))
 
         # Build up new mapping
-        m = bidict()
+        r = [None] * model.rowCount()
         for row in xrange(0, model.rowCount()):
-            index = model.index(row, 0)
-            rect = index.data(RectRole)
-            item = self.scene.add_box(rect)
-            m[index] = item
+            rect = self.model().index(row, 0).data(RectRole)
+            r[row] = self.scene.add_box(rect)
 
-        self._mapping = m
+        self._rows = r
 
-    def setModel(self, model):
-        """QAbstractItemView virtual
-        """
-        debug_print('GraphicsHookView.setModel', model, model.rowCount(),
-              model.columnCount())
-        super(GraphicsHookView, self).setModel(model)
-
-    def setCurrentIndex(self, index):
+    def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot
         """
-        debug_print('GraphicsHookView.setCurrentIndex', index)
+        debug_print('GraphicsItemView.rowsAboutToBeRemoved')
 
-    def update(self, index):
-        """QAbstractItemView slot
-        """
-        debug_print('GraphicsHookView.update', index)
+        map(self.scene.removeItem, self._rows[start:end])
+
+        # Remove items
+        self._rows[start:end] = []
 
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView virtual
@@ -79,75 +71,113 @@ class GraphicsHookView(QtGui.QAbstractItemView):
         # Tell the scene about the new selection
         if not self.handling_selection_update:
             # TODO Context for this
-            debug_print('GraphicsHookView.selectionChanged')
+            debug_print('GraphicsItemView.selectionChanged')
             self.handling_selection_update = True
             try:
-                # Tell the selected items
-                selected_items = [self._mapping[i] for i in selected.indexes()]
-                for item in selected_items:
+                current = set(self.scene.selectedItems())
+                new = set(self._rows[i.row()] for i in self.selectionModel().selectedIndexes())
+
+                for item in new.difference(current):
                     item.setSelected(True)
                     item.update()
 
-                # Tell the deselected items
-                for item in [self._mapping[i] for i in deselected.indexes()]:
+                for item in current.difference(new):
                     item.setSelected(False)
                     item.update()
 
-                if selected_items:
+                if new:
                     # Ensure that the selected items are visible
-                    rect = unite_rects([i.rect() for i in selected_items])
-                    debug_print('GraphicsHookView will make visible', rect)
-                    selected_items[0].ensureVisible(rect)
-
-                msg = ('GraphicsHookView selectionChanged: [{0}] items added, '
-                       '[{1}] items removed')
-                debug_print(msg.format(len(selected.indexes()), len(deselected.indexes())))
+                    rect = unite_rects([i.rect() for i in new])
+                    debug_print('GraphicsItemView will make visible', rect)
+                    new.pop().ensureVisible(rect)
             finally:
                 self.handling_selection_update = False
-
-    def currentChanged(self, current, previous):
-        """QAbstractItemView virtual
-        """
-        debug_print('GraphicsHookView.currentChanged')
 
     def dataChanged(self, topLeft, bottomRight):
         """QAbstractItemView virtual
         """
-        debug_print('GraphicsHookView.dataChanged')
+        debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
+
+    def _rows_of_items(self, items):
+        """Returns a generator of row numbers of the list of QGraphicsItems
+        """
+        # TODO LH This is horrible
+        # TODO LH Use a view to support changes to self._rows during iteration?
+        return (self._rows.index(i) for i in items)
+
+    def _indexes_of_items(self, items):
+        """Returns a generator of indexes of the list of QGraphicsItems
+        """
+        # TODO LH Use a view to support changes to self._rows during iteration?
+        return (self.model().index(row, 0) for row in self._rows_of_items(items))
 
     def scene_selection_changed(self):
         """scene.selectionChanged slot
         """
+        # TODO LH Fix dreadful performance when selection changing as a result
+        # of mouse drag
         if not self.handling_selection_update:
-            debug_print('GraphicsHookView.scene_selection_changed')
+            debug_print('GraphicsItemView.scene_selection_changed')
             # TODO Context for this
             self.handling_selection_update = True
             try:
-                selected = self.scene.selectedItems()
-                s = self.selectionModel()
+                model = self.model()
+                sm = self.selectionModel()
+                current = set(i.row() for i in sm.selectedIndexes())
+                updated = set(self._rows_of_items(self.scene.selectedItems()))
 
-                # TODO LH Clear then add is clunky
-                s.clear()
-                for index in [self._mapping[:i] for i in selected]:
-                    s.select(index, QtGui.QItemSelectionModel.Select)
+                # Select contiguous blocks
+                for row, count in contiguous(sorted(list(updated.difference(current)))):
+                    top_left = model.index(row, 0)
+                    bottom_right = model.index(row+count-1, 0)
+                    sm.select(QtGui.QItemSelection(top_left, bottom_right),
+                              QtGui.QItemSelectionModel.Select)
 
-                if selected:
-                    s.setCurrentIndex(self._mapping[:selected[0]], s.Current)
+                # Deselect contiguous blocks
+                for row, count in contiguous(sorted(list(current.difference(updated)))):
+                    top_left = model.index(row, 0)
+                    bottom_right = model.index(row+count-1, 0)
+                    sm.select(QtGui.QItemSelection(top_left, bottom_right),
+                              QtGui.QItemSelectionModel.Deselect)
+
+                if updated:
+                    # Set an arbitraty row as the current index
+                    sm.setCurrentIndex(model.index(updated.pop(), 0),
+                                       QtGui.QItemSelectionModel.Current)
             finally:
                 self.handling_selection_update = False
 
-
-    def item_rects_updated(self, items):
-        """Function called by Scene
+    def scene_item_rects_updated(self, items):
+        """The user moved or resized items in the scene
         """
-        debug_print('GraphicsHookView.item_rects_updated')
-        for index,item in izip([self._mapping[:i] for i in items], items):
+        debug_print('GraphicsItemView.item_rects_updated')
+        for index,item in izip(self._indexes_of_items(items), items):
             # item.sceneBoundingRect() is the items rects in the correct
             # coordinates system
+            print('Row [{0}] updated'.format(index.row()))
             rect = item.sceneBoundingRect()
             # Cumbersome conversion to ints
             rect = QtCore.QRect(rect.left(), rect.top(), rect.width(), rect.height())
             self.model().setData(index, rect, RectRole)
+
+    def scene_items_deleted(self, items):
+        """The user deleted items from the scene
+        """
+        # Inform the model of the indexes that have been deleted
+        # The items will be deleted from the scene in this class's
+        # rowsAboutToBeRemoved() implementation
+
+        # Delete contiguous blocks of rows
+        selected = sorted([i.row() for i in self.selectionModel().selectedIndexes()])
+
+        # Clear selection before deleting
+        self.clearSelection()
+
+        # TODO LH We shouldn't need to remove blocks in reverse order - stems
+        # from crummy GraphicsItemView
+        # Remove blocks in reverse order so that row indices are not invalidated
+        for row, count in reversed(list(contiguous(selected))):
+            self.model().removeRows(row, count)
 
 
 class Scene(QtGui.QGraphicsScene):
@@ -160,6 +190,8 @@ class Scene(QtGui.QGraphicsScene):
         self._mouse_press_selection = {}
 
     def new_document(self, image):
+        """A new document. Image should be a QPixmap or None.
+        """
         self.clear()  # Removes all items
 
         if image:
@@ -169,7 +201,7 @@ class Scene(QtGui.QGraphicsScene):
             for v in self.views():
                 v.updateSceneRect(self.sceneRect())
         else:
-            debug_print('New empty scene')
+            debug_print('Clear scene')
             self.setSceneRect(0, 0, 0, 0)
 
     def add_box(self, rect):
@@ -178,8 +210,21 @@ class Scene(QtGui.QGraphicsScene):
         self.addItem(item)
         return item
 
+    def keyPressEvent(self, event):
+        """QGraphicsScene virtual
+        """
+        debug_print('Scene.keyPressEvent')
+        if event.key() == Qt.Key_Delete:
+            # Delete the selected items from source
+            selected = self.selectedItems()
+            self.source.scene_items_deleted(selected)
+            event.accept()
+        else:
+            super(Scene, self).keyPressEvent(event)
+
     def mousePressEvent(self, event):
-        # QGraphicsRectItem virtual
+        """QGraphicsScene virtual
+        """
         debug_print('Scene.mousePressEvent')
         super(Scene, self).mousePressEvent(event)
 
@@ -192,7 +237,8 @@ class Scene(QtGui.QGraphicsScene):
         self._mouse_press_selection = {i: i.sceneBoundingRect() for i in selected}
 
     def mouseReleaseEvent(self, event):
-        # QGraphicsRectItem virtual
+        """QGraphicsScene virtual
+        """
         debug_print('Scene.mouseReleaseEvent')
         super(Scene, self).mouseReleaseEvent(event)
 
@@ -210,7 +256,7 @@ class Scene(QtGui.QGraphicsScene):
             # This assumes that the order of items in self.selectedItems() has
             # not changed and that is one item's rect has altered then they all
             # have.
-            self.source.item_rects_updated(selected)
+            self.source.scene_item_rects_updated(selected)
 
 
 class ZoomLevels(Enum):
@@ -219,10 +265,13 @@ class ZoomLevels(Enum):
 
 
 class BoxesView(QtGui.QGraphicsView):
+    """
+    """
     def __init__(self, scene, parent=None):
         super(BoxesView, self).__init__(scene, parent)
         self.zoom = ZoomLevels.FitImage
         self.setCursor(Qt.CrossCursor)
+        self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
 
     def updateSceneRect(self, rect):
         """QGraphicsView slot
@@ -235,6 +284,10 @@ class BoxesView(QtGui.QGraphicsView):
         """QGraphicsView virtual
         """
         debug_print('BoxesView.resizeEvent')
+
+        # Check for change in size because many user-interface actions trigger
+        # resizeEvent(), even though they do not cause a change in the view's
+        # size
         if event.oldSize() != event.size() and ZoomLevels.FitImage == self.zoom:
             self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
         super(BoxesView, self).resizeEvent(event)
@@ -242,7 +295,7 @@ class BoxesView(QtGui.QGraphicsView):
     def keyPressEvent(self, event):
         """QGraphicsView virtual
         """
-        if QtCore.Qt.Key_Z==event.key():
+        if event.key() == Qt.Key_Z:
             event.accept()
             self.toggle_zoom()
         else:

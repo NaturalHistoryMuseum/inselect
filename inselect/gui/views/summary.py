@@ -25,15 +25,15 @@ class SummaryView(QtGui.QAbstractItemView):
         self.widget = QtGui.QWidget(parent)
         self.widget.setLayout(layout)
 
-    def _n_crops(self):
-        self.n_crops.setText('{0} crops'.format(self.model().rowCount()))
+    def _n_crops(self, n):
+        self.n_crops.setText('{0} crops'.format(n))
 
     def reset(self):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.reset')
         super(SummaryView, self).reset()
-        self._n_crops()
+        self._n_crops(self.model().rowCount())
 
     def setModel(self, model):
         """QAbstractItemView virtual
@@ -46,7 +46,7 @@ class SummaryView(QtGui.QAbstractItemView):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.dataChanged')
-        self._n_crops()
+        self._n_crops(self.model().rowCount())
 
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView slot
@@ -54,3 +54,9 @@ class SummaryView(QtGui.QAbstractItemView):
         debug_print('SummaryView.selectionChanged')
         n = len(self.selectionModel().selectedIndexes())
         self.n_selected.setText('{0} selected'.format(n))
+
+    def rowsAboutToBeRemoved(self, parent, start, end):
+        """QAbstractItemView slot
+        """
+        debug_print('SummaryView.rowsAboutToBeRemoved')
+        self._n_crops(self.model().rowCount() - (end - start))

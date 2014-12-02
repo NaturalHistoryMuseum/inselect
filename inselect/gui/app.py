@@ -19,7 +19,7 @@ from inselect.lib.utils import debug_print
 
 from inselect.gui.model import Model
 from inselect.gui.help_dialog import HelpDialog
-from inselect.gui.views.boxes import BoxesView, GraphicsHookView
+from inselect.gui.views.boxes import BoxesView, GraphicsItemView
 from inselect.gui.views.grid import GridView
 from inselect.gui.views.metadata import MetadataView
 from inselect.gui.views.summary import SummaryView
@@ -74,7 +74,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.app = app
 
         # Boxes view
-        self.view_hook = GraphicsHookView()
+        self.view_hook = GraphicsItemView()
         self.view_boxes = BoxesView(self.view_hook.scene)
 
         # Metadata view
@@ -90,7 +90,7 @@ class InselectMainWindow(QtGui.QMainWindow):
             self.tabs = QtGui.QTabWidget(self)
             self.tabs.addTab(self.view_boxes, 'Boxes')
             self.tabs.addTab(metadata, 'Metadata')
-            self.tabs.setCurrentIndex(1)
+            #self.tabs.setCurrentIndex(1)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)

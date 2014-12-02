@@ -22,10 +22,10 @@ class MetadataView(QtGui.QAbstractItemView):
         """QAbstractItemView slot
         """
         debug_print('MetadataView.selectionChanged')
-        sn = {}
-        for index in self.selectionModel().selectedIndexes():
-            sn = {i.get('Specimen number','') for i in index.data(MetadataRole)}
-        print(sn)
+        # sn = {}
+        # for index in self.selectionModel().selectedIndexes():
+        #     sn = {i.get('Specimen number','') for i in index.data(MetadataRole)}
+        # print(sn)
 
 
 class UpdateModelLineEdit(QtGui.QLineEdit):
