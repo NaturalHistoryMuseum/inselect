@@ -25,28 +25,36 @@ from inselect.gui.views.metadata import MetadataView
 from inselect.gui.views.summary import SummaryView
 from inselect.workflow.ingest import ingest_image
 
-class WorkerThread(QtCore.QThread):
-    """Segmentation
+class SegmentWorkerThread(QtCore.QThread):
+    """Segments an image
     """
     results = QtCore.Signal(list, np.ndarray)
 
-    def __init__(self, image, resegment_window, selected=None, parent=None):
-        super(WorkerThread, self).__init__(parent)
+    def __init__(self, image, parent=None):
+        super(SegmentWorkerThread, self).__init__(parent)
         self.image = image
-        self.resegment_window = resegment_window
-        self.selected = selected
 
     def run(self):
-        if self.resegment_window:
-            seeds = self.selected.seeds()
-            rects, display = segment_grabcut(self.image, seeds=seeds,
-                                             window=self.resegment_window)
-        else:
-            rects, display = segment_edges(self.image,
-                                           window=None,
-                                           resize=(5000, 5000),
-                                           variance_threshold=100,
-                                           size_filter=1)
+        rects, display = segment_edges(self.image,
+                                       window=None,
+                                       resize=(5000, 5000),
+                                       variance_threshold=100,
+                                       size_filter=1)
+        self.results.emit(rects, display)
+
+
+class SubSegmentWorkerThread(QtCore.QThread):
+    """Sub-segments an existing box
+    """
+    results = QtCore.Signal(list, np.ndarray)
+
+    def __init__(self, image, box, seed_points, parent=None):
+        super(SubSegmentWorkerThread, self).__init__(parent)
+        self.image, self.box, self.seed_points = image, window, seed_points
+
+    def run(self):
+        rects, display = segment_grabcut(self.image, self.window,
+                                         self.seed_points)
         self.results.emit(rects, display)
 
 
@@ -60,7 +68,7 @@ def report_to_user(f):
         except Exception as e:
             QtGui.QMessageBox.critical(self, u'An error occurred',
                 u'An error occurred:\n{0}'.format(e))
-            raise e
+            raise
     return wrapper
 
 
@@ -108,6 +116,9 @@ class InselectMainWindow(QtGui.QMainWindow):
         box = QtGui.QWidget()
         box.setLayout(layout)
         self.setCentralWidget(box)
+
+        # Document
+        self.document = None
 
         # Model
         self.model = Model()
@@ -205,6 +216,8 @@ class InselectMainWindow(QtGui.QMainWindow):
         """
         debug_print('empty_document')
         self.document = None
+        self.segment_display = None
+        self.segment_image_visible = False
         self.model.clear()
 
         # TODO LH Prefer setWindowFilePath to setWindowTitle?
@@ -241,44 +254,53 @@ class InselectMainWindow(QtGui.QMainWindow):
         d.exec_()
 
     @report_to_user
-    def worker_finished(self, rects, display):
-        raise NotImplementedError('worker_finished')
-        debug_print('worker_finished')
+    def segment_worker_finished(self, rects, display):
+        debug_print('segment_worker_finished')
+
         worker, self.worker = self.worker, None
         self.progressDialog.hide()
         self.progressDialog = None
 
-        self.toggle_segment_action.setEnabled(True)
-        window = worker.resegment_window
-        if window:
-            if self.segment_display is None:
-                h, w = self.image_array.shape[:2]
-                self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
-            x, y, w, h = window
-            self.segment_display[y:y+h, x:x+w] = display
-            # removes the selected box before replacing it with resegmentations
-            self.segment_scene.remove(worker.selected)
-        else:
-            self.view.delete_all_boxes()
-            self.segment_display = display.copy()
+        # add detected boxes
+        rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in rects]
+        if self.padding:
+            # TODO LH Padding is a fraction of box width or height - better
+            # to be a fixed number of pixels?
+            p = self.padding
+            for i in xrange(0, len(rects)):
+                w, h = rects[i].width(), rects[i].height()
+                rects[i].adjust(-w*p, -h*p, 2*w*p, 2*h*p)
+
+        # TODO LH Order of boxes
+        self.model.set_new_boxes(rects)
+        self.segment_display = display.copy()
 
         if self.segment_image_visible:
             self.display_image(self.segment_display)
-        # add detected boxes
-        for rect in rects:
-            x, y, w, h = rect[:4]
-            x -= w * self.padding
-            y -= w * self.padding
-            w += 2 * w * self.padding
-            h += 2 * h * self.padding
-            self.segment_scene.add((x, y), (x + w, y + h))
+
+        self.sync_ui()
+
+    @report_to_user
+    def subsegment_worker_finished(self, rects, display):
+        # TODO LH Reinstate
+
+        # Create segmentation image if required
+        if self.segment_display is None:
+            h, w = self.image_array.shape[:2]
+            self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
+        x, y, w, h = window
+        self.segment_display[y:y+h, x:x+w] = display
+
+        # removes the selected box before replacing it with resegmentations
+        self.segment_scene.remove(worker.selected)
+
+        if self.segment_image_visible:
+            self.display_image(self.segment_display)
 
         self.sync_ui()
 
     @report_to_user
     def segment(self):
-        raise NotImplementedError('worker_finished')
-
         # TODO LH Should be modal
         # TODO LH Allow cancel
         # TODO LH Possible to show progress?
@@ -287,26 +309,47 @@ class InselectMainWindow(QtGui.QMainWindow):
             raise InselectError('Reenter segment()')
         else:
             debug_print('segment')
-            self.toggle_segment_action.setEnabled(True)
-            self.progressDialog = QtGui.QProgressDialog(self)
-            self.progressDialog.setWindowTitle("Segmenting...")
-            self.progressDialog.setCancelButton(None)
-            self.progressDialog.setValue(0)
-            self.progressDialog.setMaximum(0)
-            self.progressDialog.setMinimum(0)
-            self.progressDialog.show()
-            resegment_window = None
-            # if object selected, resegment the window
-            selected = self.scene.selected_segments()
-            if selected:
-                selected = selected[0]
-                window_rect = selected.get_q_rect_f()
-                p = window_rect.topLeft()
-                resegment_window = [p.x(), p.y(), window_rect.width(),
-                                    window_rect.height()]
-            self.worker = WorkerThread(self.image_array, resegment_window, selected)
-            self.worker.results.connect(self.worker_finished)
-            self.worker.start()
+            # Sub-segment a single box if seed points are set, otherwise
+            # segment the entire image
+
+            worker = None
+            subsegment = False
+            if subsegment:
+                # TODO LH Reinstate this
+                # if object selected, resegment the window
+                selected = self.scene.selected_segments()
+                if selected:
+                    selected = selected[0]
+                    window_rect = selected.get_q_rect_f()
+                    p = window_rect.topLeft()
+                    subsegment_window = [p.x(), p.y(), window_rect.width(),
+                                         window_rect.height()]
+                    worker = SubSegmentWorkerThread(self.model.image_array,
+                        subsegment_window, seed_points)
+                    worker.results.connect(self.subsegment_worker_finished)
+            else:
+                # Segment the entire image
+                if self.model.rowCount():
+                    prompt = ('All boxes and their metadata will be replaced. '
+                              'Replace existing boxes?')
+                    res = QtGui.QMessageBox.question(self, 'Replace existing boxes?',
+                        prompt, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+                    if QtGui.QMessageBox.Yes == res:
+                        worker = SegmentWorkerThread(self.model.image_array)
+                        worker.results.connect(self.segment_worker_finished)
+
+            if worker:
+                self.toggle_segment_action.setEnabled(True)
+                self.progressDialog = QtGui.QProgressDialog(self)
+                self.progressDialog.setWindowTitle("Segmenting...")
+                self.progressDialog.setCancelButton(None)
+                self.progressDialog.setValue(0)
+                self.progressDialog.setMaximum(0)
+                self.progressDialog.setMinimum(0)
+                self.progressDialog.show()
+
+                self.worker = worker
+                self.worker.start()
 
     @report_to_user
     def select_all(self):
@@ -318,7 +361,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def display_image(self, image):
-        return
+        raise NotImplementedError('display_image')
 
         """Displays an image in the user interface.
 

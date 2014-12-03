@@ -17,7 +17,7 @@ class SummaryView(QtGui.QAbstractItemView):
             layout.addWidget(l, *args, **kwargs)
             return l
 
-        self.n_crops = new_label('0 crops')
+        self.n_boxes = new_label('0 boxes')
         # Last item has stretch greater than zero to force all labels to be
         # left-aligned
         self.n_selected = new_label('0 selected', stretch=1)
@@ -25,15 +25,15 @@ class SummaryView(QtGui.QAbstractItemView):
         self.widget = QtGui.QWidget(parent)
         self.widget.setLayout(layout)
 
-    def _n_crops(self, n):
-        self.n_crops.setText('{0} crops'.format(n))
+    def _n_boxes(self, n):
+        self.n_boxes.setText('{0} boxes'.format(n))
 
     def reset(self):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.reset')
         super(SummaryView, self).reset()
-        self._n_crops(self.model().rowCount())
+        self._n_boxes(self.model().rowCount())
 
     def setModel(self, model):
         """QAbstractItemView virtual
@@ -46,7 +46,7 @@ class SummaryView(QtGui.QAbstractItemView):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.dataChanged')
-        self._n_crops(self.model().rowCount())
+        self._n_boxes(self.model().rowCount())
 
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView slot
@@ -59,4 +59,4 @@ class SummaryView(QtGui.QAbstractItemView):
         """QAbstractItemView slot
         """
         debug_print('SummaryView.rowsAboutToBeRemoved')
-        self._n_crops(self.model().rowCount() - (end - start))
+        self._n_boxes(self.model().rowCount() - (end - start))

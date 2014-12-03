@@ -5,7 +5,7 @@ from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex
 
 from inselect.lib.utils import debug_print
 from .utils import qimage_of_bgr
-from .roles import RectRole, ImageRole, RotationRole, MetadataRole
+from .roles import RectRole, PixmapRole, RotationRole, MetadataRole
 
 
 class Model(QAbstractItemModel):
@@ -14,48 +14,78 @@ class Model(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
+        # TODO LH Placeholder metadata fields
         self._metadata_fields = ('Specimen number', 'Taxonomic group',)
-        self._data = []
-        self._image = None
+        self._clear_model_data()
+
+    def _clear_model_data(self):
+        """Clear data structures
+        """
+        self._data = [] # A list of dicts
+        self._image_array = None    # np.nd_array
+        self._pixmap = None    # QPixmap
 
     def clear(self):
+        """Empty data
+        """
         self.beginResetModel()
-        self._data, self._image = [], None
+        self._clear_model_data()
         self.endResetModel ()
 
+    def set_new_boxes(self, rects):
+        """Replace all boxes with rects. All box information is replaced
+        """
+        self.removeRows(0, self.rowCount())
+        if rects:
+            # TODO LH Validation
+            self.beginInsertRows(QModelIndex(), 0, len(rects)-1)
+            self._data = [{"metadata": {}, "rect": r, "rotation": 0} for r in rects]
+            self.endInsertRows()
+            self.dataChanged.emit(self.index(0, 0),
+                                  self.index(len(rects)-1, 0))
+
     def from_document(self, document):
+        """Load data from document
+        """
         # Load the new data
         if document.thumbnail:
-            debug_print('Will display thumbnail')
+            debug_print('Model will work on thumbnail')
             image_array = document.thumbnail.array
         else:
-            debug_print('Will display full-res scan')
+            debug_print('Model will work on full-res scan')
             image_array = document.scanned.array
 
-        image = QtGui.QPixmap.fromImage(qimage_of_bgr(image_array))
+        pixmap = QtGui.QPixmap.fromImage(qimage_of_bgr(image_array))
         data = []
         for item in document.items:
             rect = item['rect']
-            rect = QtCore.QRect(rect[0]*image.width(),
-                                rect[1]*image.height(),
-                                rect[2]*image.width(),
-                                rect[3]*image.height())
+            rect = QtCore.QRect(rect[0]*pixmap.width(),
+                                rect[1]*pixmap.height(),
+                                rect[2]*pixmap.width(),
+                                rect[3]*pixmap.height())
             data.append({"metadata": item['fields'],
                          "rect": rect,
-                         "rotation": item['rotation'],
+                         "rotation": item.get('rotation', 0),
                         }
                        )
 
-
         # Inform views
         self.beginResetModel()
-        self._data, self._image = data, image
+        self._data, self._image_array, self._pixmap = data, image_array, pixmap
         self.endResetModel ()
 
+    @property
+    def image_array(self):
+        """np.nd_array
+        """
+        return self._image_array
+
     def to_document(self, document):
+        """Write data to document
+        """
         # Convert to normalised boxes
         items = []
-        w, h = float(self._image.width()), float(self._image.height())
+        w, h = float(self._pixmap.width()), float(self._pixmap.height())
         for box in self._data:
             # TODO LH Better to use InselectImage to convert to normalised?
             rect = box['rect']
@@ -69,12 +99,12 @@ class Model(QAbstractItemModel):
         document.set_items(items)
 
     def flags(self, index):
-        """QAbstractItemModel
+        """QAbstractItemModel virtual
         """
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def index(self, row, column, parent=QModelIndex()):
-        """QAbstractItemModel
+        """QAbstractItemModel virtual
         """
         if self.hasIndex(row, column, parent):
             return self.createIndex(row, column, self._data[row])
@@ -82,21 +112,23 @@ class Model(QAbstractItemModel):
             return QModelIndex()
 
     def parent(self, child):
-        """QAbstractItemModel
+        """QAbstractItemModel virtual
         """
         return QModelIndex()
 
     def rowCount(self, parent=QModelIndex()):
-        """QAbstractItemModel
+        """QAbstractItemModel virtual
         """
         return len(self._data)
 
     def columnCount(self, parent=QModelIndex()):
-        """QAbstractItemModel
+        """QAbstractItemModel virtual
         """
         return 1
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
+        """QAbstractItemModel virtual
+        """
         if Qt.DisplayRole==role:
             if Qt.Vertical==orientation:
                 return str(1+section)
@@ -104,7 +136,7 @@ class Model(QAbstractItemModel):
                 return 'Title'
 
     def data(self, index, role=Qt.DisplayRole):
-        """QAbstractItemModel
+        """QAbstractItemModel virtual
         """
         if not index.isValid():
             return None
@@ -120,24 +152,33 @@ class Model(QAbstractItemModel):
                 return item['rect']
             elif RotationRole == role:
                 return item['rotation']
-            elif ImageRole == role:
-                return self._image
+            elif PixmapRole == role:
+                return self._pixmap
             elif MetadataRole == role:
                 return item['metadata']
 
     def setData(self, index, value, role):
+        """QAbstractItemModel virtual
+        """
         # TODO LH Validation?
         if RectRole == role:
             current = self._data[index.row()]['rect']
-            debug_print('Model.setData rect for [{0}] from [{1}] to [{2}]'.format(index.row(), current, value))
+
+            msg = 'Model.setData rect for [{0}] from [{1}] to [{2}]'
+            debug_print(msg.format(index.row(), current, value))
+
             self._data[index.row()]['rect'] = value
             self.dataChanged.emit(index, index)
             return True
         elif RotationRole == role:
             current = self._data[index.row()]['rotation']
-            value = (value+360) % 360
-            debug_print('Model.setData rotation for [{0}] from [{1}] to [{2}]'.format(index.row(), current, value))
+
             # Constrain angle to be in range 0:360
+            value = (value+360) % 360
+
+            msg = 'Model.setData rotation for [{0}] from [{1}] to [{2}]'
+            debug_print(msg.format(index.row(), current, value))
+
             self._data[index.row()]['rotation'] = value
             self.dataChanged.emit(index, index)
             return True
@@ -145,6 +186,8 @@ class Model(QAbstractItemModel):
             return super(Model, self).setData(index, value, role)
 
     def removeRows(self, row, count, parent=QModelIndex()):
+        """QAbstractItemModel virtual
+        """
         debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
 
         first, last = row, row+count

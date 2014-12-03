@@ -6,7 +6,7 @@ from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
 
 from inselect.lib.utils import debug_print
-from inselect.gui.roles import ImageRole, RectRole
+from inselect.gui.roles import PixmapRole, RectRole
 from inselect.gui.utils import unite_rects, contiguous
 
 from PySide import QtCore, QtGui
@@ -45,7 +45,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         super(GraphicsItemView, self).reset()
 
         model = self.model()
-        self.scene.new_document(model.index(0, 0).data(ImageRole))
+        self.scene.new_document(model.index(0, 0).data(PixmapRole))
 
         # Build up new mapping
         r = [None] * model.rowCount()
@@ -55,10 +55,46 @@ class GraphicsItemView(QtGui.QAbstractItemView):
 
         self._rows = r
 
+    def rowsInserted(self, parent, start, end):
+        """QAbstractItemView slot
+        """
+        debug_print('GraphicsItemView.rowsInserted', start, end)
+
+        # New boxes but are coming but their rects are not yet known.
+        # Create new items with zero height and zero width rects - actual rects
+        # will be set in dataChanged()
+        n = 1 + end - start
+        new = [None] * n
+        rect = QtCore.QRect(0, 0, 0, 0)
+        for row in xrange(0, n):
+            new[row] = self.scene.add_box(rect)
+        self._rows[start:start] = new
+
+    def dataChanged(self, topLeft, bottomRight):
+        """QAbstractItemView virtual
+        """
+        debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
+
+        for row in xrange(topLeft.row(), 1+bottomRight.row()):
+            # new is a QRect - integer coordinates
+            new = self.model().index(row, 0).data(RectRole)
+
+            # Cumbersome conversion to ints
+            item = self._rows[row]
+            current = item.sceneBoundingRect()
+            current = QtCore.QRect(current.left(), current.top(),
+                                   current.width(), current.height())
+            if current!=new:
+                print('Update rect for [{0}] from [{1}] to [{2}]'.format(row,
+                        current, new))
+                item.prepareGeometryChange()
+                # setrect() expects floating point rect
+                item.setRect(QtCore.QRectF(new))
+
     def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot
         """
-        debug_print('GraphicsItemView.rowsAboutToBeRemoved')
+        debug_print('GraphicsItemView.rowsAboutToBeRemoved', start, end)
 
         map(self.scene.removeItem, self._rows[start:end])
 
@@ -92,11 +128,6 @@ class GraphicsItemView(QtGui.QAbstractItemView):
                     new.pop().ensureVisible(rect)
             finally:
                 self.handling_selection_update = False
-
-    def dataChanged(self, topLeft, bottomRight):
-        """QAbstractItemView virtual
-        """
-        debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
 
     def _rows_of_items(self, items):
         """Returns a generator of row numbers of the list of QGraphicsItems
@@ -181,6 +212,8 @@ class GraphicsItemView(QtGui.QAbstractItemView):
 
 
 class Scene(QtGui.QGraphicsScene):
+    """
+    """
     def __init__(self, source, parent=None):
         super(Scene, self).__init__(parent)
         self.source = source
@@ -188,6 +221,8 @@ class Scene(QtGui.QGraphicsScene):
         # A mapping from QGraphicsItem to QtCore.QRectF of selected items,
         # populated on mouseReleaseEvent()
         self._mouse_press_selection = {}
+
+        self.setBackgroundBrush(QtGui.QBrush(Qt.darkGray))
 
     def new_document(self, image):
         """A new document. Image should be a QPixmap or None.
@@ -267,6 +302,7 @@ class ZoomLevels(Enum):
 class BoxesView(QtGui.QGraphicsView):
     """
     """
+
     def __init__(self, scene, parent=None):
         super(BoxesView, self).__init__(scene, parent)
         self.zoom = ZoomLevels.FitImage

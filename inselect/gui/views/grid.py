@@ -3,7 +3,7 @@ from PySide.QtCore import Qt
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import contiguous
-from inselect.gui.roles import RectRole, ImageRole, RotationRole
+from inselect.gui.roles import RectRole, PixmapRole, RotationRole
 
 class PaintState(object):
     """Context manager that saves and restores a QPainter's state
@@ -94,7 +94,7 @@ class CropDelegate(QtGui.QAbstractItemDelegate):
 
         with PaintState(painter):
             painter.setTransform(t)
-            painter.drawPixmap(target_rect, index.data(ImageRole), source_rect)
+            painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
             painter.drawRect(target_rect)
 
     def _paint_controls(self, painter, option, index):

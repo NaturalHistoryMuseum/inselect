@@ -7,6 +7,7 @@ from PySide.QtTest import QTest
 
 import inselect
 from inselect.gui.app import InselectMainWindow
+from inselect.gui.roles import RectRole
 
 
 TESTDATA = Path(__file__).parent / 'test_data'
@@ -15,7 +16,7 @@ TESTDATA = Path(__file__).parent / 'test_data'
 class TestDocument(unittest.TestCase):
     def _test_closed(self):
         self.assertEqual('inselect', window.windowTitle())
-        self.assertEqual(0, len(window.scene.boxes()))
+        self.assertEqual(0, window.model.rowCount())
         self.assertFalse(window.toggle_segment_action.isEnabled())
         self.assertFalse(window.segment_action.isEnabled())
         self.assertFalse(window.zoom_in_action.isEnabled())
@@ -28,7 +29,7 @@ class TestDocument(unittest.TestCase):
         self._test_closed()
 
         window.open_document(TESTDATA / 'test_segment.inselect')
-        self.assertEqual(5, len(window.scene.boxes()))
+        self.assertEqual(5, window.model.rowCount())
         self.assertEqual('inselect [test_segment]', window.windowTitle())
         self.assertFalse(window.toggle_segment_action.isEnabled())
         self.assertTrue(window.segment_action.isEnabled())
@@ -71,16 +72,19 @@ class TestSegment(unittest.TestCase):
         window.open_document(TESTDATA / 'test_segment.inselect')
 
         self.assertFalse(window.toggle_segment_action.isEnabled())
-        self.assertEqual(5, len(window.scene.boxes()))
-        expected = [b.boundingRect() for b in window.scene.boxes()]
+        self.assertEqual(5, window.model.rowCount())
+        indexes = [window.model.index(r, 0) for r in xrange(0, window.model.rowCount())]
+        expected = [window.model.data(i, RectRole) for i in indexes]
+
+        # TODO LH Rewrite this for new model-view architecture
         window.view.delete_all_boxes()
-        self.assertEqual(0, len(window.scene.boxes()))
+        self.assertEqual(0, window.model.rowCount())
 
         self._segment()
         self.assertTrue(window.toggle_segment_action.isEnabled())
 
-        self.assertEqual(5, len(window.scene.boxes()))
-        actual = [b.boundingRect() for b in window.scene.boxes()]
+        self.assertEqual(5, window.model.rowCount())
+        actual = [b.boundingRect() for b in window.model.rowCount()]
         self.assertEqual(expected, actual)
 
     def test_subsegment(self):
@@ -88,13 +92,9 @@ class TestSegment(unittest.TestCase):
         window.open_document(TESTDATA / 'test_subsegment.inselect')
 
         self.assertFalse(window.toggle_segment_action.isEnabled())
-        self.assertEqual(1, len(window.scene.boxes()))
-        segments = window.scene.segments_of_boxes(window.scene.boxes())
-        self.assertEqual(1, len(segments))
-        window.scene.select_segment(segments[0])
+        self.assertEqual(1, window.model.rowCount())
 
-        # TODO LH Add seed points and test subselect once boxes have been
-        # reimplemented
+        # TODO LH Add seed points and test subselect
 
 
 # TODO LH Something better than this crude solution
