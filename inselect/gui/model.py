@@ -22,8 +22,8 @@ class Model(QAbstractItemModel):
         """Clear data structures
         """
         self._data = [] # A list of dicts
-        self._image_array = None    # np.nd_array
-        self._pixmap = None    # QPixmap
+        self._image_array = None    # np.nd_array, for segmentation
+        self._pixmap = None    # QPixmap, for display
 
     def clear(self):
         """Empty data
@@ -133,12 +133,15 @@ class Model(QAbstractItemModel):
             if Qt.Vertical==orientation:
                 return str(1+section)
             else:
-                return 'Title'
+                return 'Specimen crop'
 
     def data(self, index, role=Qt.DisplayRole):
         """QAbstractItemModel virtual
         """
-        if not index.isValid():
+        if PixmapRole == role:
+            # This role applies to the document as a whole
+            return self._pixmap
+        elif not index.isValid():
             return None
         else:
             item = index.internalPointer()
@@ -152,8 +155,6 @@ class Model(QAbstractItemModel):
                 return item['rect']
             elif RotationRole == role:
                 return item['rotation']
-            elif PixmapRole == role:
-                return self._pixmap
             elif MetadataRole == role:
                 return item['metadata']
 
