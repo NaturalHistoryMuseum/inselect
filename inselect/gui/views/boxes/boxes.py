@@ -45,7 +45,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         super(GraphicsItemView, self).reset()
 
         model = self.model()
-        self.scene.new_document(model.index(0, 0).data(PixmapRole))
+        self.scene.new_document(model.data(model.index(0, 0), PixmapRole))
 
         # Build up new mapping
         r = [None] * model.rowCount()
@@ -224,15 +224,15 @@ class Scene(QtGui.QGraphicsScene):
 
         self.setBackgroundBrush(QtGui.QBrush(Qt.darkGray))
 
-    def new_document(self, image):
-        """A new document. Image should be a QPixmap or None.
+    def new_document(self, pixmap):
+        """A new document. pixmap should be a QPixmap or None.
         """
         self.clear()  # Removes all items
 
-        if image:
-            debug_print('New scene [{0}] [{1}]'.format(image.width(), image.height()))
-            self.setSceneRect(0, 0, image.width(), image.height())
-            self.addItem(QtGui.QGraphicsPixmapItem(image))
+        if pixmap:
+            debug_print('New scene [{0}] [{1}]'.format(pixmap.width(), pixmap.height()))
+            self.setSceneRect(0, 0, pixmap.width(), pixmap.height())
+            self.addItem(QtGui.QGraphicsPixmapItem(pixmap))
             for v in self.views():
                 v.updateSceneRect(self.sceneRect())
         else:
