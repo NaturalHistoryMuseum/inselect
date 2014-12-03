@@ -52,12 +52,12 @@ def segment(dir):
 def main():
     parser = argparse.ArgumentParser(description='Segments inselect documents')
     parser.add_argument("dir", help='Directory containing inselect documents')
-    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
     args = parser.parse_args()
 
-    inselect.lib.utils.DEBUG_PRINT = args.verbose
+    inselect.lib.utils.DEBUG_PRINT = args.debug
 
     segment(args.dir)
 

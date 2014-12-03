@@ -98,13 +98,13 @@ class BarcodeReader(object):
 def main():
     parser = argparse.ArgumentParser(description='Read barcodes in cropped specimens')
     parser.add_argument("dir", help='Directory containing inselect documents')
-    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--debug', action='store_true')
     parser.add_argument('--debug-barcodes', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
     args = parser.parse_args()
 
-    inselect.lib.utils.DEBUG_PRINT = args.verbose
+    inselect.lib.utils.DEBUG_PRINT = args.debug
     # BarcodeReader will raise error is barcode decoding is not available
     BarcodeReader(args.debug_barcodes).process_dir(Path(args.dir))
 

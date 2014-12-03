@@ -64,12 +64,12 @@ def main():
     parser = argparse.ArgumentParser(description='Ingests images into inselect')
     parser.add_argument("inbox", help='Source directory containing scanned images')
     parser.add_argument("docs", help='Destination directory')
-    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
     args = parser.parse_args()
 
-    inselect.lib.utils.DEBUG_PRINT = args.verbose
+    inselect.lib.utils.DEBUG_PRINT = args.debug
 
     ingest(args.inbox, args.docs)
 
