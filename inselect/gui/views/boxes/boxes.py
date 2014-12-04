@@ -3,13 +3,13 @@ from itertools import izip
 from enum import Enum
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QRect, QRectF, QPointF, QSizeF
 
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import PixmapRole, RectRole
-from inselect.gui.utils import unite_rects, contiguous
+from inselect.gui.utils import unite_rects, contiguous, PaintState
 
-from PySide import QtCore, QtGui
+from .resize_handle import ResizeHandle
 
 
 class GraphicsItemView(QtGui.QAbstractItemView):
@@ -45,7 +45,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         super(GraphicsItemView, self).reset()
 
         model = self.model()
-        self.scene.new_document(model.data(model.index(0, 0), PixmapRole))
+        self.scene.new_document(model.data(QtCore.QModelIndex(), PixmapRole))
 
         # Build up new mapping
         r = [None] * model.rowCount()
@@ -65,7 +65,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         # will be set in dataChanged()
         n = 1 + end - start
         new = [None] * n
-        rect = QtCore.QRect(0, 0, 0, 0)
+        rect = QRect(0, 0, 0, 0)
         for row in xrange(0, n):
             new[row] = self.scene.add_box(rect)
         self._rows[start:start] = new
@@ -82,14 +82,15 @@ class GraphicsItemView(QtGui.QAbstractItemView):
             # Cumbersome conversion to ints
             item = self._rows[row]
             current = item.sceneBoundingRect()
-            current = QtCore.QRect(current.left(), current.top(),
-                                   current.width(), current.height())
+            current = QRect(current.left(), current.top(),
+                            current.width(), current.height())
             if current!=new:
-                print('Update rect for [{0}] from [{1}] to [{2}]'.format(row,
-                        current, new))
+                msg = 'Update rect for [{0}] from [{1}] to [{2}]'
+                debug_print(msg.format(row, current, new))
                 item.prepareGeometryChange()
+
                 # setrect() expects floating point rect
-                item.setRect(QtCore.QRectF(new))
+                item.setRect(QRectF(new))
 
     def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot
@@ -105,6 +106,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """QAbstractItemView virtual
         """
         # Tell the scene about the new selection
+        # TODO LH Use a timer to implement a delayed refresh
         if not self.handling_selection_update:
             # TODO Context for this
             debug_print('GraphicsItemView.selectionChanged')
@@ -158,14 +160,14 @@ class GraphicsItemView(QtGui.QAbstractItemView):
                 updated = set(self._rows_of_items(self.scene.selectedItems()))
 
                 # Select contiguous blocks
-                for row, count in contiguous(sorted(list(updated.difference(current)))):
+                for row, count in contiguous(sorted(updated.difference(current))):
                     top_left = model.index(row, 0)
                     bottom_right = model.index(row+count-1, 0)
                     sm.select(QtGui.QItemSelection(top_left, bottom_right),
                               QtGui.QItemSelectionModel.Select)
 
                 # Deselect contiguous blocks
-                for row, count in contiguous(sorted(list(current.difference(updated)))):
+                for row, count in contiguous(sorted(current.difference(updated))):
                     top_left = model.index(row, 0)
                     bottom_right = model.index(row+count-1, 0)
                     sm.select(QtGui.QItemSelection(top_left, bottom_right),
@@ -188,7 +190,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
             print('Row [{0}] updated'.format(index.row()))
             rect = item.sceneBoundingRect()
             # Cumbersome conversion to ints
-            rect = QtCore.QRect(rect.left(), rect.top(), rect.width(), rect.height())
+            rect = QRect(rect.left(), rect.top(), rect.width(), rect.height())
             self.model().setData(index, rect, RectRole)
 
     def scene_items_deleted(self, items):
@@ -218,7 +220,7 @@ class Scene(QtGui.QGraphicsScene):
         super(Scene, self).__init__(parent)
         self.source = source
 
-        # A mapping from QGraphicsItem to QtCore.QRectF of selected items,
+        # A mapping from QGraphicsItem to QRectF of selected items,
         # populated on mouseReleaseEvent()
         self._mouse_press_selection = {}
 
@@ -362,18 +364,94 @@ class BoxesView(QtGui.QGraphicsView):
 class BoxItem(QtGui.QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
+
+    UNSELECTED = QtGui.QColor(0x00, 0x00, 0xff, 0xcc)
+    SELECTED =   QtGui.QColor(0xff, 0x00, 0x00, 0xcc)
+    RESIZING =   QtGui.QColor(0xff, 0x00, 0x00, 0x50)
+
     def __init__(self, x, y, w, h, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
         self.setFlags(QtGui.QGraphicsItem.ItemIsFocusable |
                       QtGui.QGraphicsItem.ItemIsSelectable |
                       QtGui.QGraphicsItem.ItemSendsGeometryChanges |
                       QtGui.QGraphicsItem.ItemIsMovable)
+
         self.setCursor(Qt.ArrowCursor)
+        self.setAcceptHoverEvents(True)
+
+        self._handles_visible = False
+        self._handles = []
+
+        positions = (Qt.TopLeftCorner, Qt.TopRightCorner, Qt.BottomLeftCorner,
+                     Qt.BottomRightCorner)
+        self._handles = [self._create_handle(pos) for pos in positions]
+        self._layout_handles()
 
     def paint(self, painter, option, widget=None):
         """QGraphicsRectItem virtual
         """
-        colour = QtCore.Qt.red if self.isSelected() else QtCore.Qt.blue
+        # Thick red border is selected
+        # Think blue border if not
         thickness = 3 if self.isSelected() else 1
-        painter.setPen(QtGui.QPen(colour, thickness, QtCore.Qt.SolidLine))
-        painter.drawRect(self.rect())
+        with PaintState(painter):
+            painter.setPen(QtGui.QPen(self.colour, thickness, Qt.SolidLine))
+            painter.drawRect(self.boundingRect())
+
+    @property
+    def colour(self):
+        """QtGui.QColor
+        """
+        if self.scene().mouseGrabberItem() in self._handles:
+            return self.RESIZING
+        else:
+            return self.SELECTED if self.isSelected() else self.UNSELECTED
+
+    def hoverEnterEvent(self, event):
+        """QGraphicsRectItem virtual
+        """
+        debug_print('BoxItem.hoverEnterEvent')
+        super(BoxItem, self).hoverEnterEvent(event)
+        self._set_handles_visible(True)
+
+    def hoverLeaveEvent(self, event):
+        """QGraphicsRectItem virtual
+        """
+        debug_print('BoxItem.hoverLeaveEvent')
+        super(BoxItem, self).hoverLeaveEvent(event)
+        self._set_handles_visible(False)
+
+    def _set_handles_visible(self, visible):
+        self._handles_visible = visible
+        map(lambda i: i.setVisible(visible), self._handles)
+
+    def _create_handle(self, corner):
+        # Creates and returns a new ResizeHandle at the given Qt.Corner
+        handle = ResizeHandle(corner, self)
+        handle.setZValue(2.0)
+        handle.setVisible(self._handles_visible)
+        return handle
+
+    def _layout_handles(self):
+        """Moves handles to the appropriate positions
+        """
+        map(lambda i: i.relayout(self.boundingRect()), self._handles)
+
+    def update_handles(self):
+        """Updates handles
+        """
+        for item in self._handles + [self]:
+            item.update()
+
+    def setRect(self, rect):
+        """QGraphicsRectItem function
+        """
+        debug_print('setRect')
+        super(BoxItem, self).setRect(rect)
+        self._layout_handles()
+
+    def mousePressEvent(self, event):
+        """QGraphicsRectItem virtual
+        """
+        debug_print('mousePressEvent')
+        super(BoxItem, self).mousePressEvent(event)
+        self.update_handles()
