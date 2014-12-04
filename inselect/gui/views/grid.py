@@ -2,21 +2,8 @@ from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import contiguous
+from inselect.gui.utils import contiguous, PaintState
 from inselect.gui.roles import RectRole, PixmapRole, RotationRole
-
-class PaintState(object):
-    """Context manager that saves and restores a QPainter's state
-    """
-    def __init__(self, painter):
-        self._p = painter
-
-    def __enter__(self):
-        self._p.save()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._p.restore()
-
 
 class CropDelegate(QtGui.QAbstractItemDelegate):
     """Delegate that shows cropped specimen images with a grey box and

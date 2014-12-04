@@ -67,3 +67,15 @@ def contiguous(values):
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1
         yield lower, count
+
+class PaintState(object):
+    """Context manager that saves and restores a QPainter's state
+    """
+    def __init__(self, painter):
+        self._p = painter
+
+    def __enter__(self):
+        self._p.save()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._p.restore()
