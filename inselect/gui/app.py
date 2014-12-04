@@ -13,7 +13,6 @@ import inselect.settings
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.qt_util import qimage_of_bgr
 from inselect.lib.segment import segment_edges, segment_grabcut
 from inselect.lib.utils import debug_print
 
