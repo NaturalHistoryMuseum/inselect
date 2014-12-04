@@ -81,8 +81,9 @@ class MainWindow(QtGui.QMainWindow):
         self.app = app
 
         # Boxes view
-        self.view_hook = GraphicsItemView()
-        self.view_boxes = BoxesView(self.view_hook.scene)
+        self.view_graphics_item = GraphicsItemView()
+        # self.boxes_view is a QGraphicsView, not a QAbstractItemView
+        self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
         # Metadata view
         self.view_grid = GridView()
@@ -95,13 +96,13 @@ class MainWindow(QtGui.QMainWindow):
         if tabbed:
             # Views in tabs
             self.tabs = QtGui.QTabWidget(self)
-            self.tabs.addTab(self.view_boxes, 'Boxes')
+            self.tabs.addTab(self.boxes_view, 'Boxes')
             self.tabs.addTab(metadata, 'Metadata')
             #self.tabs.setCurrentIndex(1)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)
-            self.tabs.addWidget(self.view_boxes)
+            self.tabs.addWidget(self.boxes_view)
             self.tabs.addWidget(metadata)
             self.tabs.setSizes([500, 500])
 
@@ -121,12 +122,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # Model
         self.model = Model()
-        self.view_hook.setModel(self.model)
+        self.view_graphics_item.setModel(self.model)
         self.view_grid.setModel(self.model)
         self.view_metadata.setModel(self.model)
         self.view_summary.setModel(self.model)
 
-        self.view_hook.setSelectionModel(self.view_grid.selectionModel())
+        self.view_graphics_item.setSelectionModel(self.view_grid.selectionModel())
         self.view_metadata.setSelectionModel(self.view_grid.selectionModel())
         self.view_summary.setSelectionModel(self.view_grid.selectionModel())
 
