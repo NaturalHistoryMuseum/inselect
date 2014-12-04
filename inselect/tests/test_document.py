@@ -236,7 +236,7 @@ class TestDocument(unittest.TestCase):
             self.assertEqual(5, len(list(crops_dir.glob('*.png'))))
 
             boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-            for box, path in izip(boxes, crops_dir.glob('*.png')):
+            for box, path in izip(boxes, sorted(crops_dir.glob('*.png'))):
                 x0, y0, x1, y1 = box.coordinates
                 self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
                                        cv2.imread(str(path))))
