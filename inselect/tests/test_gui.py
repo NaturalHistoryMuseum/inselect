@@ -6,7 +6,7 @@ from PySide.QtGui import QApplication
 from PySide.QtTest import QTest
 
 import inselect
-from inselect.gui.app import InselectMainWindow
+from inselect.gui.app import MainWindow
 from inselect.gui.roles import RectRole
 
 
@@ -104,7 +104,7 @@ def setUpModule():
     assert(not app and not window)
     inselect.settings.init()
     app = QApplication([])
-    window = InselectMainWindow(app)
+    window = MainWindow(app)
 
 
 def tearDownModule():

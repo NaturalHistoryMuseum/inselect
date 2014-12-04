@@ -72,13 +72,13 @@ def report_to_user(f):
     return wrapper
 
 
-class InselectMainWindow(QtGui.QMainWindow):
+class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
     FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
 
     def __init__(self, app, filename=None, tabbed=True):
-        super(InselectMainWindow, self).__init__()
+        super(MainWindow, self).__init__()
         self.app = app
 
         # Boxes view
@@ -150,7 +150,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def new_document(self):
-        debug_print('new_document')
+        debug_print('MainWindow.new_document')
 
         self.close_document()
 
@@ -164,12 +164,13 @@ class InselectMainWindow(QtGui.QMainWindow):
             source = Path(source)
             doc = ingest_image(source, source.parent)
             self.open_document(doc.document_path)
-            QtGui.QMessageBox.information(self, "Document created",
-                'New inselect document [{0}] created in [{1}]'.format(doc.document_path.stem, doc.document_path.parent))
+            msg = 'New inselect document [{0}] created in [{1}]'
+            msg = msg.format(doc.document_path.stem, doc.document_path.parent)
+            QtGui.QMessageBox.information(self, "Document created", msg)
 
     @report_to_user
     def open_document(self, filename=None):
-        debug_print('open_document', '[{0}]'.format(str(filename)))
+        debug_print('MainWindow.open_document', '[{0}]'.format(str(filename)))
 
         if not filename:
             folder = inselect.settings.get("working_directory")
@@ -192,7 +193,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def save_document(self):
-        debug_print('save_document')
+        debug_print('MainWindow.save_document')
         items = []
 
         self.model.to_document(self.document)
@@ -205,7 +206,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def close_document(self):
-        debug_print('close_document')
+        debug_print('MainWindow.close_document')
         # TODO LH If not dirty or dirty and user saved
 
         self.empty_document()
@@ -214,7 +215,7 @@ class InselectMainWindow(QtGui.QMainWindow):
     def empty_document(self):
         """Creates an empty document
         """
-        debug_print('empty_document')
+        debug_print('MainWindow.empty_document')
         self.document = None
         self.segment_display = None
         self.segment_image_visible = False
@@ -228,15 +229,17 @@ class InselectMainWindow(QtGui.QMainWindow):
         # TODO LH Default zoom
 
     def closeEvent(self, event):
-        debug_print('closeEvent')
+        debug_print('MainWindow.closeEvent')
         self.close_document()
 
     @report_to_user
     def zoom_in(self):
+        raise NotImplementedError('MainWindow.zoom_in')
         self.view.zoom(1)
 
     @report_to_user
     def zoom_out(self):
+        raise NotImplementedError('MainWindow.zoom_out')
         self.view.zoom(-1)
 
     @report_to_user
@@ -255,7 +258,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def segment_worker_finished(self, rects, display):
-        debug_print('segment_worker_finished')
+        debug_print('MainWindow.segment_worker_finished')
 
         worker, self.worker = self.worker, None
         self.progressDialog.hide()
@@ -282,6 +285,7 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def subsegment_worker_finished(self, rects, display):
+        debug_print('MainWindow.subsegment_worker_finished')
         # TODO LH Reinstate
 
         # Create segmentation image if required
@@ -308,7 +312,7 @@ class InselectMainWindow(QtGui.QMainWindow):
         if self.worker:
             raise InselectError('Reenter segment()')
         else:
-            debug_print('segment')
+            debug_print('MainWindow.segment')
             # Sub-segment a single box if seed points are set, otherwise
             # segment the entire image
 
@@ -330,13 +334,13 @@ class InselectMainWindow(QtGui.QMainWindow):
             else:
                 # Segment the entire image
                 if self.model.rowCount():
-                    prompt = ('All boxes and their metadata will be replaced. '
-                              'Replace existing boxes?')
+                    prompt = ('Segmenting will cause all boxes and metadata to '
+                              'be replaced.\n\nReplace existing boxes?')
                     res = QtGui.QMessageBox.question(self, 'Replace existing boxes?',
                         prompt, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
-                    if QtGui.QMessageBox.Yes == res:
-                        worker = SegmentWorkerThread(self.model.image_array)
-                        worker.results.connect(self.segment_worker_finished)
+                if 0 == self.model.rowCount() or QtGui.QMessageBox.Yes == res:
+                    worker = SegmentWorkerThread(self.model.image_array)
+                    worker.results.connect(self.segment_worker_finished)
 
             if worker:
                 self.toggle_segment_action.setEnabled(True)
@@ -353,15 +357,15 @@ class InselectMainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def select_all(self):
-        raise NotImplementedError('select_all')
+        raise NotImplementedError('MainWindow.select_all')
 
     @report_to_user
     def select_none(self):
-        raise NotImplementedError('select_none')
+        raise NotImplementedError('MainWindow.select_none')
 
     @report_to_user
     def display_image(self, image):
-        raise NotImplementedError('display_image')
+        raise NotImplementedError('MainWindow.display_image')
 
         """Displays an image in the user interface.
 

@@ -20,18 +20,18 @@ from docopt import docopt
 import inselect
 import inselect.lib.utils
 import inselect.settings
-from inselect.gui.app import InselectMainWindow
+from inselect.gui.app import MainWindow
 
 
 def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
-    window = InselectMainWindow(app)
+    window = MainWindow(app)
     open_fullscreen = False
     if open_fullscreen:
         window.showFullScreen()
     else:
         desktop = QtGui.QDesktopWidget()
-        window.setGeometry(0, 0, desktop.width(), desktop.height()*0.7);
+        window.setGeometry(0, 0, desktop.width(), desktop.height()*0.75)
         window.show()
 
     if filename:
