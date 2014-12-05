@@ -24,11 +24,7 @@ def qimage_of_bgr(bgr):
 def unite_rects(rects):
     """Returns united rect
     """
-    # TODO LH There must be a more elegant way of doing this
-    rect = rects[0]
-    for other in rects[1:]:
-        rect = rect.united(other)
-    return rect
+    return reduce(lambda x, y: x.united(y), rects)
 
 def get_corners(x1, y1, x2, y2):
     """Given two diagonally opposite corners of a box, return the top left and
