@@ -4,6 +4,7 @@ from PySide import QtGui
 from PySide.QtCore import Qt
 
 from inselect.lib.utils import debug_print
+from inselect.gui.utils import unite_rects
 
 
 class ZoomLevels(Enum):
