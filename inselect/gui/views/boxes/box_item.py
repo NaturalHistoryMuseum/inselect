@@ -25,6 +25,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self.setCursor(Qt.ArrowCursor)
         self.setAcceptHoverEvents(True)
 
+        self._mouse_hover = False
+
         self._handles_visible = False
         self._handles = []
 
@@ -32,12 +34,22 @@ class BoxItem(QtGui.QGraphicsRectItem):
                      Qt.BottomRightCorner)
         self._handles = [self._create_handle(pos) for pos in positions]
         self._layout_handles()
+        self._set_z_index()
 
     def paint(self, painter, option, widget=None):
         """QGraphicsRectItem virtual
         """
+        # TODO LH Is there a way to clip to overlapping
+        # QAbstractGraphicsItems with a larger zorder
+
+        # TODO LH Get pixmap without tight coupling to scene
+        # pixmap = next((i for i in self.scene().items() if type(i)==QtGui.QGraphicsPixmapItem))
+        painter.drawPixmap(self.boundingRect(),
+                           self.scene().pixmap,
+                           self.sceneBoundingRect())
+
         # Thick red border is selected
-        # Think blue border if not
+        # Thin blue border if not
         thickness = 3 if self.isSelected() else 1
         with PaintState(painter):
             painter.setPen(QtGui.QPen(self.colour, thickness, Qt.SolidLine))
@@ -47,6 +59,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
     def colour(self):
         """QtGui.QColor
         """
+        # TODO LH Transparency on resize better handled by setOpacity()?
         if self.scene().mouseGrabberItem() in self._handles:
             return self.RESIZING
         else:
@@ -57,14 +70,20 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         debug_print('BoxItem.hoverEnterEvent')
         super(BoxItem, self).hoverEnterEvent(event)
+        self._mouse_hover = True
         self._set_handles_visible(True)
+        self._set_z_index()
+        self.update()
 
     def hoverLeaveEvent(self, event):
         """QGraphicsRectItem virtual
         """
         debug_print('BoxItem.hoverLeaveEvent')
         super(BoxItem, self).hoverLeaveEvent(event)
+        self._mouse_hover = False
         self._set_handles_visible(False)
+        self._set_z_index()
+        self.update()
 
     def _set_handles_visible(self, visible):
         self._handles_visible = visible
@@ -85,7 +104,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
     def update_handles(self):
         """Updates handles
         """
-        for item in self._handles + [self]:
+        for item in self._handles:
             item.update()
 
     def setRect(self, rect):
@@ -93,11 +112,36 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         debug_print('setRect')
         super(BoxItem, self).setRect(rect)
+        self._set_z_index()
         self._layout_handles()
 
     def mousePressEvent(self, event):
         """QGraphicsRectItem virtual
         """
-        debug_print('mousePressEvent')
+        debug_print('BoxItem.mousePressEvent')
         super(BoxItem, self).mousePressEvent(event)
+        self._set_z_index()
         self.update_handles()
+
+    def itemChange(self, change, value):
+        if change == self.ItemSelectedChange:
+            self._set_z_index()
+            self.update_handles()
+        return super(BoxItem, self).itemChange(change, value)
+
+    def _set_z_index(self):
+        """Updates the Z-index of the box
+
+        This sorts the boxes such that the bigger the area of a box, the lower
+        it's Z-index is; and boxes that are selected and have mouse or keyboard
+        focus are always above other boxes.
+        """
+        rect = self.rect()
+        # Smaller items have a higher z
+        z = 1 + 1.0 / float(rect.width() * rect.height())
+        if self.isSelected():
+            z += 1.0
+        if self._mouse_hover or self.hasFocus():
+            z += 1.0
+        self.setZValue(z)
+ 

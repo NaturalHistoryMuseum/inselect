@@ -12,6 +12,7 @@ class BoxesScene(QtGui.QGraphicsScene):
         super(BoxesScene, self).__init__(parent)
         self.source = source
 
+        self.pixmap = None
         # A mapping from QGraphicsItem to QRectF of selected items,
         # populated on mouseReleaseEvent()
         self._mouse_press_selection = {}
@@ -27,11 +28,13 @@ class BoxesScene(QtGui.QGraphicsScene):
             debug_print('New scene [{0}] [{1}]'.format(pixmap.width(), pixmap.height()))
             self.setSceneRect(0, 0, pixmap.width(), pixmap.height())
             self.addItem(QtGui.QGraphicsPixmapItem(pixmap))
+            self.pixmap = pixmap
             for v in self.views():
                 v.updateSceneRect(self.sceneRect())
         else:
             debug_print('Clear scene')
             self.setSceneRect(0, 0, 0, 0)
+            self.pixmap = None
 
     def add_box(self, rect):
         # Notification from source that a box has been added
@@ -86,4 +89,3 @@ class BoxesScene(QtGui.QGraphicsScene):
             # not changed and that is one item's rect has altered then they all
             # have.
             self.source.scene_item_rects_updated(selected)
-
