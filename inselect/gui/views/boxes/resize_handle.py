@@ -65,7 +65,7 @@ class ResizeHandle(QtGui.QGraphicsItem):
             parent.setSelected(True)
 
         # Redraw parent and corners
-        parent.update_handles()
+        parent.update()
 
     def mouseMoveEvent(self, event):
         """QGraphicsItem virtual
@@ -106,7 +106,7 @@ class ResizeHandle(QtGui.QGraphicsItem):
         debug_print('ResizeHandle.mouseReleaseEvent')
 
         # Redraw parent and corners
-        self.parentItem().update_handles()
+        self.parentItem().update()
 
     def paint(self, painter, option, widget):
         """QGraphicsItem virtual

@@ -1,3 +1,5 @@
+from itertools import chain
+
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
 
@@ -27,7 +29,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         self._mouse_hover = False
 
-        self._handles_visible = False
         self._handles = []
 
         positions = (Qt.TopLeftCorner, Qt.TopRightCorner, Qt.BottomLeftCorner,
@@ -48,11 +49,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
                            self.scene().pixmap,
                            self.sceneBoundingRect())
 
-        # Thick red border is selected
-        # Thin blue border if not
-        thickness = 3 if self.isSelected() else 1
         with PaintState(painter):
-            painter.setPen(QtGui.QPen(self.colour, thickness, Qt.SolidLine))
+            painter.setPen(QtGui.QPen(self.colour, 1, Qt.SolidLine))
             painter.drawRect(self.boundingRect())
 
     @property
@@ -60,10 +58,20 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """QtGui.QColor
         """
         # TODO LH Transparency on resize better handled by setOpacity()?
-        if self.scene().mouseGrabberItem() in self._handles:
+        if self.scene().mouseGrabberItem() in chain([self], self._handles):
             return self.RESIZING
         else:
             return self.SELECTED if self.isSelected() else self.UNSELECTED
+
+    def update(self, rect=QtCore.QRectF()):
+        """QGraphicsRectItem function
+        """
+        # TODO LH QGraphicsRectItem::update is not a virtual function - is it
+        # OK to implement this function and call the base class's
+        # implementation?
+        super(BoxItem, self).update(rect)
+        for item in self._handles:
+            item.update()
 
     def hoverEnterEvent(self, event):
         """QGraphicsRectItem virtual
@@ -86,14 +94,13 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self.update()
 
     def _set_handles_visible(self, visible):
-        self._handles_visible = visible
         map(lambda i: i.setVisible(visible), self._handles)
 
     def _create_handle(self, corner):
         # Creates and returns a new ResizeHandle at the given Qt.Corner
         handle = ResizeHandle(corner, self)
-        handle.setZValue(2.0)
-        handle.setVisible(self._handles_visible)
+        handle.setVisible(False)
+        handle.setFlags(QtGui.QGraphicsItem.ItemStacksBehindParent)
         return handle
 
     def _layout_handles(self):
@@ -101,16 +108,10 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         map(lambda i: i.relayout(self.boundingRect()), self._handles)
 
-    def update_handles(self):
-        """Updates handles
-        """
-        for item in self._handles:
-            item.update()
-
     def setRect(self, rect):
         """QGraphicsRectItem function
         """
-        debug_print('setRect')
+        debug_print('BoxItem.setRect')
         super(BoxItem, self).setRect(rect)
         self._set_z_index()
         self._layout_handles()
@@ -121,12 +122,19 @@ class BoxItem(QtGui.QGraphicsRectItem):
         debug_print('BoxItem.mousePressEvent')
         super(BoxItem, self).mousePressEvent(event)
         self._set_z_index()
-        self.update_handles()
+        self.update()
+
+    def mouseReleaseEvent(self, event):
+        """QGraphicsRectItem virtual
+        """
+        debug_print('BoxItem.mouseReleaseEvent')
+        super(BoxItem, self).mousePressEvent(event)
+        self._set_z_index()
+        self.update()
 
     def itemChange(self, change, value):
         if change == self.ItemSelectedChange:
             self._set_z_index()
-            self.update_handles()
         return super(BoxItem, self).itemChange(change, value)
 
     def _set_z_index(self):
