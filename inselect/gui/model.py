@@ -21,6 +21,7 @@ class Model(QAbstractItemModel):
     def _clear_model_data(self):
         """Clear data structures
         """
+        self._modified = False
         self._data = [] # A list of dicts
         self._image_array = None    # np.nd_array, for segmentation
         self._pixmap = None    # QPixmap, for display
@@ -72,13 +73,24 @@ class Model(QAbstractItemModel):
         # Inform views
         self.beginResetModel()
         self._data, self._image_array, self._pixmap = data, image_array, pixmap
-        self.endResetModel ()
+        self.endResetModel()
 
     @property
     def image_array(self):
         """np.nd_array
         """
         return self._image_array
+
+    @property
+    def modified(self):
+        """bool - True if the model has been modified
+        """
+        return self._modified
+
+    def clear_modified(self):
+        """Clears modified
+        """
+        self._modified = False
 
     def to_document(self, document):
         """Write data to document
@@ -170,6 +182,7 @@ class Model(QAbstractItemModel):
 
             self._data[index.row()]['rect'] = value
             self.dataChanged.emit(index, index)
+            self._modified = True
             return True
         elif RotationRole == role:
             current = self._data[index.row()]['rotation']
@@ -182,6 +195,7 @@ class Model(QAbstractItemModel):
 
             self._data[index.row()]['rotation'] = value
             self.dataChanged.emit(index, index)
+            self._modified = True
             return True
         else:
             return super(Model, self).setData(index, value, role)

@@ -98,7 +98,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tabs = QtGui.QTabWidget(self)
             self.tabs.addTab(self.boxes_view, 'Boxes')
             self.tabs.addTab(metadata, 'Metadata')
-            #self.tabs.setCurrentIndex(1)
+            self.tabs.setCurrentIndex(1)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)
@@ -119,6 +119,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Document
         self.document = None
+        self.document_path = None
 
         # Model
         self.model = Model()
@@ -150,26 +151,34 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def new_document(self):
+        """Creates a new document. The user is prompted for the path to a
+        scanned image, for which the document will be created.
+        """
         debug_print('MainWindow.new_document')
 
-        self.close_document()
+        if not self.close_document():
+            # User does not want to close the existing document
+            pass
+        else:
+            # Source image
+            folder = inselect.settings.get("working_directory")
+            source, selected_filter = QtGui.QFileDialog.getOpenFileName(
+                    self, "Choose image for the new inselect document", folder,
+                    filter='Images (*.tiff *.png *.jpeg *.jpg)')
 
-        # Source image
-        folder = inselect.settings.get("working_directory")
-        source, selected_filter = QtGui.QFileDialog.getOpenFileName(
-                self, "Choose image for the new inselect document", folder,
-                filter='Images (*.tiff *.png *.jpeg *.jpg)')
-
-        if source:
-            source = Path(source)
-            doc = ingest_image(source, source.parent)
-            self.open_document(doc.document_path)
-            msg = 'New inselect document [{0}] created in [{1}]'
-            msg = msg.format(doc.document_path.stem, doc.document_path.parent)
-            QtGui.QMessageBox.information(self, "Document created", msg)
+            if source:
+                source = Path(source)
+                doc = ingest_image(source, source.parent)
+                self.open_document(doc.document_path)
+                msg = 'New inselect document [{0}] created in [{1}]'
+                msg = msg.format(doc.document_path.stem, doc.document_path.parent)
+                QtGui.QMessageBox.information(self, "Document created", msg)
 
     @report_to_user
     def open_document(self, filename=None):
+        """Opens filename. If filename does not evaluate to True, the user is
+        prompted for a filename.
+        """
         debug_print('MainWindow.open_document', '[{0}]'.format(str(filename)))
 
         if not filename:
@@ -193,23 +202,55 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def save_document(self):
+        """Saves the document and, if the OKed by the user, writes crops
+        """
         debug_print('MainWindow.save_document')
         items = []
 
         self.model.to_document(self.document)
         self.document.save()
+
+        existing_crops = self.document.crops_dir.is_dir()
+        if existing_crops:
+            msg = ('The document has been saved.\n\n'
+                   'Overwrite the existing cropped specimen images?')
+        else:
+            msg = ('The document has been saved.\n\n'
+                   'Write cropped specimen images?')
         res = QtGui.QMessageBox.question(self, 'Write cropped specimen images?',
-            'Write cropped specimen images?', QtGui.QMessageBox.No,
-            QtGui.QMessageBox.Yes)
-        if res==QtGui.QMessageBox.Yes:
+            msg, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+
+        if QtGui.QMessageBox.Yes == res:
             self.document.save_crops()
 
     @report_to_user
     def close_document(self):
+        """Closes the document and returns True if not modified or if modified
+        and user does not cancel. Does not close the document and returns False
+        if modified and users cancels.
+        """
         debug_print('MainWindow.close_document')
-        # TODO LH If not dirty or dirty and user saved
+        if self.model.modified:
+            # Ask the user if they work like to save before closing
+            res = QtGui.QMessageBox.question(self, 'Save document?',
+                'Save the document before closing?',
+                (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No |
+                 QtGui.QMessageBox.Cancel),
+                QtGui.QMessageBox.Yes)
 
-        self.empty_document()
+            if QtGui.QMessageBox.Yes == res:
+                self.save_document()
+
+            # Answering Yes or No means the document will be closed
+            close = QtGui.QMessageBox.Cancel != res
+        else:
+            # The document is not modified so it is OK to close it
+            close = True
+
+        if close:
+            self.empty_document()
+
+        return close
 
     @report_to_user
     def empty_document(self):
@@ -229,8 +270,15 @@ class MainWindow(QtGui.QMainWindow):
         # TODO LH Default zoom
 
     def closeEvent(self, event):
+        """QWidget virtual
+        """
         debug_print('MainWindow.closeEvent')
-        self.close_document()
+        if self.close_document():
+            # User wants to close
+            event.accept()
+        else:
+            # User does not want to close
+            event.ignore()
 
     @report_to_user
     def zoom_in(self):
