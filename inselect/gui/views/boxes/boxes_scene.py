@@ -53,19 +53,36 @@ class BoxesScene(QtGui.QGraphicsScene):
     def keyPressEvent(self, event):
         """QGraphicsScene virtual
         """
-        debug_print('Scene.keyPressEvent')
-        if event.key() == Qt.Key_Delete:
-            # Delete the selected items from source
-            selected = self.selectedItems()
-            self.source.scene_items_deleted(selected)
+        debug_print('BoxesScene.keyPressEvent')
+
+        key = event.key()
+
+        # Mapping from cursor key to adjustment (dx1, dy1, dx2, dy2)
+        cursors = { Qt.Key_Up:    ( 0.0,-1.0, 0.0,-1.0),
+                    Qt.Key_Right: ( 1.0, 0.0, 1.0, 0.0),
+                    Qt.Key_Down:  ( 0.0, 1.0, 0.0, 1.0),
+                    Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
+                  }
+
+        if key in cursors.keys():
             event.accept()
+            dx1, dy1, dx2, dy2 = cursors[key]
+            mod = event.modifiers()
+            if Qt.ShiftModifier == mod:
+                # Shift - move just the bottom-right corner
+                dx1 = dy1 = 0.0
+            elif Qt.ControlModifier == mod:
+                # Control - move just the top-left corner
+                dx2 = dy2 = 0.0
+
+            self.adjust_selected(dx1, dy1, dx2, dy2)
         else:
             super(BoxesScene, self).keyPressEvent(event)
 
     def mousePressEvent(self, event):
         """QGraphicsScene virtual
         """
-        debug_print('Scene.mousePressEvent')
+        debug_print('BoxesScene.mousePressEvent')
         super(BoxesScene, self).mousePressEvent(event)
 
         if self._mouse_press_selection:
@@ -79,7 +96,7 @@ class BoxesScene(QtGui.QGraphicsScene):
     def mouseReleaseEvent(self, event):
         """QGraphicsScene virtual
         """
-        debug_print('Scene.mouseReleaseEvent')
+        debug_print('BoxesScene.mouseReleaseEvent')
         super(BoxesScene, self).mouseReleaseEvent(event)
 
         # Work out which items have had their scene bounding rects altered
@@ -96,4 +113,13 @@ class BoxesScene(QtGui.QGraphicsScene):
             # This assumes that the order of items in self.selectedItems() has
             # not changed and that is one item's rect has altered then they all
             # have.
+            self.source.scene_item_rects_updated(selected)
+
+    def adjust_selected(self, dx1, dy1, dx2, dy2):
+        """Adjusts the rects of the selected boxes
+        """
+        selected = self.selectedItems()
+        if selected:
+            for box in selected:
+                box.adjust_rect(dx1, dy1, dx2, dy2)
             self.source.scene_item_rects_updated(selected)

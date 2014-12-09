@@ -3,7 +3,7 @@ import os
 import json
 import cv2
 
-from functools import wraps
+from functools import wraps, partial
 from pathlib import Path
 
 from PySide import QtCore, QtGui
@@ -18,6 +18,7 @@ from inselect.lib.utils import debug_print
 
 from inselect.gui.model import Model
 from inselect.gui.help_dialog import HelpDialog
+from inselect.gui.utils import contiguous
 from inselect.gui.views.boxes import BoxesView, GraphicsItemView
 from inselect.gui.views.grid import GridView
 from inselect.gui.views.metadata import MetadataView
@@ -98,7 +99,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tabs = QtGui.QTabWidget(self)
             self.tabs.addTab(self.boxes_view, 'Boxes')
             self.tabs.addTab(metadata, 'Metadata')
-            self.tabs.setCurrentIndex(1)
+            self.tabs.setCurrentIndex(0)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)
@@ -128,9 +129,11 @@ class MainWindow(QtGui.QMainWindow):
         self.view_metadata.setModel(self.model)
         self.view_summary.setModel(self.model)
 
-        self.view_graphics_item.setSelectionModel(self.view_grid.selectionModel())
-        self.view_metadata.setSelectionModel(self.view_grid.selectionModel())
-        self.view_summary.setSelectionModel(self.view_grid.selectionModel())
+        # A consistent selection across all views
+        sm = self.view_grid.selectionModel()
+        self.view_graphics_item.setSelectionModel(sm)
+        self.view_metadata.setSelectionModel(sm)
+        self.view_summary.setSelectionModel(sm)
 
         self.padding = 0
         self.segment_display = None
@@ -139,15 +142,16 @@ class MainWindow(QtGui.QMainWindow):
         self.create_actions()
         self.create_menus()
 
+        # Conect signals
+        self.tabs.currentChanged.connect(self.current_tab_changed)
+        sm.selectionChanged.connect(self.selection_changed)
+
         self.worker = self.progressDialog = None
 
         self.empty_document()
 
         if filename:
             self.open_document(filename)
-
-        # TODO LH Why is this here and not in create_actions?
-        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
 
     @report_to_user
     def new_document(self):
@@ -313,8 +317,11 @@ class MainWindow(QtGui.QMainWindow):
         self.progressDialog.hide()
         self.progressDialog = None
 
-        # add detected boxes
-        rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in rects]
+        # TODO LH Better handling of order of boxes
+
+        # Reverse order so that boxes at the top left are towards the start
+        # and boxes at the bottom right are towards the end
+        rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in reversed(rects)]
         if self.padding:
             # TODO LH Padding is a fraction of box width or height - better
             # to be a fixed number of pixels?
@@ -323,7 +330,6 @@ class MainWindow(QtGui.QMainWindow):
                 w, h = rects[i].width(), rects[i].height()
                 rects[i].adjust(-w*p, -h*p, 2*w*p, 2*h*p)
 
-        # TODO LH Order of boxes
         self.model.set_new_boxes(rects)
         self.segment_display = display.copy()
 
@@ -406,11 +412,50 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def select_all(self):
-        raise NotImplementedError('MainWindow.select_all')
+        """Selects all boxes in the model
+        """
+        sm = self.view_grid.selectionModel()
+        m = self.model
+        sm.select(QtGui.QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
+                  QtGui.QItemSelectionModel.Select)
 
     @report_to_user
     def select_none(self):
-        raise NotImplementedError('MainWindow.select_none')
+        sm = self.view_grid.selectionModel()
+        sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
+
+    @report_to_user
+    def delete_selected(self):
+        # Delete contiguous blocks of rows
+        selected = self.view_grid.selectionModel().selectedIndexes()
+        selected = sorted([i.row() for i in selected])
+
+        # Remove blocks in reverse order so that row indices are not invalidated
+        # TODO LH We shouldn't need to remove blocks in reverse order - stems
+        # from crummy GraphicsItemView
+        for row, count in reversed(list(contiguous(selected))):
+            self.model.removeRows(row, count)
+
+    @report_to_user
+    def select_next(self, forwards):
+        """The user wants to select the next/previous box
+        """
+        sm = self.view_grid.selectionModel()
+        model = self.view_grid.model()
+        current = sm.currentIndex()
+        current = current.row() if current else -1
+
+        select = current + (1 if forwards else -1)
+        if select == model.rowCount():
+            select = 0
+        elif -1 == select:
+            select = model.rowCount()-1
+
+        debug_print('Will move selection [{0}] from [{1}]'.format(current, select))
+        select = model.index(select, 0)
+        sm.select(QtGui.QItemSelection(select, select),
+                  QtGui.QItemSelectionModel.ClearAndSelect)
+        sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
 
     @report_to_user
     def display_image(self, image):
@@ -449,53 +494,63 @@ class MainWindow(QtGui.QMainWindow):
 
     def create_actions(self):
         # File menu
-        self.new_action = QtGui.QAction(
-            "&New...", self, shortcut="ctrl+N", triggered=self.new_document)
-        self.open_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton),
-            "&Open...", self, shortcut="ctrl+O", triggered=self.open_document)
-        self.save_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton),
-            "&Save", self, shortcut="ctrl+s", enabled=False,
-            triggered=self.save_document)
-        self.close_action = QtGui.QAction(
-            "&Close", self, shortcut="ctrl+w", triggered=self.close_document)
-        self.exit_action = QtGui.QAction(
-            "E&xit", self, shortcut="alt+f4", triggered=self.close)
-        # TODO LH Also Ctrl+Q?
+        self.new_action = QtGui.QAction("&New...", self,
+            shortcut=QtGui.QKeySequence.New, triggered=self.new_document)
+        self.open_action = QtGui.QAction("&Open...", self,
+            shortcut=QtGui.QKeySequence.Open, triggered=self.open_document,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
+        self.save_action = QtGui.QAction("&Save", self,
+            shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
+        self.close_action = QtGui.QAction("&Close", self,
+            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
+        self.exit_action = QtGui.QAction("E&xit", self,
+            shortcut=QtGui.QKeySequence.Quit, triggered=self.close)
 
         # Edit menu
+        self.select_all_action = QtGui.QAction("Select &All", self,
+            shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
+
+        # QT does not provide a 'select none' key sequence
+        self.select_none_action = QtGui.QAction("Select &None", self,
+            shortcut="ctrl+D", triggered=self.select_none)
+
+        self.next_box_action = QtGui.QAction("Next box", self,
+            shortcut="N", triggered=partial(self.select_next, forwards=True))
+        self.previous_box_action = QtGui.QAction("Previous box", self,
+            shortcut="P", triggered=partial(self.select_next, forwards=False))
+        self.delete_selected_action = QtGui.QAction("&Delete selected", self,
+            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
+
+        # TODO LH Is Refresh (F5) really the right shortcut for the segment
+        # action?
+        self.segment_action = QtGui.QAction("&Segment", self,
+            shortcut="f5", triggered=self.segment,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
+        # LH TODO Fix this action
         self.toggle_padding_action = QtGui.QAction(
-            "&Toggle padding", self, shortcut="", enabled=True,
-            statusTip="Toggle padding", checkable=True,
-            triggered=self.toggle_padding)
-        # self.select_all_action = QtGui.QAction(
-        #     "Select &All", self, shortcut="ctrl+A", triggered=self.select_all)
-        self.select_none_action = QtGui.QAction(
-            "Select &None", self, shortcut="ctrl+D", triggered=self.select_none)
-        self.segment_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_BrowserReload),
-            "&Segment", self, shortcut="f5", enabled=False,
-            statusTip="Segment",
-            triggered=self.segment)
+            "&Pad boxes", self, shortcut="", enabled=True,
+            statusTip="Check to add space around boxes once segmentation has finished",
+            checkable=True, triggered=self.toggle_padding)
 
         # View menu
-        self.zoom_in_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ArrowUp),
-            "Zoom &In", self, enabled=False, shortcut="Ctrl++",
-            triggered=self.zoom_in)
-        self.zoom_out_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ArrowDown),
-            "Zoom &Out", self, enabled=False, shortcut="Ctrl+-",
-            triggered=self.zoom_out)
-        self.toggle_segment_action = QtGui.QAction(
-            "&Display segmentation", self, shortcut="f3", enabled=False,
-            statusTip="Display segmentation image", checkable=True,
-            triggered=self.toggle_segment_image)
+        self.zoom_in_action = QtGui.QAction("Zoom &In", self,
+            shortcut=QtGui.QKeySequence.ZoomIn, triggered=self.zoom_in,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
+        self.zoom_out_action = QtGui.QAction("Zoom &Out", self,
+            shortcut=QtGui.QKeySequence.ZoomOut, triggered=self.zoom_out,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+
+        # TODO LH Is F3 (normally meaning 'find next') really the right
+        # shortcut for the toggle segment image action?
+        self.toggle_segment_action = QtGui.QAction("&Display segmentation", self,
+            shortcut="f3", triggered=self.toggle_segment_image,
+            statusTip="Display segmentation image", checkable=True)
 
         # Help menu
         self.about_action = QtGui.QAction("&About", self, triggered=self.about)
-        self.help_action = QtGui.QAction("&Help", self, triggered=self.help)
+        self.help_action = QtGui.QAction("&Help", self,
+            shortcut=QtGui.QKeySequence.HelpContents, triggered=self.help)
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
@@ -515,11 +570,14 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.exit_action)
 
         self.editMenu = QtGui.QMenu("&Edit", self)
-        self.editMenu.addAction(self.toggle_padding_action)
-        # self.editMenu.addAction(self.select_all_action)
+        self.editMenu.addAction(self.select_all_action)
         self.editMenu.addAction(self.select_none_action)
-        self.fileMenu.addSeparator()
+        self.editMenu.addAction(self.delete_selected_action)
+        self.editMenu.addAction(self.next_box_action)
+        self.editMenu.addAction(self.previous_box_action)
+        self.editMenu.addSeparator()
         self.editMenu.addAction(self.segment_action)
+        self.editMenu.addAction(self.toggle_padding_action)
 
         self.viewMenu = QtGui.QMenu("&View", self)
         self.viewMenu.addAction(self.zoom_in_action)
@@ -535,20 +593,37 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
+    def current_tab_changed(self, index):
+        """Slot for self.tabs.currentChanged() signal
+        """
+        self.sync_ui()
+
+    def selection_changed(self, selected, deselected):
+        """Slot for self.grid_view.selectionModel().selectionChanged() signal
+        """
+        self.sync_ui()
+
     def sync_ui(self):
         """Synchronise the user interface with the application state
         """
-        if self.document:
-            self.toggle_segment_action.setEnabled(self.segment_display is not None)
-            self.segment_action.setEnabled(True)
-            self.zoom_in_action.setEnabled(True)
-            self.zoom_out_action.setEnabled(True)
-            self.save_action.setEnabled(True)
-            self.close_action.setEnabled(True)
-        else:
-            self.toggle_segment_action.setEnabled(False)
-            self.segment_action.setEnabled(False)
-            self.zoom_in_action.setEnabled(False)
-            self.zoom_out_action.setEnabled(False)
-            self.save_action.setEnabled(False)
-            self.close_action.setEnabled(False)
+        document = self.document is not None
+        has_rows = self.model.rowCount()>0 if self.model else False
+        boxes_current = self.boxes_view == self.tabs.currentWidget()
+        has_selected = len(self.view_grid.selectionModel().selectedIndexes())>0
+
+        # File
+        self.save_action.setEnabled(document)
+        self.close_action.setEnabled(document)
+
+        # Edit
+        self.select_all_action.setEnabled(has_rows)
+        self.select_none_action.setEnabled(document)
+        self.delete_selected_action.setEnabled(has_selected)
+        self.next_box_action.setEnabled(has_rows)
+        self.previous_box_action.setEnabled(has_rows)
+        self.segment_action.setEnabled(document)
+        self.toggle_segment_action.setEnabled(self.segment_display is not None)
+
+        # View
+        self.zoom_in_action.setEnabled(document and boxes_current)
+        self.zoom_out_action.setEnabled(document and boxes_current)

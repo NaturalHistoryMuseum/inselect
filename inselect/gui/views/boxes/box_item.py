@@ -164,6 +164,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self.update()
 
     def itemChange(self, change, value):
+        """QGraphicsItem virtual
+        """
         if change == self.ItemSelectedHasChanged:
             # Item has gained or lost selection
             self._set_z_index()
@@ -183,10 +185,15 @@ class BoxItem(QtGui.QGraphicsRectItem):
             z += + 1.0 / float(rect.width() * rect.height())
             if self.isSelected():
                 z += 1.0
-            if self._mouse_hover or self.hasFocus():
-                z += 1.0
         else:
             # Newly created items have zero width and height
             pass
         self.setZValue(z)
  
+    def adjust_rect(self, dx1, dy1, dx2, dy2):
+        """Adjusts rect
+        """
+        r = self.rect()
+        r.adjust(dx1, dy1, dx2, dy2)
+        if r.width()>1 and r.height()>1:
+            self.setRect(r)

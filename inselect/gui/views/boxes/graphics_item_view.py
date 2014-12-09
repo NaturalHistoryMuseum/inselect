@@ -95,7 +95,18 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """
         debug_print('GraphicsItemView.rowsAboutToBeRemoved', start, end)
 
-        map(self.scene.removeItem, self._rows[start:end])
+        if self.handling_selection_update:
+            debug_print('Unexpected handling_selection_update in '
+                        'GraphicsItemView.rowsAboutToBeRemoved')
+
+        # Ignore the selectionChanged() notifications that the scene will send
+        # for every item that is about to be removed.
+        self.handling_selection_update = True
+        try:
+            # TODO Context for this
+            map(self.scene.removeItem, self._rows[start:end])
+        finally:
+            self.handling_selection_update = False
 
         # Remove items
         self._rows[start:end] = []
@@ -172,7 +183,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
                               QtGui.QItemSelectionModel.Deselect)
 
                 if updated:
-                    # Set an arbitraty row as the current index
+                    # Set an arbitrary row as the current index
                     sm.setCurrentIndex(model.index(updated.pop(), 0),
                                        QtGui.QItemSelectionModel.Current)
             finally:
@@ -185,30 +196,11 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         for index,item in izip(self._indexes_of_items(items), items):
             # item.sceneBoundingRect() is the items rects in the correct
             # coordinates system
-            print('Row [{0}] updated'.format(index.row()))
+            debug_print('Row [{0}] updated'.format(index.row()))
             rect = item.sceneBoundingRect()
             # Cumbersome conversion to ints
             rect = QRect(rect.left(), rect.top(), rect.width(), rect.height())
             self.model().setData(index, rect, RectRole)
-
-    def scene_items_deleted(self, items):
-        """The user deleted items from the scene
-        """
-        # Inform the model of the indexes that have been deleted
-        # The items will be deleted from the scene in this class's
-        # rowsAboutToBeRemoved() implementation
-
-        # Delete contiguous blocks of rows
-        selected = sorted([i.row() for i in self.selectionModel().selectedIndexes()])
-
-        # Clear selection before deleting
-        self.clearSelection()
-
-        # TODO LH We shouldn't need to remove blocks in reverse order - stems
-        # from crummy GraphicsItemView
-        # Remove blocks in reverse order so that row indices are not invalidated
-        for row, count in reversed(list(contiguous(selected))):
-            self.model().removeRows(row, count)
 
     def scene_box_added(self, rect):
         """The user added a box

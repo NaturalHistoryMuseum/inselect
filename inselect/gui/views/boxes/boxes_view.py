@@ -80,8 +80,6 @@ class BoxesView(QtGui.QGraphicsView):
     def mouseMoveEvent(self, event):
         """QGraphicsView virtual
         """
-        debug_print('BoxesView.mouseMoveEvent')
-
         if self._pending_box:
             debug_print('Updating pending box')
             r = self._pending_box.rect()
@@ -100,7 +98,6 @@ class BoxesView(QtGui.QGraphicsView):
             if not self._pending_box:
                 debug_print('Expected self._pending_box to be set')
             else:
-                debug_print('Creating a new box')
                 pending, self._pending_box = self._pending_box, None
 
                 # Grab the rect of the new box and remove the temporary box
@@ -111,8 +108,14 @@ class BoxesView(QtGui.QGraphicsView):
                 r.setBottomRight(self.mapToScene(event.pos()))
                 r = r.normalized()
 
-                # Add the box
-                self.scene().user_add_box(r)
+                if r.width()>0 and r.height()>0:
+                    debug_print('Creating a new box')
+                    # Add the box
+                    self.scene().user_add_box(r)
+                else:
+                    # Chances are that the user just click the right mouse - do
+                    # nothing
+                    pass
         else:
             super(BoxesView, self).mouseReleaseEvent(event)
 
