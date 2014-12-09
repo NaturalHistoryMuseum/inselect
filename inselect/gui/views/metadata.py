@@ -8,24 +8,29 @@ from inselect.gui.roles import MetadataRole
 class MetadataView(QtGui.QAbstractItemView):
     def __init__(self, parent=None):
         # This view is not visible
-        super(MetadataView, self).__init__(None)
+        super(MetadataView, self).__init__(parent)
+
+
+        fields = ['Specimen number', 'Taxonomic group', 'Location']
+        self._edits = {f:UpdateModelLineEdit(f) for f in fields}
 
         self.layout = QtGui.QFormLayout()
-        self.specimen_number = UpdateModelLineEdit('Specimen number', self.model())
-        self.layout.addRow("&Specimen number:", self.specimen_number)
+        for field, edit in self._edits.items():
+            self.layout.addRow(field, edit)
 
         self.widget = QtGui.QWidget(parent)
         self.widget.setLayout(self.layout)
-        # self.setItemDelegate(LineEditDelegate())
 
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView slot
         """
         debug_print('MetadataView.selectionChanged')
-        # sn = {}
-        # for index in self.selectionModel().selectedIndexes():
-        #     sn = {i.get('Specimen number','') for i in index.data(MetadataRole)}
-        # print(sn)
+        selected = self.selectionModel().selectedIndexes()
+        for field, edit in self._edits.items():
+            v = {i.data(MetadataRole).get(field,'') for i in selected}
+            edit.setText(','.join(sorted(v)))
+            edit.selected = selected
+            edit.setEnabled(len(selected) > 0)
 
 
 class UpdateModelLineEdit(QtGui.QLineEdit):
@@ -33,12 +38,15 @@ class UpdateModelLineEdit(QtGui.QLineEdit):
     """
     def __init__(self, field, parent=None):
         super(UpdateModelLineEdit, self).__init__(parent)
+        self.selected = None
         self._field = field
 
     def focusOutEvent(self, event):
-        if QtCore.QEvent.FocusOut == event.type():
-            debug_print('UpdateModelFilter.eventFilter', self._field,
-                        self, self.isModified())
+        debug_print('UpdateModelLineEdit.focusOutEvent')
+        if QtCore.QEvent.FocusOut == event.type() and self.isModified():
             self.setModified(False)
-        return False
+            new = {self._field : self.text()}
+            for i in self.selected:
+                i.model().setData(i, new, MetadataRole)
 
+        super(UpdateModelLineEdit, self).focusOutEvent(event)

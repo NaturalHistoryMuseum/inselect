@@ -175,6 +175,7 @@ class Model(QAbstractItemModel):
         """
         # TODO LH Validation?
         if RectRole == role:
+            # value is a QRectF
             current = self._data[index.row()]['rect']
 
             msg = 'Model.setData rect for [{0}] from [{1}] to [{2}]'
@@ -185,6 +186,7 @@ class Model(QAbstractItemModel):
             self._modified = True
             return True
         elif RotationRole == role:
+            # value is an integer that is a multiple of 90
             current = self._data[index.row()]['rotation']
 
             # Constrain angle to be in range 0:360
@@ -194,6 +196,17 @@ class Model(QAbstractItemModel):
             debug_print(msg.format(index.row(), current, value))
 
             self._data[index.row()]['rotation'] = value
+            self.dataChanged.emit(index, index)
+            self._modified = True
+            return True
+        elif MetadataRole == role:
+            # value is a dict containing one or more fields
+            msg = 'Model.setData for [{0}] update [{1}]'
+            debug_print(msg.format(index.row(), value))
+
+            current = self._data[index.row()]['metadata']
+            current.update(value)
+            self._data[index.row()]['metadata'] = current
             self.dataChanged.emit(index, index)
             self._modified = True
             return True
