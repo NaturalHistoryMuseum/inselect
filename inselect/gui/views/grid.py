@@ -1,19 +1,21 @@
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide.QtCore import QRect, QPoint, Qt, QCoreApplication
+from PySide.QtGui import (QListView, QBrush, QPalette, QStyle, QTransform,
+                          QAbstractItemView, QAbstractItemDelegate,
+                          QStyleOptionButton)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import contiguous, PaintState
 from inselect.gui.roles import RectRole, PixmapRole, RotationRole
 
-class CropDelegate(QtGui.QAbstractItemDelegate):
+class CropDelegate(QAbstractItemDelegate):
     """Delegate that shows cropped specimen images with a grey box and
     provides editing of rotation and some flags.
     """
 
-    BOX_RECT = QtCore.QRect(0, 0, 250, 250)
+    BOX_RECT = QRect(0, 0, 250, 250)
  
     # Bounding rectangle for the title
-    TITLE_RECT = QtCore.QRect(QtCore.QPoint(0, 0), BOX_RECT.size())
+    TITLE_RECT = QRect(QPoint(0, 0), BOX_RECT.size())
     TITLE_RECT.adjust(5, 5, -5, -5)
 
     BORDER = 25   # Border around cropped image
@@ -23,26 +25,22 @@ class CropDelegate(QtGui.QAbstractItemDelegate):
 
     # Controls
     CONTROLS_SIZE = 23
-    ROTATE_COUNTERCLOCKWISE_RECT = \
-        QtCore.QRect(0, 0, CONTROLS_SIZE, CONTROLS_SIZE)
-    ROTATE_COUNTERCLOCKWISE_RECT.translate(
-        QtCore.QPoint(0, BOX_RECT.height()-CONTROLS_SIZE))
+    ROTATE_COUNTERCLOCKWISE_RECT = QRect(0, 0, CONTROLS_SIZE, CONTROLS_SIZE)
+    ROTATE_COUNTERCLOCKWISE_RECT.translate(QPoint(0, BOX_RECT.height()-CONTROLS_SIZE))
 
-    ROTATE_CLOCKWISE_RECT = \
-        QtCore.QRect(0, 0, CONTROLS_SIZE, CONTROLS_SIZE)
-    ROTATE_CLOCKWISE_RECT.translate(
-         QtCore.QPoint(BOX_RECT.width()-CONTROLS_SIZE,
-                       BOX_RECT.height()-CONTROLS_SIZE))
+    ROTATE_CLOCKWISE_RECT = QRect(0, 0, CONTROLS_SIZE, CONTROLS_SIZE)
+    ROTATE_CLOCKWISE_RECT.translate(QPoint(BOX_RECT.width()-CONTROLS_SIZE,
+                                    BOX_RECT.height()-CONTROLS_SIZE))
 
-    BLACK = QtGui.QBrush(Qt.black)
-    WHITE = QtGui.QBrush(Qt.white)
-    GREY = QtGui.QBrush(Qt.gray)
-    DARK_GREY = QtGui.QBrush(Qt.darkGray)
+    BLACK = QBrush(Qt.black)
+    WHITE = QBrush(Qt.white)
+    GREY = QBrush(Qt.gray)
+    DARK_GREY = QBrush(Qt.darkGray)
 
     def _paint_box(self, painter, option, index):
         """The grey box
         """
-        selected = QtGui.QStyle.State_Selected & option.state
+        selected = QStyle.State_Selected & option.state
         with PaintState(painter):
             painter.setBrush(self.GREY if selected else self.DARK_GREY)
             painter.drawRect(option.rect)
@@ -72,7 +70,7 @@ class CropDelegate(QtGui.QAbstractItemDelegate):
             target_rect.adjust(offset/2, 0, -offset/2, 0)
 
         # Draw rotated
-        t = QtGui.QTransform()
+        t = QTransform()
         t.translate(option.rect.width()/2+option.rect.left(),
                     option.rect.height()/2+option.rect.top())
         t.rotate(index.data(RotationRole))
@@ -85,14 +83,30 @@ class CropDelegate(QtGui.QAbstractItemDelegate):
             painter.drawRect(target_rect)
 
     def _paint_controls(self, painter, option, index):
-        """The controls
+        """Arrows to rotate crops
         """
+
         with PaintState(painter):
-            painter.setBrush(self.WHITE)
-            painter.drawRect(self.ROTATE_CLOCKWISE_RECT.translated(option.rect.topLeft()))
-            painter.drawRect(self.ROTATE_COUNTERCLOCKWISE_RECT.translated(option.rect.topLeft()))
+            selected = QStyle.State_Selected & option.state
+            painter.setBrush(self.WHITE if selected else self.GREY)
+            f = option.font
+            f.setPointSize(19)  # TODO LH Arbitrary font size
+            painter.setFont(f)
+
+            # \u293e and \u293f are unicode characters for 'lower right
+            # semicircular clockwise arrow' and 'lower right semicircular
+            # anticlockwise arrow' respectively
+            clockwise = self.ROTATE_CLOCKWISE_RECT.translated(option.rect.topLeft())
+            painter.drawRect(clockwise)
+            painter.drawText(clockwise, Qt.AlignVCenter | Qt.AlignHCenter, u'\u293e')
+
+            clockwise = self.ROTATE_COUNTERCLOCKWISE_RECT.translated(option.rect.topLeft())
+            painter.drawRect(clockwise)
+            painter.drawText(clockwise, Qt.AlignVCenter | Qt.AlignHCenter, u'\u293f')
 
     def paint(self, painter, option, index):
+        """QAbstractItemDelegate virtual
+        """
         self._paint_box(painter, option, index)
         self._paint_title(painter, option, index)
         self._paint_crop(painter, option, index)
@@ -144,7 +158,7 @@ class CropDelegate(QtGui.QAbstractItemDelegate):
         return super(CropDelegate, self).setEditorData(event, editor, index)
 
 
-class GridView(QtGui.QListView):
+class GridView(QListView):
     """Shows cropped images in a grid
     """
     def __init__(self, parent=None):
@@ -153,7 +167,7 @@ class GridView(QtGui.QListView):
         self.setFlow(self.LeftToRight)
         self.setWrapping(True)
         self.setResizeMode(self.Adjust)
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
     def keyPressEvent(self, event):
         """QListView protected
