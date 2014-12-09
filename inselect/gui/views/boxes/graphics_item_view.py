@@ -209,3 +209,18 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         # Remove blocks in reverse order so that row indices are not invalidated
         for row, count in reversed(list(contiguous(selected))):
             self.model().removeRows(row, count)
+
+    def scene_box_added(self, rect):
+        """The user added a box
+        """
+        m = self.model()
+        row = len(self._rows)
+        if not m.insertRow(row):
+            pass
+            # TODO LH Report to user
+        else:
+            # Cumbersome conversion to ints
+            rect = QRect(rect.left(), rect.top(), rect.width(), rect.height())
+            if not m.setData(m.index(row, 0), rect, RectRole):
+                # TODO LH Report to user
+                pass

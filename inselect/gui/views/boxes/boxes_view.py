@@ -1,7 +1,7 @@
 from enum import Enum
 
 from PySide import QtGui
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QRectF, QSizeF
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
@@ -22,6 +22,10 @@ class BoxesView(QtGui.QGraphicsView):
         self.zoom = ZoomLevels.FitImage
         self.setCursor(Qt.CrossCursor)
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+
+        # Will contain a temporary Rect object while the user drag-drop-creates
+        # a box
+        self._pending_box = None
 
     def updateSceneRect(self, rect):
         """QGraphicsView slot
@@ -50,6 +54,67 @@ class BoxesView(QtGui.QGraphicsView):
             self.toggle_zoom()
         else:
             super(BoxesView, self).keyPressEvent(event)
+
+    def mousePressEvent(self, event):
+        """QGraphicsView virtual
+        """
+        debug_print('BoxesView.mousePressEvent')
+        if Qt.RightButton == event.button():
+            if self._pending_box:
+                debug_print('Expected self._pending_box to be empty')
+            else:
+                debug_print('Starting a new box')
+                # The user is creating a new box
+                # Create a temporary box (self._pending_box) that is used only
+                # to provide feedback as the user drags the mouse
+                # TODO LH Escape key cancels new box
+                tl = self.mapToScene(event.pos())
+                r = self.scene().addRect(QRectF(tl, QSizeF(0, 0)),
+                                         Qt.DotLine)
+                r.setZValue(3)  # Above all other items
+                r.update()
+                self._pending_box = r
+        else:
+            super(BoxesView, self).mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        """QGraphicsView virtual
+        """
+        debug_print('BoxesView.mouseMoveEvent')
+
+        if self._pending_box:
+            debug_print('Updating pending box')
+            r = self._pending_box.rect()
+            r.setBottomRight(self.mapToScene(event.pos()))
+            self._pending_box.setRect(r)
+            self._pending_box.update()
+
+        super(BoxesView, self).mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        """QGraphicsView virtual
+        """
+        debug_print('BoxesView.mouseReleaseEvent')
+
+        if Qt.RightButton == event.button():
+            if not self._pending_box:
+                debug_print('Expected self._pending_box to be set')
+            else:
+                debug_print('Creating a new box')
+                pending, self._pending_box = self._pending_box, None
+
+                # Grab the rect of the new box and remove the temporary box
+                r = pending.rect()
+                self.scene().removeItem(pending)
+
+                # Update the current position and normalise
+                r.setBottomRight(self.mapToScene(event.pos()))
+                r = r.normalized()
+
+                # Add the box
+                self.scene().user_add_box(r)
+        else:
+            super(BoxesView, self).mouseReleaseEvent(event)
 
     def toggle_zoom(self):
         """Sets a new zoom level

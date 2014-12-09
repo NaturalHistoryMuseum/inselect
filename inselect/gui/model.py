@@ -213,6 +213,22 @@ class Model(QAbstractItemModel):
         else:
             return super(Model, self).setData(index, value, role)
 
+
+    def insertRow(self, row, parent=QModelIndex()):
+        """QAbstractItemModel virtual
+        """
+        debug_print('Model.insertRow row [{0}]'.format(row))
+
+        self.beginInsertRows(QModelIndex(), row, row)
+        self._data.insert(row, {"metadata": {},
+                                "rect": QtCore.QRect(0, 0, 1, 1),
+                                "rotation": 0})
+        self._modified = True
+        self.endInsertRows()
+        self.dataChanged.emit(self.index(row, 0), self.index(row, 0))
+
+        return True
+
     def removeRows(self, row, count, parent=QModelIndex()):
         """QAbstractItemModel virtual
         """
@@ -222,6 +238,21 @@ class Model(QAbstractItemModel):
 
         self.beginRemoveRows(parent, first, last)
         del self._data[first:last]
+        self._modified = True
+        self.endRemoveRows()
+
+        return True
+
+    def removeRows(self, row, count, parent=QModelIndex()):
+        """QAbstractItemModel virtual
+        """
+        debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
+
+        first, last = row, row+count
+
+        self.beginRemoveRows(parent, first, last)
+        del self._data[first:last]
+        self._modified = True
         self.endRemoveRows()
 
         return True

@@ -37,10 +37,18 @@ class BoxesScene(QtGui.QGraphicsScene):
             self.pixmap = None
 
     def add_box(self, rect):
-        # Notification from source that a box has been added
+        """Notification from source that a box has been added.
+
+        Adds a Box item at the given rect.
+        """
         item = BoxItem(rect.left(), rect.top(), rect.width(), rect.height())
         self.addItem(item)
         return item
+
+    def user_add_box(self, rect):
+        """Informs the source that the user has added a box
+        """
+        self.source.scene_box_added(rect)
 
     def keyPressEvent(self, event):
         """QGraphicsScene virtual

@@ -179,7 +179,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         rect = self.rect()
         # Smaller items have a higher z
         z = 1.0
-        if rect.width() and rect.height()
+        if rect.width() and rect.height():
             z += + 1.0 / float(rect.width() * rect.height())
             if self.isSelected():
                 z += 1.0
