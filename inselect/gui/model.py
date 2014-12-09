@@ -213,7 +213,6 @@ class Model(QAbstractItemModel):
         else:
             return super(Model, self).setData(index, value, role)
 
-
     def insertRow(self, row, parent=QModelIndex()):
         """QAbstractItemModel virtual
         """
