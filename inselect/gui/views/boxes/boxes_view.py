@@ -10,6 +10,7 @@ from inselect.gui.utils import unite_rects
 class ZoomLevels(Enum):
     FitImage = 1
     Zoom1 = 2
+    FitSelection = 3
 
 
 class BoxesView(QtGui.QGraphicsView):
@@ -53,10 +54,10 @@ class BoxesView(QtGui.QGraphicsView):
     def toggle_zoom(self):
         """Sets a new zoom level
         """
+        selected = self.scene().selectedItems()
+
         if ZoomLevels.FitImage == self.zoom:
             self.zoom = ZoomLevels.Zoom1
-
-            selected = self.scene().selectedItems()
             if selected:
                 # Centre on selected items
                 self.scale(4, 4)
@@ -67,6 +68,16 @@ class BoxesView(QtGui.QGraphicsView):
                 self.scale(4, 4)
                 if self.scene().sceneRect().contains(p):
                     self.centerOn(p)
+        elif ZoomLevels.Zoom1 == self.zoom and selected:
+            self.zoom = ZoomLevels.FitSelection
+
+            # Centre on selected item(s)
+            r = unite_rects([i.rect() for i in selected])
+
+            # Some space
+            r.adjust(-20, -20, 40, 40)
+            self.fitInView(r, Qt.KeepAspectRatio)
         else:
+            # FitSelection
             self.zoom = ZoomLevels.FitImage
             self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
