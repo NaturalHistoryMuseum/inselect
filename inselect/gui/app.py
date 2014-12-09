@@ -209,6 +209,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.model.to_document(self.document)
         self.document.save()
+        self.model.clear_modified()
 
         existing_crops = self.document.crops_dir.is_dir()
         if existing_crops:
