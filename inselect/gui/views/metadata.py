@@ -10,11 +10,16 @@ class MetadataView(QtGui.QAbstractItemView):
         # This view is not visible
         super(MetadataView, self).__init__(parent)
 
-
+        # TODO LH Metadata to come from config
         fields = ['Specimen number', 'Taxonomic group', 'Location']
+
+        # A mapping from field name to UpdateModelLineEdit control
         self._edits = {f:UpdateModelLineEdit(f) for f in fields}
 
+        # Show controls stacked vertically
         self.layout = QtGui.QFormLayout()
+        self.title = QtGui.QLabel()
+        self.layout.addRow(self.title)
         for field, edit in self._edits.items():
             self.layout.addRow(field, edit)
 
@@ -31,6 +36,10 @@ class MetadataView(QtGui.QAbstractItemView):
             edit.setText(','.join(sorted(v)))
             edit.selected = selected
             edit.setEnabled(len(selected) > 0)
+        if selected:
+            self.title.setText('Metadata for {0} boxes'.format(len(selected)))
+        else:
+            self.title.setText('')
 
 
 class UpdateModelLineEdit(QtGui.QLineEdit):
@@ -39,6 +48,7 @@ class UpdateModelLineEdit(QtGui.QLineEdit):
     def __init__(self, field, parent=None):
         super(UpdateModelLineEdit, self).__init__(parent)
         self.selected = None
+        self.setEnabled(False)
         self._field = field
 
     def focusOutEvent(self, event):
