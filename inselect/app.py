@@ -20,8 +20,9 @@ from docopt import docopt
 import inselect
 import inselect.lib.utils
 import inselect.settings
-from inselect.gui.app import MainWindow
 
+from inselect.gui.app import MainWindow
+from inselect.lib.utils import debug_print
 
 def launch_gui(filename=None):
     app = QtGui.QApplication(sys.argv)
@@ -44,6 +45,6 @@ def launch():
     arguments = docopt(__doc__, version='inselect {0}'.format(inselect.__version__))
     inselect.settings.init()
     inselect.lib.utils.DEBUG_PRINT = arguments['--debug']
-    print("Launching gui")
+    debug_print("Launching gui")
     filename = arguments['<filename>']
     launch_gui(filename)
