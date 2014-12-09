@@ -1,7 +1,9 @@
 {
     "items": [
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.30660000000000004, 
@@ -11,7 +13,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6865785211267605, 
@@ -21,7 +25,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.17916760563380282, 
@@ -31,7 +37,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2816, 
@@ -41,7 +49,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.5312, 
@@ -51,7 +61,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.0840669014084507, 
@@ -61,7 +73,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7761577464788734, 
@@ -71,7 +85,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.47640000000000005, 
@@ -81,7 +97,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.234, 
@@ -91,7 +109,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6116401408450705, 
@@ -101,7 +121,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9042, 
@@ -111,7 +133,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.1269806338028169, 
@@ -121,7 +145,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.4116, 
@@ -131,7 +157,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.2088, 
@@ -141,7 +169,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8277778169014085, 
@@ -151,7 +181,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.11057992957746479, 
@@ -161,7 +193,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.15584014084507042, 
@@ -171,7 +205,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.2556, 
@@ -181,7 +217,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6439904929577465, 
@@ -191,7 +229,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7398, 
@@ -201,7 +241,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.8566070422535214, 
@@ -211,7 +253,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5018, 
@@ -221,7 +265,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.4398915492957747, 
@@ -231,7 +277,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.23299999999999998, 
@@ -241,7 +289,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1388, 
@@ -251,7 +301,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7857383802816902, 
@@ -261,7 +313,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.18116830985915494, 
@@ -271,7 +325,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.085, 
@@ -281,7 +337,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5314000000000001, 
@@ -291,7 +349,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6896000000000001, 
@@ -301,7 +361,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.15652042253521128, 
@@ -311,7 +373,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.476, 
@@ -321,7 +385,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2596, 
@@ -331,7 +397,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8346914051732409, 
@@ -341,7 +409,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.105, 
@@ -351,7 +421,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.20660000000000003, 
@@ -361,7 +433,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.3094, 
@@ -371,7 +445,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6042000000000001, 
@@ -381,7 +457,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.28249823943661967, 
@@ -391,7 +469,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.548, 
@@ -401,7 +481,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9062000000000001, 
@@ -411,7 +493,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.2278, 
@@ -421,7 +505,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7306, 
@@ -431,7 +517,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.13840000000000002, 
@@ -441,7 +529,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.505, 
@@ -451,7 +541,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.15564014084507044, 
@@ -461,7 +553,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.40380000000000005, 
@@ -471,7 +565,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.17522640845070425, 
@@ -481,7 +577,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.0902, 
@@ -491,7 +589,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.8557985915492958, 
@@ -501,7 +601,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.4839204225352113, 
@@ -511,7 +613,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6480980491041157, 
@@ -521,7 +625,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.20440000000000003, 
@@ -531,7 +637,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.11340000000000001, 
@@ -541,7 +649,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.3930997858143765, 
@@ -551,7 +661,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.1854, 
@@ -561,7 +673,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.49901470199301573, 
@@ -571,7 +685,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.2544, 
@@ -581,7 +697,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7834, 
@@ -591,7 +709,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.1618, 
@@ -601,7 +721,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8264000000000001, 
@@ -611,7 +733,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1318, 
@@ -621,7 +745,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2346, 
@@ -631,7 +757,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.689599295774648, 
@@ -641,7 +769,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.0842, 
@@ -651,7 +781,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2842, 
@@ -661,7 +793,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9101593059850465, 
@@ -671,7 +805,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.44860000000000005, 
@@ -681,7 +817,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6197404929577465, 
@@ -691,7 +829,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.32244014084507044, 
@@ -701,7 +841,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.4843605633802817, 
@@ -711,7 +853,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5567745115877663, 
@@ -721,7 +865,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.2048, 
@@ -731,7 +877,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.11140000000000001, 
@@ -741,7 +889,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1796, 
@@ -751,7 +901,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7330000000000001, 
@@ -761,7 +913,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2548, 
@@ -771,7 +925,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8713003521126761, 
@@ -781,7 +937,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.5021862676056338, 
@@ -791,7 +949,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1298, 
@@ -801,7 +961,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.4128, 
@@ -811,7 +973,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.534756690140845, 
@@ -821,7 +985,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.4554000000000001, 
@@ -831,7 +997,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1598, 
@@ -841,7 +1009,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.22719999999999999, 
@@ -851,7 +1021,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6424077464788732, 
@@ -861,7 +1033,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.08600000000000001, 
@@ -871,7 +1045,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.777919014084507, 
@@ -881,7 +1057,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.48280000000000006, 
@@ -891,7 +1069,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1072, 
@@ -901,7 +1081,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.2016, 
@@ -911,7 +1093,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.28140000000000004, 
@@ -921,7 +1105,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.18080000000000002, 
@@ -931,7 +1117,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8221999999999999, 
@@ -941,7 +1129,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9063968681720382, 
@@ -951,7 +1141,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.31004269719499566, 
@@ -961,7 +1153,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7348394366197183, 
@@ -971,7 +1165,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.328088471842883, 
@@ -981,7 +1177,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2526, 
@@ -991,7 +1189,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.15660000000000002, 
@@ -1001,7 +1201,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.22719999999999999, 
@@ -1011,7 +1213,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1276, 
@@ -1021,7 +1225,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6154000000000001, 
@@ -1031,7 +1237,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.5542242957746478, 
@@ -1041,7 +1249,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5094, 
@@ -1051,7 +1261,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.0898, 
@@ -1061,7 +1273,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.5306000000000001, 
@@ -1071,7 +1285,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.20560000000000003, 
@@ -1081,7 +1297,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8756, 
@@ -1091,7 +1309,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.6862017605633803, 
@@ -1101,7 +1321,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.7762000000000001, 
@@ -1111,7 +1333,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1102, 
@@ -1121,7 +1345,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1792, 
@@ -1131,7 +1357,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.48340000000000005, 
@@ -1141,7 +1369,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7312000000000001, 
@@ -1151,7 +1381,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1288, 
@@ -1161,7 +1393,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.8226, 
@@ -1171,7 +1405,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1564, 
@@ -1181,7 +1417,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.24600000000000002, 
@@ -1191,7 +1429,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.5412401408450704, 
@@ -1201,7 +1441,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.22740000000000002, 
@@ -1211,7 +1453,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2824588028169014, 
@@ -1221,7 +1465,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.45280000000000004, 
@@ -1231,7 +1477,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5080000000000001, 
@@ -1241,7 +1489,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.3118, 
@@ -1251,7 +1501,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.199, 
@@ -1261,7 +1513,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.3399722746597844, 
@@ -1271,7 +1525,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9036000000000001, 
@@ -1281,7 +1537,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6368, 
@@ -1291,7 +1549,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.08320000000000001, 
@@ -1301,7 +1561,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.17464647887323945, 
@@ -1311,7 +1573,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.11080000000000001, 
@@ -1321,7 +1585,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.42340000000000005, 
@@ -1331,7 +1597,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1314, 
@@ -1341,7 +1609,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.48508028169014084, 
@@ -1351,7 +1621,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7305577092927507, 
@@ -1361,7 +1633,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.617, 
@@ -1371,7 +1645,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.24780000000000002, 
@@ -1381,7 +1657,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.776580633802817, 
@@ -1391,7 +1669,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.15506021126760564, 
@@ -1401,7 +1681,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8698, 
@@ -1411,7 +1693,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6847830614054267, 
@@ -1421,7 +1705,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.22160000000000002, 
@@ -1431,7 +1717,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5150098591549296, 
@@ -1441,7 +1729,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.33734330985915495, 
@@ -1451,7 +1741,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.45660000000000006, 
@@ -1461,7 +1753,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8320000000000001, 
@@ -1471,7 +1765,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.2028, 
@@ -1481,7 +1777,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.33153743159682847, 
@@ -1491,7 +1789,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6438, 
@@ -1501,7 +1801,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.078, 
@@ -1511,7 +1813,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.17980000000000002, 
@@ -1521,7 +1825,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2836, 
@@ -1531,7 +1837,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.1348, 
@@ -1541,7 +1849,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.729, 
@@ -1551,7 +1861,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.4854, 
@@ -1561,7 +1873,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.3078, 
@@ -1571,7 +1885,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.111, 
@@ -1581,7 +1897,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9020531190123462, 
@@ -1591,7 +1909,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2532, 
@@ -1601,7 +1921,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.15660000000000002, 
@@ -1611,7 +1933,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.2246, 
@@ -1621,7 +1945,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7756000000000001, 
@@ -1631,7 +1957,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.2008, 
@@ -1641,7 +1969,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8606, 
@@ -1651,7 +1981,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5164, 
@@ -1661,7 +1993,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.685, 
@@ -1671,7 +2005,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.17720000000000002, 
@@ -1681,7 +2017,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.1062, 
@@ -1691,7 +2029,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8300200704225352, 
@@ -1701,7 +2041,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6413355633802817, 
@@ -1711,7 +2053,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7338, 
@@ -1721,7 +2065,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.15520000000000003, 
@@ -1731,7 +2077,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.12840000000000001, 
@@ -1741,7 +2089,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.457, 
@@ -1751,7 +2101,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.0786, 
@@ -1761,7 +2113,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.48819999999999997, 
@@ -1771,7 +2125,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.31300000000000006, 
@@ -1781,7 +2137,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.2246, 
@@ -1791,7 +2149,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6034, 
@@ -1801,7 +2161,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.28400000000000003, 
@@ -1811,7 +2173,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2602, 
@@ -1821,7 +2185,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.17864014084507043, 
@@ -1831,7 +2197,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.40740000000000004, 
@@ -1841,7 +2209,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9026000000000002, 
@@ -1851,7 +2221,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5080000000000001, 
@@ -1861,7 +2233,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8658, 
@@ -1871,7 +2245,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.10400000000000001, 
@@ -1881,7 +2257,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.2068, 
@@ -1891,7 +2269,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7768401408450705, 
@@ -1901,7 +2281,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6454352112676057, 
@@ -1911,7 +2293,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.07540000000000001, 
@@ -1921,7 +2305,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.12700000000000003, 
@@ -1931,7 +2317,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7356, 
@@ -1941,7 +2329,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.3395440140845071, 
@@ -1951,7 +2341,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.16260000000000002, 
@@ -1961,7 +2353,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8298000000000001, 
@@ -1971,7 +2365,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.49119999999999997, 
@@ -1981,7 +2377,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5245397887323944, 
@@ -1991,7 +2389,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.457, 
@@ -2001,7 +2401,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1864, 
@@ -2011,7 +2413,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.9008, 
@@ -2021,7 +2425,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.1086, 
@@ -2031,7 +2437,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.22820000000000001, 
@@ -2041,7 +2449,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.26420000000000005, 
@@ -2051,7 +2461,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.6099404929577465, 
@@ -2061,7 +2473,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.2812573943661972, 
@@ -2071,7 +2485,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6864401408450704, 
@@ -2081,7 +2497,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.1352, 
@@ -2091,7 +2509,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.323, 
@@ -2101,7 +2521,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.8632000000000001, 
@@ -2111,7 +2533,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 180, 
             "rect": [
                 0.20220000000000002, 
@@ -2121,7 +2545,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7806000000000001, 
@@ -2131,7 +2557,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.0722, 
@@ -2141,7 +2569,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.23679999999999998, 
@@ -2151,7 +2581,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1802, 
@@ -2161,7 +2593,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8732394366197183, 
@@ -2171,7 +2605,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.06536091549295775, 
@@ -2181,7 +2617,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.5193003521126761, 
@@ -2191,7 +2629,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7284514084507042, 
@@ -2201,7 +2641,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.39143063380281695, 
@@ -2211,7 +2653,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6144, 
@@ -2221,7 +2665,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7936200704225352, 
@@ -2231,7 +2677,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6638000000000001, 
@@ -2241,7 +2689,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.18580000000000002, 
@@ -2251,7 +2701,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7652, 
@@ -2261,7 +2713,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8194380281690141, 
@@ -2271,7 +2725,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.29259999999999997, 
@@ -2281,7 +2737,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6932401408450705, 
@@ -2291,7 +2749,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.892318309859155, 
@@ -2301,7 +2761,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.43520000000000003, 
@@ -2311,7 +2773,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.641, 
@@ -2321,7 +2785,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8472380281690141, 
@@ -2331,7 +2797,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5187159244368347, 
@@ -2341,7 +2809,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.134, 
@@ -2351,7 +2821,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7954000000000001, 
@@ -2361,7 +2833,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.3593003521126761, 
@@ -2371,7 +2845,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6666, 
@@ -2381,7 +2857,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.18598028169014086, 
@@ -2391,7 +2869,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8326602112676057, 
@@ -2401,7 +2881,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6174, 
@@ -2411,7 +2893,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.7304, 
@@ -2421,7 +2905,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8738000000000001, 
@@ -2431,7 +2917,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.0724, 
@@ -2441,7 +2929,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6938000000000001, 
@@ -2451,7 +2941,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.9007003521126762, 
@@ -2461,7 +2953,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7594, 
@@ -2471,7 +2965,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6422, 
@@ -2481,7 +2977,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.43920000000000003, 
@@ -2491,7 +2989,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 270, 
             "rect": [
                 0.7958000000000001, 
@@ -2501,7 +3001,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8467447183098592, 
@@ -2511,7 +3013,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.12304014084507044, 
@@ -2521,7 +3025,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7326, 
@@ -2531,7 +3037,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5232616197183099, 
@@ -2541,7 +3049,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6678000000000001, 
@@ -2551,7 +3061,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.2842, 
@@ -2561,7 +3073,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6114, 
@@ -2571,7 +3085,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.0882, 
@@ -2581,7 +3097,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8690366197183099, 
@@ -2591,7 +3109,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8320200704225352, 
@@ -2601,7 +3121,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.24400000000000002, 
@@ -2611,7 +3133,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7634, 
@@ -2621,7 +3145,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.36776725352112677, 
@@ -2631,7 +3157,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.698, 
@@ -2641,7 +3169,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6488, 
@@ -2651,7 +3181,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.12838098591549296, 
@@ -2661,7 +3193,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7334, 
@@ -2671,7 +3205,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.798, 
@@ -2681,7 +3217,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8500658450704225, 
@@ -2691,7 +3229,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6706, 
@@ -2701,7 +3241,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6090000000000001, 
@@ -2711,7 +3253,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.27753838028169014, 
@@ -2721,7 +3265,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8695577464788733, 
@@ -2731,7 +3277,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.4399419014084507, 
@@ -2741,7 +3289,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7610000000000001, 
@@ -2751,7 +3301,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7002, 
@@ -2761,7 +3313,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8334, 
@@ -2771,7 +3325,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.20060000000000003, 
@@ -2781,7 +3337,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.06346021126760562, 
@@ -2791,7 +3349,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6494000000000001, 
@@ -2801,7 +3361,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.3759204225352113, 
@@ -2811,7 +3373,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7319542253521126, 
@@ -2821,7 +3385,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6084, 
@@ -2831,7 +3397,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5090602112676057, 
@@ -2841,7 +3409,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6718000000000001, 
@@ -2851,7 +3421,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.870736971830986, 
@@ -2861,7 +3433,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8516000000000001, 
@@ -2871,7 +3445,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8008, 
@@ -2881,7 +3457,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.13168204225352112, 
@@ -2891,7 +3469,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7555017605633803, 
@@ -2901,7 +3481,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.2782, 
@@ -2911,7 +3493,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7012, 
@@ -2921,7 +3505,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6488, 
@@ -2931,7 +3517,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.4520457746478873, 
@@ -2941,7 +3529,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.257, 
@@ -2951,7 +3541,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8278, 
@@ -2961,7 +3553,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6190200704225353, 
@@ -2971,7 +3565,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.3824, 
@@ -2981,7 +3577,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7366401408450705, 
@@ -2991,7 +3589,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6722000000000001, 
@@ -3001,7 +3601,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7998000000000001, 
@@ -3011,7 +3613,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.22860000000000003, 
@@ -3021,7 +3625,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.4346602112676056, 
@@ -3031,7 +3637,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8445978873239437, 
@@ -3041,7 +3649,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.058860211267605635, 
@@ -3051,7 +3661,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6445799295774648, 
@@ -3061,7 +3673,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7042, 
@@ -3071,7 +3685,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7584264107616826, 
@@ -3081,7 +3697,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8847985915492959, 
@@ -3091,7 +3709,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.5114000000000001, 
@@ -3101,7 +3721,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.1378654929577465, 
@@ -3111,7 +3733,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.43560000000000004, 
@@ -3121,7 +3745,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6214809859154931, 
@@ -3131,7 +3757,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.27122816901408453, 
@@ -3141,7 +3769,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7366401408450705, 
@@ -3151,7 +3781,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8248, 
@@ -3161,7 +3793,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6724, 
@@ -3171,7 +3805,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.38990669014084517, 
@@ -3181,7 +3817,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7948000000000001, 
@@ -3191,7 +3829,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6394000000000001, 
@@ -3201,7 +3841,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8506, 
@@ -3211,7 +3853,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.7054, 
@@ -3221,7 +3865,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.892, 
@@ -3231,7 +3877,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.20916830985915494, 
@@ -3241,7 +3889,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.4954, 
@@ -3251,7 +3901,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.36966021126760573, 
@@ -3261,7 +3913,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.6174, 
@@ -3271,7 +3925,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.06209172584561571, 
@@ -3281,7 +3937,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.8280000000000001, 
@@ -3291,7 +3949,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.6712, 
@@ -3301,7 +3961,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.7684000000000001, 
@@ -3311,7 +3973,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.464, 
@@ -3321,7 +3985,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.43620000000000003, 
@@ -3331,7 +3997,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 90, 
             "rect": [
                 0.339, 
@@ -3341,7 +4009,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.2824, 
@@ -3351,7 +4021,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Taxonomic group": "Plecoptera"
+            }, 
             "rotation": 0, 
             "rect": [
                 0.705, 
