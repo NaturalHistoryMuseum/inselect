@@ -13,9 +13,24 @@ class BoxItem(QtGui.QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    UNSELECTED = QtGui.QColor(0x00, 0x00, 0xff, 0xcc)
-    SELECTED =   QtGui.QColor(0xff, 0x00, 0x00, 0xcc)
-    RESIZING =   QtGui.QColor(0xff, 0x00, 0x00, 0x50)
+    DRAW_INNER = False
+
+    if True:
+        # Blue unselected, red selected
+        UNSELECTED = Qt.blue
+        SELECTED =   Qt.red
+        RESIZING =   QtGui.QColor(0xff, 0x00, 0x00, 0x50)
+
+        INNER =         Qt.black
+        INNER_RESIZE =  QtGui.QColor(0x00, 0x00, 0x00, 0x30)
+    else:
+        # Light outer, dark inner
+        UNSELECTED = Qt.lightGray
+        SELECTED =   Qt.white
+        RESIZING =   QtGui.QColor(0xff, 0xff, 0xff, 0xa0)
+
+        INNER =         Qt.black
+        INNER_RESIZE =  QtGui.QColor(0x00, 0x00, 0x00, 0x30)
 
     def __init__(self, x, y, w, h, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
@@ -51,17 +66,33 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         with PaintState(painter):
             painter.setPen(QtGui.QPen(self.colour, 1, Qt.SolidLine))
-            painter.drawRect(self.boundingRect())
+            r = self.boundingRect()
+            painter.drawRect(r)
+
+            if self.DRAW_INNER:
+                painter.setPen(QtGui.QPen(self.inner_colour, 1, Qt.SolidLine))
+                r.adjust(1, 1, -1, -1)
+                painter.drawRect(r)
 
     @property
     def colour(self):
-        """QtGui.QColor
+        """QtGui.QColor to use for drawing the order
         """
         # TODO LH Transparency on resize better handled by setOpacity()?
         if self.scene().mouseGrabberItem() in chain([self], self._handles):
             return self.RESIZING
         else:
             return self.SELECTED if self.isSelected() else self.UNSELECTED
+
+    @property
+    def inner_colour(self):
+        """QtGui.QColor to use for drawing the rectangle within the box's border
+        """
+        if self.scene().mouseGrabberItem() in chain([self], self._handles):
+            return self.INNER_RESIZE
+        else:
+            return self.INNER
+
 
     def update(self, rect=QtCore.QRectF()):
         """QGraphicsRectItem function
@@ -147,10 +178,15 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         rect = self.rect()
         # Smaller items have a higher z
-        z = 1 + 1.0 / float(rect.width() * rect.height())
-        if self.isSelected():
-            z += 1.0
-        if self._mouse_hover or self.hasFocus():
-            z += 1.0
+        z = 1.0
+        if rect.width() and rect.height()
+            z += + 1.0 / float(rect.width() * rect.height())
+            if self.isSelected():
+                z += 1.0
+            if self._mouse_hover or self.hasFocus():
+                z += 1.0
+        else:
+            # Newly created items have zero width and height
+            pass
         self.setZValue(z)
  
