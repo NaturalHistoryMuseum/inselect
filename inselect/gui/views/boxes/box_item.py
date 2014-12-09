@@ -133,7 +133,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self.update()
 
     def itemChange(self, change, value):
-        if change == self.ItemSelectedChange:
+        if change == self.ItemSelectedHasChanged:
+            # Item has gained or lost selection
             self._set_z_index()
         return super(BoxItem, self).itemChange(change, value)
 
