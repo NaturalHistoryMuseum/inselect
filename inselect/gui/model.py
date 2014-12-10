@@ -175,7 +175,7 @@ class Model(QAbstractItemModel):
         """
         # TODO LH Validation?
         if RectRole == role:
-            # value is a QRectF
+            # value is a QRect
             current = self._data[index.row()]['rect']
 
             msg = 'Model.setData rect for [{0}] from [{1}] to [{2}]'
@@ -217,14 +217,29 @@ class Model(QAbstractItemModel):
         """QAbstractItemModel virtual
         """
         debug_print('Model.insertRow row [{0}]'.format(row))
+        return self.insertRows(row, 1, parent)
 
-        self.beginInsertRows(QModelIndex(), row, row)
-        self._data.insert(row, {"metadata": {},
-                                "rect": QtCore.QRect(0, 0, 1, 1),
-                                "rotation": 0})
+    def insertRows(self, row, count, parent=QModelIndex()):
+        """QAbstractItemModel virtual
+        """
+        debug_print('Model.insertRows row [{0}] count [{1}]'.format(row, count))
+
+        upper = row + count - 1
+        self.beginInsertRows(QModelIndex(), row, upper)
+
+        # Create list of new rows. Cannot use [{whatever}] * count because we
+        # get the same dict instance repeated count times, not count different
+        # dict instances
+        new_rows = [None] * count
+        for i in xrange(0, count):
+            new_rows[i] = {"metadata": {},
+                           "rect": QtCore.QRect(0, 0, 0, 0),
+                           "rotation": 0}
+
+        self._data[row:row] = new_rows
         self._modified = True
         self.endInsertRows()
-        self.dataChanged.emit(self.index(row, 0), self.index(row, 0))
+        self.dataChanged.emit(self.index(row, 0), self.index(upper, 0))
 
         return True
 

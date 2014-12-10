@@ -2,6 +2,7 @@ from itertools import chain
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
+from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import PaintState
@@ -19,37 +20,39 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # Blue unselected, red selected
         UNSELECTED = Qt.blue
         SELECTED =   Qt.red
-        RESIZING =   QtGui.QColor(0xff, 0x00, 0x00, 0x50)
+        RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
 
         INNER =         Qt.black
-        INNER_RESIZE =  QtGui.QColor(0x00, 0x00, 0x00, 0x30)
+        INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
     else:
         # Light outer, dark inner
         UNSELECTED = Qt.lightGray
         SELECTED =   Qt.white
-        RESIZING =   QtGui.QColor(0xff, 0xff, 0xff, 0xa0)
+        RESIZING =   QColor(0xff, 0xff, 0xff, 0xa0)
 
         INNER =         Qt.black
-        INNER_RESIZE =  QtGui.QColor(0x00, 0x00, 0x00, 0x30)
+        INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
 
     def __init__(self, x, y, w, h, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
-        self.setFlags(QtGui.QGraphicsItem.ItemIsFocusable |
-                      QtGui.QGraphicsItem.ItemIsSelectable |
-                      QtGui.QGraphicsItem.ItemSendsGeometryChanges |
-                      QtGui.QGraphicsItem.ItemIsMovable)
+        self.setFlags(QGraphicsItem.ItemIsFocusable |
+                      QGraphicsItem.ItemIsSelectable |
+                      QGraphicsItem.ItemSendsGeometryChanges |
+                      QGraphicsItem.ItemIsMovable)
 
         self.setCursor(Qt.ArrowCursor)
         self.setAcceptHoverEvents(True)
 
-        self._mouse_hover = False
+        # Sub-segmentation seed points - QPointF objects in item coordinates
+        self._seeds = []
 
-        self._handles = []
-
+        # Resize handles
         positions = (Qt.TopLeftCorner, Qt.TopRightCorner, Qt.BottomLeftCorner,
                      Qt.BottomRightCorner)
+        self._handles = []
         self._handles = [self._create_handle(pos) for pos in positions]
         self._layout_handles()
+
         self._set_z_index()
 
     def paint(self, painter, option, widget=None):
@@ -59,24 +62,31 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # QAbstractGraphicsItems with a larger zorder
 
         # TODO LH Get pixmap without tight coupling to scene
-        # pixmap = next((i for i in self.scene().items() if type(i)==QtGui.QGraphicsPixmapItem))
+        # pixmap = next((i for i in self.scene().items() if type(i)==QGraphicsPixmapItem))
         painter.drawPixmap(self.boundingRect(),
                            self.scene().pixmap,
                            self.sceneBoundingRect())
 
         with PaintState(painter):
-            painter.setPen(QtGui.QPen(self.colour, 1, Qt.SolidLine))
+            painter.setPen(QPen(self.colour, 1, Qt.SolidLine))
             r = self.boundingRect()
             painter.drawRect(r)
 
+            if self._seeds:
+                # Draw sub-segmentation seed points
+                painter.setBrush(QBrush(Qt.black))
+                painter.setPen(QPen(Qt.white, 5, Qt.SolidLine))
+                for point in self._seeds:
+                    painter.drawEllipse(point, 5, 5)
+
             if self.DRAW_INNER:
-                painter.setPen(QtGui.QPen(self.inner_colour, 1, Qt.SolidLine))
+                painter.setPen(QPen(self.inner_colour, 1, Qt.SolidLine))
                 r.adjust(1, 1, -1, -1)
                 painter.drawRect(r)
 
     @property
     def colour(self):
-        """QtGui.QColor to use for drawing the order
+        """QColor to use for drawing the box's border
         """
         # TODO LH Transparency on resize better handled by setOpacity()?
         if self.scene().mouseGrabberItem() in chain([self], self._handles):
@@ -86,7 +96,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
     @property
     def inner_colour(self):
-        """QtGui.QColor to use for drawing the rectangle within the box's border
+        """QColor to use for drawing the rectangle within the box's border
         """
         if self.scene().mouseGrabberItem() in chain([self], self._handles):
             return self.INNER_RESIZE
@@ -109,7 +119,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         debug_print('BoxItem.hoverEnterEvent')
         super(BoxItem, self).hoverEnterEvent(event)
-        self._mouse_hover = True
         self._set_handles_visible(True)
         self._set_z_index()
         self.update()
@@ -119,7 +128,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         debug_print('BoxItem.hoverLeaveEvent')
         super(BoxItem, self).hoverLeaveEvent(event)
-        self._mouse_hover = False
         self._set_handles_visible(False)
         self._set_z_index()
         self.update()
@@ -131,7 +139,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # Creates and returns a new ResizeHandle at the given Qt.Corner
         handle = ResizeHandle(corner, self)
         handle.setVisible(False)
-        handle.setFlags(QtGui.QGraphicsItem.ItemStacksBehindParent)
+        handle.setFlags(QGraphicsItem.ItemStacksBehindParent)
         return handle
 
     def _layout_handles(self):
@@ -153,13 +161,19 @@ class BoxItem(QtGui.QGraphicsRectItem):
         debug_print('BoxItem.mousePressEvent')
         super(BoxItem, self).mousePressEvent(event)
         self._set_z_index()
+
+        if Qt.ShiftModifier == event.modifiers():
+            # Add sub-segmentation seed point
+            from pprint import pprint
+            pprint([self.sceneBoundingRect(), event.pos(), self.mapToScene(event.pos())])
+            self._seeds.append(event.pos())
         self.update()
 
     def mouseReleaseEvent(self, event):
         """QGraphicsRectItem virtual
         """
         debug_print('BoxItem.mouseReleaseEvent')
-        super(BoxItem, self).mousePressEvent(event)
+        super(BoxItem, self).mouseReleaseEvent(event)
         self._set_z_index()
         self.update()
 
@@ -167,6 +181,9 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """QGraphicsItem virtual
         """
         if change == self.ItemSelectedHasChanged:
+            # Clear sub-segmentatation seed points
+            self._seeds = []
+
             # Item has gained or lost selection
             self._set_z_index()
         return super(BoxItem, self).itemChange(change, value)
@@ -195,5 +212,11 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         r = self.rect()
         r.adjust(dx1, dy1, dx2, dy2)
-        if r.width()>1 and r.height()>1:
+        if r.width()>1.0 and r.height()>1.0:
             self.setRect(r)
+
+    @property
+    def subsegmentation_seed_points(self):
+        """An iterable of sub-segmentatation seed points in item coordinates
+        """
+        return self._seeds

@@ -140,18 +140,28 @@ class GraphicsItemView(QtGui.QAbstractItemView):
             finally:
                 self.handling_selection_update = False
 
-    def _rows_of_items(self, items):
+    def rows_of_items(self, items):
         """Returns a generator of row numbers of the list of QGraphicsItems
         """
         # TODO LH This is horrible
         # TODO LH Use a view to support changes to self._rows during iteration?
         return (self._rows.index(i) for i in items)
 
-    def _indexes_of_items(self, items):
+    def indexes_of_items(self, items):
         """Returns a generator of indexes of the list of QGraphicsItems
         """
         # TODO LH Use a view to support changes to self._rows during iteration?
-        return (self.model().index(row, 0) for row in self._rows_of_items(items))
+        return (self.model().index(row, 0) for row in self.rows_of_items(items))
+
+    def items_of_rows(self, rows):
+        """Returns an iterable of QGraphicsItems for the given rows
+        """
+        return (self._rows[r] for r in rows)
+
+    def items_of_indexes(self, indexes):
+        """Returns an iterable of QGraphicsItems for the given indexes
+        """
+        return (self._rows[i.row()] for i in indexes)
 
     def scene_selection_changed(self):
         """scene.selectionChanged slot
@@ -166,7 +176,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
                 model = self.model()
                 sm = self.selectionModel()
                 current = set(i.row() for i in sm.selectedIndexes())
-                updated = set(self._rows_of_items(self.scene.selectedItems()))
+                updated = set(self.rows_of_items(self.scene.selectedItems()))
 
                 # Select contiguous blocks
                 for row, count in contiguous(sorted(updated.difference(current))):
@@ -193,7 +203,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """The user moved or resized items in the scene
         """
         debug_print('GraphicsItemView.item_rects_updated')
-        for index,item in izip(self._indexes_of_items(items), items):
+        for index,item in izip(self.indexes_of_items(items), items):
             # item.sceneBoundingRect() is the items rects in the correct
             # coordinates system
             debug_print('Row [{0}] updated'.format(index.row()))

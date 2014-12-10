@@ -8,6 +8,7 @@ from pathlib import Path
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
+from PySide.QtGui import QMenu, QAction, QMessageBox
 
 import inselect.settings
 
@@ -20,7 +21,7 @@ from inselect.lib.utils import debug_print
 from .help_dialog import HelpDialog
 from .model import Model
 from .progress_dialog import ProgressDialog
-from .roles import RotationRole
+from .roles import RotationRole, RectRole
 from .segment_worker_thread import SegmentWorkerThread
 from .utils import contiguous, report_to_user
 from .views.boxes import BoxesView, GraphicsItemView
@@ -29,21 +30,6 @@ from .views.metadata import MetadataView
 from .views.summary import SummaryView
 
 from inselect.workflow.ingest import ingest_image
-
-
-class SubSegmentWorkerThread(QtCore.QThread):
-    """Sub-segments an existing box
-    """
-    results = QtCore.Signal(list, np.ndarray)
-
-    def __init__(self, image, box, seed_points, parent=None):
-        super(SubSegmentWorkerThread, self).__init__(parent)
-        self.image, self.box, self.seed_points = image, window, seed_points
-
-    def run(self):
-        rects, display = segment_grabcut(self.image, self.window,
-                                         self.seed_points)
-        self.results.emit(rects, display)
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -73,7 +59,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tabs = QtGui.QTabWidget(self)
             self.tabs.addTab(self.boxes_view, 'Boxes')
             self.tabs.addTab(metadata, 'Metadata')
-            self.tabs.setCurrentIndex(1)
+            self.tabs.setCurrentIndex(0)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)
@@ -150,7 +136,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.open_document(doc.document_path)
                 msg = 'New inselect document [{0}] created in [{1}]'
                 msg = msg.format(doc.document_path.stem, doc.document_path.parent)
-                QtGui.QMessageBox.information(self, "Document created", msg)
+                QMessageBox.information(self, "Document created", msg)
 
     @report_to_user
     def open_document(self, filename=None):
@@ -196,10 +182,10 @@ class MainWindow(QtGui.QMainWindow):
         else:
             msg = ('The document has been saved.\n\n'
                    'Write cropped specimen images?')
-        res = QtGui.QMessageBox.question(self, 'Write cropped specimen images?',
-            msg, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+        res = QMessageBox.question(self, 'Write cropped specimen images?',
+            msg, QMessageBox.No, QMessageBox.Yes)
 
-        if QtGui.QMessageBox.Yes == res:
+        if QMessageBox.Yes == res:
             self.document.save_crops()
 
     @report_to_user
@@ -211,17 +197,17 @@ class MainWindow(QtGui.QMainWindow):
         debug_print('MainWindow.close_document')
         if self.model.modified:
             # Ask the user if they work like to save before closing
-            res = QtGui.QMessageBox.question(self, 'Save document?',
+            res = QMessageBox.question(self, 'Save document?',
                 'Save the document before closing?',
-                (QtGui.QMessageBox.Yes | QtGui.QMessageBox.No |
-                 QtGui.QMessageBox.Cancel),
-                QtGui.QMessageBox.Yes)
+                (QMessageBox.Yes | QMessageBox.No |
+                 QMessageBox.Cancel),
+                QMessageBox.Yes)
 
-            if QtGui.QMessageBox.Yes == res:
+            if QMessageBox.Yes == res:
                 self.save_document()
 
             # Answering Yes or No means the document will be closed
-            close = QtGui.QMessageBox.Cancel != res
+            close = QMessageBox.Cancel != res
         else:
             # The document is not modified so it is OK to close it
             close = True
@@ -271,7 +257,7 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def about(self):
-        QtGui.QMessageBox.about(
+        QMessageBox.about(
             self,
             inselect.settings.get('about_label'),
             inselect.settings.get('about_text')
@@ -291,7 +277,7 @@ class MainWindow(QtGui.QMainWindow):
         self.progress_box.hide()
         self.progress_box = None
         if user_cancelled:
-            QtGui.QMessageBox.information(self, 'Segmentation cancelled',
+            QMessageBox.information(self, 'Segmentation cancelled',
                 'Segmentation was cancelled.\n\nExisting data will not be replaced')
         else:
             # TODO LH Better handling of order of boxes
@@ -316,67 +302,26 @@ class MainWindow(QtGui.QMainWindow):
             self.sync_ui()
 
     @report_to_user
-    def subsegment_worker_finished(self, rects, display):
-        debug_print('MainWindow.subsegment_worker_finished')
-        # TODO LH Reinstate
-
-        # Create segmentation image if required
-        if self.segment_display is None:
-            h, w = self.image_array.shape[:2]
-            self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
-        x, y, w, h = window
-        self.segment_display[y:y+h, x:x+w] = display
-
-        # removes the selected box before replacing it with resegmentations
-        self.segment_scene.remove(worker.selected)
-
-        if self.segment_image_visible:
-            self.display_image(self.segment_display)
-
-        self.sync_ui()
-
-    @report_to_user
     def segment(self):
-        # TODO LH Should be modal
-        # TODO LH Allow cancel
-        # TODO LH Possible to show progress?
-
+        """
+        """
         if self.worker:
             raise InselectError('Reenter segment()')
         else:
             debug_print('MainWindow.segment')
-            # Sub-segment a single box if seed points are set, otherwise
             # segment the entire image
+            if self.model.rowCount():
+                prompt = ('Segmenting will cause all boxes and metadata to '
+                          'be replaced.\n\nContinue and replace existing '
+                          'boxes?')
+                res = QMessageBox.question(self, 'Replace existing boxes?',
+                    prompt, QMessageBox.No, QMessageBox.Yes)
 
-            worker = None
-            subsegment = False
-            if subsegment:
-                # TODO LH Reinstate this
-                # if object selected, resegment the window
-                selected = self.scene.selected_segments()
-                if selected:
-                    selected = selected[0]
-                    window_rect = selected.get_q_rect_f()
-                    p = window_rect.topLeft()
-                    subsegment_window = [p.x(), p.y(), window_rect.width(),
-                                         window_rect.height()]
-                    worker = SubSegmentWorkerThread(self.model.image_array,
-                        subsegment_window, seed_points)
-                    worker.results.connect(self.subsegment_worker_finished)
-            else:
-                # Segment the entire image
-                if self.model.rowCount():
-                    prompt = ('Segmenting will cause all boxes and metadata to '
-                              'be replaced.\n\nContinue and replace existing '
-                              'boxes?')
-                    res = QtGui.QMessageBox.question(self, 'Replace existing boxes?',
-                        prompt, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
-                if 0 == self.model.rowCount() or QtGui.QMessageBox.Yes == res:
-                    worker = SegmentWorkerThread(self.model.image_array,
-                                                 self.progress_box)
-                    worker.results.connect(self.segment_worker_finished)
+            if 0 == self.model.rowCount() or QMessageBox.Yes == res:
+                worker = SegmentWorkerThread(self.model.image_array,
+                                             self.progress_box)
+                worker.results.connect(self.segment_worker_finished)
 
-            if worker:
                 self.progress_box = ProgressDialog(self)
                 # Connect the progress box's cancel signal to the worker
                 # thread's slot.
@@ -393,6 +338,62 @@ class MainWindow(QtGui.QMainWindow):
 
                 self.worker = worker
                 self.worker.start()
+
+    @report_to_user
+    def subsegment(self):
+        """Subsegment the selected box, using the user-defined seed points
+        """
+        debug_print('MainWindow.subsegment')
+        # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
+        box, seeds = self.subsegment_box_and_seeds()
+        if box and len(seeds)>1:
+            # Box rect as a tuple
+            window = box.sceneBoundingRect()
+            window = (window.x(), window.y(), window.width(), window.height())
+
+            # Seed points as a list of tuples, with coordinates relative to
+            # the top-left of the sub-segmentation window
+            seeds = [(p.x()-window[0], p.y()-window[1]) for p in seeds]
+
+            # Perform the subsegmentation
+            new_rects, display = segment_grabcut(self.model.image_array,
+                                             window, seeds)
+            new_rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in new_rects]
+
+            debug_print('subsegment found [{0}] new rects'.format(len(new_rects)))
+            if len(new_rects):
+                row = list(self.view_graphics_item.rows_of_items([box]))
+                if 1 != len(row):
+                    raise ValueError('Expected one row [{0}]'.format(len(row)))
+                else:
+                    row = row[0]
+                    # Replace the existing box with the new boxes
+                    self.model.removeRows(row, 1)
+                    self.model.insertRows(row, len(new_rects))
+                    for index, rect in enumerate(new_rects):
+                        self.model.setData(self.model.index(index + row, 0),
+                                           rect, RectRole)
+
+                    # Show segmentation display
+                    if self.segment_display is None:
+                        h, w = self.model.image_array.shape[:2]
+                        self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
+
+                    x, y, w, h = window
+                    self.segment_display[y:y+h, x:x+w] = display
+
+                    if self.segment_image_visible:
+                        self.display_image(self.segment_display)
+
+                    self.sync_ui()
+            else:
+                # No new boxes
+                # Can this ever happen?
+                pass
+        else:
+            QMessageBox.information(self, 'Unable to subsegment',
+                'Please select exactly one box and create at least two seed '
+                'points')
 
     @report_to_user
     def select_all(self):
@@ -478,7 +479,7 @@ class MainWindow(QtGui.QMainWindow):
             self.padding = 0
 
     @report_to_user
-    def toggle_segment_image(self):
+    def toggle_segmentation_image(self):
         """Action method to switch between display of segmentation image and
         actual image.
         """
@@ -491,67 +492,72 @@ class MainWindow(QtGui.QMainWindow):
 
     def create_actions(self):
         # File menu
-        self.new_action = QtGui.QAction("&New...", self,
+        self.new_action = QAction("&New...", self,
             shortcut=QtGui.QKeySequence.New, triggered=self.new_document)
-        self.open_action = QtGui.QAction("&Open...", self,
+        self.open_action = QAction("&Open...", self,
             shortcut=QtGui.QKeySequence.Open, triggered=self.open_document,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
-        self.save_action = QtGui.QAction("&Save", self,
+        self.save_action = QAction("&Save", self,
             shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
-        self.close_action = QtGui.QAction("&Close", self,
+        self.close_action = QAction("&Close", self,
             shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
-        self.exit_action = QtGui.QAction("E&xit", self,
+        self.exit_action = QAction("E&xit", self,
             shortcut=QtGui.QKeySequence.Quit, triggered=self.close)
 
         # Edit menu
-        self.select_all_action = QtGui.QAction("Select &All", self,
+        self.select_all_action = QAction("Select &All", self,
             shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
         # QT does not provide a 'select none' key sequence
-        self.select_none_action = QtGui.QAction("Select &None", self,
+        self.select_none_action = QAction("Select &None", self,
             shortcut="ctrl+D", triggered=self.select_none)
-        self.next_box_action = QtGui.QAction("Next box", self,
+        self.next_box_action = QAction("Next box", self,
             shortcut="N", triggered=partial(self.select_next, forwards=True))
-        self.previous_box_action = QtGui.QAction("Previous box", self,
+        self.previous_box_action = QAction("Previous box", self,
             shortcut="P", triggered=partial(self.select_next, forwards=False))
         # TODO LH Does CMD + Backspace work on a mac?
-        self.delete_action = QtGui.QAction("&Delete selected", self,
+        self.delete_action = QAction("&Delete selected", self,
             shortcut=QtGui.QKeySequence.Delete, triggered=self.delete)
-        self.rotate_clockwise_action = QtGui.QAction(
+        self.rotate_clockwise_action = QAction(
             "Rotate clockwise", self,
             shortcut="R", triggered=partial(self.rotate90, clockwise=True))
-        self.rotate_counter_clockwise_action = QtGui.QAction(
+        self.rotate_counter_clockwise_action = QAction(
             "Rotate counter-clockwise", self, shortcut="L",
             triggered=partial(self.rotate90, clockwise=False))
 
-        # TODO LH Is Refresh (F5) really the right shortcut for the segment
-        # action?
-        self.segment_action = QtGui.QAction("&Segment", self,
+        # TODO LH Are F5 (refresh) and F6 really the right shortcuts for the
+        # segment and subsegment actions?
+        self.segment_action = QAction("&Segment", self,
             shortcut="f5", triggered=self.segment,
             icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
+        self.subsegment_action = QAction("S&ub-segment", self,
+            shortcut="f6", triggered=self.subsegment,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
+
         # LH TODO Fix this action
-        self.toggle_padding_action = QtGui.QAction(
+        self.toggle_padding_action = QAction(
             "&Pad boxes", self, shortcut="", enabled=True,
             statusTip="Check to add space around boxes once segmentation has finished",
             checkable=True, triggered=self.toggle_padding)
 
         # View menu
-        self.zoom_in_action = QtGui.QAction("Zoom &In", self,
+        self.zoom_in_action = QAction("Zoom &In", self,
             shortcut=QtGui.QKeySequence.ZoomIn, triggered=self.zoom_in,
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
-        self.zoom_out_action = QtGui.QAction("Zoom &Out", self,
+        self.zoom_out_action = QAction("Zoom &Out", self,
             shortcut=QtGui.QKeySequence.ZoomOut, triggered=self.zoom_out,
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
 
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the toggle segment image action?
-        self.toggle_segment_action = QtGui.QAction("&Display segmentation", self,
-            shortcut="f3", triggered=self.toggle_segment_image,
+        self.toggle_segmentation_image_action = QAction(
+            "&Display segmentation image", self, shortcut="f3",
+            triggered=self.toggle_segmentation_image,
             statusTip="Display segmentation image", checkable=True)
 
         # Help menu
-        self.about_action = QtGui.QAction("&About", self, triggered=self.about)
-        self.help_action = QtGui.QAction("&Help", self,
+        self.about_action = QAction("&About", self, triggered=self.about)
+        self.help_action = QAction("&Help", self,
             shortcut=QtGui.QKeySequence.HelpContents, triggered=self.help)
 
     def create_menus(self):
@@ -559,11 +565,12 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
         self.toolbar.addAction(self.segment_action)
+        self.toolbar.addAction(self.subsegment_action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
-        self.fileMenu = QtGui.QMenu("&File", self)
+        self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.new_action)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
@@ -571,7 +578,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
-        self.editMenu = QtGui.QMenu("&Edit", self)
+        self.editMenu = QMenu("&Edit", self)
         self.editMenu.addAction(self.select_all_action)
         self.editMenu.addAction(self.select_none_action)
         self.editMenu.addAction(self.delete_action)
@@ -583,14 +590,15 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addAction(self.rotate_counter_clockwise_action)
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.segment_action)
+        self.editMenu.addAction(self.subsegment_action)
         self.editMenu.addAction(self.toggle_padding_action)
 
-        self.viewMenu = QtGui.QMenu("&View", self)
+        self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
-        self.viewMenu.addAction(self.toggle_segment_action)
+        self.viewMenu.addAction(self.toggle_segmentation_image_action)
 
-        self.helpMenu = QtGui.QMenu("&Help", self)
+        self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.help_action)
         self.helpMenu.addAction(self.about_action)
 
@@ -609,13 +617,24 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.sync_ui()
 
+    def subsegment_box_and_seeds(self):
+        """Returns a tuple of the selected box and its seed points, if a single
+        box is selected.
+        """
+        # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
+        selected = self.view_grid.selectedIndexes()
+        items_of_indexes = self.view_graphics_item.items_of_indexes
+        box = items_of_indexes(selected).next() if 1==len(selected) else None
+        seeds = box.subsegmentation_seed_points if box else None
+        return box, seeds
+
     def sync_ui(self):
         """Synchronise the user interface with the application state
         """
         document = self.document is not None
         has_rows = self.model.rowCount()>0 if self.model else False
         boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
-        has_selection = len(self.view_grid.selectionModel().selectedIndexes())>0
+        has_selection = len(self.view_grid.selectedIndexes())>0
 
         # File
         self.save_action.setEnabled(document)
@@ -630,8 +649,13 @@ class MainWindow(QtGui.QMainWindow):
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
         self.segment_action.setEnabled(document)
-        self.toggle_segment_action.setEnabled(self.segment_display is not None)
+
+        # TODO LH Should enable subsegment if self.subsegment_box_and_seeds()
+        # returns a tuple != (None, None) - hard to do because box item would
+        # need to sync ui as user selects / deselects and adds / removes seeds
+        self.subsegment_action.setEnabled(document and boxes_view_visible)
 
         # View
         self.zoom_in_action.setEnabled(document and boxes_view_visible)
         self.zoom_out_action.setEnabled(document and boxes_view_visible)
+        self.toggle_segmentation_image_action.setEnabled(document)
