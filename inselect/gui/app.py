@@ -16,8 +16,9 @@ from inselect.lib.inselect_error import InselectError
 from inselect.lib.segment import segment_edges, segment_grabcut
 from inselect.lib.utils import debug_print
 
-from inselect.gui.model import Model
 from inselect.gui.help_dialog import HelpDialog
+from inselect.gui.model import Model
+from inselect.gui.roles import RotationRole
 from inselect.gui.utils import contiguous
 from inselect.gui.views.boxes import BoxesView, GraphicsItemView
 from inselect.gui.views.grid import GridView
@@ -316,7 +317,6 @@ class MainWindow(QtGui.QMainWindow):
         worker, self.worker = self.worker, None
         self.progressDialog.hide()
         self.progressDialog = None
-
         # TODO LH Better handling of order of boxes
 
         # Reverse order so that boxes at the top left are towards the start
@@ -425,7 +425,9 @@ class MainWindow(QtGui.QMainWindow):
         sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
 
     @report_to_user
-    def delete_selected(self):
+    def delete(self):
+        """Deletes the selected boxes
+        """
         # Delete contiguous blocks of rows
         selected = self.view_grid.selectionModel().selectedIndexes()
         selected = sorted([i.row() for i in selected])
@@ -456,6 +458,17 @@ class MainWindow(QtGui.QMainWindow):
         sm.select(QtGui.QItemSelection(select, select),
                   QtGui.QItemSelectionModel.ClearAndSelect)
         sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
+
+    @report_to_user
+    def rotate90(self, clockwise):
+        """Rotates the selected boxes 90 either clockwise or counter-clockwise.
+        """
+        debug_print('MainWindow.rotate')
+        value = 90 if clockwise else -90
+        selected = self.view_grid.selectionModel().selectedIndexes()
+        for index in selected:
+            current = index.data(RotationRole)
+            self.model.setData(index, current + value, RotationRole)
 
     @report_to_user
     def display_image(self, image):
@@ -510,17 +523,22 @@ class MainWindow(QtGui.QMainWindow):
         # Edit menu
         self.select_all_action = QtGui.QAction("Select &All", self,
             shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
-
         # QT does not provide a 'select none' key sequence
         self.select_none_action = QtGui.QAction("Select &None", self,
             shortcut="ctrl+D", triggered=self.select_none)
-
         self.next_box_action = QtGui.QAction("Next box", self,
             shortcut="N", triggered=partial(self.select_next, forwards=True))
         self.previous_box_action = QtGui.QAction("Previous box", self,
             shortcut="P", triggered=partial(self.select_next, forwards=False))
-        self.delete_selected_action = QtGui.QAction("&Delete selected", self,
-            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
+        # TODO LH Does CMD + Backspace work on a mac?
+        self.delete_action = QtGui.QAction("&Delete selected", self,
+            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete)
+        self.rotate_clockwise_action = QtGui.QAction(
+            "Rotate clockwise", self,
+            shortcut="R", triggered=partial(self.rotate90, clockwise=True))
+        self.rotate_counter_clockwise_action = QtGui.QAction(
+            "Rotate counter-clockwise", self, shortcut="L",
+            triggered=partial(self.rotate90, clockwise=False))
 
         # TODO LH Is Refresh (F5) really the right shortcut for the segment
         # action?
@@ -572,9 +590,13 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu = QtGui.QMenu("&Edit", self)
         self.editMenu.addAction(self.select_all_action)
         self.editMenu.addAction(self.select_none_action)
-        self.editMenu.addAction(self.delete_selected_action)
+        self.editMenu.addAction(self.delete_action)
+        self.editMenu.addSeparator()
         self.editMenu.addAction(self.next_box_action)
         self.editMenu.addAction(self.previous_box_action)
+        self.editMenu.addSeparator()
+        self.editMenu.addAction(self.rotate_clockwise_action)
+        self.editMenu.addAction(self.rotate_counter_clockwise_action)
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.segment_action)
         self.editMenu.addAction(self.toggle_padding_action)
@@ -608,8 +630,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         document = self.document is not None
         has_rows = self.model.rowCount()>0 if self.model else False
-        boxes_current = self.boxes_view == self.tabs.currentWidget()
-        has_selected = len(self.view_grid.selectionModel().selectedIndexes())>0
+        boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
+        has_selection = len(self.view_grid.selectionModel().selectedIndexes())>0
 
         # File
         self.save_action.setEnabled(document)
@@ -618,12 +640,14 @@ class MainWindow(QtGui.QMainWindow):
         # Edit
         self.select_all_action.setEnabled(has_rows)
         self.select_none_action.setEnabled(document)
-        self.delete_selected_action.setEnabled(has_selected)
+        self.delete_action.setEnabled(has_selection)
         self.next_box_action.setEnabled(has_rows)
         self.previous_box_action.setEnabled(has_rows)
+        self.rotate_clockwise_action.setEnabled(has_selection)
+        self.rotate_counter_clockwise_action.setEnabled(has_selection)
         self.segment_action.setEnabled(document)
         self.toggle_segment_action.setEnabled(self.segment_display is not None)
 
         # View
-        self.zoom_in_action.setEnabled(document and boxes_current)
-        self.zoom_out_action.setEnabled(document and boxes_current)
+        self.zoom_in_action.setEnabled(document and boxes_view_visible)
+        self.zoom_out_action.setEnabled(document and boxes_view_visible)

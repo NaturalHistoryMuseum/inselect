@@ -1,10 +1,10 @@
 from PySide.QtCore import QRect, QPoint, Qt, QCoreApplication
-from PySide.QtGui import (QListView, QBrush, QPalette, QStyle, QTransform,
+from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
                           QAbstractItemView, QAbstractItemDelegate,
                           QStyleOptionButton)
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import contiguous, PaintState
+from inselect.gui.utils import PaintState
 from inselect.gui.roles import RectRole, PixmapRole, RotationRole
 
 class CropDelegate(QAbstractItemDelegate):
@@ -80,6 +80,8 @@ class CropDelegate(QAbstractItemDelegate):
         with PaintState(painter):
             painter.setTransform(t)
             painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
+
+            painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
             painter.drawRect(target_rect)
 
     def _paint_controls(self, painter, option, index):
@@ -168,22 +170,4 @@ class GridView(QListView):
         self.setWrapping(True)
         self.setResizeMode(self.Adjust)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-
-    def keyPressEvent(self, event):
-        """QListView protected
-        """
-        if event.key() == Qt.Key_Delete:
-            # Delete contiguous blocks of rows
-            selected = sorted([i.row() for i in self.selectedIndexes()])
-
-            # Clear selection before deleting
-            self.clearSelection()
-
-            # TODO LH We shouldn't need to remove blocks in reverse order -
-            # stems from crummy GraphicsItemView
-            for row, count in reversed(list(contiguous(selected))):
-                self.model().removeRows(row, count)
-
-            return True
-        else:
-            return super(GridView, self).keyPressEvent(event)
+        self.setStyleSheet("background-color: darkgray;")
