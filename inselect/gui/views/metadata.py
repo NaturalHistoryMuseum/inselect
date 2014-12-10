@@ -39,7 +39,7 @@ class MetadataView(QtGui.QAbstractItemView):
         if selected:
             self.title.setText('Metadata for {0} boxes'.format(len(selected)))
         else:
-            self.title.setText('')
+            self.title.setText('Metadata')
 
 
 class UpdateModelLineEdit(QtGui.QLineEdit):
