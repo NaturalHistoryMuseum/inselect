@@ -1,3 +1,4 @@
+from functools import wraps
 from itertools import groupby
 from operator import itemgetter
 
@@ -65,7 +66,7 @@ def contiguous(values):
         yield lower, count
 
 class PaintState(object):
-    """Context manager that saves and restores a QPainter's state
+    """Context manager that saves and restores a QtGui.QPainter's state
     """
     def __init__(self, painter):
         self._p = painter
@@ -75,3 +76,18 @@ class PaintState(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self._p.restore()
+
+
+def report_to_user(f):
+    """Decorator that reports exceptions to the user
+    """
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return f(self, *args, **kwargs)
+        except Exception as e:
+            parent = self if isinstance(self, QtGui.QWidget) else None
+            QtGui.QMessageBox.critical(parent, u'An error occurred',
+                u'An error occurred:\n{0}'.format(e))
+            raise
+    return wrapper

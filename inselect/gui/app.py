@@ -3,45 +3,32 @@ import os
 import json
 import cv2
 
-from functools import wraps, partial
+from functools import partial
 from pathlib import Path
 
 from PySide import QtCore, QtGui
+from PySide.QtCore import Qt
 
 import inselect.settings
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.segment import segment_edges, segment_grabcut
+from inselect.lib.segment import segment_grabcut
 from inselect.lib.utils import debug_print
 
-from inselect.gui.help_dialog import HelpDialog
-from inselect.gui.model import Model
-from inselect.gui.roles import RotationRole
-from inselect.gui.utils import contiguous
-from inselect.gui.views.boxes import BoxesView, GraphicsItemView
-from inselect.gui.views.grid import GridView
-from inselect.gui.views.metadata import MetadataView
-from inselect.gui.views.summary import SummaryView
+from .help_dialog import HelpDialog
+from .model import Model
+from .progress_dialog import ProgressDialog
+from .roles import RotationRole
+from .segment_worker_thread import SegmentWorkerThread
+from .utils import contiguous, report_to_user
+from .views.boxes import BoxesView, GraphicsItemView
+from .views.grid import GridView
+from .views.metadata import MetadataView
+from .views.summary import SummaryView
+
 from inselect.workflow.ingest import ingest_image
-
-class SegmentWorkerThread(QtCore.QThread):
-    """Segments an image
-    """
-    results = QtCore.Signal(list, np.ndarray)
-
-    def __init__(self, image, parent=None):
-        super(SegmentWorkerThread, self).__init__(parent)
-        self.image = image
-
-    def run(self):
-        rects, display = segment_edges(self.image,
-                                       window=None,
-                                       resize=(5000, 5000),
-                                       variance_threshold=100,
-                                       size_filter=1)
-        self.results.emit(rects, display)
 
 
 class SubSegmentWorkerThread(QtCore.QThread):
@@ -57,20 +44,6 @@ class SubSegmentWorkerThread(QtCore.QThread):
         rects, display = segment_grabcut(self.image, self.window,
                                          self.seed_points)
         self.results.emit(rects, display)
-
-
-def report_to_user(f):
-    """A decorator that reports exceptions to the user
-    """
-    @wraps(f)
-    def wrapper(self, *args, **kwargs):
-        try:
-            return f(self, *args, **kwargs)
-        except Exception as e:
-            QtGui.QMessageBox.critical(self, u'An error occurred',
-                u'An error occurred:\n{0}'.format(e))
-            raise
-    return wrapper
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -100,7 +73,7 @@ class MainWindow(QtGui.QMainWindow):
             self.tabs = QtGui.QTabWidget(self)
             self.tabs.addTab(self.boxes_view, 'Boxes')
             self.tabs.addTab(metadata, 'Metadata')
-            self.tabs.setCurrentIndex(0)
+            self.tabs.setCurrentIndex(1)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)
@@ -147,7 +120,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tabs.currentChanged.connect(self.current_tab_changed)
         sm.selectionChanged.connect(self.selection_changed)
 
-        self.worker = self.progressDialog = None
+        self.worker = self.progress_box = None
 
         self.empty_document()
 
@@ -311,32 +284,36 @@ class MainWindow(QtGui.QMainWindow):
         d.exec_()
 
     @report_to_user
-    def segment_worker_finished(self, rects, display):
+    def segment_worker_finished(self, rects, display, user_cancelled):
         debug_print('MainWindow.segment_worker_finished')
 
         worker, self.worker = self.worker, None
-        self.progressDialog.hide()
-        self.progressDialog = None
-        # TODO LH Better handling of order of boxes
+        self.progress_box.hide()
+        self.progress_box = None
+        if user_cancelled:
+            QtGui.QMessageBox.information(self, 'Segmentation cancelled',
+                'Segmentation was cancelled.\n\nExisting data will not be replaced')
+        else:
+            # TODO LH Better handling of order of boxes
 
-        # Reverse order so that boxes at the top left are towards the start
-        # and boxes at the bottom right are towards the end
-        rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in reversed(rects)]
-        if self.padding:
-            # TODO LH Padding is a fraction of box width or height - better
-            # to be a fixed number of pixels?
-            p = self.padding
-            for i in xrange(0, len(rects)):
-                w, h = rects[i].width(), rects[i].height()
-                rects[i].adjust(-w*p, -h*p, 2*w*p, 2*h*p)
+            # Reverse order so that boxes at the top left are towards the start
+            # and boxes at the bottom right are towards the end
+            rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in reversed(rects)]
+            if self.padding:
+                # TODO LH Padding is a fraction of box width or height - better
+                # to be a fixed number of pixels?
+                p = self.padding
+                for i in xrange(0, len(rects)):
+                    w, h = rects[i].width(), rects[i].height()
+                    rects[i].adjust(-w*p, -h*p, 2*w*p, 2*h*p)
 
-        self.model.set_new_boxes(rects)
-        self.segment_display = display.copy()
+            self.model.set_new_boxes(rects)
+            self.segment_display = display.copy()
 
-        if self.segment_image_visible:
-            self.display_image(self.segment_display)
+            if self.segment_image_visible:
+                self.display_image(self.segment_display)
 
-        self.sync_ui()
+            self.sync_ui()
 
     @report_to_user
     def subsegment_worker_finished(self, rects, display):
@@ -390,22 +367,29 @@ class MainWindow(QtGui.QMainWindow):
                 # Segment the entire image
                 if self.model.rowCount():
                     prompt = ('Segmenting will cause all boxes and metadata to '
-                              'be replaced.\n\nReplace existing boxes?')
+                              'be replaced.\n\nContinue and replace existing '
+                              'boxes?')
                     res = QtGui.QMessageBox.question(self, 'Replace existing boxes?',
                         prompt, QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
                 if 0 == self.model.rowCount() or QtGui.QMessageBox.Yes == res:
-                    worker = SegmentWorkerThread(self.model.image_array)
+                    worker = SegmentWorkerThread(self.model.image_array,
+                                                 self.progress_box)
                     worker.results.connect(self.segment_worker_finished)
 
             if worker:
-                self.toggle_segment_action.setEnabled(True)
-                self.progressDialog = QtGui.QProgressDialog(self)
-                self.progressDialog.setWindowTitle("Segmenting...")
-                self.progressDialog.setCancelButton(None)
-                self.progressDialog.setValue(0)
-                self.progressDialog.setMaximum(0)
-                self.progressDialog.setMinimum(0)
-                self.progressDialog.show()
+                self.progress_box = ProgressDialog(self)
+                # Connect the progress box's cancel signal to the worker
+                # thread's slot.
+                self.progress_box.canceled.connect(worker.user_cancelled)
+                self.progress_box.setWindowModality(Qt.WindowModal)
+                self.progress_box.setWindowTitle('Segmenting image')
+                self.progress_box.setLabelText('Segmenting image')
+                self.progress_box.setAutoClose(False)
+                self.progress_box.setAutoReset(False)
+                self.progress_box.setValue(0)
+                self.progress_box.setMaximum(0)
+                self.progress_box.setMinimum(0)
+                self.progress_box.show()
 
                 self.worker = worker
                 self.worker.start()
@@ -577,7 +561,7 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(self.segment_action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
-        self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QtGui.QMenu("&File", self)
         self.fileMenu.addAction(self.new_action)
