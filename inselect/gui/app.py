@@ -1,7 +1,7 @@
+import cv2
+import json
 import numpy as np
 import os
-import json
-import cv2
 
 from functools import partial
 from pathlib import Path
@@ -31,6 +31,12 @@ from .views.summary import SummaryView
 
 from inselect.workflow.ingest import ingest_image
 
+
+# LH TODO Make a decision about padding
+SHOW_PADDING = False
+
+# LH TODO Make a decision about showing the segmentation image
+SHOW_SEGMENTATION_IMAGE = False
 
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
@@ -249,6 +255,7 @@ class MainWindow(QtGui.QMainWindow):
     def zoom_in(self):
         raise NotImplementedError('MainWindow.zoom_in')
         self.view.zoom(1)
+
 
     @report_to_user
     def zoom_out(self):
@@ -534,7 +541,6 @@ class MainWindow(QtGui.QMainWindow):
             shortcut="f6", triggered=self.subsegment,
             icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
 
-        # LH TODO Fix this action
         self.toggle_padding_action = QAction(
             "&Pad boxes", self, shortcut="", enabled=True,
             statusTip="Check to add space around boxes once segmentation has finished",
@@ -591,12 +597,16 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.segment_action)
         self.editMenu.addAction(self.subsegment_action)
-        self.editMenu.addAction(self.toggle_padding_action)
+
+        if SHOW_PADDING:
+            self.editMenu.addAction(self.toggle_padding_action)
 
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
-        self.viewMenu.addAction(self.toggle_segmentation_image_action)
+
+        if SHOW_SEGMENTATION_IMAGE:
+            self.viewMenu.addAction(self.toggle_segmentation_image_action)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.help_action)
