@@ -6,4 +6,4 @@ if sys.platform == 'win32':
     from multiprocessing import freeze_support
     freeze_support()
 
-app.launch()
+app.main()
