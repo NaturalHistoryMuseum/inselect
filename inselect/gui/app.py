@@ -532,10 +532,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # TODO LH Are F5 (refresh) and F6 really the right shortcuts for the
         # segment and subsegment actions?
-        self.segment_action = QAction("&Segment", self,
+        self.segment_action = QAction("&Segment image", self,
             shortcut="f5", triggered=self.segment,
             icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
-        self.subsegment_action = QAction("S&ub-segment", self,
+        self.subsegment_action = QAction("S&ub-segment box", self,
             shortcut="f6", triggered=self.subsegment,
             icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
 
