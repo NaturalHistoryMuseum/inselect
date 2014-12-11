@@ -254,14 +254,11 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def zoom_in(self):
-        raise NotImplementedError('MainWindow.zoom_in')
-        self.view.zoom(1)
-
+        self.boxes_view.zoom_in()
 
     @report_to_user
     def zoom_out(self):
-        raise NotImplementedError('MainWindow.zoom_out')
-        self.view.zoom(-1)
+        self.boxes_view.zoom_out()
 
     @report_to_user
     def about(self):

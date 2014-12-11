@@ -120,33 +120,84 @@ class BoxesView(QtGui.QGraphicsView):
         else:
             super(BoxesView, self).mouseReleaseEvent(event)
 
+
+
+    def zoom_in(self):
+        """A higher zoom level, if possible
+        """
+        z = self.zoom
+        if ZoomLevels.FitImage == self.zoom:
+            z = ZoomLevels.Zoom1
+        elif ZoomLevels.Zoom1 == self.zoom and self.scene().selectedItems():
+            z = ZoomLevels.FitSelection
+
+        self._new_zoom(z)
+
+    def zoom_out(self):
+        """A lower zoom level, if possible
+        """
+        z = self.zoom
+        if ZoomLevels.FitSelection == self.zoom:
+            z = ZoomLevels.Zoom1
+        elif ZoomLevels.Zoom1 == self.zoom:
+            z = ZoomLevels.FitImage
+
+        self._new_zoom(z)
+
     def toggle_zoom(self):
         """Sets a new zoom level
         """
-        selected = self.scene().selectedItems()
-
         if ZoomLevels.FitImage == self.zoom:
-            self.zoom = ZoomLevels.Zoom1
-            if selected:
-                # Centre on selected items
-                self.scale(4, 4)
-                self.ensureVisible(unite_rects([i.rect() for i in selected]))
+            z = ZoomLevels.Zoom1
+        elif ZoomLevels.Zoom1 == self.zoom:
+            # Zoom in on the current selection only when present
+            if self.scene().selectedItems():
+                z = ZoomLevels.FitSelection
             else:
-                # Centre on mouse cursor, if mouse is within the scene
-                p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
-                self.scale(4, 4)
-                if self.scene().sceneRect().contains(p):
-                    self.centerOn(p)
-        elif ZoomLevels.Zoom1 == self.zoom and selected:
-            self.zoom = ZoomLevels.FitSelection
-
-            # Centre on selected item(s)
-            r = unite_rects([i.rect() for i in selected])
-
-            # Some space
-            r.adjust(-20, -20, 40, 40)
-            self.fitInView(r, Qt.KeepAspectRatio)
+                z= ZoomLevels.FitImage
         else:
             # FitSelection
-            self.zoom = ZoomLevels.FitImage
-            self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+            z = ZoomLevels.FitImage
+
+        self._new_zoom(z)
+
+    def _new_zoom(self, new):
+        """Update the view with the current zoom level
+        """
+
+        ZOOM1_SCALE_FACTOR = 4.0
+
+        current = self.zoom
+        debug_print('Zooming from [{0}] to [{1}]'.format(current, new))
+        if new != current:
+            selected = self.scene().selectedItems()
+
+            if ZoomLevels.FitImage == new:
+                self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+            elif ZoomLevels.FitSelection == new and selected:
+                # Centre on selected item(s)
+                r = unite_rects([i.rect() for i in selected])
+
+                # Some space
+                r.adjust(-20, -20, 40, 40)
+                self.fitInView(r, Qt.KeepAspectRatio)
+            elif ZoomLevels.Zoom1 == new:
+                if ZoomLevels.FitImage == current:
+                    # Zoom in from FitImage
+                    self.scale(ZOOM1_SCALE_FACTOR, ZOOM1_SCALE_FACTOR)
+                else:
+                    # Zoom in from FitSelection
+                    self.scale(1.0/ZOOM1_SCALE_FACTOR, 1.0/ZOOM1_SCALE_FACTOR)
+
+                if selected:
+                    # Centre on selected items
+                    self.ensureVisible(unite_rects([i.rect() for i in selected]))
+                else:
+                    # Centre on mouse cursor, if mouse is within the scene
+                    p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
+                    if self.scene().sceneRect().contains(p):
+                        self.centerOn(p)
+            else:
+                debug_print('Unknown zoom level [{0}]'.format(repr(current)))
+
+            self.zoom = new
