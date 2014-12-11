@@ -2,6 +2,7 @@ import cv2
 import json
 import numpy as np
 import os
+import sys
 
 from functools import partial
 from pathlib import Path
@@ -547,6 +548,18 @@ class MainWindow(QtGui.QMainWindow):
             checkable=True, triggered=self.toggle_padding)
 
         # View menu
+        # FullScreen added in Qt 5.something
+        # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
+        if not hasattr(QtGui.QKeySequence, 'FullScreen'):
+            if 'darwin' == sys.platform:
+                KeySequenceFullScreen = 'ctrl+f'
+            else:
+                KeySequenceFullScreen = 'f11'
+        else:
+            KeySequenceFullScreen = QtGui.QKeySequence.FullScreen
+        self.full_screen_action = QAction("&Full screen", self,
+            shortcut=KeySequenceFullScreen, triggered=self.toggle_full_screen)
+
         self.zoom_in_action = QAction("Zoom &In", self,
             shortcut=QtGui.QKeySequence.ZoomIn, triggered=self.zoom_in,
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
@@ -602,6 +615,7 @@ class MainWindow(QtGui.QMainWindow):
             self.editMenu.addAction(self.toggle_padding_action)
 
         self.viewMenu = QMenu("&View", self)
+        self.viewMenu.addAction(self.full_screen_action)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
 
@@ -637,6 +651,14 @@ class MainWindow(QtGui.QMainWindow):
         box = items_of_indexes(selected).next() if 1==len(selected) else None
         seeds = box.subsegmentation_seed_points if box else None
         return box, seeds
+
+    def toggle_full_screen(self):
+        """Toggles between full screen and normal
+        """
+        if self.isFullScreen():
+            self.showNormal()
+        else:
+            self.showFullScreen()
 
     def sync_ui(self):
         """Synchronise the user interface with the application state
