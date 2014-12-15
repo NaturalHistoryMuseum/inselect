@@ -1,6 +1,10 @@
-import cv2
-import numpy as np
 from random import randint
+
+import cv2
+
+import numpy as np
+
+from .utils import debug_print
 
 # Breaks pyinstaller build
 # from skimage.morphology import watershed
@@ -55,8 +59,8 @@ def _right_sized(contour, image, container_filter=True, size_filter=True):
         not (size_filter and is_too_large)
 
 
-def _process_contours(image, contours, hierarchy, callback,
-                      index=0, size_filter=True):
+def _process_contours(image, contours, hierarchy, callback, index=0,
+                      size_filter=True):
     """Traverse a hierachy of contours (contours containing contours) and
     returns bounding boxes of the smallest possible objects that still remain
     of interest.
@@ -70,7 +74,7 @@ def _process_contours(image, contours, hierarchy, callback,
     hierarchy : ndarray
         Hierarchy of contours.
     callback: Callable
-        A callable that takes no arguments. Will be called at regular intervals.
+        A callable that will be called at regular intervals.
     index : int
         Start of contour index.
     size_filter : boolean
@@ -183,7 +187,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
             pass
         callback = swallow
 
-    callback()
+    callback('Preparing to segment')
 
     if window:
         subimage = np.array(image)
@@ -238,14 +242,14 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         mask = remove_lines(image)
         mag2[mask == 255] = 0
 
-    callback()
+    callback('Detecting contours')
 
     display = np.dstack((mag2, mag2, mag2))
     contours, hierarchy = cv2.findContours(mag2.copy(),
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
-    callback()
+    callback('Processing contours')
 
     rects = _process_contours(display, contours, hierarchy,
                               callback, size_filter=size_filter)

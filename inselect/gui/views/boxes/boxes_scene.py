@@ -12,7 +12,9 @@ class BoxesScene(QtGui.QGraphicsScene):
         super(BoxesScene, self).__init__(parent)
         self.source = source
 
+        # A pixmap that is accessed by BoxItems during painting
         self.pixmap = None
+
         # A mapping from QGraphicsItem to QRectF of selected items,
         # populated on mouseReleaseEvent()
         self._mouse_press_selection = {}
@@ -35,6 +37,36 @@ class BoxesScene(QtGui.QGraphicsScene):
             debug_print('Clear scene')
             self.setSceneRect(0, 0, 0, 0)
             self.pixmap = None
+
+    @property
+    def pixmap_item(self):
+        """The single QGraphicsPixmapItem within this scene, or None if there is
+        no open document
+        """
+        items = self.items()
+        if not items:
+            return None
+        else:
+            items = [i for i in items if isinstance(i, QtGui.QGraphicsPixmapItem)]
+            if 1 != len(items):
+                raise ValueError('Unexpected number of graphics pixmap items')
+            else:
+                return items[0]
+
+    def set_pixmap(self, pixmap):
+        """Sets pixmap as the display image. pixmap should be a QPixmap with the
+        same dimensions as self.width(), self.height().
+        """
+        pixmap_item = self.pixmap_item
+        if pixmap_item:
+            pw, ph = pixmap.width(), pixmap.height()
+            sw, sh = self.width(), self.height()
+            if not (pw == int(sw) and ph == int(sh)):
+                raise ValueError('Unexpected pixmap dimension')
+            else:
+                pixmap_item.setPixmap(pixmap)
+                self.pixmap = pixmap
+                self.update()
 
     def add_box(self, rect):
         """Notification from source that a box has been added.

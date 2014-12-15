@@ -53,6 +53,17 @@ class GraphicsItemView(QtGui.QAbstractItemView):
 
         self._rows = r
 
+    def show_alternative_pixmap(self, pixmap):
+        """Show or clear an alternative pixmap in place of the document's usual
+        pixmap. pixmaps should either be a QPixmap of the same dimensions as the
+        documents pixmap (which is shown) or None (which clears any existing
+        alternative pixmap)
+        """
+        debug_print('show_alternative_pixmap', pixmap)
+        model = self.model()
+        pixmap = pixmap if pixmap else model.data(QtCore.QModelIndex(), PixmapRole)
+        self.scene.set_pixmap(pixmap)
+
     def rowsInserted(self, parent, start, end):
         """QAbstractItemView slot
         """

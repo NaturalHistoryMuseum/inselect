@@ -1,15 +1,17 @@
 import cv2
 import json
-import numpy as np
 import os
 import sys
 
 from functools import partial
+from itertools import izip
 from pathlib import Path
+
+import numpy as np
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
-from PySide.QtGui import QMenu, QAction, QMessageBox
+from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
 
 import inselect.settings
 
@@ -21,23 +23,18 @@ from inselect.lib.utils import debug_print
 
 from .help_dialog import HelpDialog
 from .model import Model
-from .progress_dialog import ProgressDialog
+from .plugins.barcode import BarcodePlugin
+from .plugins.segment import SegmentPlugin
+from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
-from .segment_worker_thread import SegmentWorkerThread
-from .utils import contiguous, report_to_user
+from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.grid import GridView
 from .views.metadata import MetadataView
 from .views.summary import SummaryView
+from .worker_thread import WorkerThread
 
 from inselect.workflow.ingest import ingest_image
-
-
-# LH TODO Make a decision about padding
-SHOW_PADDING = False
-
-# LH TODO Make a decision about showing the segmentation image
-SHOW_SEGMENTATION_IMAGE = False
 
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
@@ -102,9 +99,15 @@ class MainWindow(QtGui.QMainWindow):
         self.view_metadata.setSelectionModel(sm)
         self.view_summary.setSelectionModel(sm)
 
-        self.padding = 0
-        self.segment_display = None
-        self.segment_image_visible = False
+        # Plugins
+        self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
+        self.plugin_actions = len(self.plugins) * [None]    # QActions
+        self.plugin_image = None
+        self.plugin_image_visible = False
+
+        # Long-running operations are run in their own thread.
+        self.running_operation = None   # The operation that is currently running
+        self.worker = None   # Instance of WorkerThread
 
         self.create_actions()
         self.create_menus()
@@ -112,8 +115,6 @@ class MainWindow(QtGui.QMainWindow):
         # Conect signals
         self.tabs.currentChanged.connect(self.current_tab_changed)
         sm.selectionChanged.connect(self.selection_changed)
-
-        self.worker = self.progress_box = None
 
         self.empty_document()
 
@@ -182,18 +183,26 @@ class MainWindow(QtGui.QMainWindow):
         self.document.save()
         self.model.clear_modified()
 
-        existing_crops = self.document.crops_dir.is_dir()
-        if existing_crops:
-            msg = ('The document has been saved.\n\n'
-                   'Overwrite the existing cropped specimen images?')
-        else:
-            msg = ('The document has been saved.\n\n'
-                   'Write cropped specimen images?')
-        res = QMessageBox.question(self, 'Write cropped specimen images?',
-            msg, QMessageBox.No, QMessageBox.Yes)
+        if self.model.rowCount() > 0:
+            # Prompt the user to save crops
+            existing_crops = self.document.crops_dir.is_dir()
+            if existing_crops:
+                # TODO LH Prompt should mention that full-res scan will need to be
+                # loaded
+                msg = ('The document has been saved.\n\n'
+                       'Overwrite the existing cropped specimen images?')
+            else:
+                msg = ('The document has been saved.\n\n'
+                       'Write cropped specimen images?')
+            res = QMessageBox.question(self, 'Write cropped specimen images?',
+                msg, QMessageBox.No, QMessageBox.Yes)
 
-        if QMessageBox.Yes == res:
-            self.document.save_crops()
+            if QMessageBox.Yes == res:
+                # TODO LH Should be run in its own thread
+                self.document.save_crops()
+        else:
+            pass
+            # There are no boxes so no crops to save
 
     @report_to_user
     def close_document(self):
@@ -230,8 +239,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.empty_document')
         self.document = None
-        self.segment_display = None
-        self.segment_image_visible = False
+        self.plugin_image = None
+        self.plugin_image_visible = False
         self.model.clear()
 
         # TODO LH Prefer setWindowFilePath to setWindowTitle?
@@ -275,130 +284,74 @@ class MainWindow(QtGui.QMainWindow):
         d.exec_()
 
     @report_to_user
-    def segment_worker_finished(self, rects, display, user_cancelled):
-        debug_print('MainWindow.segment_worker_finished')
-
-        worker, self.worker = self.worker, None
-        self.progress_box.hide()
-        self.progress_box = None
-        if user_cancelled:
-            QMessageBox.information(self, 'Segmentation cancelled',
-                'Segmentation was cancelled.\n\nExisting data will not be replaced')
-        else:
-            # TODO LH Better handling of order of boxes
-
-            # Reverse order so that boxes at the top left are towards the start
-            # and boxes at the bottom right are towards the end
-            rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in reversed(rects)]
-            if self.padding:
-                # TODO LH Padding is a fraction of box width or height - better
-                # to be a fixed number of pixels?
-                p = self.padding
-                for i in xrange(0, len(rects)):
-                    w, h = rects[i].width(), rects[i].height()
-                    rects[i].adjust(-w*p, -h*p, 2*w*p, 2*h*p)
-
-            self.model.set_new_boxes(rects)
-            self.segment_display = display.copy()
-
-            if self.segment_image_visible:
-                self.display_image(self.segment_display)
-
-            self.sync_ui()
-
-    @report_to_user
-    def segment(self):
+    def run_plugin(self, plugin_number):
+        """Passes each cropped specimen image through plugin
         """
-        """
-        if self.worker:
-            raise InselectError('Reenter segment()')
+        if plugin_number < 0 or plugin_number > len(self.plugins):
+            raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
+        elif self.running_operation or self.worker:
+            raise ValueError('Re-enter run_plugin')
         else:
-            debug_print('MainWindow.segment')
-            # segment the entire image
-            if self.model.rowCount():
-                prompt = ('Segmenting will cause all boxes and metadata to '
-                          'be replaced.\n\nContinue and replace existing '
-                          'boxes?')
-                res = QMessageBox.question(self, 'Replace existing boxes?',
-                    prompt, QMessageBox.No, QMessageBox.Yes)
+            plugin = self.plugins[plugin_number]
 
-            if 0 == self.model.rowCount() or QMessageBox.Yes == res:
-                worker = SegmentWorkerThread(self.model.image_array,
-                                             self.progress_box)
-                worker.results.connect(self.segment_worker_finished)
+            if self.model.modified:
+                # We will use self.document to iterate over crops
+                # TODO LH Temporary InselectDocument to avoid this?
 
-                self.progress_box = ProgressDialog(self)
-                # Connect the progress box's cancel signal to the worker
-                # thread's slot.
-                self.progress_box.canceled.connect(worker.user_cancelled)
-                self.progress_box.setWindowModality(Qt.WindowModal)
-                self.progress_box.setWindowTitle('Segmenting image')
-                self.progress_box.setLabelText('Segmenting image')
-                self.progress_box.setAutoClose(False)
-                self.progress_box.setAutoReset(False)
-                self.progress_box.setValue(0)
-                self.progress_box.setMaximum(0)
-                self.progress_box.setMinimum(0)
-                self.progress_box.show()
+                title = 'Save document and run {0}?'.format(plugin.name())
+                msg = plugin.prompt() + '\n\n' if plugin.prompt else ''
+                msg += ('Would you like to save the document and '
+                        'run {0}?'.format(plugin.name()))
+                res = QMessageBox.question(self, title, msg,
+                                           QMessageBox.No, QMessageBox.Yes)
+                if QMessageBox.Yes == res:
+                    self.save_document()
+            elif plugin.prompt():
+                # self.document is up to date with self.model and the plugin
+                # has a prompt for the user 
+                title = 'Run {0}?'.format(plugin.name())
+                msg = (plugin.prompt() + '\n\nWould you like to run {0}?')
+                msg = msg.format(plugin.name())
+                res = QMessageBox.question(self, title, msg,
+                                           QMessageBox.No, QMessageBox.Yes)
+            else:
+                # self.document is up to date with self.model and the plugin
+                # does not have a prompt for the user
+                res = QMessageBox.Yes
+
+            if QMessageBox.Yes == res:
+                # Create the plugin
+                self.running_operation = plugin(self)
+                worker = WorkerThread(self.running_operation,
+                              self.running_operation.name(),
+                              self.document,
+                              self)
+                worker.completed.connect(self.worker_finished)
 
                 self.worker = worker
                 self.worker.start()
 
     @report_to_user
-    def subsegment(self):
-        """Subsegment the selected box, using the user-defined seed points
-        """
-        debug_print('MainWindow.subsegment')
-        # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
-        box, seeds = self.subsegment_box_and_seeds()
-        if box and len(seeds)>1:
-            # Box rect as a tuple
-            window = box.sceneBoundingRect()
-            window = (window.x(), window.y(), window.width(), window.height())
+    def worker_finished(self, user_cancelled, error_message):
+        debug_print("MainWindow.worker_finished", user_cancelled,
+                    error_message)
 
-            # Seed points as a list of tuples, with coordinates relative to
-            # the top-left of the sub-segmentation window
-            seeds = [(p.x()-window[0], p.y()-window[1]) for p in seeds]
-
-            # Perform the subsegmentation
-            new_rects, display = segment_grabcut(self.model.image_array,
-                                             window, seeds)
-            new_rects = [QtCore.QRect(x, y, w, h) for x, y, w, h in new_rects]
-
-            debug_print('subsegment found [{0}] new rects'.format(len(new_rects)))
-            if len(new_rects):
-                row = list(self.view_graphics_item.rows_of_items([box]))
-                if 1 != len(row):
-                    raise ValueError('Expected one row [{0}]'.format(len(row)))
-                else:
-                    row = row[0]
-                    # Replace the existing box with the new boxes
-                    self.model.removeRows(row, 1)
-                    self.model.insertRows(row, len(new_rects))
-                    for index, rect in enumerate(new_rects):
-                        self.model.setData(self.model.index(index + row, 0),
-                                           rect, RectRole)
-
-                    # Show segmentation display
-                    if self.segment_display is None:
-                        h, w = self.model.image_array.shape[:2]
-                        self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
-
-                    x, y, w, h = window
-                    self.segment_display[y:y+h, x:x+w] = display
-
-                    if self.segment_image_visible:
-                        self.display_image(self.segment_display)
-
-                    self.sync_ui()
-            else:
-                # No new boxes
-                # Can this ever happen?
-                pass
+        worker, self.worker = self.worker, None
+        plugin, self.running_operation = self.running_operation, None
+        if user_cancelled:
+            QMessageBox.information(self, 'Cancelled',
+                'Cancelled.\n\nExisting data has not been altered')
+        elif error_message:
+            QMessageBox.information(self, 'Error occurred',
+                error_message + '\n\nExisting data has not been altered')
         else:
-            QMessageBox.information(self, 'Unable to subsegment',
-                'Please select exactly one box and create at least two seed '
-                'points')
+            self.model.set_new_boxes(plugin.items)
+            if hasattr(plugin, 'display'):
+                # An image that can be displayed instead of the main image
+                display = plugin.display
+                self.plugin_image = QtGui.QPixmap.fromImage(qimage_of_bgr(display))
+                self.update_boxes_display_pixmap()
+            self.sync_ui()
 
     @report_to_user
     def select_all(self):
@@ -460,40 +413,19 @@ class MainWindow(QtGui.QMainWindow):
             current = index.data(RotationRole)
             self.model.setData(index, current + value, RotationRole)
 
-    @report_to_user
-    def display_image(self, image):
-        raise NotImplementedError('MainWindow.display_image')
-
-        """Displays an image in the user interface.
-
-        Parameters
-        ----------
-        image : np.ndarray, QtCore.QImage
-            Image to be displayed in viewer.
+    def update_boxes_display_pixmap(self):
+        """Sets the pixmap in the boxes view
         """
-        if isinstance(image, np.ndarray):
-            image = qimage_of_bgr(image)
-        self.scene._image_item.setPixmap(QtGui.QPixmap.fromImage(image))
+        pixmap = self.plugin_image if self.plugin_image_visible else None
+        self.view_graphics_item.show_alternative_pixmap(pixmap)
 
     @report_to_user
-    def toggle_padding(self):
-        """Action method to toggle box padding."""
-        if self.padding == 0:
-            self.padding = 0.05
-        else:
-            self.padding = 0
-
-    @report_to_user
-    def toggle_segmentation_image(self):
-        """Action method to switch between display of segmentation image and
-        actual image.
+    def toggle_plugin_image(self):
+        """Action method to switch between display of the last plugin's 
+        information image (if any) and the actual image.
         """
-        self.segment_image_visible = not self.segment_image_visible
-        if self.segment_image_visible:
-            image = self.segment_display
-        else:
-            image = self.qimage
-        self.display_image(image)
+        self.plugin_image_visible = not self.plugin_image_visible
+        self.update_boxes_display_pixmap()
 
     def create_actions(self):
         # File menu
@@ -530,19 +462,20 @@ class MainWindow(QtGui.QMainWindow):
             "Rotate counter-clockwise", self, shortcut="L",
             triggered=partial(self.rotate90, clockwise=False))
 
-        # TODO LH Are F5 (refresh) and F6 really the right shortcuts for the
-        # segment and subsegment actions?
-        self.segment_action = QAction("&Segment image", self,
-            shortcut="f5", triggered=self.segment,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
-        self.subsegment_action = QAction("S&ub-segment box", self,
-            shortcut="f6", triggered=self.subsegment,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_BrowserReload))
-
-        self.toggle_padding_action = QAction(
-            "&Pad boxes", self, shortcut="", enabled=True,
-            statusTip="Check to add space around boxes once segmentation has finished",
-            checkable=True, triggered=self.toggle_padding)
+        # Plugins
+        # Plugin shortcuts start at F5
+        offset = 5
+        for index, plugin in enumerate(self.plugins):
+            action = QAction(plugin.name(), self,
+                             triggered=partial(self.run_plugin, index))
+            shortcut_fkey = index + offset
+            if shortcut_fkey < 13:
+                # Keyboards typically have up to 12 function  keys
+                action.setShortcut('f{0}'.format(shortcut_fkey))
+            icon = plugin.icon()
+            if icon:
+                action.setIcon(icon)
+            self.plugin_actions[index] = action
 
         # View menu
         # FullScreen added in Qt 5.something
@@ -566,10 +499,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the toggle segment image action?
-        self.toggle_segmentation_image_action = QAction(
-            "&Display segmentation image", self, shortcut="f3",
-            triggered=self.toggle_segmentation_image,
-            statusTip="Display segmentation image", checkable=True)
+        self.toggle_plugin_image_action = QAction(
+            "&Display plugin image", self, shortcut="f3",
+            triggered=self.toggle_plugin_image,
+            statusTip="Display plugin image", checkable=True)
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
@@ -580,8 +513,8 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
-        self.toolbar.addAction(self.segment_action)
-        self.toolbar.addAction(self.subsegment_action)
+        for action in [a for a in self.plugin_actions if a.icon()]:
+            self.toolbar.addAction(action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
@@ -605,19 +538,16 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addAction(self.rotate_clockwise_action)
         self.editMenu.addAction(self.rotate_counter_clockwise_action)
         self.editMenu.addSeparator()
-        self.editMenu.addAction(self.segment_action)
-        self.editMenu.addAction(self.subsegment_action)
+        for action in self.plugin_actions:
+            self.editMenu.addAction(action)
 
-        if SHOW_PADDING:
-            self.editMenu.addAction(self.toggle_padding_action)
 
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.full_screen_action)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
 
-        if SHOW_SEGMENTATION_IMAGE:
-            self.viewMenu.addAction(self.toggle_segmentation_image_action)
+        self.viewMenu.addAction(self.toggle_plugin_image_action)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.help_action)
@@ -638,17 +568,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.sync_ui()
 
-    def subsegment_box_and_seeds(self):
-        """Returns a tuple of the selected box and its seed points, if a single
-        box is selected.
-        """
-        # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
-        selected = self.view_grid.selectedIndexes()
-        items_of_indexes = self.view_graphics_item.items_of_indexes
-        box = items_of_indexes(selected).next() if 1==len(selected) else None
-        seeds = box.subsegmentation_seed_points if box else None
-        return box, seeds
-
+    @report_to_user
     def toggle_full_screen(self):
         """Toggles between full screen and normal
         """
@@ -677,14 +597,7 @@ class MainWindow(QtGui.QMainWindow):
         self.previous_box_action.setEnabled(has_rows)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
-        self.segment_action.setEnabled(document)
-
-        # TODO LH Should enable subsegment if self.subsegment_box_and_seeds()
-        # returns a tuple != (None, None) - hard to do because box item would
-        # need to sync ui as user selects / deselects and adds / removes seeds
-        self.subsegment_action.setEnabled(document and boxes_view_visible)
 
         # View
         self.zoom_in_action.setEnabled(document and boxes_view_visible)
         self.zoom_out_action.setEnabled(document and boxes_view_visible)
-        self.toggle_segmentation_image_action.setEnabled(document)

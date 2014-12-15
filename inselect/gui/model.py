@@ -1,7 +1,9 @@
 import json
 
+from itertools import izip
+
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex
+from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
 
 from inselect.lib.utils import debug_print
 from .utils import qimage_of_bgr
@@ -33,18 +35,6 @@ class Model(QAbstractItemModel):
         self._clear_model_data()
         self.endResetModel ()
 
-    def set_new_boxes(self, rects):
-        """Replace all boxes with rects. All box information is replaced
-        """
-        self.removeRows(0, self.rowCount())
-        if rects:
-            # TODO LH Validation
-            self.beginInsertRows(QModelIndex(), 0, len(rects)-1)
-            self._data = [{"metadata": {}, "rect": r, "rotation": 0} for r in rects]
-            self.endInsertRows()
-            self.dataChanged.emit(self.index(0, 0),
-                                  self.index(len(rects)-1, 0))
-
     def from_document(self, document):
         """Load data from document
         """
@@ -57,23 +47,50 @@ class Model(QAbstractItemModel):
             image_array = document.scanned.array
 
         pixmap = QtGui.QPixmap.fromImage(qimage_of_bgr(image_array))
-        data = []
-        for item in document.items:
-            rect = item['rect']
-            rect = QtCore.QRect(rect[0]*pixmap.width(),
-                                rect[1]*pixmap.height(),
-                                rect[2]*pixmap.width(),
-                                rect[3]*pixmap.height())
-            data.append({"metadata": item['fields'],
-                         "rect": rect,
-                         "rotation": item.get('rotation', 0),
-                        }
-                       )
+        data = self._boxes_from_items(document.items, pixmap.width(), pixmap.height())
 
         # Inform views
         self.beginResetModel()
         self._data, self._image_array, self._pixmap = data, image_array, pixmap
         self.endResetModel()
+
+    def _boxes_from_items(self, items, image_width=None, image_height=None):
+        """Returns a list of boxes, suitable for use as self._data, created
+        from of InselectDocument items
+        """
+        if not image_width:
+            image_width = self._pixmap.width()
+            image_height = self._pixmap.height()
+
+        data = [None] * len(items)
+        for index, item in enumerate(items):
+            rect = item['rect']
+            rect = QtCore.QRect(rect[0]*image_width,
+                                rect[1]*image_height,
+                                rect[2]*image_width,
+                                rect[3]*image_height)
+            data[index] = {"metadata": item.get('fields', {}),
+                           "rect": rect,
+                           "rotation": item.get('rotation', 0),
+                          }
+        return data
+
+    def set_new_boxes(self, items):
+        """Replaces existing boxes with those in InselectDocument items
+        """
+        new = self._boxes_from_items(items)
+
+        if self._data:
+            self.removeRows(0, self.rowCount())
+
+        if new:
+            self.beginInsertRows(QModelIndex(), 0, len(new)-1)
+            self._data = new
+            self._modified = True
+            self.endInsertRows()
+            self.dataChanged.emit(self.index(0, 0),
+                                  self.index(len(new)-1, 0))
+
 
     @property
     def image_array(self):
@@ -175,41 +192,52 @@ class Model(QAbstractItemModel):
         """
         # TODO LH Validation?
         if RectRole == role:
-            # value is a QRect
-            current = self._data[index.row()]['rect']
+            # A new QRect for index
+            if not isinstance(value, QRect):
+                raise ValueError('Value is not a QRect')
+            else:
+                current = self._data[index.row()]['rect']
 
-            msg = 'Model.setData rect for [{0}] from [{1}] to [{2}]'
-            debug_print(msg.format(index.row(), current, value))
+                msg = 'Model.setData rect for [{0}] from [{1}] to [{2}]'
+                debug_print(msg.format(index.row(), current, value))
 
-            self._data[index.row()]['rect'] = value
+                self._data[index.row()]['rect'] = value
             self.dataChanged.emit(index, index)
             self._modified = True
             return True
         elif RotationRole == role:
-            # value is an integer that is a multiple of 90
-            current = self._data[index.row()]['rotation']
+            # A new rotation for index
+            if (not isinstance(value, (int, long)) or
+                0 != value%90):
+                raise ValueError('Value is not an integer multiple of 90')
+            else:
+                current = self._data[index.row()]['rotation']
 
-            # Constrain angle to be in range 0:360
-            value = (value+360) % 360
+                # Constrain angle to be in range 0:360
+                value = (value+360) % 360
 
-            msg = 'Model.setData rotation for [{0}] from [{1}] to [{2}]'
-            debug_print(msg.format(index.row(), current, value))
+                msg = 'Model.setData rotation for [{0}] from [{1}] to [{2}]'
+                debug_print(msg.format(index.row(), current, value))
 
-            self._data[index.row()]['rotation'] = value
-            self.dataChanged.emit(index, index)
-            self._modified = True
-            return True
+                self._data[index.row()]['rotation'] = value
+                self.dataChanged.emit(index, index)
+                self._modified = True
+                return True
         elif MetadataRole == role:
             # value is a dict containing one or more fields
-            msg = 'Model.setData for [{0}] update [{1}]'
-            debug_print(msg.format(index.row(), value))
+            if (not isinstance(value, dict) or
+                not all(values.keys() in self._metadata_fields)):
+                raise ValueError('Value is not a dict with recognised keys')
+            else:
+                msg = 'Model.setData for [{0}] update [{1}]'
+                debug_print(msg.format(index.row(), value))
 
-            current = self._data[index.row()]['metadata']
-            current.update(value)
-            self._data[index.row()]['metadata'] = current
-            self.dataChanged.emit(index, index)
-            self._modified = True
-            return True
+                current = self._data[index.row()]['metadata']
+                current.update(value)
+                self._data[index.row()]['metadata'] = current
+                self.dataChanged.emit(index, index)
+                self._modified = True
+                return True
         else:
             return super(Model, self).setData(index, value, role)
 
@@ -224,49 +252,58 @@ class Model(QAbstractItemModel):
         """
         debug_print('Model.insertRows row [{0}] count [{1}]'.format(row, count))
 
-        upper = row + count - 1
-        self.beginInsertRows(QModelIndex(), row, upper)
+        if row < 0 or row > len(self._data) or count < 1:
+            raise ValueError('Bad row [{0}] or count [{1}]'.format(row, count))
+        else:
+            upper = row + count - 1
+            self.beginInsertRows(QModelIndex(), row, upper)
 
-        # Create list of new rows. Cannot use [{whatever}] * count because we
-        # get the same dict instance repeated count times, not count different
-        # dict instances
-        new_rows = [None] * count
-        for i in xrange(0, count):
-            new_rows[i] = {"metadata": {},
-                           "rect": QtCore.QRect(0, 0, 0, 0),
-                           "rotation": 0}
+            # Create list of new rows. Cannot use [{whatever}] * count because
+            # this will create the same dict instance repeated 'count' times,
+            # not 'count' different dict instances
+            new_rows = [None] * count
+            for i in xrange(0, count):
+                new_rows[i] = {"metadata": {},
+                               "rect": QtCore.QRect(0, 0, 0, 0),
+                               "rotation": 0}
 
-        self._data[row:row] = new_rows
-        self._modified = True
-        self.endInsertRows()
-        self.dataChanged.emit(self.index(row, 0), self.index(upper, 0))
+            self._data[row:row] = new_rows
+            self._modified = True
+            self.endInsertRows()
+            self.dataChanged.emit(self.index(row, 0), self.index(upper, 0))
 
-        return True
-
-    def removeRows(self, row, count, parent=QModelIndex()):
-        """QAbstractItemModel virtual
-        """
-        debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
-
-        first, last = row, row+count
-
-        self.beginRemoveRows(parent, first, last)
-        del self._data[first:last]
-        self._modified = True
-        self.endRemoveRows()
-
-        return True
+            return True
 
     def removeRows(self, row, count, parent=QModelIndex()):
         """QAbstractItemModel virtual
         """
         debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
 
-        first, last = row, row+count
+        if row < 0 or row > len(self._data) or count < 1:
+            raise ValueError('Bad row [{0}] or count [{1}]'.format(row, count))
+        else:
+            first, last = row, row+count
 
-        self.beginRemoveRows(parent, first, last)
-        del self._data[first:last]
-        self._modified = True
-        self.endRemoveRows()
+            self.beginRemoveRows(parent, first, last)
+            del self._data[first:last]
+            self._modified = True
+            self.endRemoveRows()
 
-        return True
+            return True
+
+    def removeRows(self, row, count, parent=QModelIndex()):
+        """QAbstractItemModel virtual
+        """
+        debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
+
+        if row < 0 or row > len(self._data) or count < 1:
+            raise ValueError('Bad row [{0}] or count [{1}]'.format(row, count))
+        else:
+            first, last = row, row+count
+
+            self.beginRemoveRows(parent, first, last)
+            del self._data[first:last]
+            self._modified = True
+            self.endRemoveRows()
+
+            return True
