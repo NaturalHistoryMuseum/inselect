@@ -68,7 +68,9 @@ class BoxItem(QtGui.QGraphicsRectItem):
                            self.sceneBoundingRect())
 
         with PaintState(painter):
-            painter.setPen(QPen(self.colour, 1, Qt.SolidLine))
+            # Zero thickness indicates a cosmetic pen, which is drawn with the
+            # same thickness regardless of the view's scale factor
+            painter.setPen(QPen(self.colour, 0, Qt.SolidLine))
             r = self.boundingRect()
             painter.drawRect(r)
 
