@@ -19,7 +19,7 @@ class BoxesScene(QtGui.QGraphicsScene):
         # populated on mouseReleaseEvent()
         self._mouse_press_selection = {}
 
-        self.setBackgroundBrush(QtGui.QBrush(Qt.darkGray))
+        self.setBackgroundBrush(QtGui.QBrush(Qt.gray))
 
     def new_document(self, pixmap):
         """A new document. pixmap should be a QPixmap or None.
