@@ -3,7 +3,7 @@ import shutil
 import tempfile
 
 from copy import deepcopy
-from itertools import izip
+from itertools import izip, count
 from pathlib import Path
 
 import cv2
@@ -85,11 +85,13 @@ class InselectImage(object):
             x0, y0, x1, y1 = box.coordinates
             yield self.array[y0:y1, x0:x1]
 
-    def save_crops(self, normalised, paths):
+    def save_crops(self, normalised, paths, progress=None):
         "Saves crops given in normalised to paths."
         # TODO Copy EXIF tags?
         # TODO Make read-only?
-        for crop, path in izip(self.crops(normalised), paths):
+        for index, crop, path in izip(count(), self.crops(normalised), paths):
+            if progress:
+                progress('Writing crop {0}'.format(1 + index))
             if not cv2.imwrite(str(path), crop):
                 raise InselectError('Unable to write crop [{0}]'.format(path))
             else:
@@ -215,20 +217,16 @@ class InselectDocument(object):
         "Iterate over cropped specimen image arrays"
         return self.scanned.crops([i['rect'] for i in self.items])
 
-    def save_crops_from_image(self, dir, image):
+    def save_crops_from_image(self, dir, image, progress=None):
         "Saves images cropped from image to dir. dir must exist."
         boxes = [i['rect'] for i in self.items]
         template = '{0:03}' + image.path.suffix
         paths = [dir / template.format(1+i) for i in xrange(0, len(self.items))]
-        image.save_crops(boxes, paths)
+        image.save_crops(boxes, paths, progress)
 
-    def save_crops(self):
+    def save_crops(self, progress=None):
         "Saves images cropped from self.scanned to self.crops_dir"
-        # TODO LH Take a progress function, which will be passed a number 
-        #          between 0 and 100. Function can raise an exception to cancel
-        #          export.
         # TODO LH Test that cancel of export leaves existing crops dir.
-
         # Create temp dir alongside scan
         tempdir = tempfile.mkdtemp(dir=str(self.scanned.path.parent),
             prefix=self.scanned.path.stem + '_temp_crops')
@@ -236,7 +234,7 @@ class InselectDocument(object):
         debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
         try:
             # Save crops
-            self.save_crops_from_image(tempdir, self.scanned)
+            self.save_crops_from_image(tempdir, self.scanned, progress)
 
             # rm existing crops dir
             crops_dir = self.crops_dir

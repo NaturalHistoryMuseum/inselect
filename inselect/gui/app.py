@@ -25,6 +25,7 @@ from .help_dialog import HelpDialog
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
+from .plugins.save_crops import SaveCropsPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
 from .utils import contiguous, report_to_user, qimage_of_bgr
@@ -199,7 +200,14 @@ class MainWindow(QtGui.QMainWindow):
 
             if QMessageBox.Yes == res:
                 # TODO LH Should be run in its own thread
-                self.document.save_crops()
+                self.running_operation = SaveCropsPlugin()
+                worker = WorkerThread(self.running_operation, 'Save crops',
+                                      self.document, self)
+                worker.completed.connect(self.worker_finished)
+
+                self.worker = worker
+                self.worker.start()
+
         else:
             pass
             # There are no boxes so no crops to save
@@ -337,18 +345,20 @@ class MainWindow(QtGui.QMainWindow):
                     error_message)
 
         worker, self.worker = self.worker, None
-        plugin, self.running_operation = self.running_operation, None
+        operation, self.running_operation = self.running_operation, None
         if user_cancelled:
             QMessageBox.information(self, 'Cancelled',
                 'Cancelled.\n\nExisting data has not been altered')
         elif error_message:
-            QMessageBox.information(self, 'Error occurred',
+            QMessageBox.information(self, 'An error occurred',
                 error_message + '\n\nExisting data has not been altered')
         else:
-            self.model.set_new_boxes(plugin.items)
-            if hasattr(plugin, 'display'):
+            if hasattr(operation, 'items'):
+                self.model.set_new_boxes(operation.items)
+
+            if hasattr(operation, 'display'):
                 # An image that can be displayed instead of the main image
-                display = plugin.display
+                display = operation.display
                 self.plugin_image = QtGui.QPixmap.fromImage(qimage_of_bgr(display))
                 self.update_boxes_display_pixmap()
             self.sync_ui()
@@ -470,7 +480,7 @@ class MainWindow(QtGui.QMainWindow):
                              triggered=partial(self.run_plugin, index))
             shortcut_fkey = index + offset
             if shortcut_fkey < 13:
-                # Keyboards typically have up to 12 function  keys
+                # Keyboards typically have up to 12 function keys
                 action.setShortcut('f{0}'.format(shortcut_fkey))
             icon = plugin.icon()
             if icon:
@@ -597,6 +607,8 @@ class MainWindow(QtGui.QMainWindow):
         self.previous_box_action.setEnabled(has_rows)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
+        for action in self.plugin_actions:
+            action.setEnabled(document)
 
         # View
         self.zoom_in_action.setEnabled(document and boxes_view_visible)
