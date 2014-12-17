@@ -256,8 +256,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.sync_ui()
 
-        # TODO LH Default zoom
-
     def closeEvent(self, event):
         """QWidget virtual
         """
@@ -276,6 +274,14 @@ class MainWindow(QtGui.QMainWindow):
     @report_to_user
     def zoom_out(self):
         self.boxes_view.zoom_out()
+
+    @report_to_user
+    def toggle_zoom(self):
+        self.boxes_view.toggle_zoom()
+
+    @report_to_user
+    def zoom_home(self):
+        self.boxes_view.zoom_home()
 
     @report_to_user
     def about(self):
@@ -506,6 +512,10 @@ class MainWindow(QtGui.QMainWindow):
         self.zoom_out_action = QAction("Zoom &Out", self,
             shortcut=QtGui.QKeySequence.ZoomOut, triggered=self.zoom_out,
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+        self.toogle_zoom_action = QAction("&Toogle Zoom", self,
+            shortcut='Z', triggered=self.toggle_zoom)
+        self.zoom_home_action = QAction("Zoom &Home", self,
+            shortcut=QtGui.QKeySequence.MoveToStartOfDocument, triggered=self.zoom_home)
 
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the toggle segment image action?
@@ -527,6 +537,8 @@ class MainWindow(QtGui.QMainWindow):
             self.toolbar.addAction(action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
+        self.toolbar.addAction(self.toogle_zoom_action)
+        self.toolbar.addAction(self.zoom_home_action)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QMenu("&File", self)
@@ -551,12 +563,13 @@ class MainWindow(QtGui.QMainWindow):
         for action in self.plugin_actions:
             self.editMenu.addAction(action)
 
-
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.full_screen_action)
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
-
+        self.viewMenu.addAction(self.toogle_zoom_action)
+        self.viewMenu.addAction(self.zoom_home_action)
+        self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.toggle_plugin_image_action)
 
         self.helpMenu = QMenu("&Help", self)
@@ -613,3 +626,5 @@ class MainWindow(QtGui.QMainWindow):
         # View
         self.zoom_in_action.setEnabled(document and boxes_view_visible)
         self.zoom_out_action.setEnabled(document and boxes_view_visible)
+        self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
+        self.zoom_home_action.setEnabled(document and boxes_view_visible)

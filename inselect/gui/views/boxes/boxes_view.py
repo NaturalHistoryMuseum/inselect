@@ -1,4 +1,4 @@
-from enum import Enum
+import sys
 
 from PySide import QtGui
 from PySide.QtCore import Qt, QRectF, QSizeF
@@ -7,21 +7,20 @@ from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
 
 
-class ZoomLevels(Enum):
-    FitImage = 1
-    Zoom1 = 2
-    FitSelection = 3
-
-
 class BoxesView(QtGui.QGraphicsView):
     """
     """
 
+    MAXIMUM_ZOOM = 3 # User can't zoom in more than 1:3
+
     def __init__(self, scene, parent=None):
         super(BoxesView, self).__init__(scene, parent)
-        self.zoom = ZoomLevels.FitImage
         self.setCursor(Qt.CrossCursor)
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+
+        # If True, resizeEvent() will cause the scale to be updated to fit the
+        # scene within the view
+        self.fit_to_view = True
 
         # Will contain a temporary Rect object while the user drag-drop-creates
         # a box
@@ -32,7 +31,6 @@ class BoxesView(QtGui.QGraphicsView):
         """
         debug_print('BoxesView.updateSceneRect')
         # Reset zoom to fit image
-        self.zoom = ZoomLevels.FitImage
         self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
 
     def resizeEvent(self, event):
@@ -43,24 +41,23 @@ class BoxesView(QtGui.QGraphicsView):
         # Check for change in size because many user-interface actions trigger
         # resizeEvent(), even though they do not cause a change in the view's
         # size
-        if event.oldSize() != event.size() and ZoomLevels.FitImage == self.zoom:
+        if self.fit_to_view and event.oldSize() != event.size():
             self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
-        super(BoxesView, self).resizeEvent(event)
 
-    def keyPressEvent(self, event):
-        """QGraphicsView virtual
-        """
-        if event.key() == Qt.Key_Z:
-            event.accept()
-            self.toggle_zoom()
-        else:
-            super(BoxesView, self).keyPressEvent(event)
+        super(BoxesView, self).resizeEvent(event)
 
     def mousePressEvent(self, event):
         """QGraphicsView virtual
         """
         debug_print('BoxesView.mousePressEvent')
+
+        p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
+        if self.scene().sceneRect().contains(p):
+            print(p)
+
         if Qt.RightButton == event.button():
+            # TODO Rubber-band drag uses dashed black line - difficult to see on
+            # images with a dark background
             if self._pending_box:
                 debug_print('Expected self._pending_box to be empty')
             else:
@@ -120,84 +117,102 @@ class BoxesView(QtGui.QGraphicsView):
         else:
             super(BoxesView, self).mouseReleaseEvent(event)
 
+    def wheelEvent(self, event):
+        """QGraphicsView virtual
+        """
+
+        if Qt.ControlModifier == event.modifiers():
+            event.accept()
+            # Wheel event delta is in units of 1/8 of a degree
+            degrees = 8 * event.delta()
+
+            # Compute a relative scale factor
+            # Multiplier determined by experimenting with a mac trackpad and a
+            # cheap Logitech wheel mouse
+            multiplier = 0.0005
+            f = 1.0 + degrees * multiplier
+            if 0 < f < 2:
+                debug_print('BoxesView.wheelEvent delta degrees [{0}] factor [{1}]'.format(degrees, f))
+                self.new_relative_zoom(f)
+            else:
+                pass
+                # Extremely large wheel delta
+        else:
+            super(BoxesView, self).wheelEvent(event)
 
 
     def zoom_in(self):
         """A higher zoom level, if possible
         """
-        z = self.zoom
-        if ZoomLevels.FitImage == self.zoom:
-            z = ZoomLevels.Zoom1
-        elif ZoomLevels.Zoom1 == self.zoom and self.scene().selectedItems():
-            z = ZoomLevels.FitSelection
-
-        self._new_zoom(z)
+        self.new_relative_zoom(1.1)
 
     def zoom_out(self):
         """A lower zoom level, if possible
         """
-        z = self.zoom
-        if ZoomLevels.FitSelection == self.zoom:
-            z = ZoomLevels.Zoom1
-        elif ZoomLevels.Zoom1 == self.zoom:
-            z = ZoomLevels.FitImage
+        self.new_relative_zoom(0.9)
 
-        self._new_zoom(z)
+    def zoom_home(self):
+        """Zoom to show the entire scene
+        """
+        debug_print('BoxesView.zoom_home')
+        self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+        self.fit_to_view = True
+
+    @property
+    def absolute_zoom(self):
+        """The current zoom scale
+        """
+        return self.transform().m11()
+
+    def new_relative_zoom(self, factor):
+        """Sets a new relative zoom
+        """
+        self.new_absolute_zoom(self.absolute_zoom * factor)
 
     def toggle_zoom(self):
-        """Sets a new zoom level
+        """Toggles between 'fit to screen' and a mild zoom / zoom to selected
         """
-        if ZoomLevels.FitImage == self.zoom:
-            z = ZoomLevels.Zoom1
-        elif ZoomLevels.Zoom1 == self.zoom:
-            # Zoom in on the current selection only when present
-            if self.scene().selectedItems():
-                z = ZoomLevels.FitSelection
-            else:
-                z= ZoomLevels.FitImage
-        else:
-            # FitSelection
-            z = ZoomLevels.FitImage
-
-        self._new_zoom(z)
-
-    def _new_zoom(self, new):
-        """Update the view with the current zoom level
-        """
-
-        ZOOM1_SCALE_FACTOR = 4.0
-
-        current = self.zoom
-        debug_print('Zooming from [{0}] to [{1}]'.format(current, new))
-        if new != current:
+        if self.fit_to_view:
             selected = self.scene().selectedItems()
-
-            if ZoomLevels.FitImage == new:
-                self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
-            elif ZoomLevels.FitSelection == new and selected:
-                # Centre on selected item(s)
+            if selected:
                 r = unite_rects([i.rect() for i in selected])
 
                 # Some space
                 r.adjust(-20, -20, 40, 40)
+                print(r.width(), self.sceneRect().width(), r.width() / self.sceneRect().width(), self.sceneRect().width()/r.width())
                 self.fitInView(r, Qt.KeepAspectRatio)
-            elif ZoomLevels.Zoom1 == new:
-                if ZoomLevels.FitImage == current:
-                    # Zoom in from FitImage
-                    self.scale(ZOOM1_SCALE_FACTOR, ZOOM1_SCALE_FACTOR)
-                else:
-                    # Zoom in from FitSelection
-                    self.scale(1.0/ZOOM1_SCALE_FACTOR, 1.0/ZOOM1_SCALE_FACTOR)
-
-                if selected:
-                    # Centre on selected items
-                    self.ensureVisible(unite_rects([i.rect() for i in selected]))
-                else:
-                    # Centre on mouse cursor, if mouse is within the scene
-                    p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
-                    if self.scene().sceneRect().contains(p):
-                        self.centerOn(p)
+                self.fit_to_view = False
+                # TODO LH Need a better solution
+                if self.absolute_zoom > self.MAXIMUM_ZOOM:
+                    self.new_absolute_zoom(self.MAXIMUM_ZOOM)
             else:
-                debug_print('Unknown zoom level [{0}]'.format(repr(current)))
+               self.new_relative_zoom(4.0)
+        else:
+            self.zoom_home()
 
-            self.zoom = new
+    def new_absolute_zoom(self, factor):
+        """Sets a new absolute zoom
+        """
+        f = factor
+        scene_rect = self.scene().sceneRect()   # Scene
+        view_rect = self.viewport().rect()      # Available space
+        # The size of the scene if the new transform is applied
+        t_scene_rect = QtGui.QTransform.fromScale(f, f).mapRect(scene_rect)
+
+        if (t_scene_rect.width() < view_rect.width() and
+            t_scene_rect.height() < view_rect.height()):
+            # The user wants to zoom out so that the image is smaller than the
+            # view
+            self.zoom_home()
+        else:
+            f = min(self.MAXIMUM_ZOOM, f)
+            debug_print('Change absolute zoom from [{0}] to [{1}]'.format(self.absolute_zoom, f))
+
+            self.setTransform(QtGui.QTransform.fromScale(f, f))
+            self.fit_to_view = False
+
+            selected = self.scene().selectedItems()
+            if selected:
+                # Centre on selected items
+                #self.ensureVisible(unite_rects([i.rect() for i in selected]))
+                self.centerOn(unite_rects([i.rect() for i in selected]).center())
