@@ -28,27 +28,35 @@ class InselectDocument(object):
         items = self._preprocess_items(items)
         validate_normalised([i['rect'] for i in items])
 
-        self.scanned = InselectImage(scanned)
+        self._scanned = InselectImage(scanned)
 
         thumbnail = self._thumbnail_path()
-        self.thumbnail = InselectImage(thumbnail) if thumbnail.is_file() else None
+        self._thumbnail = InselectImage(thumbnail) if thumbnail.is_file() else None
 
         self._items = items
 
     def __repr__(self):
         s = "InselectDocument ['{0}'] [{1} items]"
-        return s.format(str(self.scanned.path), len(self._items))
+        return s.format(str(self._scanned.path), len(self._items))
 
     def _thumbnail_path(self):
-        return self.scanned.path.parent / (self.scanned.path.stem + '_thumbnail.jpg')
+        return self._scanned.path.parent / (self._scanned.path.stem + '_thumbnail.jpg')
+
+    @property
+    def scanned(self):
+        return self._scanned
+
+    @property
+    def thumbnail(self):
+        return self._thumbnail
 
     @property
     def document_path(self):
-        return self.scanned.path.with_suffix(self.EXTENSION)
+        return self._scanned.path.with_suffix(self.EXTENSION)
 
     @property
     def crops_dir(self):
-        return self.scanned.path.parent / (self.scanned.path.stem + '_crops')
+        return self._scanned.path.parent / (self._scanned.path.stem + '_crops')
 
     @property
     def items(self):
@@ -119,7 +127,7 @@ class InselectDocument(object):
             items[i]['rect'] = [l,t,w,h]
 
         doc = { 'inselect version': self.VERSION,
-                'scanned extension': self.scanned.path.suffix,
+                'scanned extension': self._scanned.path.suffix,
                 'items' : items,
               }
 
@@ -130,7 +138,7 @@ class InselectDocument(object):
     @property
     def crops(self):
         "Iterate over cropped specimen image arrays"
-        return self.scanned.crops([i['rect'] for i in self.items])
+        return self._scanned.crops([i['rect'] for i in self.items])
 
     def save_crops_from_image(self, dir, image, progress=None):
         "Saves images cropped from image to dir. dir must exist."
@@ -140,16 +148,16 @@ class InselectDocument(object):
         image.save_crops(boxes, paths, progress)
 
     def save_crops(self, progress=None):
-        "Saves images cropped from self.scanned to self.crops_dir"
+        "Saves images cropped from self._scanned to self.crops_dir"
         # TODO LH Test that cancel of export leaves existing crops dir.
         # Create temp dir alongside scan
-        tempdir = tempfile.mkdtemp(dir=str(self.scanned.path.parent),
-            prefix=self.scanned.path.stem + '_temp_crops')
+        tempdir = tempfile.mkdtemp(dir=str(self._scanned.path.parent),
+            prefix=self._scanned.path.stem + '_temp_crops')
         tempdir = Path(tempdir)
         debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
         try:
             # Save crops
-            self.save_crops_from_image(tempdir, self.scanned, progress)
+            self.save_crops_from_image(tempdir, self._scanned, progress)
 
             # rm existing crops dir
             crops_dir = self.crops_dir
@@ -167,19 +175,19 @@ class InselectDocument(object):
                 shutil.rmtree(str(tempdir))
 
     def ensure_thumbnail(self, width=4096):
-        if self.thumbnail is None:
+        if self._thumbnail is None:
             p = self._thumbnail_path()
 
             # File might have been created after this instance
             if not p.is_file():
                 debug_print('Creating [{0}] with width of [{1}] pixels'.format(p, width))
                 # TODO LH Sensible limits?
-                # TODO LH What if self.scanned.width<width?
+                # TODO LH What if self._scanned.width<width?
                 min, max = 512, 8192
                 if not min<width<max:
                     raise InselectError('width should be between [{0}] and [{1}]'.format(min, max))
                 else:
-                    img = self.scanned.array
+                    img = self._scanned.array
                     factor  = float(width)/img.shape[1]
                     debug_print('Resizing to [{0}] pixels wide'.format(width))
                     thumbnail = cv2.resize(img, (0,0), fx=factor, fy=factor)
@@ -190,4 +198,4 @@ class InselectDocument(object):
                         raise InselectError('Unable to write thumbnail [{0}]'.format(p))
 
             # Load it
-            self.thumbnail = InselectImage(p)
+            self._thumbnail = InselectImage(p)
