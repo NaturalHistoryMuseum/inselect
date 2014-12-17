@@ -143,7 +143,11 @@ class GraphicsItemView(QtGui.QAbstractItemView):
                     item.setSelected(False)
                     item.update()
 
-                if new:
+                if 1 == len(new):
+                    rect = new.pop().rect()
+                    for view in self.scene.views():
+                        view.centerOn(rect.center())
+                elif 1 < len(new):
                     # Ensure that the selected items are visible
                     rect = unite_rects([i.rect() for i in new])
                     debug_print('GraphicsItemView will make visible', rect)
