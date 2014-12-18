@@ -20,6 +20,7 @@ from inselect.lib.ingest import ingest_image
 from inselect.lib.inselect_error import InselectError
 
 IMAGE_SUFFIXES = ('.tiff', '.png', '.jpeg', '.jpg')
+IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
 
 def ingest_from_directory(inbox, docs):
     """Ingest images from the directory given by inbox to the directory given
@@ -34,8 +35,7 @@ def ingest_from_directory(inbox, docs):
         docs.mkdir(parents=True)
 
     # TODO LH Case insensitive matching
-    patterns = ('*{0}'.format(s) for s in IMAGE_SUFFIXES)
-    for source in apply(chain, [inbox.glob(p) for p in patterns]):
+    for source in apply(chain, [inbox.glob(p) for p in IMAGE_PATTERNS]):
         try:
             ingest_image(source, docs)
         except Exception:
