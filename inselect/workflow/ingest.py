@@ -6,6 +6,7 @@ import argparse
 import stat
 import traceback
 
+from itertools import chain
 from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
@@ -15,36 +16,15 @@ import numpy
 import inselect
 import inselect.lib.utils
 
-from inselect.lib.document import InselectDocument, InselectImage
+from inselect.lib.ingest import ingest_image
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import debug_print, make_readonly
 
+IMAGE_SUFFIXES = ('.tiff', '.png', '.jpeg', '.jpg')
 
-def ingest_image(source, dest_dir):
-    dest = dest_dir / source.name
-    if source!=dest and dest.is_file():
-        raise InselectError('Destination image [{0}] exists'.format(dest))
-    else:
-        debug_print('Ingesting [{0}] to [{1}]'.format(source, dest))
-        if source!=dest:
-            source.rename(dest)
-
-        # Raises if the document already exists
-        doc = InselectDocument.new_from_scan(dest)
-
-        doc.ensure_thumbnail()
-
-        # Make images read-only
-        debug_print('Making image files read-only')
-        make_readonly(doc.scanned.path)
-        make_readonly(doc.thumbnail.path)
-
-        # TODO LH Copy EXIF tags?
-        debug_print('Ingested [{0}] to [{1}]'.format(source, dest))
-
-        return doc
-
-def ingest(inbox, docs):
+def ingest_from_directory(inbox, docs):
+    """Ingest images from the directory given by inbox to the directory given
+    by docs
+    """
     inbox, docs = Path(inbox), Path(docs)
     if not inbox.is_dir():
         raise InselectError('Inbox directory [{0}] does not exist'.format(inbox))
@@ -53,7 +33,9 @@ def ingest(inbox, docs):
         print('Create document directory [{0}]'.format(docs))
         docs.mkdir(parents=True)
 
-    for source in inbox.glob('*tiff'):
+    # TODO LH Case insensitive matching
+    patterns = ('*{0}'.format(s) for s in IMAGE_SUFFIXES)
+    for source in apply(chain, [inbox.glob(p) for p in patterns]):
         try:
             ingest_image(source, docs)
         except Exception:
@@ -63,7 +45,8 @@ def ingest(inbox, docs):
 def main():
     parser = argparse.ArgumentParser(description='Ingests images into inselect')
     parser.add_argument("inbox", help='Source directory containing scanned images')
-    parser.add_argument("docs", help='Destination directory')
+    parser.add_argument("docs", help='Destination directory to which images '
+                        'will be moved and in which new documents will be created')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
@@ -71,7 +54,7 @@ def main():
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
-    ingest(args.inbox, args.docs)
+    ingest_from_directory(args.inbox, args.docs)
 
 if __name__=='__main__':
     main()

@@ -35,7 +35,7 @@ from .views.metadata import MetadataView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
-from inselect.workflow.ingest import ingest_image
+from inselect.workflow.ingest import ingest_image, IMAGE_PATTERNS
 
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
@@ -135,9 +135,11 @@ class MainWindow(QtGui.QMainWindow):
         else:
             # Source image
             folder = inselect.settings.get("working_directory")
+            filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
+            print(filter)
             source, selected_filter = QtGui.QFileDialog.getOpenFileName(
                     self, "Choose image for the new inselect document", folder,
-                    filter='Images (*.tiff *.png *.jpeg *.jpg)')
+                    filter=filter)
 
             if source:
                 source = Path(source)
@@ -309,7 +311,7 @@ class MainWindow(QtGui.QMainWindow):
 
             # Create the plugin
             operation = plugin(temp_doc, self)
-            if operation.proceed(self):
+            if operation.proceed():
                 self.running_operation = operation
                 worker = WorkerThread(self.running_operation,
                                       self.running_operation.name(),
