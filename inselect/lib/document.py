@@ -13,8 +13,17 @@ from inselect.lib.utils import debug_print, validate_normalised
 from inselect.lib.rect import Rect
 
 
+def _thumbnail_path(scanned):
+    """Returns the path of the thumbnail image for the given scanned image path
+    """
+    return scanned.parent / (scanned.stem + '_thumbnail.jpg')
+
+
 class InselectDocument(object):
-    """Simple represention of an Inselect document
+    """Simple represention of an Inselect document.
+
+    You should probably create instances using the class methods new_from_scan
+    or load.
     """
 
     VERSION = 1
@@ -24,23 +33,34 @@ class InselectDocument(object):
     # TODO LH Store Rect instances within items
     # TODO LH Validate rotation?
 
-    def __init__(self, scanned, items):
+    def __init__(self, scanned=None, scanned_path=None, thumbnail=None,
+                 items=[]):
+        """
+        """
         items = self._preprocess_items(items)
         validate_normalised([i['rect'] for i in items])
 
-        self._scanned = InselectImage(scanned)
+        self._scanned = scanned if scanned else InselectImage(scanned_path)
 
-        thumbnail = self._thumbnail_path()
-        self._thumbnail = InselectImage(thumbnail) if thumbnail.is_file() else None
+        if thumbnail:
+            self._thumbnail = thumbnail
+        else:
+            t = _thumbnail_path(self._scanned.path)
+            self._thumbnail = InselectImage(t) if t.is_file() else None
 
         self._items = items
+
+    def copy(self):
+        """Returns a new instance of InselectDocument that is a copy of this
+        instance
+        """
+        return InselectDocument(scanned=self.scanned,
+                                thumbnail=self.thumbnail,
+                                items=self.items)
 
     def __repr__(self):
         s = "InselectDocument ['{0}'] [{1} items]"
         return s.format(str(self._scanned.path), len(self._items))
-
-    def _thumbnail_path(self):
-        return self._scanned.path.parent / (self._scanned.path.stem + '_thumbnail.jpg')
 
     @property
     def scanned(self):
@@ -87,7 +107,7 @@ class InselectDocument(object):
             raise InselectError('Image file [{0}] does not exist'.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
-            doc = InselectDocument(scanned, items=[])
+            doc = cls(scanned_path=scanned, items=[])
             if doc.document_path.is_file():
                 raise InselectError('Document file [{0}] already exists'.format(doc.document_path))
             else:
@@ -112,7 +132,7 @@ class InselectDocument(object):
 
         debug_print('Loaded [{0}] items from [{1}]'.format(len(doc['items']), path))
 
-        return InselectDocument(scanned, doc['items'])
+        return cls(scanned_path=scanned, items=doc['items'])
 
     def save(self):
         "Saves to self.document_path"
@@ -176,7 +196,7 @@ class InselectDocument(object):
 
     def ensure_thumbnail(self, width=4096):
         if self._thumbnail is None:
-            p = self._thumbnail_path()
+            p = _thumbnail_path(self._scanned.path)
 
             # File might have been created after this instance
             if not p.is_file():

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import numpy as np
 
-from PySide.QtGui import QIcon
+from PySide.QtGui import QIcon, QMessageBox
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.segment import segment_grabcut
@@ -12,21 +12,10 @@ from .plugin import Plugin
 
 
 class SubsegmentPlugin(Plugin):
-    def __init__(self, app):
+    def __init__(self, document, parent):
         self.rects = self.display = None
-
-        # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
-        selected = app.view_grid.selectedIndexes()
-        items_of_indexes = app.view_graphics_item.items_of_indexes
-        item = items_of_indexes(selected).next() if 1 == len(selected) else None
-        seeds = item.subsegmentation_seed_points if item else None
-
-        if not seeds or len(seeds) < 2:
-            raise ValueError('Please select exactly one box and that contains '
-                             'at least two seed points')
-        else:
-            self.row = selected[0].row()
-            self.seeds = seeds
+        self.document = document
+        self.parent = parent
 
     @classmethod
     def name(cls):
@@ -35,30 +24,48 @@ class SubsegmentPlugin(Plugin):
         return 'Subsegment box'
 
     @classmethod
-    def prompt(cls):
+    def description(cls):
         """A description of the effect of running this plugin.
         """
-        return ('Subsegmenting will replace the selected box.')
+        return ('Will subsegment and replace the selected box using seed '
+                'points.')
 
     @classmethod
     def icon(cls):
         dir = Path(__file__).resolve().parents[3]
         return QIcon(str(dir / 'data' / 'subsegment_icon.png'))
 
-    def __call__(self, document, progress):
+    def proceed(self):
+        # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
+        selected = self.parent.view_grid.selectedIndexes()
+        items_of_indexes = self.parent.view_graphics_item.items_of_indexes
+        item = items_of_indexes(selected).next() if 1 == len(selected) else None
+        seeds = item.subsegmentation_seed_points if item else None
+
+        if not seeds or len(seeds) < 2:
+            msg = ('Please select exactly one box that contains at least two '
+                   'seed points')
+            QMessageBox.warning(self.parent, "Unable to subsegment", msg)
+            return False
+        else:
+            self.row = selected[0].row()
+            self.seeds = seeds
+            return True
+
+    def __call__(self, progress):
         """
         """
         debug_print('SubsegmentPlugin.__call__')
 
-        if document.thumbnail:
+        if self.document.thumbnail:
             debug_print('Subsegment will work on thumbnail')
-            image = document.thumbnail
+            image = self.document.thumbnail
         else:
             debug_print('Segment will work on full-res scan')
-            image = document.scanned
+            image = self.document.scanned
 
         # Perform the subsegmentation
-        items = document.items
+        items = self.document.items
         row = self.row
         window = image.from_normalised([items[row]['rect']]).next()
 

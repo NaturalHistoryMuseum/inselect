@@ -5,8 +5,12 @@ from PySide.QtGui import QIcon
 
 from inselect.lib.inselect_error import InselectError
 
-from gouda.engines import InliteEngine, LibDMTXEngine
-from gouda.strategies import roi, resize
+try:
+    import gouda
+    from gouda.engines import InliteEngine, LibDMTXEngine
+    from gouda.strategies import roi, resize
+except ImportError:
+    gouda = None
 
 from inselect.lib.utils import debug_print
 
@@ -15,8 +19,11 @@ from .plugin import Plugin
 
 class BarcodePlugin(Plugin):
 
-    def __init__(self, app):
-        self.document = None
+    def __init__(self, document, parent):
+        if not gouda:
+            raise InselectError('Barcode decoding is not available')
+        else:
+            self.document = document
 
     @classmethod
     def name(cls):
@@ -25,7 +32,7 @@ class BarcodePlugin(Plugin):
         return 'Decode barcodes'
 
     @classmethod
-    def prompt(cls):
+    def description(cls):
         """A description of the effect of running this plugin.
         """
         return ("Will load the full-resolution scanned image and will set each "
@@ -37,7 +44,7 @@ class BarcodePlugin(Plugin):
         dir = Path(__file__).resolve().parents[3]
         return QIcon(str(dir / 'data' / 'barcode_icon.png'))
 
-    def __call__(self, document, progress):
+    def __call__(self, progress):
         """
         """
         debug_print('BarcodePlugin.__call__')
@@ -50,10 +57,10 @@ class BarcodePlugin(Plugin):
             raise InselectError('No barcode decoding engine available')
 
         progress(label='Loading full-res image')
-        image_array = document.scanned.array
+        image_array = self.document.scanned.array
 
-        items = document.items
-        for index, item, crop in izip(count(), items, document.crops):
+        items = self.document.items
+        for index, item, crop in izip(count(), items, self.document.crops):
             msg = u'Reading barcodes in box {0} of {1}'.format(1 + index, len(items))
             progress(label=msg)
             barcodes = self._decode_barcodes(engine, crop)

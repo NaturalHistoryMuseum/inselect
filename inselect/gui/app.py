@@ -184,33 +184,25 @@ class MainWindow(QtGui.QMainWindow):
         self.document.save()
         self.model.clear_modified()
 
-        if self.model.rowCount() > 0:
-            # Prompt the user to save crops
-            existing_crops = self.document.crops_dir.is_dir()
-            if existing_crops:
-                # TODO LH Prompt should mention that full-res scan will need to be
-                # loaded
-                msg = ('The document has been saved.\n\n'
-                       'Overwrite the existing cropped specimen images?')
-            else:
-                msg = ('The document has been saved.\n\n'
-                       'Write cropped specimen images?')
+    @report_to_user
+    def save_crops(self):
+        res = QMessageBox.Yes
+        existing_crops = self.document.crops_dir.is_dir()
+
+        if existing_crops:
+            # TODO LH Prompt should mention that full-res scan will need to be
+            # loaded
+            msg = 'Overwrite the existing cropped specimen images?'
             res = QMessageBox.question(self, 'Write cropped specimen images?',
                 msg, QMessageBox.No, QMessageBox.Yes)
 
-            if QMessageBox.Yes == res:
-                # TODO LH Should be run in its own thread
-                self.running_operation = SaveCropsPlugin()
-                worker = WorkerThread(self.running_operation, 'Save crops',
-                                      self.document, self)
-                worker.completed.connect(self.worker_finished)
+        if QMessageBox.Yes == res:
+            self.running_operation = SaveCropsPlugin(self.document, self)
+            worker = WorkerThread(self.running_operation, 'Save crops', self)
+            worker.completed.connect(self.worker_finished)
 
-                self.worker = worker
-                self.worker.start()
-
-        else:
-            pass
-            # There are no boxes so no crops to save
+            self.worker = worker
+            self.worker.start()
 
     @report_to_user
     def close_document(self):
@@ -308,42 +300,26 @@ class MainWindow(QtGui.QMainWindow):
         else:
             plugin = self.plugins[plugin_number]
 
-            if self.model.modified:
-                # We will use self.document to iterate over crops
-                # TODO LH Temporary InselectDocument to avoid this?
+            # Create a temporary document that contains references to the
+            # loaded images
+            temp_doc = self.document.copy()
 
-                title = 'Save document and run {0}?'.format(plugin.name())
-                msg = plugin.prompt() + '\n\n' if plugin.prompt else ''
-                msg += ('Would you like to save the document and '
-                        'run {0}?'.format(plugin.name()))
-                res = QMessageBox.question(self, title, msg,
-                                           QMessageBox.No, QMessageBox.Yes)
-                if QMessageBox.Yes == res:
-                    self.save_document()
-            elif plugin.prompt():
-                # self.document is up to date with self.model and the plugin
-                # has a prompt for the user 
-                title = 'Run {0}?'.format(plugin.name())
-                msg = (plugin.prompt() + '\n\nWould you like to run {0}?')
-                msg = msg.format(plugin.name())
-                res = QMessageBox.question(self, title, msg,
-                                           QMessageBox.No, QMessageBox.Yes)
-            else:
-                # self.document is up to date with self.model and the plugin
-                # does not have a prompt for the user
-                res = QMessageBox.Yes
+            # Save the model to the temporary document
+            self.model.to_document(temp_doc)
 
-            if QMessageBox.Yes == res:
-                # Create the plugin
-                self.running_operation = plugin(self)
+            # Create the plugin
+            operation = plugin(temp_doc, self)
+            if operation.proceed(self):
+                self.running_operation = operation
                 worker = WorkerThread(self.running_operation,
-                              self.running_operation.name(),
-                              self.document,
-                              self)
+                                      self.running_operation.name(),
+                                      self)
                 worker.completed.connect(self.worker_finished)
 
                 self.worker = worker
                 self.worker.start()
+            else:
+                pass
 
     @report_to_user
     def worker_finished(self, user_cancelled, error_message):
@@ -453,6 +429,8 @@ class MainWindow(QtGui.QMainWindow):
         self.save_action = QAction("&Save", self,
             shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
+        self.save_crops_action = QAction("&Save crops", self,
+            triggered=self.save_crops)
         self.close_action = QAction("&Close", self,
             shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
         self.exit_action = QAction("E&xit", self,
@@ -537,14 +515,13 @@ class MainWindow(QtGui.QMainWindow):
             self.toolbar.addAction(action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
-        self.toolbar.addAction(self.toogle_zoom_action)
-        self.toolbar.addAction(self.zoom_home_action)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.new_action)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
+        self.fileMenu.addAction(self.save_crops_action)
         self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
@@ -565,6 +542,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.full_screen_action)
+        self.fileMenu.addSeparator()
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
         self.viewMenu.addAction(self.toogle_zoom_action)
@@ -610,6 +588,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # File
         self.save_action.setEnabled(document)
+        self.save_crops_action.setEnabled(has_rows)
         self.close_action.setEnabled(document)
 
         # Edit

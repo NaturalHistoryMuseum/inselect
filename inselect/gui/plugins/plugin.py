@@ -3,6 +3,12 @@ class Plugin(object):
     """
     # TODO LH Config UI and settings
 
+    def __init__(self, document, parent):
+        """document - an instance of InselectDocument
+        parent - a QMainWindow
+        """
+        raise NotImplementedError('name')
+
     @classmethod
     def name(cls):
         """Name of the plugin
@@ -10,7 +16,7 @@ class Plugin(object):
         raise NotImplementedError('name')
 
     @classmethod
-    def prompt(cls):
+    def description(cls):
         """A description of the effect of running this plugin.
         """
         return None
@@ -21,7 +27,13 @@ class Plugin(object):
         """
         return None
 
-    def __call__(self, document, progress):
+    def proceed(self):
+        """If False is returned, the plugin is not run. If True is returned,
+        the plugin is run in its own thread.
+        """
+        return True
+
+    def __call__(self, progress):
         """Executes the plugin
         """
         raise NotImplementedError('__call__')
