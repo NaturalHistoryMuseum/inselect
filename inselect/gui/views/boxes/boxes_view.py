@@ -52,9 +52,6 @@ class BoxesView(QtGui.QGraphicsView):
         debug_print('BoxesView.mousePressEvent')
 
         p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
-        if self.scene().sceneRect().contains(p):
-            print(p)
-
         if Qt.RightButton == event.button():
             # TODO Rubber-band drag uses dashed black line - difficult to see on
             # images with a dark background
@@ -179,7 +176,6 @@ class BoxesView(QtGui.QGraphicsView):
 
                 # Some space
                 r.adjust(-20, -20, 40, 40)
-                print(r.width(), self.sceneRect().width(), r.width() / self.sceneRect().width(), self.sceneRect().width()/r.width())
                 self.fitInView(r, Qt.KeepAspectRatio)
                 self.fit_to_view = False
                 # TODO LH Need a better solution
