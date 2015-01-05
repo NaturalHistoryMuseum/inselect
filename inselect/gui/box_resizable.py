@@ -367,7 +367,7 @@ class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
         # Paint rectangle
         if self.isSelected():
             color = QtCore.Qt.red
-            thickness = 3
+            thickness = 5
         else:
             color = self._color
             thickness = 0
