@@ -2,11 +2,10 @@
 """Post-process
 """
 import argparse
-import itertools
 import traceback
 
 from functools import partial
-from itertools import izip
+from itertools import count, izip
 from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
@@ -70,7 +69,7 @@ class BarcodeReader(object):
 
     def read_barcodes_in_document(self, doc):
         items = doc.items
-        for index, item, crop in izip(itertools.count(), items, doc.crops):
+        for index, item, crop in izip(count(), items, doc.crops):
             result = self.decode_barcodes(crop)
             if result:
                 strategy, barcodes = result
