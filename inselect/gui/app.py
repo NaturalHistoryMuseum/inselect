@@ -136,7 +136,6 @@ class MainWindow(QtGui.QMainWindow):
             # Source image
             folder = inselect.settings.get("working_directory")
             filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
-            print(filter)
             source, selected_filter = QtGui.QFileDialog.getOpenFileName(
                     self, "Choose image for the new inselect document", folder,
                     filter=filter)
@@ -478,7 +477,7 @@ class MainWindow(QtGui.QMainWindow):
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
         if not hasattr(QtGui.QKeySequence, 'FullScreen'):
             if 'darwin' == sys.platform:
-                KeySequenceFullScreen = 'ctrl+f'
+                KeySequenceFullScreen = 'shift+ctrl+f'
             else:
                 KeySequenceFullScreen = 'f11'
         else:
@@ -494,8 +493,9 @@ class MainWindow(QtGui.QMainWindow):
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
         self.toogle_zoom_action = QAction("&Toogle Zoom", self,
             shortcut='Z', triggered=self.toggle_zoom)
-        self.zoom_home_action = QAction("Zoom &Home", self,
-            shortcut=QtGui.QKeySequence.MoveToStartOfDocument, triggered=self.zoom_home)
+        self.zoom_home_action = QAction("Fit To Window", self,
+            shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
+            triggered=self.zoom_home)
 
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the toggle segment image action?
