@@ -62,7 +62,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # QAbstractGraphicsItems with a larger zorder
 
         # TODO LH Get pixmap without tight coupling to scene
-        # pixmap = next((i for i in self.scene().items() if type(i)==QGraphicsPixmapItem))
         painter.drawPixmap(self.boundingRect(),
                            self.scene().pixmap,
                            self.sceneBoundingRect())
@@ -166,8 +165,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         if Qt.ShiftModifier == event.modifiers():
             # Add sub-segmentation seed point
-            from pprint import pprint
-            pprint([self.sceneBoundingRect(), event.pos(), self.mapToScene(event.pos())])
             self._seeds.append(event.pos())
         self.update()
 
