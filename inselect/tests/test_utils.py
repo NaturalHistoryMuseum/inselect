@@ -6,7 +6,8 @@ import unittest
 from pathlib import Path
 
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import make_readonly, validate_normalised
+from inselect.lib.utils import (make_readonly, validate_normalised,
+                                rmtree_readonly)
 from inselect.lib.rect import Rect
 
 class TestMakeReadOnly(unittest.TestCase):
@@ -25,7 +26,19 @@ class TestMakeReadOnly(unittest.TestCase):
             make_readonly(temp)
             self.assertFalse(stat.S_IWUSR & path.stat()[stat.ST_MODE])
         finally:
-             shutil.rmtree(temp)
+            rmtree_readonly(temp)
+
+
+class TestRMTreeReadOnly(unittest.TestCase):
+    def test_rmtree_readonly(self):
+        d = tempfile.mkdtemp()
+        path = Path(d)
+        try:
+            make_readonly(path)
+            self.assertTrue(path.is_dir())
+        finally:
+            rmtree_readonly(path)
+            self.assertFalse(path.is_dir())
 
 
 class TestValidateNormalised(unittest.TestCase):

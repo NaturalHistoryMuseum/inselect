@@ -12,7 +12,7 @@ import cv2
 from inselect.lib.image import InselectImage
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.rect import Rect
-from inselect.lib.utils import make_readonly
+from inselect.lib.utils import make_readonly, rmtree_readonly
 
 TESTDATA = Path(__file__).parent / 'test_data'
 
@@ -96,7 +96,7 @@ class TestImage(unittest.TestCase):
             expected = i.array[87:218, 45:228]
             self.assertTrue(np.all(expected==InselectImage(p).array))
         finally:
-             shutil.rmtree(temp)
+            shutil.rmtree(temp)
 
     def test_save_crops_read_only(self):
         # Try to save to existing read-only file
@@ -112,7 +112,7 @@ class TestImage(unittest.TestCase):
             with self.assertRaises(InselectError):
                 i.save_crops([Rect(0, 0, 1, 1)], [p])
         finally:
-             shutil.rmtree(temp)
+            rmtree_readonly(temp)
 
 
 if __name__=='__main__':

@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import tempfile
 import unittest
@@ -36,16 +37,26 @@ class TestDocument(unittest.TestCase):
         self.assertTrue(doc.thumbnail is None)
 
     def test_load_bad_document(self):
-        f = tempfile.NamedTemporaryFile()
-        json.dump({'x': 1}, f)
-        f.seek(0)
-        self.assertRaises(InselectError, InselectDocument.load, f.name)
+        # Temporary files on Windows are pain
+        f = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            json.dump({'x': 1}, f)
+            f.seek(0)
+            f.close()
+            self.assertRaises(InselectError, InselectDocument.load, f.name)
+        finally:
+            os.unlink(f.name)
 
     def test_load_bad_version(self):
-        f = tempfile.NamedTemporaryFile()
-        json.dump({'inselect version': 1000}, f)
-        f.seek(0)
-        self.assertRaises(InselectError, InselectDocument.load, f.name)
+        # Temporary files on Windows are pain
+        f = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            json.dump({'inselect version': 1000}, f)
+            f.seek(0)
+            f.close()
+            self.assertRaises(InselectError, InselectDocument.load, f.name)
+        finally:
+            os.unlink(f.name)
 
     def test_load_images(self):
         source = TESTDATA / 'test_segment.inselect'

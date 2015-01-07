@@ -1,6 +1,9 @@
 from __future__ import print_function
 
+import errno
+import os
 import stat
+import shutil
 
 from pathlib import Path
 
@@ -24,3 +27,16 @@ def validate_normalised(boxes):
                 t+h<=1):
             raise InselectError('One or more boxes are not normalised')
 
+def rmtree_readonly(path):
+    """Like shutil.rmtree() but removes read-only files on Windows
+    """
+    # http://stackoverflow.com/questions/1213706/what-user-do-python-scripts-run-as-in-windows
+    def handle_remove_readonly(func, path, exc):
+        excvalue = exc[1]
+        if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+            os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+            func(path)
+        else:
+            raise
+
+    shutil.rmtree(str(path), ignore_errors=False, onerror=handle_remove_readonly)

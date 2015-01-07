@@ -1,7 +1,6 @@
 import cv2
 
 import tempfile
-import shutil
 import tempfile
 import unittest
 
@@ -12,6 +11,7 @@ import numpy as np
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image
 from inselect.lib.inselect_error import InselectError
+from inselect.lib.utils import rmtree_readonly
 from inselect.workflow.ingest import ingest_from_directory
 from inselect.workflow.segment import segment
 
@@ -26,9 +26,9 @@ class TestWorkflow(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree(self.inbox)
+            rmtree_readonly(self.inbox)
         finally:
-            shutil.rmtree(self.docs)
+            rmtree_readonly(self.docs)
 
 class TestIngest(TestWorkflow):
     def test_ingest_fail(self):
