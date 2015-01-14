@@ -17,7 +17,7 @@ class Model(QAbstractItemModel):
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
         # TODO LH Placeholder metadata fields
-        self._metadata_fields = ('Specimen number', 'Taxonomic group',)
+        self._metadata_fields = ('Specimen number', 'Location', 'Taxonomic group',)
         self._clear_model_data()
 
     def _clear_model_data(self):
@@ -226,7 +226,7 @@ class Model(QAbstractItemModel):
         elif MetadataRole == role:
             # value is a dict containing one or more fields
             if (not isinstance(value, dict) or
-                not all(values.keys() in self._metadata_fields)):
+                not set(value.keys()).issubset(self._metadata_fields)):
                 raise ValueError('Value is not a dict with recognised keys')
             else:
                 msg = 'Model.setData for [{0}] update [{1}]'
