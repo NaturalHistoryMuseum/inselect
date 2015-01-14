@@ -52,7 +52,7 @@ class BoxesView(QtGui.QGraphicsView):
         debug_print('BoxesView.mousePressEvent')
 
         p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
-        if Qt.RightButton == event.button():
+        if Qt.RightButton == event.button() and not self.scene().is_empty:
             # TODO Rubber-band drag uses dashed black line - difficult to see on
             # images with a dark background
             if self._pending_box:
@@ -89,7 +89,7 @@ class BoxesView(QtGui.QGraphicsView):
         """
         debug_print('BoxesView.mouseReleaseEvent')
 
-        if Qt.RightButton == event.button():
+        if Qt.RightButton == event.button() and not self.scene().is_empty:
             if not self._pending_box:
                 debug_print('Expected self._pending_box to be set')
             else:
@@ -118,7 +118,7 @@ class BoxesView(QtGui.QGraphicsView):
         """QGraphicsView virtual
         """
 
-        if Qt.ControlModifier == event.modifiers():
+        if Qt.ControlModifier == event.modifiers() and not self.scene().is_empty:
             event.accept()
             # Wheel event delta is in units of 1/8 of a degree
             degrees = 8 * event.delta()

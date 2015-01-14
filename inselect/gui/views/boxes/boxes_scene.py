@@ -39,6 +39,12 @@ class BoxesScene(QtGui.QGraphicsScene):
             self.pixmap = None
 
     @property
+    def is_empty(self):
+        """True if the scene does not contain a document
+        """
+        return 0 == self.sceneRect().width()
+
+    @property
     def pixmap_item(self):
         """The single QGraphicsPixmapItem within this scene, or None if there is
         no open document
