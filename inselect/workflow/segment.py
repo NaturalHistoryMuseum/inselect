@@ -13,7 +13,7 @@ import numpy
 import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
-from inselect.lib.segment import segment_edges
+from inselect.lib.segment import segment_document
 from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
@@ -25,23 +25,8 @@ def segment(dir):
         if not doc.items:
             try:
                 debug_print('Will segment [{0}]'.format(p))
-
-                # TODO LH This logic belongs in a Segmenter class
-                if doc.thumbnail:
-                    debug_print('Will segment on thumbnail')
-                    img = doc.thumbnail
-                else:
-                    debug_print('Will segment on scan')
-                    img = doc.scanned
-
-                debug_print('Segmenting [{0}]'.format(p))
-                rects,junk = segment_edges(img.array,
-                                           variance_threshold=100,
-                                           size_filter=1)
-                rects = map(lambda r: Rect(r[0], r[1], r[2], r[3]), rects)
-                rects = img.to_normalised(rects)
-                items = [{"fields": {}, 'rect': r} for r in rects]
-                doc.set_items(items)
+                doc, display_image = segment_document(doc)
+                del display_image    # We don't use this
                 doc.save()
             except Exception:
                 print('Error segmenting [{0}]'.format(p))

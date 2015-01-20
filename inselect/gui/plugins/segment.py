@@ -3,7 +3,7 @@ from pathlib import Path
 from PySide.QtGui import QIcon, QMessageBox
 
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.segment import segment_edges
+from inselect.lib.segment import segment_document
 from inselect.lib.utils import debug_print
 
 from .plugin import Plugin
@@ -48,23 +48,8 @@ class SegmentPlugin(Plugin):
         """
         """
         debug_print('SegmentPlugin.__call__')
-        if self.document.thumbnail:
-            debug_print('Segment will work on thumbnail')
-            image = self.document.thumbnail
-        else:
-            debug_print('Segment will work on full-res scan')
-            image = self.document.scanned
-        rects, display = segment_edges(image.array,
-                                       window=None,
-                                       resize=(5000, 5000),
-                                       variance_threshold=100,
-                                       size_filter=1,
-                                       callback=progress)
+        doc, display = segment_document(self.document, callback=progress)
 
-        # Reverse order so that boxes at the top left are towards the start
-        # and boxes at the bottom right are towards the end
-        rects = [{'rect': r} for r in image.to_normalised(list(reversed(rects)))]
+        self.items, self.display = doc.items, display
 
-        self.items, self.display = rects, display
-
-        debug_print('SegmentPlugin.__call__ exiting. Found [{0}] boxes'.format(len(rects)))
+        debug_print('SegmentPlugin.__call__ exiting. Found [{0}] boxes'.format(len(self.items)))

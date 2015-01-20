@@ -5,10 +5,33 @@ import cv2
 import numpy as np
 
 from .utils import debug_print
+from .rect import Rect
 
 # Breaks pyinstaller build
 # from skimage.morphology import watershed
 use_opencv_watershed = True
+
+
+def segment_document(doc, *args, **kwargs):
+    """Returns doc with items replaced by the result of calling segment_edges().
+    The caller is responsible for saving doc.
+    """
+    if doc.thumbnail:
+        img = doc.thumbnail
+        debug_print('Will segment using thumbnail [{0}]'.format(img))
+    else:
+        img = doc.scanned
+        debug_print('Will segment using fill-res scan [{0}]'.format(img))
+
+    debug_print('Segmenting [{0}]'.format(doc))
+    rects, display_image = segment_edges(img.array, *args, **kwargs)
+
+    rects = map(lambda r: Rect(r[0], r[1], r[2], r[3]), rects)
+    rects = img.to_normalised(rects)
+    items = [{"fields": {}, 'rect': r} for r in rects]
+    doc = doc.copy()    # Deep copy to avoid altering argument
+    doc.set_items(items)
+    return doc, display_image
 
 
 def _right_sized(contour, image, container_filter=True, size_filter=True):
@@ -153,9 +176,10 @@ def remove_lines(image):
             cv2.drawContours(mask, [contour], -1, 255, -1)
     return mask
 
-
+# Values passed to segment_edges() before iss102 reorganisation
+# variance_threshold=100, resize=(5000, 5000), size_filter=1, line_filter=1
 def segment_edges(image, window=None, threshold=12, lab_based=True,
-                  variance_threshold=None, resize=False, size_filter=1,
+                  variance_threshold=100, resize=False, size_filter=1,
                   line_filter=1, callback=None):
     """Segments an image based on edge intensities.
 
@@ -194,8 +218,8 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         x, y, w, h = window
         image = subimage[y:y + h, x:x + w]
 
+    original_height, original_width = image.shape[:2]
     if resize:
-        original_width, original_height = image.shape[1], image.shape[0]
         image = cv2.resize(image, resize)
 
     callback()
@@ -279,6 +303,12 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
             new_rect = (rect[0] * fx, rect[1] * fy, rect[2] * fx, rect[3] * fy)
             new_rects.append(new_rect)
         rects = new_rects
+
+    # Reverse order so that boxes at the top left are towards the start
+    # and boxes at the bottom right are towards the end
+    # TODO LH This is crummy - need a way to order rects
+    rects = list(reversed(rects))
+
     return rects, display
 
 
