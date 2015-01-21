@@ -40,7 +40,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
                       QGraphicsItem.ItemSendsGeometryChanges |
                       QGraphicsItem.ItemIsMovable)
 
-        self.setCursor(Qt.ArrowCursor)
+        self.setCursor(Qt.OpenHandCursor)
         self.setAcceptHoverEvents(True)
 
         # Sub-segmentation seed points - QPointF objects in item coordinates
@@ -85,12 +85,17 @@ class BoxItem(QtGui.QGraphicsRectItem):
                 r.adjust(1, 1, -1, -1)
                 painter.drawRect(r)
 
+    def has_mouse(self):
+        """True if self or self._handles has grabbed the mouse
+        """
+        return self.scene().mouseGrabberItem() in chain([self], self._handles)
+
     @property
     def colour(self):
         """QColor to use for drawing the box's border
         """
         # TODO LH Transparency on resize better handled by setOpacity()?
-        if self.scene().mouseGrabberItem() in chain([self], self._handles):
+        if self.has_mouse():
             return self.RESIZING
         else:
             return self.SELECTED if self.isSelected() else self.UNSELECTED
@@ -99,7 +104,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
     def inner_colour(self):
         """QColor to use for drawing the rectangle within the box's border
         """
-        if self.scene().mouseGrabberItem() in chain([self], self._handles):
+        if self.has_mouse():
             return self.INNER_RESIZE
         else:
             return self.INNER
@@ -166,6 +171,10 @@ class BoxItem(QtGui.QGraphicsRectItem):
         if Qt.ShiftModifier == event.modifiers():
             # Add sub-segmentation seed point
             self._seeds.append(event.pos())
+        else:
+            # Starting a move
+            self.setCursor(Qt.ClosedHandCursor)
+
         self.update()
 
     def mouseReleaseEvent(self, event):
@@ -173,6 +182,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """
         debug_print('BoxItem.mouseReleaseEvent')
         super(BoxItem, self).mouseReleaseEvent(event)
+        self.setCursor(Qt.OpenHandCursor)
         self._set_z_index()
         self.update()
 
