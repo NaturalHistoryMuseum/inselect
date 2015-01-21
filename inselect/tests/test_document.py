@@ -36,27 +36,27 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
         self.assertTrue(doc.thumbnail is None)
 
-    def test_load_bad_document(self):
+    def _test_load_fails(self, contents):
+        # Helper for tests that expect InselectDocument.load to fail
         # Temporary files on Windows are pain
         f = tempfile.NamedTemporaryFile(delete=False)
         try:
-            json.dump({'x': 1}, f)
+            f.write(contents)
             f.seek(0)
             f.close()
             self.assertRaises(InselectError, InselectDocument.load, f.name)
         finally:
             os.unlink(f.name)
 
-    def test_load_bad_version(self):
+    def test_load_not_json_document(self):
+        self._test_load_fails('XYZ')
+
+    def test_load_not_inselect_document(self):
         # Temporary files on Windows are pain
-        f = tempfile.NamedTemporaryFile(delete=False)
-        try:
-            json.dump({'inselect version': 1000}, f)
-            f.seek(0)
-            f.close()
-            self.assertRaises(InselectError, InselectDocument.load, f.name)
-        finally:
-            os.unlink(f.name)
+        self._test_load_fails('{"x": 1}')
+
+    def test_load_bad_version(self):
+        self._test_load_fails('{"items": [], "inselect version": 1000}')
 
     def test_load_images(self):
         source = TESTDATA / 'test_segment.inselect'

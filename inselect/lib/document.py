@@ -1,4 +1,5 @@
 import json
+import re
 import shutil
 import tempfile
 
@@ -119,24 +120,30 @@ class InselectDocument(object):
         "Returns a new InselectDocument"
         debug_print('Loading from [{0}]'.format(path))
 
+
         path = Path(path)
-        doc = json.load(path.open())
 
-        v = doc.get('inselect version')
-        if not v:
+        # Sniff the first few bytes - file must look like a json document
+        if not re.match('{[ \n]*"', path.open('rb').read(20)):
             raise InselectError('Not an inselect document')
-        elif v > cls.VERSION:
-            raise InselectError('Unsupported version [{0}]'.format(v))
+        else:
+            doc = json.load(path.open())
 
-        scanned = path.with_suffix(doc['scanned extension'])
+            v = doc.get('inselect version')
+            if not v:
+                raise InselectError('Not an inselect document')
+            elif v > cls.VERSION:
+                raise InselectError('Unsupported version [{0}]'.format(v))
+            else:
+                scanned = path.with_suffix(doc['scanned extension'])
 
-        debug_print('Loaded [{0}] items from [{1}]'.format(len(doc['items']), path))
+                msg = 'Loaded [{0}] items from [{1}]'
+                debug_print(msg.format(len(doc['items']), path))
 
-        return cls(scanned_path=scanned, items=doc['items'])
+                return cls(scanned_path=scanned, items=doc['items'])
 
     def save(self):
         "Saves to self.document_path"
-        # TODO LH Clear existing crops dir?
         path = self.document_path
         debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
 
