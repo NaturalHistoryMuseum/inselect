@@ -4,15 +4,16 @@ import cv2
 
 import numpy as np
 
-from .utils import debug_print
 from .rect import Rect
+from .utils import debug_print
 
 # Breaks pyinstaller build
 # from skimage.morphology import watershed
-use_opencv_watershed = True
+USE_OPENCV_WATERSHED = True
 
+SEGMENTATION_PREFERRED_WIDTH = 4096
 
-def segment_document(doc, *args, **kwargs):
+def segment_document(doc, resize=None, *args, **kwargs):
     """Returns doc with items replaced by the result of calling segment_edges().
     The caller is responsible for saving doc.
     """
@@ -24,11 +25,20 @@ def segment_document(doc, *args, **kwargs):
         debug_print('Will segment using fill-res scan [{0}]'.format(img))
 
     debug_print('Segmenting [{0}]'.format(doc))
-    rects, display_image = segment_edges(img.array, *args, **kwargs)
+    if resize is None and img.array.shape[1] < SEGMENTATION_PREFERRED_WIDTH:
+        # Make smaller images larger
+        resize = (SEGMENTATION_PREFERRED_WIDTH,SEGMENTATION_PREFERRED_WIDTH)
+    else:
+        # Images of the preferred size or larger do not need resizing
+        resize = False
+
+    rects, display_image = segment_edges(img.array, resize=resize, *args, **kwargs)
+
+    # TODO LH Apply padding here?
 
     rects = map(lambda r: Rect(r[0], r[1], r[2], r[3]), rects)
     rects = img.to_normalised(rects)
-    items = [{"fields": {}, 'rect': r} for r in rects]
+    items = [{"fields": {}, 'rect': r, 'rotation': 0} for r in rects]
     doc = doc.copy()    # Deep copy to avoid altering argument
     doc.set_items(items)
     return doc, display_image
@@ -394,7 +404,7 @@ def segment_grabcut(image, window=None, seeds=[]):
         for i, seed in enumerate(seeds):
             sx, sy = seed
             markers[sy, sx] = i + 1
-        if use_opencv_watershed:
+        if USE_OPENCV_WATERSHED:
             cv2.watershed(display, markers)
         else:
             markers = watershed(mask2, markers, mask=mask2)
