@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 from inselect import __version__ as inselect_version
 
