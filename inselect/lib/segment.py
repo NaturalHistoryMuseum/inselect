@@ -17,19 +17,28 @@ def segment_document(doc, resize=None, *args, **kwargs):
     """Returns doc with items replaced by the result of calling segment_edges().
     The caller is responsible for saving doc.
     """
+    debug_print('Segmenting [{0}]'.format(doc))
+
     if doc.thumbnail:
         img = doc.thumbnail
         debug_print('Will segment using thumbnail [{0}]'.format(img))
     else:
         img = doc.scanned
-        debug_print('Will segment using fill-res scan [{0}]'.format(img))
+        debug_print('Will segment using full-res scan [{0}]'.format(img))
 
-    debug_print('Segmenting [{0}]'.format(doc))
-    if resize is None and img.array.shape[1] < SEGMENTATION_PREFERRED_WIDTH:
-        # Make smaller images larger
-        resize = (SEGMENTATION_PREFERRED_WIDTH,SEGMENTATION_PREFERRED_WIDTH)
+    # Make smaller images larger
+    height, width = img.array.shape[:2]
+    if resize is None and width < SEGMENTATION_PREFERRED_WIDTH:
+        # Resize, maintaining aspect ratio
+        # segment_edges() expects a tuple (height, width)
+        factor  = float(SEGMENTATION_PREFERRED_WIDTH) / width
+        resize = (int(height * factor),SEGMENTATION_PREFERRED_WIDTH)
+
+        msg = 'Resizing [{0}] from [{1}] to preferred size of [{2}]'
+        debug_print(msg.format(doc, (height,width), resize))
     else:
         # Images of the preferred size or larger do not need resizing
+        debug_print('Image is of the preferred size or larger')
         resize = False
 
     rects, display_image = segment_edges(img.array, resize=resize, *args, **kwargs)
@@ -84,7 +93,7 @@ def _right_sized(contour, image, container_filter=True, size_filter=True):
     is_too_large = (w > image_size[1] * 0.85 and h > image_size[0] * 0.85)
     debug = False
     if debug and (w > image_size[1] * 0.35 or h > image_size[0] * 0.35):
-        print w, h, fill_ratio, is_container
+        debug_print(w, h, fill_ratio, is_container)
         cv2.imshow('im', image[y:y+h, x:x+w])
         cv2.waitKey(0)
 
