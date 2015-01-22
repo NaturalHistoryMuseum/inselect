@@ -1,10 +1,37 @@
-import cv2
-import numpy as np
 from random import randint
+
+import cv2
+
+import numpy as np
+
+from .utils import debug_print
+from .rect import Rect
 
 # Breaks pyinstaller build
 # from skimage.morphology import watershed
 use_opencv_watershed = True
+
+
+def segment_document(doc, *args, **kwargs):
+    """Returns doc with items replaced by the result of calling segment_edges().
+    The caller is responsible for saving doc.
+    """
+    if doc.thumbnail:
+        img = doc.thumbnail
+        debug_print('Will segment using thumbnail [{0}]'.format(img))
+    else:
+        img = doc.scanned
+        debug_print('Will segment using fill-res scan [{0}]'.format(img))
+
+    debug_print('Segmenting [{0}]'.format(doc))
+    rects, display_image = segment_edges(img.array, *args, **kwargs)
+
+    rects = map(lambda r: Rect(r[0], r[1], r[2], r[3]), rects)
+    rects = img.to_normalised(rects)
+    items = [{"fields": {}, 'rect': r} for r in rects]
+    doc = doc.copy()    # Deep copy to avoid altering argument
+    doc.set_items(items)
+    return doc, display_image
 
 
 def _right_sized(contour, image, container_filter=True, size_filter=True):
@@ -55,7 +82,8 @@ def _right_sized(contour, image, container_filter=True, size_filter=True):
         not (size_filter and is_too_large)
 
 
-def _process_contours(image, contours, hierarchy, index=0, size_filter=True):
+def _process_contours(image, contours, hierarchy, callback, index=0,
+                      size_filter=True):
     """Traverse a hierachy of contours (contours containing contours) and
     returns bounding boxes of the smallest possible objects that still remain
     of interest.
@@ -68,6 +96,8 @@ def _process_contours(image, contours, hierarchy, index=0, size_filter=True):
         List of contours.
     hierarchy : ndarray
         Hierarchy of contours.
+    callback: Callable
+        A callable that will be called at regular intervals.
     index : int
         Start of contour index.
     size_filter : boolean
@@ -75,6 +105,7 @@ def _process_contours(image, contours, hierarchy, index=0, size_filter=True):
     """
     result = []
     while index >= 0:
+        callback()
         next, previous, child, parent = hierarchy[0][index]
         if _right_sized(contours[index], image, size_filter=size_filter):
             rect = cv2.boundingRect(contours[index])
@@ -82,7 +113,8 @@ def _process_contours(image, contours, hierarchy, index=0, size_filter=True):
             result.append(rect)
         else:
             if child != -1:
-                rects = _process_contours(image, contours, hierarchy, child,
+                rects = _process_contours(image, contours, hierarchy,
+                                          callback, index=child,
                                           size_filter=size_filter)
                 result.extend(rects)
         index = next
@@ -144,10 +176,11 @@ def remove_lines(image):
             cv2.drawContours(mask, [contour], -1, 255, -1)
     return mask
 
-
+# Values passed to segment_edges() before iss102 reorganisation
+# variance_threshold=100, resize=(5000, 5000), size_filter=1, line_filter=1
 def segment_edges(image, window=None, threshold=12, lab_based=True,
-                  variance_threshold=None, resize=False, size_filter=1,
-                  line_filter=1):
+                  variance_threshold=100, resize=False, size_filter=1,
+                  line_filter=1, callback=None):
     """Segments an image based on edge intensities.
 
     Parameters
@@ -164,20 +197,32 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         Reject large objects.
     line_filter: Boolean
         Remove long line segment edges.
+    callback: Callable or None
+        If given, should be a callable that takes no arguments. It will be
+        polled at regular intervals.
 
     Returns
     -------
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
     """
+    if not callback:
+        def swallow(*args, **kwargs):
+            pass
+        callback = swallow
+
+    callback('Preparing to segment')
+
     if window:
         subimage = np.array(image)
         x, y, w, h = window
         image = subimage[y:y + h, x:x + w]
 
+    original_height, original_width = image.shape[:2]
     if resize:
-        original_width, original_height = image.shape[1], image.shape[0]
         image = cv2.resize(image, resize)
+
+    callback()
 
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 3)
@@ -192,17 +237,26 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         image2 = cv2.GaussianBlur(image, (3, 3), 3)
         lab_image = cv2.cvtColor(image2, cv2.cv.CV_BGR2Lab)
         # L component
+
+        callback()
+
         channel = np.array(lab_image[:, :, 0])
         v_edges = cv2.Sobel(channel, cv2.CV_32F, 1, 0, None, 1)
         h_edges = cv2.Sobel(channel, cv2.CV_32F, 0, 1, None, 1)
         mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
         mag0 = (255*mag/np.max(mag)).astype(np.uint8)
         threshold = 10
+
+        callback()
+
         _, mag0 = cv2.threshold(mag0, threshold, 255, cv2.cv.CV_THRESH_BINARY)
         # B component
         channel = np.array(lab_image[:, :, 2])
         v_edges = cv2.Sobel(channel, cv2.CV_32F, 1, 0, None, 1)
         h_edges = cv2.Sobel(channel, cv2.CV_32F, 0, 1, None, 1)
+
+        callback()
+
         mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
         mag2 = (255*mag/np.max(mag)).astype(np.uint8)
         threshold = 40
@@ -212,13 +266,20 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         mask = remove_lines(image)
         mag2[mask == 255] = 0
 
+    callback('Detecting contours')
+
     display = np.dstack((mag2, mag2, mag2))
     contours, hierarchy = cv2.findContours(mag2.copy(),
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
 
+    callback('Processing contours')
+
     rects = _process_contours(display, contours, hierarchy,
-                              size_filter=size_filter)
+                              callback, size_filter=size_filter)
+
+    callback()
+
     if variance_threshold:
         new_rects = []
         for rect in rects:
@@ -242,6 +303,12 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
             new_rect = (rect[0] * fx, rect[1] * fy, rect[2] * fx, rect[3] * fy)
             new_rects.append(new_rect)
         rects = new_rects
+
+    # Reverse order so that boxes at the top left are towards the start
+    # and boxes at the bottom right are towards the end
+    # TODO LH This is crummy - need a way to order rects
+    rects = list(reversed(rects))
+
     return rects, display
 
 

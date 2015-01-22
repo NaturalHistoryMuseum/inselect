@@ -1,7 +1,6 @@
 import cv2
 
 import tempfile
-import shutil
 import tempfile
 import unittest
 
@@ -10,8 +9,10 @@ from pathlib import Path
 import numpy as np
 
 from inselect.lib.document import InselectDocument
+from inselect.lib.ingest import ingest_image
 from inselect.lib.inselect_error import InselectError
-from inselect.workflow.ingest import ingest, ingest_image
+from inselect.lib.utils import rmtree_readonly
+from inselect.workflow.ingest import ingest_from_directory
 from inselect.workflow.segment import segment
 
 
@@ -25,14 +26,15 @@ class TestWorkflow(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree(self.inbox)
+            rmtree_readonly(self.inbox)
         finally:
-            shutil.rmtree(self.docs)
+            rmtree_readonly(self.docs)
 
 class TestIngest(TestWorkflow):
     def test_ingest_fail(self):
         # Inbox does not exist
-        self.assertRaises(InselectError, ingest, Path('I am not a directory'),
+        self.assertRaises(InselectError, ingest_from_directory,
+                          Path('I am not a directory'),
                           Path(self.docs))
 
     def test_ingest_create_docs(self):
@@ -45,7 +47,7 @@ class TestIngest(TestWorkflow):
         inbox_img = Path(self.inbox) / 'x.tiff'
 
         cv2.imwrite(str(inbox_img), img)
-        ingest(self.inbox, docs)
+        ingest_from_directory(self.inbox, docs)
 
         self.assertTrue(docs.is_dir())
 
@@ -57,7 +59,7 @@ class TestIngest(TestWorkflow):
         img = cv2.imread(str(TESTDATA / 'test_segment.png'))
         cv2.imwrite(str(inbox_img), img)
 
-        ingest(self.inbox, self.docs)
+        ingest_from_directory(self.inbox, self.docs)
 
         # Document, scan and thumbnail should all exists
         self.assertTrue((Path(self.docs) / 'x.inselect').is_file())
@@ -85,7 +87,7 @@ class TestSegment(TestWorkflow):
         img = cv2.imread(str(TESTDATA / 'test_segment.png'))
         cv2.imwrite(str(Path(self.inbox) / 'x.tiff'), img)
 
-        ingest(self.inbox, self.docs)
+        ingest_from_directory(self.inbox, self.docs)
 
         doc = InselectDocument.load(Path(self.docs) / 'x.inselect')
         self.assertEqual(0, len(doc.items))

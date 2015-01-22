@@ -101,6 +101,9 @@ _settings = {
             <p>
                 <strong>Alice Heaton</strong>: Application development
             </p>
+            <p>
+                <strong>Lawrence Hudson</strong>: Application development
+            </p>
         """.format(version=inselect_version)
     },
     'icon_size': {

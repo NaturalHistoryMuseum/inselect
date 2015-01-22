@@ -1,137 +1,159 @@
-import numpy as np
-import os
-import json
 import cv2
+import json
+import os
+import sys
 
-from functools import wraps
+from functools import partial
+from itertools import izip
 from pathlib import Path
 
+import numpy as np
+
 from PySide import QtCore, QtGui
+from PySide.QtCore import Qt
+from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
 
 import inselect.settings
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.qt_util import qimage_of_bgr
-from inselect.lib.segment import segment_edges, segment_grabcut
-from inselect.lib.segment_scene import SegmentScene
+from inselect.lib.segment import segment_grabcut
 from inselect.lib.utils import debug_print
-from inselect.gui.help_dialog import HelpDialog
-from inselect.gui.graphics_scene import GraphicsScene
-from inselect.gui.graphics_view import GraphicsView
-from inselect.gui.sidebar import SegmentListWidget
-from inselect.workflow.ingest import ingest_image
 
-class WorkerThread(QtCore.QThread):
-    results = QtCore.Signal(list, np.ndarray)
+from .help_dialog import HelpDialog
+from .model import Model
+from .plugins.barcode import BarcodePlugin
+from .plugins.segment import SegmentPlugin
+from .plugins.save_crops import SaveCropsPlugin
+from .plugins.subsegment import SubsegmentPlugin
+from .roles import RotationRole, RectRole
+from .utils import contiguous, report_to_user, qimage_of_bgr
+from .views.boxes import BoxesView, GraphicsItemView
+from .views.grid import GridView
+from .views.metadata import MetadataView
+from .views.summary import SummaryView
+from .worker_thread import WorkerThread
 
-    def __init__(self, image, resegment_window, selected=None, parent=None):
-        super(WorkerThread, self).__init__(parent)
-        self.image = image
-        self.resegment_window = resegment_window
-        self.selected = selected
+from inselect.workflow.ingest import ingest_image, IMAGE_PATTERNS
 
-    def run(self):
-        if self.resegment_window:
-            seeds = self.selected.seeds()
-            rects, display = segment_grabcut(self.image, seeds=seeds,
-                                             window=self.resegment_window)
-        else:
-            rects, display = segment_edges(self.image,
-                                           window=None,
-                                           resize=(5000, 5000),
-                                           variance_threshold=100,
-                                           size_filter=1)
-        self.results.emit(rects, display)
-
-
-def report_to_user(f):
-    """A decorator for class methods that reports exceptions to the user
+class MainWindow(QtGui.QMainWindow):
+    """The application's main window
     """
-    @wraps(f)
-    def wrapper(self, *args, **kwargs):
-        try:
-            return f(self, *args, **kwargs)
-        except Exception as e:
-            QtGui.QMessageBox.critical(self, u'An error occurred',
-                u'An error occurred:\n{0}'.format(e))
-            raise e
-    return wrapper
-
-
-class InselectMainWindow(QtGui.QMainWindow):
     FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
 
-    def __init__(self, app, filename=None):
-        super(InselectMainWindow, self).__init__()
-        # Segment container
-        self.segment_scene = SegmentScene()
+    def __init__(self, app, filename=None, tabbed=True):
+        super(MainWindow, self).__init__()
         self.app = app
-        self.container = QtGui.QWidget(self)
-        self.splitter = QtGui.QSplitter(self)
-        self.scene = GraphicsScene(self.segment_scene)
-        self.view = GraphicsView(self.scene, self)
-        self.sidebar = SegmentListWidget(self.scene, self)
-        self.view.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
-        self.view.setCursor(QtCore.Qt.CrossCursor)
-        self.view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.view.setRenderHint(QtGui.QPainter.Antialiasing)
-        self.view.setUpdatesEnabled(True)
-        self.view.setMouseTracking(True)
-        self.view.setCacheMode(QtGui.QGraphicsView.CacheBackground)
 
-        self.setCentralWidget(self.splitter)
-        self.splitter.addWidget(self.view)
-        self.splitter.addWidget(self.sidebar)
-        self.splitter.setSizes([1000, 100])
+        # Boxes view
+        self.view_graphics_item = GraphicsItemView()
+        # self.boxes_view is a QGraphicsView, not a QAbstractItemView
+        self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
-        self.padding = 0
-        self.segment_display = None
-        self.segment_image_visible = False
+        # Metadata view
+        self.view_grid = GridView()
+        self.view_metadata = MetadataView()
+        metadata = QtGui.QSplitter()
+        metadata.addWidget(self.view_grid)
+        metadata.addWidget(self.view_metadata.widget)
+        metadata.setSizes([450, 50])
+
+        if tabbed:
+            # Views in tabs
+            self.tabs = QtGui.QTabWidget(self)
+            self.tabs.addTab(self.boxes_view, 'Boxes')
+            self.tabs.addTab(metadata, 'Metadata')
+            self.tabs.setCurrentIndex(0)
+        else:
+            # Views in a splitter
+            self.tabs = QtGui.QSplitter(self)
+            self.tabs.addWidget(self.boxes_view)
+            self.tabs.addWidget(metadata)
+            self.tabs.setSizes([500, 500])
+
+        # Summary view
+        self.view_summary = SummaryView()
+
+        # Main window layout
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.view_summary.widget)
+        layout.addWidget(self.tabs)
+        box = QtGui.QWidget()
+        box.setLayout(layout)
+        self.setCentralWidget(box)
+
+        # Document
+        self.document = None
+        self.document_path = None
+
+        # Model
+        self.model = Model()
+        self.view_graphics_item.setModel(self.model)
+        self.view_grid.setModel(self.model)
+        self.view_metadata.setModel(self.model)
+        self.view_summary.setModel(self.model)
+
+        # A consistent selection across all views
+        sm = self.view_grid.selectionModel()
+        self.view_graphics_item.setSelectionModel(sm)
+        self.view_metadata.setSelectionModel(sm)
+        self.view_summary.setSelectionModel(sm)
+
+        # Plugins
+        self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
+        self.plugin_actions = len(self.plugins) * [None]    # QActions
+        self.plugin_image = None
+        self.plugin_image_visible = False
+
+        # Long-running operations are run in their own thread.
+        self.running_operation = None   # The operation that is currently running
+        self.worker = None   # Instance of WorkerThread
 
         self.create_actions()
         self.create_menus()
 
-        self.resize(500, 500)
-
-        self.worker = self.progressDialog = None
-
-        # TODO LH Remove the need for empty image
-        # A QImage that is shown when no document is open
-        self.empty_image = QtGui.QImage(500, 500, QtGui.QImage.Format_RGB32)
-        self.empty_image.fill(0xffffff)
+        # Conect signals
+        self.tabs.currentChanged.connect(self.current_tab_changed)
+        sm.selectionChanged.connect(self.selection_changed)
 
         self.empty_document()
 
         if filename:
             self.open_document(filename)
 
-        # TODO LH Why is this here and not in create_actions?
-        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self, self.close)
-
     @report_to_user
     def new_document(self):
-        debug_print('new_document')
+        """Creates a new document. The user is prompted for the path to a
+        scanned image, for which the document will be created.
+        """
+        debug_print('MainWindow.new_document')
 
-        self.close_document()
+        if not self.close_document():
+            # User does not want to close the existing document
+            pass
+        else:
+            # Source image
+            folder = inselect.settings.get("working_directory")
+            filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
+            source, selected_filter = QtGui.QFileDialog.getOpenFileName(
+                    self, "Choose image for the new inselect document", folder,
+                    filter=filter)
 
-        # Source image
-        folder = inselect.settings.get("working_directory")
-        source, selected_filter = QtGui.QFileDialog.getOpenFileName(
-                self, "Choose image for the new inselect document", folder,
-                filter='Images (*.tiff *.png *.jpeg *.jpg)')
-
-        if source:
-            source = Path(source)
-            doc = ingest_image(source, source.parent)
-            self.open_document(doc.document_path)
-            QtGui.QMessageBox.information(self, "Document created",
-                'New inselect document [{0}] created in [{1}]'.format(doc.document_path.stem, doc.document_path.parent))
+            if source:
+                source = Path(source)
+                doc = ingest_image(source, source.parent)
+                self.open_document(doc.document_path)
+                msg = 'New inselect document [{0}] created in [{1}]'
+                msg = msg.format(doc.document_path.stem, doc.document_path.parent)
+                QMessageBox.information(self, "Document created", msg)
 
     @report_to_user
     def open_document(self, filename=None):
-        debug_print('open_document', '[{0}]'.format(str(filename)))
+        """Opens filename. If filename does not evaluate to True, the user is
+        prompted for a filename.
+        """
+        debug_print('MainWindow.open_document', '[{0}]'.format(str(filename)))
 
         if not filename:
             folder = inselect.settings.get("working_directory")
@@ -143,101 +165,120 @@ class InselectMainWindow(QtGui.QMainWindow):
             document = InselectDocument.load(filename)
             inselect.settings.set_value('working_directory', str(filename.parent))
 
-            if document.thumbnail:
-                debug_print('Will display thumbnail')
-                image_array = document.thumbnail.array
-            else:
-                debug_print('Will display full-res scan')
-                image_array = document.scanned.array
-
-            qimage = qimage_of_bgr(image_array)
-
-            # Setup GUI actions
-            w, h = qimage.width(), qimage.height()
-
-            # Update the graphics scene, segment scene and sidebar elements
-            self.segment_scene.empty()
-            self.sidebar.clear()
-            self.scene.set_image(qimage)
-            self.segment_scene.set_size(w, h)
-
             self.document = document
-            self.image_array = image_array
-            self.qimage = qimage
             self.document_path = filename
+            self.model.from_document(self.document)
 
             # TODO LH Prefer setWindowFilePath to setWindowTitle?
             self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
-
-            for item in document.items:
-                rect = item['rect']
-                self.segment_scene.add_normalized(
-                    rect.topleft, rect.bottomright, item['fields']
-                )
 
             self.sync_ui()
 
     @report_to_user
     def save_document(self):
-        debug_print('save_document')
+        """Saves the document and, if the OKed by the user, writes crops
+        """
+        debug_print('MainWindow.save_document')
         items = []
 
-        for segment in self.segment_scene.segments():
-           items.append({
-               'rect': [segment.left(normalized=True),
-                        segment.top(normalized=True),
-                        segment.width(normalized=True),
-                        segment.height(normalized=True)],
-               'fields': segment.fields()
-               })
-        self.document.set_items(items)
+        self.model.to_document(self.document)
         self.document.save()
-        res = QtGui.QMessageBox.question(self, 'Write cropped specimen images?',
-            'Write cropped specimen images?', QtGui.QMessageBox.No,
-            QtGui.QMessageBox.Yes)
-        if res==QtGui.QMessageBox.Yes:
-            self.document.save_crops()
+        self.model.clear_modified()
+
+    @report_to_user
+    def save_crops(self):
+        res = QMessageBox.Yes
+        existing_crops = self.document.crops_dir.is_dir()
+
+        if existing_crops:
+            # TODO LH Prompt should mention that full-res scan will need to be
+            # loaded
+            msg = 'Overwrite the existing cropped specimen images?'
+            res = QMessageBox.question(self, 'Write cropped specimen images?',
+                msg, QMessageBox.No, QMessageBox.Yes)
+
+        if QMessageBox.Yes == res:
+            self.running_operation = SaveCropsPlugin(self.document, self)
+            worker = WorkerThread(self.running_operation, 'Save crops', self)
+            worker.completed.connect(self.worker_finished)
+
+            self.worker = worker
+            self.worker.start()
 
     @report_to_user
     def close_document(self):
-        debug_print('close_document')
-        # TODO LH If not dirty or dirty and user saved
+        """Closes the document and returns True if not modified or if modified
+        and user does not cancel. Does not close the document and returns False
+        if modified and users cancels.
+        """
+        debug_print('MainWindow.close_document')
+        if self.model.modified:
+            # Ask the user if they work like to save before closing
+            res = QMessageBox.question(self, 'Save document?',
+                'Save the document before closing?',
+                (QMessageBox.Yes | QMessageBox.No |
+                 QMessageBox.Cancel),
+                QMessageBox.Yes)
 
-        self.empty_document()
+            if QMessageBox.Yes == res:
+                self.save_document()
+
+            # Answering Yes or No means the document will be closed
+            close = QMessageBox.Cancel != res
+        else:
+            # The document is not modified so it is OK to close it
+            close = True
+
+        if close:
+            self.empty_document()
+
+        return close
 
     @report_to_user
     def empty_document(self):
         """Creates an empty document
         """
-        debug_print('empty_document')
+        debug_print('MainWindow.empty_document')
         self.document = None
-
-        self.scene.set_image(self.empty_image)
-        self.qimage = self.empty_image
-        self.image_array = None
-        self.segment_display = None
-        self.segment_image_visible = False
+        self.plugin_image = None
+        self.plugin_image_visible = False
+        self.model.clear()
 
         # TODO LH Prefer setWindowFilePath to setWindowTitle?
         self.setWindowTitle("inselect")
 
-        self.view.delete_all_boxes()
-
         self.sync_ui()
 
-        # TODO LH Default zoom
+    def closeEvent(self, event):
+        """QWidget virtual
+        """
+        debug_print('MainWindow.closeEvent')
+        if self.close_document():
+            # User wants to close
+            event.accept()
+        else:
+            # User does not want to close
+            event.ignore()
 
     @report_to_user
     def zoom_in(self):
-        self.view.zoom(1)
+        self.boxes_view.zoom_in()
 
     @report_to_user
     def zoom_out(self):
-        self.view.zoom(-1)
+        self.boxes_view.zoom_out()
+
+    @report_to_user
+    def toggle_zoom(self):
+        self.boxes_view.toggle_zoom()
+
+    @report_to_user
+    def zoom_home(self):
+        self.boxes_view.zoom_home()
 
     @report_to_user
     def about(self):
-        QtGui.QMessageBox.about(
+        QMessageBox.about(
             self,
             inselect.settings.get('about_label'),
             inselect.settings.get('about_text')
@@ -250,191 +291,268 @@ class InselectMainWindow(QtGui.QMainWindow):
         d.exec_()
 
     @report_to_user
-    def worker_finished(self, rects, display):
-        debug_print('worker_finished')
-        worker, self.worker = self.worker, None
-        self.progressDialog.hide()
-        self.progressDialog = None
-
-        self.toggle_segment_action.setEnabled(True)
-        window = worker.resegment_window
-        if window:
-            if self.segment_display is None:
-                h, w = self.image_array.shape[:2]
-                self.segment_display = np.zeros((h, w, 3), dtype=np.uint8)
-            x, y, w, h = window
-            self.segment_display[y:y+h, x:x+w] = display
-            # removes the selected box before replacing it with resegmentations
-            self.segment_scene.remove(worker.selected)
+    def run_plugin(self, plugin_number):
+        """Passes each cropped specimen image through plugin
+        """
+        if plugin_number < 0 or plugin_number > len(self.plugins):
+            raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
+        elif self.running_operation or self.worker:
+            raise ValueError('Re-enter run_plugin')
         else:
-            self.view.delete_all_boxes()
-            self.segment_display = display.copy()
+            plugin = self.plugins[plugin_number]
 
-        if self.segment_image_visible:
-            self.display_image(self.segment_display)
-        # add detected boxes
-        for rect in rects:
-            x, y, w, h = rect[:4]
-            x -= w * self.padding
-            y -= w * self.padding
-            w += 2 * w * self.padding
-            h += 2 * h * self.padding
-            self.segment_scene.add((x, y), (x + w, y + h))
+            # Create a temporary document that contains references to the
+            # loaded images
+            temp_doc = self.document.copy()
 
-        self.sync_ui()
+            # Save the model to the temporary document
+            self.model.to_document(temp_doc)
+
+            # Create the plugin
+            operation = plugin(temp_doc, self)
+            if operation.proceed():
+                self.running_operation = operation
+                worker = WorkerThread(self.running_operation,
+                                      self.running_operation.name(),
+                                      self)
+                worker.completed.connect(self.worker_finished)
+
+                self.worker = worker
+                self.worker.start()
+            else:
+                pass
 
     @report_to_user
-    def segment(self):
-        # TODO LH Should be modal
-        # TODO LH Allow cancel
-        # TODO LH Possible to show progress?
+    def worker_finished(self, user_cancelled, error_message):
+        debug_print("MainWindow.worker_finished", user_cancelled,
+                    error_message)
 
-        if self.worker:
-            raise InselectError('Reenter segment()')
+        worker, self.worker = self.worker, None
+        operation, self.running_operation = self.running_operation, None
+        if user_cancelled:
+            QMessageBox.information(self, 'Cancelled',
+                'Cancelled.\n\nExisting data has not been altered')
+        elif error_message:
+            QMessageBox.information(self, 'An error occurred',
+                error_message + '\n\nExisting data has not been altered')
         else:
-            debug_print('segment')
-            self.toggle_segment_action.setEnabled(True)
-            self.progressDialog = QtGui.QProgressDialog(self)
-            self.progressDialog.setWindowTitle("Segmenting...")
-            self.progressDialog.setCancelButton(None)
-            self.progressDialog.setValue(0)
-            self.progressDialog.setMaximum(0)
-            self.progressDialog.setMinimum(0)
-            self.progressDialog.show()
-            resegment_window = None
-            # if object selected, resegment the window
-            selected = self.scene.selected_segments()
-            if selected:
-                selected = selected[0]
-                window_rect = selected.get_q_rect_f()
-                p = window_rect.topLeft()
-                resegment_window = [p.x(), p.y(), window_rect.width(),
-                                    window_rect.height()]
-            self.worker = WorkerThread(self.image_array, resegment_window, selected)
-            self.worker.results.connect(self.worker_finished)
-            self.worker.start()
+            if hasattr(operation, 'items'):
+                self.model.set_new_boxes(operation.items)
+
+            if hasattr(operation, 'display'):
+                # An image that can be displayed instead of the main image
+                display = operation.display
+                self.plugin_image = QtGui.QPixmap.fromImage(qimage_of_bgr(display))
+                self.update_boxes_display_pixmap()
+            self.sync_ui()
 
     @report_to_user
     def select_all(self):
-        self.view.select_all()
+        """Selects all boxes in the model
+        """
+        sm = self.view_grid.selectionModel()
+        m = self.model
+        sm.select(QtGui.QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
+                  QtGui.QItemSelectionModel.Select)
 
     @report_to_user
     def select_none(self):
-        self.view.select_none()
+        sm = self.view_grid.selectionModel()
+        sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
 
     @report_to_user
-    def display_image(self, image):
-        """Displays an image in the user interface.
-
-        Parameters
-        ----------
-        image : np.ndarray, QtCore.QImage
-            Image to be displayed in viewer.
+    def delete(self):
+        """Deletes the selected boxes
         """
-        if isinstance(image, np.ndarray):
-            image = qimage_of_bgr(image)
-        self.scene._image_item.setPixmap(QtGui.QPixmap.fromImage(image))
+        # Delete contiguous blocks of rows
+        selected = self.view_grid.selectionModel().selectedIndexes()
+        selected = sorted([i.row() for i in selected])
+
+        # Remove blocks in reverse order so that row indices are not invalidated
+        # TODO LH We shouldn't need to remove blocks in reverse order - stems
+        # from crummy GraphicsItemView
+        for row, count in reversed(list(contiguous(selected))):
+            self.model.removeRows(row, count)
 
     @report_to_user
-    def toggle_padding(self):
-        """Action method to toggle box padding."""
-        if self.padding == 0:
-            self.padding = 0.05
-        else:
-            self.padding = 0
-
-    @report_to_user
-    def toggle_segment_image(self):
-        """Action method to switch between display of segmentation image and
-        actual image.
+    def select_next(self, forwards):
+        """The user wants to select the next/previous box
         """
-        self.segment_image_visible = not self.segment_image_visible
-        if self.segment_image_visible:
-            image = self.segment_display
-        else:
-            image = self.qimage
-        self.display_image(image)
+        sm = self.view_grid.selectionModel()
+        model = self.view_grid.model()
+        current = sm.currentIndex()
+        current = current.row() if current else -1
+
+        select = current + (1 if forwards else -1)
+        if select == model.rowCount():
+            select = 0
+        elif -1 == select:
+            select = model.rowCount()-1
+
+        debug_print('Will move selection [{0}] from [{1}]'.format(current, select))
+        select = model.index(select, 0)
+        sm.select(QtGui.QItemSelection(select, select),
+                  QtGui.QItemSelectionModel.ClearAndSelect)
+        sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
+
+    @report_to_user
+    def rotate90(self, clockwise):
+        """Rotates the selected boxes 90 either clockwise or counter-clockwise.
+        """
+        debug_print('MainWindow.rotate')
+        value = 90 if clockwise else -90
+        selected = self.view_grid.selectionModel().selectedIndexes()
+        for index in selected:
+            current = index.data(RotationRole)
+            self.model.setData(index, current + value, RotationRole)
+
+    def update_boxes_display_pixmap(self):
+        """Sets the pixmap in the boxes view
+        """
+        pixmap = self.plugin_image if self.plugin_image_visible else None
+        self.view_graphics_item.show_alternative_pixmap(pixmap)
+
+    @report_to_user
+    def toggle_plugin_image(self):
+        """Action method to switch between display of the last plugin's 
+        information image (if any) and the actual image.
+        """
+        self.plugin_image_visible = not self.plugin_image_visible
+        self.update_boxes_display_pixmap()
 
     def create_actions(self):
         # File menu
-        self.new_action = QtGui.QAction(
-            "&New...", self, shortcut="ctrl+N", triggered=self.new_document)
-        self.open_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton),
-            "&Open...", self, shortcut="ctrl+O", triggered=self.open_document)
-        self.save_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton),
-            "&Save", self, shortcut="ctrl+s", enabled=False,
-            triggered=self.save_document)
-        self.close_action = QtGui.QAction(
-            "&Close", self, shortcut="ctrl+w", triggered=self.close_document)
-        self.exit_action = QtGui.QAction(
-            "E&xit", self, shortcut="alt+f4", triggered=self.close)
-        # TODO LH Also Ctrl+Q?
+        self.new_action = QAction("&New...", self,
+            shortcut=QtGui.QKeySequence.New, triggered=self.new_document)
+        self.open_action = QAction("&Open...", self,
+            shortcut=QtGui.QKeySequence.Open, triggered=self.open_document,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
+        self.save_action = QAction("&Save", self,
+            shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
+        self.save_crops_action = QAction("&Save crops", self,
+            triggered=self.save_crops)
+        self.close_action = QAction("&Close", self,
+            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
+        self.exit_action = QAction("E&xit", self,
+            shortcut=QtGui.QKeySequence.Quit, triggered=self.close)
 
         # Edit menu
-        self.toggle_padding_action = QtGui.QAction(
-            "&Toggle padding", self, shortcut="", enabled=True,
-            statusTip="Toggle padding", checkable=True,
-            triggered=self.toggle_padding)
-        self.select_all_action = QtGui.QAction(
-            "Select &All", self, shortcut="ctrl+A", triggered=self.select_all)
-        self.select_none_action = QtGui.QAction(
-            "Select &None", self, shortcut="ctrl+D", triggered=self.select_none)
-        self.segment_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_BrowserReload),
-            "&Segment", self, shortcut="f5", enabled=False,
-            statusTip="Segment",
-            triggered=self.segment)
+        self.select_all_action = QAction("Select &All", self,
+            shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
+        # QT does not provide a 'select none' key sequence
+        self.select_none_action = QAction("Select &None", self,
+            shortcut="ctrl+D", triggered=self.select_none)
+        self.next_box_action = QAction("Next box", self,
+            shortcut="N", triggered=partial(self.select_next, forwards=True))
+        self.previous_box_action = QAction("Previous box", self,
+            shortcut="P", triggered=partial(self.select_next, forwards=False))
+        # TODO LH Does CMD + Backspace work on a mac?
+        self.delete_action = QAction("&Delete selected", self,
+            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete)
+        self.rotate_clockwise_action = QAction(
+            "Rotate clockwise", self,
+            shortcut="R", triggered=partial(self.rotate90, clockwise=True))
+        self.rotate_counter_clockwise_action = QAction(
+            "Rotate counter-clockwise", self, shortcut="L",
+            triggered=partial(self.rotate90, clockwise=False))
+
+        # Plugins
+        # Plugin shortcuts start at F5
+        offset = 5
+        for index, plugin in enumerate(self.plugins):
+            action = QAction(plugin.name(), self,
+                             triggered=partial(self.run_plugin, index))
+            shortcut_fkey = index + offset
+            if shortcut_fkey < 13:
+                # Keyboards typically have up to 12 function keys
+                action.setShortcut('f{0}'.format(shortcut_fkey))
+            icon = plugin.icon()
+            if icon:
+                action.setIcon(icon)
+            self.plugin_actions[index] = action
 
         # View menu
-        self.zoom_in_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ArrowUp),
-            "Zoom &In", self, enabled=False, shortcut="Ctrl++",
-            triggered=self.zoom_in)
-        self.zoom_out_action = QtGui.QAction(
-            self.style().standardIcon(QtGui.QStyle.SP_ArrowDown),
-            "Zoom &Out", self, enabled=False, shortcut="Ctrl+-",
-            triggered=self.zoom_out)
-        self.toggle_segment_action = QtGui.QAction(
-            "&Display segmentation", self, shortcut="f3", enabled=False,
-            statusTip="Display segmentation image", checkable=True,
-            triggered=self.toggle_segment_image)
+        # FullScreen added in Qt 5.something
+        # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
+        if not hasattr(QtGui.QKeySequence, 'FullScreen'):
+            if 'darwin' == sys.platform:
+                KeySequenceFullScreen = 'shift+ctrl+f'
+            else:
+                KeySequenceFullScreen = 'f11'
+        else:
+            KeySequenceFullScreen = QtGui.QKeySequence.FullScreen
+        self.full_screen_action = QAction("&Full screen", self,
+            shortcut=KeySequenceFullScreen, triggered=self.toggle_full_screen)
+
+        self.zoom_in_action = QAction("Zoom &In", self,
+            shortcut=QtGui.QKeySequence.ZoomIn, triggered=self.zoom_in,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
+        self.zoom_out_action = QAction("Zoom &Out", self,
+            shortcut=QtGui.QKeySequence.ZoomOut, triggered=self.zoom_out,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
+        self.toogle_zoom_action = QAction("&Toogle Zoom", self,
+            shortcut='Z', triggered=self.toggle_zoom)
+        self.zoom_home_action = QAction("Fit To Window", self,
+            shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
+            triggered=self.zoom_home)
+
+        # TODO LH Is F3 (normally meaning 'find next') really the right
+        # shortcut for the toggle segment image action?
+        self.toggle_plugin_image_action = QAction(
+            "&Display plugin image", self, shortcut="f3",
+            triggered=self.toggle_plugin_image,
+            statusTip="Display plugin image", checkable=True)
 
         # Help menu
-        self.about_action = QtGui.QAction("&About", self, triggered=self.about)
-        self.help_action = QtGui.QAction("&Help", self, triggered=self.help)
+        self.about_action = QAction("&About", self, triggered=self.about)
+        self.help_action = QAction("&Help", self,
+            shortcut=QtGui.QKeySequence.HelpContents, triggered=self.help)
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
-        self.toolbar.addAction(self.segment_action)
+        for action in [a for a in self.plugin_actions if a.icon()]:
+            self.toolbar.addAction(action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
-        self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
-        self.fileMenu = QtGui.QMenu("&File", self)
+        self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.new_action)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
+        self.fileMenu.addAction(self.save_crops_action)
         self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
-        self.editMenu = QtGui.QMenu("&Edit", self)
-        self.editMenu.addAction(self.toggle_padding_action)
+        self.editMenu = QMenu("&Edit", self)
         self.editMenu.addAction(self.select_all_action)
         self.editMenu.addAction(self.select_none_action)
-        self.fileMenu.addSeparator()
-        self.editMenu.addAction(self.segment_action)
+        self.editMenu.addAction(self.delete_action)
+        self.editMenu.addSeparator()
+        self.editMenu.addAction(self.next_box_action)
+        self.editMenu.addAction(self.previous_box_action)
+        self.editMenu.addSeparator()
+        self.editMenu.addAction(self.rotate_clockwise_action)
+        self.editMenu.addAction(self.rotate_counter_clockwise_action)
+        self.editMenu.addSeparator()
+        for action in self.plugin_actions:
+            self.editMenu.addAction(action)
 
-        self.viewMenu = QtGui.QMenu("&View", self)
+        self.viewMenu = QMenu("&View", self)
+        self.viewMenu.addAction(self.full_screen_action)
+        self.fileMenu.addSeparator()
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
-        self.viewMenu.addAction(self.toggle_segment_action)
+        self.viewMenu.addAction(self.toogle_zoom_action)
+        self.viewMenu.addAction(self.zoom_home_action)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.toggle_plugin_image_action)
 
-        self.helpMenu = QtGui.QMenu("&Help", self)
+        self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.help_action)
         self.helpMenu.addAction(self.about_action)
 
@@ -443,20 +561,51 @@ class InselectMainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
 
+    def current_tab_changed(self, index):
+        """Slot for self.tabs.currentChanged() signal
+        """
+        self.sync_ui()
+
+    def selection_changed(self, selected, deselected):
+        """Slot for self.grid_view.selectionModel().selectionChanged() signal
+        """
+        self.sync_ui()
+
+    @report_to_user
+    def toggle_full_screen(self):
+        """Toggles between full screen and normal
+        """
+        if self.isFullScreen():
+            self.showNormal()
+        else:
+            self.showFullScreen()
+
     def sync_ui(self):
         """Synchronise the user interface with the application state
         """
-        if self.document:
-            self.toggle_segment_action.setEnabled(self.segment_display is not None)
-            self.segment_action.setEnabled(True)
-            self.zoom_in_action.setEnabled(True)
-            self.zoom_out_action.setEnabled(True)
-            self.save_action.setEnabled(True)
-            self.close_action.setEnabled(True)
-        else:
-            self.toggle_segment_action.setEnabled(False)
-            self.segment_action.setEnabled(False)
-            self.zoom_in_action.setEnabled(False)
-            self.zoom_out_action.setEnabled(False)
-            self.save_action.setEnabled(False)
-            self.close_action.setEnabled(False)
+        document = self.document is not None
+        has_rows = self.model.rowCount()>0 if self.model else False
+        boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
+        has_selection = len(self.view_grid.selectedIndexes())>0
+
+        # File
+        self.save_action.setEnabled(document)
+        self.save_crops_action.setEnabled(has_rows)
+        self.close_action.setEnabled(document)
+
+        # Edit
+        self.select_all_action.setEnabled(has_rows)
+        self.select_none_action.setEnabled(document)
+        self.delete_action.setEnabled(has_selection)
+        self.next_box_action.setEnabled(has_rows)
+        self.previous_box_action.setEnabled(has_rows)
+        self.rotate_clockwise_action.setEnabled(has_selection)
+        self.rotate_counter_clockwise_action.setEnabled(has_selection)
+        for action in self.plugin_actions:
+            action.setEnabled(document)
+
+        # View
+        self.zoom_in_action.setEnabled(document and boxes_view_visible)
+        self.zoom_out_action.setEnabled(document and boxes_view_visible)
+        self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
+        self.zoom_home_action.setEnabled(document and boxes_view_visible)

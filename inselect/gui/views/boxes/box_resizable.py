@@ -1,7 +1,6 @@
 from PySide import QtCore, QtGui
 
 from inselect.lib.mouse_handler import MouseHandler, MouseState
-from inselect.gui.annotator import AnnotateDialog
 
 
 class BoxResizable(MouseHandler, QtGui.QGraphicsRectItem):
