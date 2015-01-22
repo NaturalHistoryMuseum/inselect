@@ -23,9 +23,8 @@ class WorkerThread(QtCore.QThread):
     # occurred.
     completed = QtCore.Signal(bool, str)
 
-    # Signalled when the callable wants to set new label text - see
-    # self.progress.
-    new_label_text = QtCore.Signal(str)
+    # Signalled when the callable wants to set a new message- see progress()
+    new_message = QtCore.Signal(str)
 
     def __init__(self, operation, box_title, parent=None):
         super(WorkerThread, self).__init__(parent)
@@ -34,7 +33,10 @@ class WorkerThread(QtCore.QThread):
         self._user_cancelled = False
 
         self.finished.connect(self._thread_finished)
-        self.new_label_text.connect(self._set_label_text)
+        self.new_message.connect(self._set_message)
+
+        # The current message
+        self._message = None
 
         # A progress box to show feedback while the operation runs and to allow
         # the user to cancel.
@@ -81,24 +83,24 @@ class WorkerThread(QtCore.QThread):
         """
         self._user_cancelled = True
 
-    def progress(self, label=None):
+    def progress(self, message=None):
         """Raises an OperationCancelledError if self._user_cancelled has been
         set.
 
         Should be called regularly by the operation.
         """
-        debug_print('WorkerThread.progress [{0}]'.format(label))
         if self._user_cancelled:
             debug_print('WorkerThread.progress: user cancelled')
             raise OperationCancelledError()
-        elif label:
+        elif message != self._message:
             # Only the main thread can call GUI methods. Emit a signal, the slot
             # for which will be executed in the main thread
-            self.new_label_text.emit(label)
+            debug_print('WorkerThread.progress message [{0}]'.format(message))
+            self.new_message.emit(message)
 
-    def _set_label_text(self, label):
-        """Slot signalled by self.new_label_text
+    def _set_message(self, message):
+        """Slot signalled by self.new_message
         """
-        debug_print("WorkerThread._set_label_text")
+        debug_print("WorkerThread._set_message [{0}]".format(message))
         assert(self.thread() == QtCore.QThread.currentThread())
-        self._progress_box.setLabelText(label)
+        self._progress_box.setLabelText(message)
