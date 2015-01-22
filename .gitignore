@@ -6,4 +6,5 @@ dist/
 .DS_Store
 .coverage
 htmlcov
-
+MANIFEST
+*.spec
