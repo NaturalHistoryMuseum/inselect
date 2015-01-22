@@ -2,6 +2,11 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.4
 -------------
+- Document format (@quicklizard)
+- Workflow tools (@quicklizard)
+- UI reimplementation (@quicklizard)
+- OS X (Mac) build (@quicklizard)
+- Myriad bug fixes and enhancements (@quicklizard)
 - Add license and changelog (@aliceh75)
 - Added help dialog (@aliceh75)
 - Add previous/next navigation in the annotation dialog (@aliceh75)
