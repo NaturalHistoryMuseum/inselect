@@ -3,7 +3,11 @@ from pathlib import Path
 
 from PySide.QtGui import QIcon
 
+from inselect.gui import icons
 from inselect.lib.inselect_error import InselectError
+from inselect.lib.utils import debug_print
+
+from .plugin import Plugin
 
 try:
     import gouda
@@ -11,10 +15,6 @@ try:
     from gouda.strategies import roi, resize
 except ImportError:
     gouda = None
-
-from inselect.lib.utils import debug_print
-
-from .plugin import Plugin
 
 
 class BarcodePlugin(Plugin):
@@ -41,8 +41,7 @@ class BarcodePlugin(Plugin):
 
     @classmethod
     def icon(cls):
-        dir = Path(__file__).resolve().parents[3]
-        return QIcon(str(dir / 'data' / 'barcode_icon.png'))
+        return QIcon(":/data/barcode_icon.png")
 
     def __call__(self, progress):
         """

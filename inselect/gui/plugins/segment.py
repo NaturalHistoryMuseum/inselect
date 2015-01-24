@@ -2,6 +2,7 @@ from pathlib import Path
 
 from PySide.QtGui import QIcon, QMessageBox
 
+from inselect.gui import icons
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.segment import segment_document
 from inselect.lib.utils import debug_print
@@ -30,8 +31,7 @@ class SegmentPlugin(Plugin):
 
     @classmethod
     def icon(cls):
-        dir = Path(__file__).resolve().parents[3]
-        return QIcon(str(dir / 'data' / 'segment_icon.png'))
+        return QIcon(':/data/segment_icon.png')
 
     def proceed(self):
         if self.document.items:

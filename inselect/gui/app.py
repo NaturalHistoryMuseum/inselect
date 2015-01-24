@@ -20,6 +20,8 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
+import icons        # Register our icon resources with QT
+
 from .help_dialog import HelpDialog
 from .model import Model
 from .plugins.barcode import BarcodePlugin

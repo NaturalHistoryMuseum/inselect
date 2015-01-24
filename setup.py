@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
-from inselect import __version__ as inselect_version
+
+import inselect
 
 # Generic setup data used for both the distutils setup and the cx_Freeze setup.
 # win32.extra_packages and win32.include_files indicate extra packages/files that are
@@ -8,8 +9,14 @@ from inselect import __version__ as inselect_version
 # of numpy/scipy.
 setup_data = {
     'name': 'inselect',
-    'version': inselect_version,
-    'packages': ['inselect'],
+    'version': inselect.__version__,
+    'description': inselect.__doc__,
+    'packages': ['inselect','inselect.gui.plugins', 'inselect.gui.views',
+                 'inselect.gui.views.boxes', 'inselect.lib', 'inselect.workflow'],
+    'test_suite': 'inselect.tests',
+    'scripts': ['inselect/workflow/ingest.py',
+                'inselect/workflow/segment.py'],
+    'install_requires' : open('requirements.txt').readlines(),
     'entry_points': {
         'console_scripts': [
             'inselect = inselect.app:launch'
@@ -55,15 +62,14 @@ def distutils_setup():
     """disttutils setup"""
     from distutils.core import setup
 
-    with open('requirements.txt') as f:
-        required = f.read().splitlines()
-
     setup(
         name=setup_data['name'],
         version=setup_data['version'],
         packages=setup_data['packages'],
         entry_points=setup_data['entry_points'],
-        install_requires=required
+        install_requires=setup_data['install_requires'],
+        test_suite=setup_data['test_suite'],
+        scripts=setup_data['scripts'],
     )
 
 def cx_setup():
