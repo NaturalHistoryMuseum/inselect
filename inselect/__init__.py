@@ -1,3 +1,5 @@
+"""Segmentation, validation and annotation of scanned images of museum specimens
+"""
 __version__ = '0.1.5'
 # distutils/version.py and win32/lib/win32versionstamp.py have different
 # restrictions on the format of version numbers - both must be met.
