@@ -158,7 +158,8 @@ class InselectDocument(object):
                 'items' : items,
               }
 
-        json.dump(doc, open(str(path), "w"), indent=4)
+        # Specify separators to prevent trailing whitespace
+        json.dump(doc, open(str(path), "w"), indent=4, separators=(',', ': '))
 
         debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 
