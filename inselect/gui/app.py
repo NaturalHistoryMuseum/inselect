@@ -17,6 +17,7 @@ import inselect.settings
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
+from inselect.lib.ingest import ingest_image
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
@@ -26,7 +27,6 @@ from .help_dialog import HelpDialog
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
-from .plugins.save_crops import SaveCropsPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
 from .utils import contiguous, report_to_user, qimage_of_bgr
@@ -35,8 +35,6 @@ from .views.grid import GridView
 from .views.metadata import MetadataView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
-
-from inselect.workflow.ingest import ingest_image, IMAGE_PATTERNS
 
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
@@ -220,14 +218,14 @@ class MainWindow(QtGui.QMainWindow):
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         if QMessageBox.Yes == res:
-            # TODO LH Add a 'run in worker thread' function
-            assert not self.running_operation
-            self.running_operation = SaveCropsPlugin(self.document, self)
-            worker = WorkerThread(self.running_operation, 'Save crops', self)
-            worker.completed.connect(self.worker_finished)
+            def save_crops(document, progress):
+                progress('Loading full-resolution scanned image')
+                document.scanned.array
 
-            self.worker = worker
-            self.worker.start()
+                progress('Saving crops')
+                self.document.save_crops(progress)
+
+            self.run_in_worker(partial(save_crops, self.document), 'Save crops')
 
     @report_to_user
     def close_document(self):
@@ -314,10 +312,42 @@ class MainWindow(QtGui.QMainWindow):
         d = HelpDialog(self)
         d.exec_()
 
+    def run_in_worker(self, operation, name, complete_fn=None):
+        """Runs the callable operation in a worker thread. The callable
+        complete_fn is called when the operation has finished.
+        """
+        debug_print("MainWindow.run_in_worker")
+
+        if self.running_operation:
+            debug_print('Operation already running')
+        else:
+            self.running_operation = operation
+            self.worker_complete_fn = complete_fn
+            worker = WorkerThread(self.running_operation,
+                                  name,
+                                  self)
+            worker.completed.connect(self.worker_finished)
+
+            self.worker = worker
+            self.worker.start()
+
+    @report_to_user
+    def worker_finished(self, user_cancelled, error_message):
+        debug_print("MainWindow.worker_finished", user_cancelled,
+                    error_message)
+
+        worker, self.worker = self.worker, None
+        operation, self.running_operation = self.running_operation, None
+        complete_fn, self.worker_complete_fn = self.worker_complete_fn, None
+        if complete_fn:
+            complete_fn(operation, user_cancelled, error_message)
+
     @report_to_user
     def run_plugin(self, plugin_number):
         """Passes each cropped specimen image through plugin
         """
+        debug_print("MainWindow.run_plugin")
+
         if plugin_number < 0 or plugin_number > len(self.plugins):
             raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
         elif self.running_operation or self.worker:
@@ -335,24 +365,15 @@ class MainWindow(QtGui.QMainWindow):
             # Create the plugin
             operation = plugin(temp_doc, self)
             if operation.proceed():
-                self.running_operation = operation
-                worker = WorkerThread(self.running_operation,
-                                      self.running_operation.name(),
-                                      self)
-                worker.completed.connect(self.worker_finished)
-
-                self.worker = worker
-                self.worker.start()
+                self.run_in_worker(operation,
+                                   operation.name(),
+                                   self.plugin_finished)
             else:
                 pass
 
-    @report_to_user
-    def worker_finished(self, user_cancelled, error_message):
-        debug_print("MainWindow.worker_finished", user_cancelled,
-                    error_message)
+    def plugin_finished(self, operation, user_cancelled, error_message):
+        debug_print("MainWindow.plugin_finished")
 
-        worker, self.worker = self.worker, None
-        operation, self.running_operation = self.running_operation, None
         if user_cancelled:
             QMessageBox.information(self, 'Cancelled',
                 'Cancelled.\n\nExisting data has not been altered')
