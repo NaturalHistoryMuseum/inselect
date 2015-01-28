@@ -98,6 +98,7 @@ class ResizeHandle(QtGui.QGraphicsItem):
                 # inside out - prevent this
                 pass
             else:
+                parent.prepareGeometryChange()
                 parent.setRect(rect)
 
     def mouseReleaseEvent(self, event):

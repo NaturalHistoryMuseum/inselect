@@ -222,6 +222,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         r = self.rect()
         r.adjust(dx1, dy1, dx2, dy2)
         if r.width()>1.0 and r.height()>1.0:
+            self.prepareGeometryChange()
             self.setRect(r)
 
     @property
