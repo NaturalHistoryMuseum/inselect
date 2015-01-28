@@ -1,4 +1,1 @@
-numpy>=1.6
-pyside>=1.1.2
-scipy>=0.12.0
 pathlib>=1.0
