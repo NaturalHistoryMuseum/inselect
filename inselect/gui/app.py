@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QEvent
 from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
 
 import inselect.settings
@@ -116,10 +116,24 @@ class MainWindow(QtGui.QMainWindow):
         self.tabs.currentChanged.connect(self.current_tab_changed)
         sm.selectionChanged.connect(self.selection_changed)
 
+        # Filter events
+        self.tabs.installEventFilter(self)
+        self.boxes_view.installEventFilter(self)
+        self.view_grid.installEventFilter(self)
+        self.view_metadata.installEventFilter(self)
+
         self.empty_document()
+
+        self.setAcceptDrops(True)
 
         if filename:
             self.open_document(filename)
+
+    def eventFilter(self, obj, event):
+        if event.type() in (QEvent.DragEnter, QEvent.Drop):
+            return True
+        else:
+            return super(MainWindow, self).eventFilter(obj, event)
 
     @report_to_user
     def new_document(self):
@@ -141,8 +155,10 @@ class MainWindow(QtGui.QMainWindow):
 
             if source:
                 source = Path(source)
+                # TODO LH Ingestion of large images is time-consuming - run
+                # in a worker thread
                 doc = ingest_image(source, source.parent)
-                self.open_document(doc.document_path)
+                self.open_document(doc.documcent_path)
                 msg = 'New inselect document [{0}] created in [{1}]'
                 msg = msg.format(doc.document_path.stem, doc.document_path.parent)
                 QMessageBox.information(self, "Document created", msg)
@@ -160,18 +176,23 @@ class MainWindow(QtGui.QMainWindow):
                 self, "Open", folder, self.FILE_FILTER)
 
         if filename:
-            filename = Path(filename)
-            document = InselectDocument.load(filename)
-            inselect.settings.set_value('working_directory', str(filename.parent))
+            # Will be None if user cancelled getOpenFileName
+            if not self.close_document():
+                # User does not want to close the existing document
+                pass
+            else:
+                filename = Path(filename)
+                document = InselectDocument.load(filename)
+                inselect.settings.set_value('working_directory', str(filename.parent))
 
-            self.document = document
-            self.document_path = filename
-            self.model.from_document(self.document)
+                self.document = document
+                self.document_path = filename
+                self.model.from_document(self.document)
 
-            # TODO LH Prefer setWindowFilePath to setWindowTitle?
-            self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
+                # TODO LH Prefer setWindowFilePath to setWindowTitle?
+                self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
 
-            self.sync_ui()
+                self.sync_ui()
 
     @report_to_user
     def save_document(self):
@@ -197,6 +218,8 @@ class MainWindow(QtGui.QMainWindow):
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         if QMessageBox.Yes == res:
+            # TODO LH Add a 'run in worker thread' function
+            assert not self.running_operation
             self.running_operation = SaveCropsPlugin(self.document, self)
             worker = WorkerThread(self.running_operation, 'Save crops', self)
             worker.completed.connect(self.worker_finished)
@@ -578,6 +601,33 @@ class MainWindow(QtGui.QMainWindow):
             self.showNormal()
         else:
             self.showFullScreen()
+
+    def dragEnterEvent(self, event):
+        """QWidget virtual
+        """
+        # Accept drag-drop of a single inselect file
+        debug_print('MainWindow.dragEnterEvent')
+        mimeData = event.mimeData()
+        urls = mimeData.urls()
+        if (mimeData.hasUrls() and 1==len(urls) and
+            urls[0].toLocalFile().endswith(InselectDocument.EXTENSION)):
+            event.acceptProposedAction()
+        else:
+            super(MainWindow, self).dragEnterEvent(event)
+
+    def dropEvent(self, event):
+        """QWidget virtual
+        """
+        # Accept drag-drop of a single inselect file
+        debug_print('MainWindow.dropEvent', event)
+        mimeData = event.mimeData()
+        urls = mimeData.urls()
+        if (mimeData.hasUrls() and 1==len(urls) and
+            urls[0].toLocalFile().endswith(InselectDocument.EXTENSION)):
+            event.acceptProposedAction()
+            self.open_document(urls[0].toLocalFile())
+        else:
+            super(MainWindow, self).dropEvent(event)
 
     def sync_ui(self):
         """Synchronise the user interface with the application state

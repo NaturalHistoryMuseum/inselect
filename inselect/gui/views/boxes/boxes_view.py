@@ -212,3 +212,10 @@ class BoxesView(QtGui.QGraphicsView):
                 # Centre on selected items
                 #self.ensureVisible(unite_rects([i.rect() for i in selected]))
                 self.centerOn(unite_rects([i.rect() for i in selected]).center())
+
+    def dragEnterEvent(self, event):
+        """QWidget virtual
+        """
+        debug_print('BoxesView.dragEnterEvent')
+        # This method overriden to allow file drag-drop. See
+        # MainWindow.dragEnterEvent.
