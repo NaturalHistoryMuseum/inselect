@@ -19,7 +19,12 @@ If you would like to install the project from source on Windows, you will need t
 From the Anaconda Shell you can now run Inselect by typing `inselect.exe`, and the source code is in `src\inselect`. If you would like to create a Microsoft Installer package, you can do the following:
 
 - Open an Anaconda shell and run (the first time) `pip install cx_Freeze`;
-- cd into `src/inselect` and run `python setup.py bdist_msi`.
+- cd into `src/inselect` and run
+
+```
+pyside-rcc inselect.qrc > inselect/gui/icons.py
+python setup.py bdist_msi
+```
 
 The installer can be found in the `dist` subdir.
 
@@ -39,20 +44,23 @@ conda install -c https://conda.binstar.org/jjhelmus opencv
 
 ```shell
 conda install PySide
-pip install docopt pyinstaller
+pip install pyinstaller
 brew install upx
 ```
 
 - Install inselect source and build:
 
+[SO](http://stackoverflow.com/questions/11534293/pyinstaller-wont-load-the-pyqts-images-to-the-gui)
+thread about including icons in bundled QT / PySide applications.
+
 ```shell
 pip install -e git+https://github.com/NaturalHistoryMuseum/inselect.git#egg=inselect
-VERSION=`python inselect.py --version | sed 's/inselect //g'`
-echo Building $VERSION
+VERSION=`python inselect.py --version 2>&1 | sed 's/inselect.py //g'`
+echo Building inselect $VERSION
 rm -rf build dist inselect-$VERSION.dmg
-pyinstaller --onefile --windowed inselect.py
+pyside-rcc icons.qrc > inselect/gui/icons.py
+pyinstaller --onefile --windowed --icon=data/inselect.icns inselect.py
 plutil -replace CFBundleShortVersionString -string $VERSION dist/inselect.app/Contents/Info.plist
-install -c -m 644 data/inselect.icns dist/inselect.app/Contents/Resources/icon-windowed.icns
 install -c -m 644 data/Plecoptera_Accession_Drawer_4.jpg dist/
 install -c -m 644 data/Plecoptera_Accession_Drawer_4.inselect dist/
 rm dist/inselect

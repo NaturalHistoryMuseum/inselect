@@ -4,6 +4,7 @@ import numpy as np
 
 from PySide.QtGui import QIcon, QMessageBox
 
+from inselect.gui import icons
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.segment import segment_grabcut
 from inselect.lib.utils import debug_print
@@ -32,8 +33,7 @@ class SubsegmentPlugin(Plugin):
 
     @classmethod
     def icon(cls):
-        dir = Path(__file__).resolve().parents[3]
-        return QIcon(str(dir / 'data' / 'subsegment_icon.png'))
+        return QIcon(':/data/subsegment_icon.png')
 
     def proceed(self):
         # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack

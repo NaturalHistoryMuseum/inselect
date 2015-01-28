@@ -1,0 +1,8 @@
+ <!DOCTYPE RCC>
+ <RCC version="1.0">
+ <qresource prefix="/">
+     <file>data/barcode_icon.png</file>
+     <file>data/segment_icon.png</file>
+     <file>data/subsegment_icon.png</file>
+ </qresource>
+ </RCC>
