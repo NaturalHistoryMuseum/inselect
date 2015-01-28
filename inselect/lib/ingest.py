@@ -3,6 +3,9 @@ from .document import InselectDocument
 from .inselect_error import InselectError
 from .utils import debug_print, make_readonly
 
+IMAGE_SUFFIXES = ('.tiff', '.png', '.jpeg', '.jpg')
+IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
+
 def ingest_image(source, dest_dir):
     """Copies the image in the path source to the directory in the path
     dest_dir. Creates an returns a new instance of InselectDocument for the

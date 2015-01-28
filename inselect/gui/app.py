@@ -17,7 +17,7 @@ import inselect.settings
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
-from inselect.lib.ingest import ingest_image
+from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
@@ -106,8 +106,7 @@ class MainWindow(QtGui.QMainWindow):
         self.plugin_image_visible = False
 
         # Long-running operations are run in their own thread.
-        self.running_operation = None   # The operation that is currently running
-        self.worker = None   # Instance of WorkerThread
+        self.running_operation = None
 
         self.create_actions()
         self.create_menus()
@@ -149,19 +148,36 @@ class MainWindow(QtGui.QMainWindow):
             # Source image
             folder = inselect.settings.get("working_directory")
             filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
-            source, selected_filter = QtGui.QFileDialog.getOpenFileName(
+            path, selected_filter = QtGui.QFileDialog.getOpenFileName(
                     self, "Choose image for the new inselect document", folder,
                     filter=filter)
 
-            if source:
-                source = Path(source)
-                # TODO LH Ingestion of large images is time-consuming - run
+            if path:
+                # TODO Ingestion of large images is time-consuming - run
                 # in a worker thread
-                doc = ingest_image(source, source.parent)
-                self.open_document(doc.documcent_path)
-                msg = 'New inselect document [{0}] created in [{1}]'
-                msg = msg.format(doc.document_path.stem, doc.document_path.parent)
-                QMessageBox.information(self, "Document created", msg)
+
+                class NewDoc(object):
+                    def __init__(self, image):
+                        self.image = image
+
+                    def __call__(self, progress):
+                        progress('Creating thumbnail of scanned image')
+                        doc = ingest_image(self.image, self.image.parent)
+                        self.document_path = doc.document_path
+
+                self.run_in_worker(NewDoc(Path(path)), 'New document',
+                                   self.new_document_finished)
+
+    def new_document_finished(self, operation):
+        """Called when new_document worker has finished
+        """
+        debug_print('MainWindow.new_document_finished')
+
+        document_path = operation.document_path
+        self.open_document(document_path)
+        msg = 'New inselect document [{0}] created in [{1}]'
+        msg = msg.format(document_path.stem, document_path.parent)
+        QMessageBox.information(self, "Document created", msg)
 
     @report_to_user
     def open_document(self, filename=None):
@@ -321,26 +337,33 @@ class MainWindow(QtGui.QMainWindow):
         if self.running_operation:
             debug_print('Operation already running')
         else:
-            self.running_operation = operation
-            self.worker_complete_fn = complete_fn
-            worker = WorkerThread(self.running_operation,
+            worker = WorkerThread(operation,
                                   name,
                                   self)
             worker.completed.connect(self.worker_finished)
 
-            self.worker = worker
-            self.worker.start()
+            self.running_operation = (operation, name, complete_fn, worker)
+            worker.start()
 
     @report_to_user
     def worker_finished(self, user_cancelled, error_message):
         debug_print("MainWindow.worker_finished", user_cancelled,
                     error_message)
 
-        worker, self.worker = self.worker, None
-        operation, self.running_operation = self.running_operation, None
-        complete_fn, self.worker_complete_fn = self.worker_complete_fn, None
-        if complete_fn:
-            complete_fn(operation, user_cancelled, error_message)
+        operation, name, complete_fn, worker = self.running_operation
+        self.running_operation = None
+
+        if user_cancelled:
+            QMessageBox.information(self, 'Cancelled',
+                                    '{0} cancelled'.format(name))
+        elif error_message:
+            QMessageBox.information(self,
+                    'An error occurred running'.format(name),
+                    error_message + '\n\nExisting data has not been altered')
+        else:
+            if complete_fn:
+                complete_fn(operation)
+            self.sync_ui()
 
     @report_to_user
     def run_plugin(self, plugin_number):
@@ -350,8 +373,6 @@ class MainWindow(QtGui.QMainWindow):
 
         if plugin_number < 0 or plugin_number > len(self.plugins):
             raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
-        elif self.running_operation or self.worker:
-            raise ValueError('Re-enter run_plugin')
         else:
             plugin = self.plugins[plugin_number]
 
@@ -371,25 +392,19 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 pass
 
-    def plugin_finished(self, operation, user_cancelled, error_message):
+    def plugin_finished(self, operation):
+        """Called when a plugin has finished running in a worker thread
+        """
         debug_print("MainWindow.plugin_finished")
 
-        if user_cancelled:
-            QMessageBox.information(self, 'Cancelled',
-                'Cancelled.\n\nExisting data has not been altered')
-        elif error_message:
-            QMessageBox.information(self, 'An error occurred',
-                error_message + '\n\nExisting data has not been altered')
-        else:
-            if hasattr(operation, 'items'):
-                self.model.set_new_boxes(operation.items)
+        if hasattr(operation, 'items'):
+            self.model.set_new_boxes(operation.items)
 
-            if hasattr(operation, 'display'):
-                # An image that can be displayed instead of the main image
-                display = operation.display
-                self.plugin_image = QtGui.QPixmap.fromImage(qimage_of_bgr(display))
-                self.update_boxes_display_pixmap()
-            self.sync_ui()
+        if hasattr(operation, 'display'):
+            # An image that can be displayed instead of the main image
+            display = operation.display
+            self.plugin_image = QtGui.QPixmap.fromImage(qimage_of_bgr(display))
+            self.update_boxes_display_pixmap()
 
     @report_to_user
     def select_all(self):

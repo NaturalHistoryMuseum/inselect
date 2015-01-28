@@ -16,11 +16,9 @@ import numpy
 import inselect
 import inselect.lib.utils
 
-from inselect.lib.ingest import ingest_image
-from inselect.lib.inselect_error import InselectError
+from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
 
-IMAGE_SUFFIXES = ('.tiff', '.png', '.jpeg', '.jpg')
-IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
+from inselect.lib.inselect_error import InselectError
 
 def ingest_from_directory(inbox, docs):
     """Ingest images from the directory given by inbox to the directory given
