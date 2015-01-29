@@ -1,5 +1,7 @@
 # Inselect
 
+[ ![Travis status](https://travis-ci.org/NaturalHistoryMuseum/inselect.svg?branch=master) ](https://travis-ci.org/NaturalHistoryMuseum/inselect)
+
 A tool for the semi-automated segmentation and annotation of specimen trays.
 
 Project page: http://naturalhistorymuseum.github.io/inselect
