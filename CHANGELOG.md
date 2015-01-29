@@ -1,5 +1,12 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.5
+-------------
+- Icons for plugins (@quicklizard)
+- CSV export(@quicklizard)
+- Progress box during 'New document' (@quicklizard)
+- Open files via drag-drop (@quicklizard)
+
 Version 0.1.4
 -------------
 - Document format (@quicklizard)
