@@ -200,6 +200,7 @@ class InselectDocument(object):
             shutil.rmtree(str(crops_dir), ignore_errors=True)
 
             # Rename temp dir
+            debug_print('Moving temp crops dir [{0}] to [{1}]'.format(tempdir, crops_dir))
             tempdir.rename(crops_dir)
             tempdir = None
 
