@@ -220,18 +220,19 @@ class TestDocument(unittest.TestCase):
 
     def test_csv_export(self):
         doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
-        f = tempfile.NamedTemporaryFile(delete=False)
+        temp = tempfile.NamedTemporaryFile(delete=False)
         try:
-            f.close()
-            doc.export_csv(f.name)
-            res = UnicodeDictReader(open(f.name, 'rb'))
-            for index, item, row in izip(count(), doc.items, res):
-                expected = item['fields']
-                expected.update({'Item' : str(1+index)})
-                actual = {k: v for k,v in row.items() if v}
-                self.assertEqual(expected, actual)
+            temp.close()
+            doc.export_csv(temp.name)
+            with open(temp.name, 'rb') as f:
+                res = UnicodeDictReader(f)
+                for index, item, row in izip(count(), doc.items, res):
+                    expected = item['fields']
+                    expected.update({'Item' : str(1+index)})
+                    actual = {k: v for k,v in row.items() if v}
+                    self.assertEqual(expected, actual)
         finally:
-            os.unlink(f.name)
+            os.unlink(temp.name)
 
 
 if __name__=='__main__':
