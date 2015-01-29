@@ -16,7 +16,6 @@ from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
 import inselect.settings
 
 from inselect.lib import utils
-from inselect.lib.csv_export import CVSExportVisitor
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
 from inselect.lib.inselect_error import InselectError
