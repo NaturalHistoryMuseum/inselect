@@ -506,7 +506,8 @@ class MainWindow(QtGui.QMainWindow):
     def create_actions(self):
         # File menu
         self.new_action = QAction("&New...", self,
-            shortcut=QtGui.QKeySequence.New, triggered=self.new_document)
+            shortcut=QtGui.QKeySequence.New, triggered=self.new_document,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_FileIcon))
         self.open_action = QAction("&Open...", self,
             shortcut=QtGui.QKeySequence.Open, triggered=self.open_document,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
@@ -596,6 +597,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
+        self.toolbar.addAction(self.new_action)
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
         for action in [a for a in self.plugin_actions if a.icon()]:
