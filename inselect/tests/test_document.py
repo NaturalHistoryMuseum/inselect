@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import unittest
 
-from itertools import izip
+from itertools import izip, count
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +14,7 @@ import cv2
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.rect import Rect
+from inselect.lib.unicode_csv import UnicodeDictReader
 
 
 TESTDATA = Path(__file__).parent / 'test_data'
@@ -216,6 +217,21 @@ class TestDocument(unittest.TestCase):
             # TODO LH Assert that failure to create thumbnail raises
         finally:
             shutil.rmtree(str(temp))
+
+    def test_csv_export(self):
+        doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
+        f = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            f.close()
+            doc.export_csv(f.name)
+            res = UnicodeDictReader(open(f.name, 'rb'))
+            for index, item, row in izip(count(), doc.items, res):
+                expected = item['fields']
+                expected.update({'Item' : str(1+index)})
+                actual = {k: v for k,v in row.items() if v}
+                self.assertEqual(expected, actual)
+        finally:
+            os.unlink(f.name)
 
 
 if __name__=='__main__':

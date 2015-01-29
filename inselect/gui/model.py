@@ -5,6 +5,7 @@ from itertools import izip
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
 
+from inselect.lib.document import InselectDocument
 from inselect.lib.utils import debug_print
 from .utils import qimage_of_bgr
 from .roles import RectRole, PixmapRole, RotationRole, MetadataRole
@@ -17,7 +18,7 @@ class Model(QAbstractItemModel):
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
         # TODO LH Placeholder metadata fields
-        self._metadata_fields = ('Specimen number', 'Location', 'Taxonomic group',)
+        self._metadata_fields = InselectDocument.METADATA_FIELDS
         self._clear_model_data()
 
     def _clear_model_data(self):

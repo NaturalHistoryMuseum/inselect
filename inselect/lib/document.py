@@ -8,10 +8,11 @@ from pathlib import Path
 
 import cv2
 
-from inselect.lib.image import InselectImage
-from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import debug_print, validate_normalised
-from inselect.lib.rect import Rect
+from .image import InselectImage
+from .inselect_error import InselectError
+from .unicode_csv import UnicodeWriter
+from .utils import debug_print, validate_normalised
+from .rect import Rect
 
 
 def _thumbnail_path(scanned):
@@ -30,6 +31,9 @@ class InselectDocument(object):
     VERSION = 1
     EXTENSION = '.inselect'
 
+    # A temporary solution to metadata fields
+    METADATA_FIELDS = ('Specimen number', 'Location', 'Taxonomic group',)
+
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
     # TODO LH Validate rotation?
@@ -39,6 +43,8 @@ class InselectDocument(object):
         """
         """
         items = self._preprocess_items(items)
+
+        # TODO Validate metadata
         validate_normalised([i['rect'] for i in items])
 
         self._scanned = scanned if scanned else InselectImage(scanned_path)
@@ -84,6 +90,10 @@ class InselectDocument(object):
         "Returns a list of dicts of items"
         return deepcopy(self._items)
 
+    @property
+    def n_items(self):
+        return len(self._items)
+
     def set_items(self, items):
         "Replace self.items with items"
         items = deepcopy(items)
@@ -120,7 +130,6 @@ class InselectDocument(object):
         "Returns a new InselectDocument"
         debug_print('Loading from [{0}]'.format(path))
 
-
         path = Path(path)
 
         # Sniff the first few bytes - file must look like a json document
@@ -128,7 +137,6 @@ class InselectDocument(object):
             raise InselectError('Not an inselect document')
         else:
             doc = json.load(path.open())
-
             v = doc.get('inselect version')
             if not v:
                 raise InselectError('Not an inselect document')
@@ -227,3 +235,18 @@ class InselectDocument(object):
 
             # Load it
             self._thumbnail = InselectImage(p)
+
+    @property
+    def metadata_fields(self):
+        """An iterable of metadata field names
+        """
+        # Temporary solution
+        return self.METADATA_FIELDS
+
+    def export_csv(self, path):
+        fields = self.metadata_fields
+        with Path(path).open('wb') as f:
+            w = UnicodeWriter(f)
+            w.writerow(('Item',) + fields)
+            for index,item in enumerate(self._items):
+                w.writerow([1+index] + [item['fields'].get(f) for f in fields])

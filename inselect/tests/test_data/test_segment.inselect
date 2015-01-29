@@ -1,7 +1,10 @@
 {
     "items": [
         {
-            "fields": {}, 
+            "fields": {
+                "Specimen number": "1",
+                "Taxonomic group": "ABC"
+            },
             "rect": [
                 0.0002, 
                 0.0002, 
@@ -10,7 +13,10 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Specimen number": "2",
+                "Taxonomic group": "ABC"
+            },
             "rect": [
                 0.5936, 
                 0.0002, 
@@ -19,7 +25,10 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "Specimen number": "3",
+                "Taxonomic group": "XYZ"
+            },
             "rect": [
                 0.42560000000000003, 
                 0.4494, 

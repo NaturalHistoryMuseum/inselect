@@ -16,6 +16,7 @@ from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
 import inselect.settings
 
 from inselect.lib import utils
+from inselect.lib.csv_export import CVSExportVisitor
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
 from inselect.lib.inselect_error import InselectError
@@ -223,6 +224,7 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def save_crops(self):
+        debug_print('MainWindow.save_crops')
         res = QMessageBox.Yes
         existing_crops = self.document.crops_dir.is_dir()
 
@@ -234,14 +236,41 @@ class MainWindow(QtGui.QMainWindow):
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         if QMessageBox.Yes == res:
-            def save_crops(document, progress):
+            def save_crops(progress):
                 progress('Loading full-resolution scanned image')
-                document.scanned.array
+                self.document.scanned.array
 
                 progress('Saving crops')
                 self.document.save_crops(progress)
 
-            self.run_in_worker(partial(save_crops, self.document), 'Save crops')
+            def completed(operation):
+                QMessageBox.information(self, "Crops saved", msg)
+
+            self.model.to_document(self.document)
+            msg = "{0} crops saved in {1}"
+            msg = msg.format(self.document.n_items, self.document.crops_dir)
+            self.run_in_worker(save_crops, 'Save crops', completed)
+
+    @report_to_user
+    def export_csv(self):
+        debug_print('MainWindow.export_csv')
+
+        path = self.document.document_path.with_suffix('.csv')
+
+        res = QMessageBox.Yes
+        existing_csv = path.is_file()
+
+        if existing_csv:
+            msg = 'Overwrite the existing CSV file?'
+            res = QMessageBox.question(self, 'Export CSV file?',
+                msg, QMessageBox.No, QMessageBox.Yes)
+
+        if QMessageBox.Yes == res:
+            self.model.to_document(self.document)
+            self.document.export_csv(path)
+            msg = "Data for {0} boxes written to {1}"
+            msg = msg.format(self.document.n_items, path)
+            QMessageBox.information(self, "CSV saved", msg)
 
     @report_to_user
     def close_document(self):
@@ -376,15 +405,10 @@ class MainWindow(QtGui.QMainWindow):
         else:
             plugin = self.plugins[plugin_number]
 
-            # Create a temporary document that contains references to the
-            # loaded images
-            temp_doc = self.document.copy()
-
-            # Save the model to the temporary document
-            self.model.to_document(temp_doc)
+            self.model.to_document(self.document)
 
             # Create the plugin
-            operation = plugin(temp_doc, self)
+            operation = plugin(self.document, self)
             if operation.proceed():
                 self.run_in_worker(operation,
                                    operation.name(),
@@ -492,6 +516,8 @@ class MainWindow(QtGui.QMainWindow):
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
         self.save_crops_action = QAction("&Save crops", self,
             triggered=self.save_crops)
+        self.export_csv_action = QAction("&Export CSV", self,
+            triggered=self.export_csv)
         self.close_action = QAction("&Close", self,
             shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
         self.exit_action = QAction("E&xit", self,
@@ -584,6 +610,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
         self.fileMenu.addAction(self.save_crops_action)
+        self.fileMenu.addAction(self.export_csv_action)
         self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
@@ -678,6 +705,7 @@ class MainWindow(QtGui.QMainWindow):
         # File
         self.save_action.setEnabled(document)
         self.save_crops_action.setEnabled(has_rows)
+        self.export_csv_action.setEnabled(has_rows)
         self.close_action.setEnabled(document)
 
         # Edit
