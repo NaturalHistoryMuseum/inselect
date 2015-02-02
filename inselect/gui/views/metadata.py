@@ -6,6 +6,10 @@ from inselect.gui.roles import MetadataRole
 
 
 class MetadataView(QtGui.QAbstractItemView):
+    MESSAGE_NO_SELECTION = 'Metadata'
+    MESSAGE_SINGLE_SELECTION = 'Metadata for 1 box'
+    MESSAGE_MULTIPLE_SELECTION = 'Metadata for {0} boxes'
+
     def __init__(self, parent=None):
         # This view is not visible
         super(MetadataView, self).__init__(parent)
@@ -18,7 +22,7 @@ class MetadataView(QtGui.QAbstractItemView):
 
         # Show controls stacked vertically
         self.layout = QtGui.QFormLayout()
-        self.title = QtGui.QLabel()
+        self.title = QtGui.QLabel(self.MESSAGE_NO_SELECTION)
         self.layout.addRow(self.title)
         for field, edit in self._edits.items():
             self.layout.addRow(field, edit)
@@ -36,10 +40,13 @@ class MetadataView(QtGui.QAbstractItemView):
             edit.setText(','.join(sorted(v)))
             edit.selected = selected
             edit.setEnabled(len(selected) > 0)
-        if selected:
-            self.title.setText('Metadata for {0} boxes'.format(len(selected)))
+
+        if 1==len(selected):
+            self.title.setText(self.MESSAGE_SINGLE_SELECTION)
+        elif selected:
+            self.title.setText(self.MESSAGE_MULTIPLE_SELECTION.format(len(selected)))
         else:
-            self.title.setText('Metadata')
+            self.title.setText(self.MESSAGE_NO_SELECTION)
 
 
 class UpdateModelLineEdit(QtGui.QLineEdit):
