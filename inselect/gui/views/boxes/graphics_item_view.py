@@ -3,6 +3,7 @@ from itertools import izip
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QRect, QRectF
 
+from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import PixmapRole, RectRole
 from inselect.gui.utils import unite_rects, contiguous
@@ -233,11 +234,15 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         m = self.model()
         row = len(self._rows)
         if not m.insertRow(row):
-            pass
-            # TODO LH Report to user
+            raise InselectError('Could not insert row')
         else:
             # Cumbersome conversion to ints
             rect = QRect(rect.left(), rect.top(), rect.width(), rect.height())
             if not m.setData(m.index(row, 0), rect, RectRole):
-                # TODO LH Report to user
-                pass
+                raise InselectError('Could not set rect')
+            else:
+                # Select the new box
+                self.scene.clearSelection()
+                item = self.items_of_rows([row]).next()
+                item.setSelected(True)
+                item.update()
