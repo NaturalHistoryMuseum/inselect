@@ -55,14 +55,14 @@ class BarcodePlugin(Plugin):
         else:
             raise InselectError('No barcode decoding engine available')
 
-        progress(label='Loading full-res image')
+        progress('Loading full-res image')
         image_array = self.document.scanned.array
 
         items = self.document.items
         for index, item, crop in izip(count(), items, self.document.crops):
             msg = u'Reading barcodes in box {0} of {1}'.format(1 + index, len(items))
-            progress(label=msg)
-            barcodes = self._decode_barcodes(engine, crop)
+            progress(msg)
+            barcodes = self._decode_barcodes(engine, crop, progress)
             if barcodes:
                 debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
 
@@ -77,8 +77,10 @@ class BarcodePlugin(Plugin):
 
         debug_print('BarcodePlugin.__call__ exiting. [{0}] boxes'.format(len(items)))
 
-    def _decode_barcodes(self, engine, crop):
+    def _decode_barcodes(self, engine, crop, progress):
         for strategy in (resize, roi):
+            # TODO LH Must be able to cancel within call to strategy
+            progress()
             result = strategy(crop, engine)
             if result:
                 strategy, barcodes = result
