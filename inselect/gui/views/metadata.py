@@ -22,6 +22,7 @@ class MetadataView(QtGui.QAbstractItemView):
 
         # Show controls stacked vertically
         self.layout = QtGui.QFormLayout()
+        self.layout.setFieldGrowthPolicy(QtGui.QFormLayout.ExpandingFieldsGrow)
         self.title = QtGui.QLabel(self.MESSAGE_NO_SELECTION)
         self.layout.addRow(self.title)
         for field, edit in self._edits.items():
