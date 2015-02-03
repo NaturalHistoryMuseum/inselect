@@ -177,8 +177,8 @@ class Model(QAbstractItemModel):
             item = index.internalPointer()
             # TODO LH use a dict for this?
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
-                return '{0:03} {1}'.format(1+index.row(),
-                                           item['metadata'].get('Specimen number', ''))
+                return u'{0:03} {1}'.format(1+index.row(),
+                                            item['metadata'].get('Specimen number', ''))
             elif Qt.WhatsThisRole == role:
                 return 'Cropped specimen image'
             elif RectRole == role:
