@@ -1,36 +1,57 @@
-from PySide.QtCore import QRect, QPoint, Qt, QCoreApplication
+from PySide.QtCore import QRect, QSize, QPoint, Qt, QCoreApplication
 from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
                           QAbstractItemView, QAbstractItemDelegate,
-                          QStyleOptionButton)
+                          QStyleOptionButton, QItemSelectionModel)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import PaintState
 from inselect.gui.roles import RectRole, PixmapRole, RotationRole
+
 
 class CropDelegate(QAbstractItemDelegate):
     """Delegate that shows cropped specimen images with a grey box and
     provides editing of rotation and some flags.
     """
 
-    BOX_RECT = QRect(0, 0, 250, 250)
+    @property
+    def BOX_RECT(self):
+        "QRect of the complete box"
+        expanded = self.parent().expanded
+        return self.parent().viewport().rect() if expanded else QRect(0, 0, 250, 250)
  
-    # Bounding rectangle for the title
-    TITLE_RECT = QRect(QPoint(0, 0), BOX_RECT.size())
-    TITLE_RECT.adjust(5, 5, -5, -5)
+    @property
+    def TITLE_RECT(self):
+        "Bounding QRect of the title"
+        return QRect(QPoint(0, 0), self.BOX_RECT.size()).adjusted(5, 5, -5, -5)
 
-    BORDER = 25   # Border around cropped image
+    @property
+    def BORDER(self):
+        # Border around cropped image
+        return 25
 
-    # Bounding rectangle of cropped image
-    CROP_RECT = BOX_RECT.adjusted(BORDER, BORDER, -BORDER, -BORDER)
+    @property
+    def CROP_RECT(self):
+        # Bounding rectangle within which the cropped image will be drawn
+        b = self.BORDER
+        return self.BOX_RECT.adjusted(b, b, -b, -b)
 
-    # Controls
-    CONTROLS_SIZE = 23
-    ROTATE_COUNTERCLOCKWISE_RECT = QRect(0, 0, CONTROLS_SIZE, CONTROLS_SIZE)
-    ROTATE_COUNTERCLOCKWISE_RECT.translate(QPoint(0, BOX_RECT.height()-CONTROLS_SIZE))
+    @property
+    def CONTROLS_SIZE(self):
+        # Controls
+        return 23
 
-    ROTATE_CLOCKWISE_RECT = QRect(0, 0, CONTROLS_SIZE, CONTROLS_SIZE)
-    ROTATE_CLOCKWISE_RECT.translate(QPoint(BOX_RECT.width()-CONTROLS_SIZE,
-                                    BOX_RECT.height()-CONTROLS_SIZE))
+    @property
+    def ROTATE_COUNTERCLOCKWISE_RECT(self):
+        r = QRect(0, 0, self.CONTROLS_SIZE, self.CONTROLS_SIZE)
+        r.translate(QPoint(0, self.BOX_RECT.height()-self.CONTROLS_SIZE))
+        return r
+
+    @property
+    def ROTATE_CLOCKWISE_RECT(self):
+        r = QRect(0, 0, self.CONTROLS_SIZE, self.CONTROLS_SIZE)
+        r.translate(QPoint(self.BOX_RECT.width()-self.CONTROLS_SIZE,
+                           self.BOX_RECT.height()-self.CONTROLS_SIZE))
+        return r
 
     BLACK = QBrush(Qt.black)
     WHITE = QBrush(Qt.white)
@@ -56,29 +77,67 @@ class CropDelegate(QAbstractItemDelegate):
         """The cropped image
         """
         source_rect = index.data(RectRole)
-        target_rect = self.CROP_RECT.translated(option.rect.topLeft())
+        crop_rect = self.CROP_RECT.translated(option.rect.topLeft())
+        angle = index.data(RotationRole)
 
-        # Adjust target rect to have the same aspect ratio as the source_rect
-        aspect = float(source_rect.width()) / source_rect.height()
-        if aspect>1.0:
-            # Image is wider than it is tall => target_rect becomes shorter
-            offset = target_rect.height() - target_rect.height() / aspect
-            target_rect.adjust(0, offset/2, 0, -offset/2)
+        # Target rect with same aspect ratio as source
+        source_aspect = float(source_rect.width()) / source_rect.height()
+        crop_aspect = float(crop_rect.width()) / crop_rect.height()
+
+        # True is the item has been rotated by a multiple of 90 degrees
+        perpendicular = 1 == (angle / 90) % 2
+
+        # Some nasty logic to compute the target rect
+        if perpendicular:
+            crop_aspect = 1.0 / crop_aspect
+
+        if source_aspect > 1.0:
+            # Crop is wider than is is tall
+            if crop_aspect > source_aspect:
+                fit_to = 'height'
+                f = 1.0 / source_aspect
+            else:
+                fit_to = 'width'
+                f = source_aspect
         else:
-            # Image is taller than it is wide => target_rect becomes narrow
-            offset = target_rect.width() - target_rect.width() * aspect
-            target_rect.adjust(offset/2, 0, -offset/2, 0)
+            # Crop is taller than is is wide
+            if crop_aspect < source_aspect:
+                fit_to = 'width'
+                f = source_aspect
+            else:
+                fit_to = 'height'
+                f = 1.0 / source_aspect
+
+        if perpendicular:
+            if 'width' == fit_to:
+                size = QSize(crop_rect.height(),
+                             crop_rect.height() / f)
+            else:
+                size = QSize(crop_rect.width() / f,
+                             crop_rect.width())
+        else:
+            if 'width' == fit_to:
+                size = QSize(crop_rect.width(),
+                             crop_rect.width() / f)
+            else:
+                size = QSize(crop_rect.height() / f,
+                             crop_rect.height())
+
+        target_rect = QRect(crop_rect.topLeft(), size)
+        target_rect.moveCenter(option.rect.center())
 
         # Draw rotated
-        t = QTransform()
-        t.translate(option.rect.width()/2+option.rect.left(),
-                    option.rect.height()/2+option.rect.top())
-        t.rotate(index.data(RotationRole))
-        t.translate(-option.rect.width()/2-option.rect.left(),
-                    -option.rect.height()/2-option.rect.top())
+        if angle:
+            t = QTransform()
+            t.translate(option.rect.width() / 2+option.rect.left(),
+                        option.rect.height() / 2+option.rect.top())
+            t.rotate(angle)
+            t.translate(-option.rect.width() / 2-option.rect.left(),
+                        -option.rect.height() / 2-option.rect.top())
 
         with PaintState(painter):
-            painter.setTransform(t)
+            if angle:
+                painter.setTransform(t)
             painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
 
             painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
@@ -165,9 +224,55 @@ class GridView(QListView):
     """
     def __init__(self, parent=None):
         super(GridView, self).__init__(parent)
-        self.setItemDelegate(CropDelegate())
+
+        # Items are shown in a grid if False
+        # A single item is shown expanded if True.
+
+        # A serious problem with this approach is that multiple selections are
+        # possible (despite setting SingleSelection in show_expanded):
+        # Select All shortcut
+        # Select None shortcut
+        # Select none or multiple on Boxes view, then go to metadataview
+
+        self.expanded = False
+
+        self.setItemDelegate(CropDelegate(self))
         self.setFlow(self.LeftToRight)
         self.setWrapping(True)
         self.setResizeMode(self.Adjust)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.setStyleSheet("background-color: darkgray;")
+
+    def show_grid(self):
+        debug_print('GridView.show_grid')
+        self.expanded = False
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self._refresh()
+
+    def show_expanded(self):
+        debug_print('GridView.show_expanded')
+        self.expanded = True
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        # Select a single item
+        sm = self.selectionModel()
+        selected = self.selectionModel().selectedIndexes()
+        if len(selected)>1:
+            sm.select(selected[0], QItemSelectionModel.Select)
+        elif not selected:
+            sm.select(self.model().index(0, 0), QItemSelectionModel.Select)
+
+        self._refresh()
+
+    def _refresh(self):
+        debug_print('GridView.toggle_display_size')
+        self.scheduleDelayedItemsLayout()
+        selected = self.selectionModel().selectedIndexes()
+        if selected:
+            self.scrollTo(selected[0])
+
+    def toggle_zoom(self):
+        debug_print('GridView.toggle_zoom')
+
+        selected = self.selectionModel().selectedIndexes()
+        self.toggle_item_display_size(selected[0])

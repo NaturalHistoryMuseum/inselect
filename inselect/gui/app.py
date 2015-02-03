@@ -53,22 +53,22 @@ class MainWindow(QtGui.QMainWindow):
         # Metadata view
         self.view_grid = GridView()
         self.view_metadata = MetadataView()
-        metadata = QtGui.QSplitter()
-        metadata.addWidget(self.view_grid)
-        metadata.addWidget(self.view_metadata.widget)
-        metadata.setSizes([450, 50])
+        self.metadata = QtGui.QSplitter()
+        self.metadata.addWidget(self.view_grid)
+        self.metadata.addWidget(self.view_metadata.widget)
+        self.metadata.setSizes([450, 50])
 
         if tabbed:
             # Views in tabs
             self.tabs = QtGui.QTabWidget(self)
             self.tabs.addTab(self.boxes_view, 'Boxes')
-            self.tabs.addTab(metadata, 'Metadata')
+            self.tabs.addTab(self.metadata, 'Metadata')
             self.tabs.setCurrentIndex(0)
         else:
             # Views in a splitter
             self.tabs = QtGui.QSplitter(self)
             self.tabs.addWidget(self.boxes_view)
-            self.tabs.addWidget(metadata)
+            self.tabs.addWidget(self.metadata)
             self.tabs.setSizes([500, 500])
 
         # Summary view
@@ -343,6 +343,14 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view.zoom_home()
 
     @report_to_user
+    def show_grid(self):
+        self.view_grid.show_grid()
+
+    @report_to_user
+    def show_expanded(self):
+        self.view_grid.show_expanded()
+
+    @report_to_user
     def about(self):
         QMessageBox.about(
             self,
@@ -462,18 +470,17 @@ class MainWindow(QtGui.QMainWindow):
         """The user wants to select the next/previous box
         """
         sm = self.view_grid.selectionModel()
-        model = self.view_grid.model()
         current = sm.currentIndex()
         current = current.row() if current else -1
 
         select = current + (1 if forwards else -1)
-        if select == model.rowCount():
+        if select == self.model.rowCount():
             select = 0
         elif -1 == select:
-            select = model.rowCount()-1
+            select = self.model.rowCount()-1
 
         debug_print('Will move selection [{0}] from [{1}]'.format(current, select))
-        select = model.index(select, 0)
+        select = self.model.index(select, 0)
         sm.select(QtGui.QItemSelection(select, select),
                   QtGui.QItemSelectionModel.ClearAndSelect)
         sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
@@ -582,13 +589,17 @@ class MainWindow(QtGui.QMainWindow):
         self.zoom_home_action = QAction("Fit To Window", self,
             shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
             triggered=self.zoom_home)
-
         # TODO LH Is F3 (normally meaning 'find next') really the right
-        # shortcut for the toggle segment image action?
+        # shortcut for the 'toggle plugin image' action?
         self.toggle_plugin_image_action = QAction(
             "&Display plugin image", self, shortcut="f3",
             triggered=self.toggle_plugin_image,
             statusTip="Display plugin image", checkable=True)
+
+        self.show_grid_action = QAction('Show grid', self,
+            shortcut='g', triggered=self.show_grid)
+        self.show_expanded_action = QAction('Show expanded', self,
+            shortcut='e', triggered=self.show_expanded)
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
@@ -637,8 +648,10 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.zoom_out_action)
         self.viewMenu.addAction(self.toogle_zoom_action)
         self.viewMenu.addAction(self.zoom_home_action)
-        self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.toggle_plugin_image_action)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.show_grid_action)
+        self.viewMenu.addAction(self.show_expanded_action)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.help_action)
@@ -701,6 +714,7 @@ class MainWindow(QtGui.QMainWindow):
         document = self.document is not None
         has_rows = self.model.rowCount()>0 if self.model else False
         boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
+        metadata_view_visible = self.metadata == self.tabs.currentWidget()
         has_selection = len(self.view_grid.selectedIndexes())>0
 
         # File
@@ -725,3 +739,6 @@ class MainWindow(QtGui.QMainWindow):
         self.zoom_out_action.setEnabled(document and boxes_view_visible)
         self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
         self.zoom_home_action.setEnabled(document and boxes_view_visible)
+        self.toggle_plugin_image_action.setEnabled(document and boxes_view_visible)
+        self.show_grid_action.setEnabled(metadata_view_visible)
+        self.show_expanded_action.setEnabled(metadata_view_visible)
