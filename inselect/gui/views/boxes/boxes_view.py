@@ -3,6 +3,7 @@ import sys
 from PySide import QtGui
 from PySide.QtCore import Qt, QRectF, QSizeF
 
+from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
 
@@ -219,3 +220,24 @@ class BoxesView(QtGui.QGraphicsView):
         debug_print('BoxesView.dragEnterEvent')
         # This method overriden to allow file drag-drop. See
         # MainWindow.dragEnterEvent.
+
+    def save_to_file(self, path):
+        # TODO LH Use cv2 to write image - QT's image format support is comical
+        # Investigate https://pypi.python.org/pypi/qimage2ndarray/0.2
+        debug_print('BoxesView.save_to_file [{0}]'.format(path))
+
+        image = QtGui.QImage(self.scene().sceneRect().size().toSize(),
+                             QtGui.QImage.Format_ARGB32)
+        painter = QtGui.QPainter(image)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        try:
+            self.scene().render(painter)
+            writer = QtGui.QImageWriter(path)
+            print(writer.supportedImageFormats())
+            if not writer.write(image):
+                msg = 'An error occurred writing to [{0}]: [{1}]'
+                raise InselectError(msg.format(path, writer.errorString()))
+            else:
+                debug_print('BoxesView.saved_to_file [{0}]'.format(path))
+        finally:
+            painter = None

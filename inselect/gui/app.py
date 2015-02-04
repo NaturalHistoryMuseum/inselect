@@ -153,9 +153,6 @@ class MainWindow(QtGui.QMainWindow):
                     filter=filter)
 
             if path:
-                # TODO Ingestion of large images is time-consuming - run
-                # in a worker thread
-
                 class NewDoc(object):
                     def __init__(self, image):
                         self.image = image
@@ -188,7 +185,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if not filename:
             folder = inselect.settings.get("working_directory")
-            filename, _ = QtGui.QFileDialog.getOpenFileName(
+            filename, selected_filter  = QtGui.QFileDialog.getOpenFileName(
                 self, "Open", folder, self.FILE_FILTER)
 
         if filename:
@@ -270,6 +267,20 @@ class MainWindow(QtGui.QMainWindow):
             msg = "Data for {0} boxes written to {1}"
             msg = msg.format(self.document.n_items, path)
             QMessageBox.information(self, "CSV saved", msg)
+
+    @report_to_user
+    def save_boxes_image(self):
+        """Saves the boxes view to an image file
+        """
+        debug_print('MainWindow,save_boxes_image_action')
+        folder = inselect.settings.get("working_directory")
+        filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
+        path, selected_filter = QtGui.QFileDialog.getSaveFileName(
+                self, "Save image file of boxes view", folder,
+                filter=filter)
+
+        if path:
+            self.boxes_view.save_to_file(path)
 
     @report_to_user
     def close_document(self):
@@ -518,6 +529,8 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.save_crops)
         self.export_csv_action = QAction("&Export CSV", self,
             triggered=self.export_csv)
+        self.save_boxes_image_action = QAction("Save boxes image", self,
+            triggered=self.save_boxes_image)
         self.close_action = QAction("&Close", self,
             shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
         self.exit_action = QAction("E&xit", self,
@@ -612,6 +625,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.save_action)
         self.fileMenu.addAction(self.save_crops_action)
         self.fileMenu.addAction(self.export_csv_action)
+        self.fileMenu.addAction(self.save_boxes_image_action)
         self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
@@ -707,6 +721,7 @@ class MainWindow(QtGui.QMainWindow):
         self.save_action.setEnabled(document)
         self.save_crops_action.setEnabled(has_rows)
         self.export_csv_action.setEnabled(has_rows)
+        self.save_boxes_image_action.setEnabled(document)
         self.close_action.setEnabled(document)
 
         # Edit
