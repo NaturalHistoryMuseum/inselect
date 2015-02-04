@@ -1,4 +1,4 @@
 ExifRead==2.0.0
-humanize>=0.151
+humanize>=0.5.1
 Pillow>=2.7.0
 pathlib>=1.0
