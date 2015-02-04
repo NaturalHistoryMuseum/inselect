@@ -97,12 +97,12 @@ class InselectImage(object):
         record of code fragments that might be used to satisfy issue 120
 
         """
-        with warnings.catch_warnings():
+
+        with warnings.catch_warnings(), self._path.open('rb') as f:
             # Ignore DecompressionBombWarning - SatScan images are > 89478485 pixels
             warnings.simplefilter("ignore", Image.DecompressionBombWarning)
-            im = Image.open(str(self._path))
-
-        with self._path.open('rb') as f:
+            im = Image.open(f)
+            f.seek(0)
             tags = exifread.process_file(f)
         debug_print('Information about [{0}]'.format(self._path))
         debug_print('\tst_size', humanize.naturalsize(self._path.stat().st_size))
