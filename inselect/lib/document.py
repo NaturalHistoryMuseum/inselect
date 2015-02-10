@@ -133,7 +133,7 @@ class InselectDocument(object):
         path = Path(path)
 
         # Sniff the first few bytes - file must look like a json document
-        if not re.match('{[ \n]*"', path.open('r').read(20)):
+        if not re.match('{[ \n]*"', path.open('rb').read(20)):
             raise InselectError('Not an inselect document')
         else:
             doc = json.load(path.open())
