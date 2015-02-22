@@ -56,7 +56,7 @@ class MainWindow(QtGui.QMainWindow):
         metadata = QtGui.QSplitter()
         metadata.addWidget(self.view_grid)
         metadata.addWidget(self.view_metadata.widget)
-        metadata.setSizes([450, 50])
+        metadata.setSizes([600, 300])
 
         if tabbed:
             # Views in tabs
@@ -568,13 +568,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plugins
         # Plugin shortcuts start at F5
-        offset = 5
+        shortcut_offset = 5
         for index, plugin in enumerate(self.plugins):
             action = QAction(plugin.name(), self,
                              triggered=partial(self.run_plugin, index))
-            shortcut_fkey = index + offset
+            shortcut_fkey = index + shortcut_offset
             if shortcut_fkey < 13:
-                # Keyboards typically have up to 12 function keys
+                # Keyboards typically have 12 function keys
                 action.setShortcut('f{0}'.format(shortcut_fkey))
             icon = plugin.icon()
             if icon:
