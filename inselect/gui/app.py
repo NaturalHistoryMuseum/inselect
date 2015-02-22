@@ -135,7 +135,7 @@ class MainWindow(QtGui.QMainWindow):
             return super(MainWindow, self).eventFilter(obj, event)
 
     @report_to_user
-    def open_file(self, path):
+    def open_file(self, path=None):
         """Opens path, which can be None, the path to an inselect document or
         the path to an image file. If None, the user is prompted to select a
         file.
@@ -151,8 +151,11 @@ class MainWindow(QtGui.QMainWindow):
 
         if not path:
             folder = inselect.settings.get("working_directory")
+            filter = u'Inselect documents ({0});;Images ({1})'
+            filter = filter.format(InselectDocument.EXTENSION,
+                                   u' '.join(IMAGE_PATTERNS))
             path, _ = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, [InselectDocument.EXTENSION] + IMAGE_SUFFIXES)
+                self, "Open", folder, filter)
 
         if path:
             # Will be None if user cancelled getOpenFileName
