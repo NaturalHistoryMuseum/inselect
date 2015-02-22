@@ -95,7 +95,7 @@ class TestDocument(unittest.TestCase):
             scanned_temp = Path(temp) / 'test_segment.png'
             scanned_temp.open('w')       # File only needs to exist
 
-            items = [ {'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
+            items = [ {'fields': {}, 'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
 
             d = InselectDocument.load(doc_temp)
             d.set_items(items)
@@ -150,12 +150,12 @@ class TestDocument(unittest.TestCase):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
 
-        items = [ {'rect': Rect(0, 0, 0.5, 0.5)}, ]
+        items = [ {'fields': {}, 'rect': Rect(0, 0, 0.5, 0.5)}, ]
         doc.set_items(items)
         self.assertEqual(items, doc.items)
 
         # Not normalised
-        items = [ {'rect': Rect(0, 0, 1, 2)}, ]
+        items = [ {'fields': {}, 'rect': Rect(0, 0, 1, 2)}, ]
         self.assertRaises(InselectError, doc.set_items, items)
 
     def test_new_from_scan(self):

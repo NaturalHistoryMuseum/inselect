@@ -1,3 +1,4 @@
+import itertools
 import json
 import re
 import shutil
@@ -22,17 +23,26 @@ def _thumbnail_path(scanned):
 
 
 class InselectDocument(object):
-    """Simple represention of an Inselect document.
+    """An Inselect document.
+
+    scanned_extension :                      File extension of the
+                                             full-resolution image.
+    items : list of dicts { fields: {k: v},  Metadata. All k and v should be
+                                             strings.
+                            rotation: int,   Integer that is a multiple of 90.
+                            rect: [x,        Normalised (i.e., between 0.0 and
+                                   y,        1.0) floats.
+                                   width,
+                                   height,
+                                  ],
+                          }
 
     You should probably create instances using the class methods new_from_scan
     or load.
     """
 
-    VERSION = 1
+    FILE_VERSION = 2
     EXTENSION = '.inselect'
-
-    # A temporary solution to metadata fields
-    METADATA_FIELDS = ('Specimen number', 'Location', 'Taxonomic group',)
 
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
@@ -44,7 +54,8 @@ class InselectDocument(object):
         """
         items = self._preprocess_items(items)
 
-        # TODO Validate metadata
+        # TODO Validate metadata fields
+
         validate_normalised([i['rect'] for i in items])
 
         self._scanned = scanned if scanned else InselectImage(scanned_path)
@@ -98,15 +109,19 @@ class InselectDocument(object):
         "Replace self.items with items"
         items = deepcopy(items)
         items = self._preprocess_items(items)
-        # TODO Validate metadata
         validate_normalised(i['rect'] for i in items)
         self._items = items
 
     def _preprocess_items(self, items):
-        # Returns items with tuples of boxes replaced with Rect instances
+        # Returns items with tuples of boxes replaced with Rect instances and
+        # metadata items with no values removed
         for i in xrange(0, len(items)):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = Rect(l,t,w,h)
+
+            fields = items[i].get('fields', {})
+            fields = {k: v for k, v in fields.iteritems() if '' != v}
+            items[i]['fields'] = fields
         return items
 
     @classmethod
@@ -140,9 +155,22 @@ class InselectDocument(object):
             v = doc.get('inselect version')
             if not v:
                 raise InselectError('Not an inselect document')
-            elif v > cls.VERSION:
+            elif v > cls.FILE_VERSION:
                 raise InselectError('Unsupported version [{0}]'.format(v))
             else:
+                if 1 == v:
+                    # Version 1 contained just three illustrative fields -
+                    # convert these to Darwin Core fields
+                    for item in doc['items']:
+                        fields = item['fields']
+                        if fields.get('Taxonomic group'):
+                            fields['scientificName'] = fields.pop('Taxonomic group')
+                        if fields.get('Location'):
+                            fields['otherCatalogNumbers'] = fields.pop('Location')
+                        if fields.get('Specimen number'):
+                            fields['catalogNumber'] = fields.pop('Specimen number')
+                        item['fields'] = fields
+
                 scanned = path.with_suffix(doc['scanned extension'])
 
                 msg = 'Loaded [{0}] items from [{1}]'
@@ -161,7 +189,7 @@ class InselectDocument(object):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = [l,t,w,h]
 
-        doc = { 'inselect version': self.VERSION,
+        doc = { 'inselect version': self.FILE_VERSION,
                 'scanned extension': self._scanned.path.suffix,
                 'items' : items,
               }
@@ -241,13 +269,14 @@ class InselectDocument(object):
     def metadata_fields(self):
         """An iterable of metadata field names
         """
-        # Temporary solution
-        return self.METADATA_FIELDS
+        # The union of fields among all items
+        return set(itertools.chain(*(i['fields'].keys() for i in self._items)))
 
     def export_csv(self, path):
-        fields = self.metadata_fields
+        # TODO fields in order given by dca terms
+        fields = sorted(self.metadata_fields)
         with Path(path).open('wb') as f:
             w = UnicodeWriter(f)
-            w.writerow(('Item',) + fields)
+            w.writerow(['Item',] + fields)
             for index,item in enumerate(self._items):
                 w.writerow([1+index] + [item['fields'].get(f) for f in fields])

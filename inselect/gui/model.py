@@ -5,7 +5,6 @@ from itertools import izip
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
 
-from inselect.lib.document import InselectDocument
 from inselect.lib.utils import debug_print
 from .utils import qimage_of_bgr
 from .roles import RectRole, PixmapRole, RotationRole, MetadataRole
@@ -17,8 +16,6 @@ class Model(QAbstractItemModel):
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
-        # TODO LH Placeholder metadata fields
-        self._metadata_fields = InselectDocument.METADATA_FIELDS
         self._clear_model_data()
 
     def _clear_model_data(self):
@@ -27,7 +24,7 @@ class Model(QAbstractItemModel):
         self._modified = False
         self._data = [] # A list of dicts
         self._image_array = None    # np.nd_array, for segmentation
-        self._pixmap = None    # QPixmap, for display
+        self._pixmap = None    # Instance of QPixmap
 
     def clear(self):
         """Empty data
@@ -175,10 +172,9 @@ class Model(QAbstractItemModel):
             return None
         else:
             item = index.internalPointer()
-            # TODO LH use a dict for this?
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 return u'{0:03} {1}'.format(1+index.row(),
-                                            item['metadata'].get('Specimen number', ''))
+                                            item['metadata'].get('materialSampleID', ''))
             elif Qt.WhatsThisRole == role:
                 return 'Cropped specimen image'
             elif RectRole == role:
@@ -191,7 +187,6 @@ class Model(QAbstractItemModel):
     def setData(self, index, value, role):
         """QAbstractItemModel virtual
         """
-        # TODO LH Validation?
         if RectRole == role:
             # A new QRect for index
             if not isinstance(value, QRect):
@@ -208,8 +203,7 @@ class Model(QAbstractItemModel):
             return True
         elif RotationRole == role:
             # A new rotation for index
-            if (not isinstance(value, (int, long)) or
-                0 != value%90):
+            if not isinstance(value, (int, long)) or 0 != value%90:
                 raise ValueError('Value is not an integer multiple of 90')
             else:
                 current = self._data[index.row()]['rotation']
@@ -226,8 +220,7 @@ class Model(QAbstractItemModel):
                 return True
         elif MetadataRole == role:
             # value is a dict containing one or more fields
-            if (not isinstance(value, dict) or
-                not set(value.keys()).issubset(self._metadata_fields)):
+            if not isinstance(value, dict):
                 raise ValueError('Value is not a dict with recognised keys')
             else:
                 msg = 'Model.setData for [{0}] update [{1}]'
@@ -235,7 +228,10 @@ class Model(QAbstractItemModel):
 
                 current = self._data[index.row()]['metadata']
                 current.update(value)
-                self._data[index.row()]['metadata'] = current
+
+                # Only fields that have a value
+                current = {k: v for k, v in current.iteritems() if '' != v}
+
                 self.dataChanged.emit(index, index)
                 self._modified = True
                 return True
