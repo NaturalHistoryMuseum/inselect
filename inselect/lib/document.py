@@ -37,7 +37,7 @@ class InselectDocument(object):
 
     FILE_VERSION = 2
     EXTENSION = '.inselect'
-    THUMBNAIL_SUFFIX = '_thumbnail.jpg'
+    THUMBNAIL_SUFFIX = '_thumbnail'
 
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
@@ -64,26 +64,11 @@ class InselectDocument(object):
         self._items = items
 
     @classmethod
-    def document_path_of_scanned(cls, scanned):
-        """Returns the path of the document for the given scanned image
-        """
-        scanned = Path(scanned)
-        return scanned.parent / (scanned.stem + cls.EXTENSION)
-
-    @classmethod
-    def document_path_of_thumbnail(cls, thumbnail):
-        """Returns the path of the document for the given thumbnail image
-        """
-        thumbnail = Path(thumbnail)
-        fname = thumbnail.name.replace(cls.THUMBNAIL_SUFFIX, cls.EXTENSION)
-        return thumbnail.parent / fname
-
-    @classmethod
     def thumbnail_path_of_scanned(cls, scanned):
         """Returns the path of the thumbnail image for the given scanned image
         """
         scanned = Path(scanned)
-        return scanned.parent / (scanned.stem + cls.THUMBNAIL_SUFFIX)
+        return scanned.parent / (scanned.stem + cls.THUMBNAIL_SUFFIX + '.jpg')
 
     def copy(self):
         """Returns a new instance of InselectDocument that is a copy of this

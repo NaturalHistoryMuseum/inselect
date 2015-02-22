@@ -14,7 +14,7 @@ TESTDATA = Path(__file__).parent / 'test_data'
 
 class TestDocument(unittest.TestCase):
     def _test_closed(self):
-        self.assertEqual('inselect', window.windowTitle())
+        self.assertEqual('Inselect', window.windowTitle())
         self.assertEqual(0, window.model.rowCount())
         self.assertFalse(window.zoom_in_action.isEnabled())
         self.assertFalse(window.zoom_out_action.isEnabled())
@@ -27,7 +27,7 @@ class TestDocument(unittest.TestCase):
 
         window.open_document(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, window.model.rowCount())
-        self.assertEqual('inselect [test_segment]', window.windowTitle())
+        self.assertEqual('Inselect [test_segment]', window.windowTitle())
         self.assertTrue(window.zoom_in_action.isEnabled())
         self.assertTrue(window.zoom_out_action.isEnabled())
         self.assertTrue(window.save_action.isEnabled())

@@ -151,7 +151,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if not path:
             folder = inselect.settings.get("working_directory")
-            filter = u'Inselect documents ({0});;Images ({1})'
+            filter = u'Inselect documents (*{0});;Images ({1})'
             filter = filter.format(InselectDocument.EXTENSION,
                                    u' '.join(IMAGE_PATTERNS))
             path, _ = QtGui.QFileDialog.getOpenFileName(
@@ -165,22 +165,22 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 path = Path(path)
                 inselect.settings.set_value('working_directory', str(path.parent))
-                doc_of_scan = InselectDocument.document_path_of_scanned(path)
-                doc_of_thumbnail = InselectDocument.document_path_of_thumbnail(path)
+                if path.suffix in IMAGE_SUFFIXES:
+                    # Compute the path to the inselect document (which may or
+                    # may not already exist) of the image file
+                    doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
+                    doc_of_image = path.parent / doc_of_image
+                    doc_of_image = doc_of_image.with_suffix(InselectDocument.EXTENSION)
+
                 if InselectDocument.EXTENSION == path.suffix:
                     # Open the .inselect document
                     debug_print('Opening inselect document [{0}]'.format(path))
                     self.open_document(path)
-                elif doc_of_scan.is_file():
-                    # An image file for which a .inselect document already exists
-                    msg = u'Opening inselect document [{0}] of scan [{1}]'
-                    debug_print(msg.format(doc_of_scan, path))
-                    self.open_document(doc_of_scan)
-                elif doc_of_thumbnail.is_file():
+                elif doc_of_image.is_file():
                     # A thumbnail file corresponding to an existing .inselect file
                     msg = u'Opening inselect document [{0}] of thumbnail [{1}]'
-                    debug_print(msg.format(doc_of_thumbnail, path))
-                    self.open_document(doc_of_thumbnail)
+                    debug_print(msg.format(doc_of_image, path))
+                    self.open_document(doc_of_image)
                 else:
                     debug_print(u'Creating new inselect document for image [{0}]'.format(path))
                     self.new_document(path)
@@ -212,7 +212,7 @@ class MainWindow(QtGui.QMainWindow):
 
         document_path = operation.document_path
         self.open_file(document_path)
-        msg = 'New inselect document [{0}] created in [{1}]'
+        msg = u'New Inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
         QMessageBox.information(self, "Document created", msg)
 
@@ -230,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
         self.model.from_document(self.document)
 
         # TODO LH Prefer setWindowFilePath to setWindowTitle?
-        self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
+        self.setWindowTitle(u"Inselect [{0}]".format(self.document_path.stem))
 
         self.sync_ui()
 
@@ -337,7 +337,7 @@ class MainWindow(QtGui.QMainWindow):
         self.model.clear()
 
         # TODO LH Prefer setWindowFilePath to setWindowTitle?
-        self.setWindowTitle("inselect")
+        self.setWindowTitle("Inselect")
 
         self.sync_ui()
 
