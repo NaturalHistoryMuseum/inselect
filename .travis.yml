@@ -6,7 +6,7 @@ virtualenv:
 
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-      sudo apt-get install python-opencv python-numpy python-scipy python-matplotlib python-pyside;
+      sudo apt-get install python-opencv python-numpy python-pyside;
     fi
   - pip install -r requirements.txt
   - "export DISPLAY=:99.0"
