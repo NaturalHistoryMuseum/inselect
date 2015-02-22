@@ -4,7 +4,7 @@ import os
 import sys
 
 from functools import partial
-from itertools import izip
+from itertools import chain, izip
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +17,7 @@ import inselect.settings
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
-from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
+from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
@@ -126,7 +126,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setAcceptDrops(True)
 
         if filename:
-            self.open_document(filename)
+            self.open_file(filename)
 
     def eventFilter(self, obj, event):
         if event.type() in (QEvent.DragEnter, QEvent.Drop):
@@ -135,38 +135,72 @@ class MainWindow(QtGui.QMainWindow):
             return super(MainWindow, self).eventFilter(obj, event)
 
     @report_to_user
-    def new_document(self):
-        """Creates a new document. The user is prompted for the path to a
-        scanned image, for which the document will be created.
+    def open_file(self, path):
+        """Opens path, which can be None, the path to an inselect document or
+        the path to an image file. If None, the user is prompted to select a
+        file.
+
+        * If a .inselect file, the file is opened
+        * If an image file for which a .inselect document already exists, the
+        .inselect file is opened
+        * If a _thumbnail.jpg file corresponding to an existing .inselect file,
+        the .inselect file is opened
+        * If an image file, a new .inselect file is created and opened
         """
-        debug_print('MainWindow.new_document')
+        debug_print(u'MainWindow.open_file [{0}]'.format(path))
 
-        if not self.close_document():
-            # User does not want to close the existing document
-            pass
-        else:
-            # Source image
+        if not path:
             folder = inselect.settings.get("working_directory")
-            filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
-            path, selected_filter = QtGui.QFileDialog.getOpenFileName(
-                    self, "Choose image for the new inselect document", folder,
-                    filter=filter)
+            path, _ = QtGui.QFileDialog.getOpenFileName(
+                self, "Open", folder, [InselectDocument.EXTENSION] + IMAGE_SUFFIXES)
 
-            if path:
-                # TODO Ingestion of large images is time-consuming - run
-                # in a worker thread
+        if path:
+            # Will be None if user cancelled getOpenFileName
+            if not self.close_document():
+                # User does not want to close the existing document
+                pass
+            else:
+                path = Path(path)
+                inselect.settings.set_value('working_directory', str(path.parent))
+                doc_of_scan = InselectDocument.document_path_of_scanned(path)
+                doc_of_thumbnail = InselectDocument.document_path_of_thumbnail(path)
+                if InselectDocument.EXTENSION == path.suffix:
+                    # Open the .inselect document
+                    debug_print('Opening inselect document [{0}]'.format(path))
+                    self.open_document(path)
+                elif doc_of_scan.is_file():
+                    # An image file for which a .inselect document already exists
+                    msg = u'Opening inselect document [{0}] of scan [{1}]'
+                    debug_print(msg.format(doc_of_scan, path))
+                    self.open_document(doc_of_scan)
+                elif doc_of_thumbnail.is_file():
+                    # A thumbnail file corresponding to an existing .inselect file
+                    msg = u'Opening inselect document [{0}] of thumbnail [{1}]'
+                    debug_print(msg.format(doc_of_thumbnail, path))
+                    self.open_document(doc_of_thumbnail)
+                else:
+                    debug_print(u'Creating new inselect document for image [{0}]'.format(path))
+                    self.new_document(path)
 
-                class NewDoc(object):
-                    def __init__(self, image):
-                        self.image = image
 
-                    def __call__(self, progress):
-                        progress('Creating thumbnail of scanned image')
-                        doc = ingest_image(self.image, self.image.parent)
-                        self.document_path = doc.document_path
+    def new_document(self, path):
+        """Creates and opens a new inselect document for the scanned image
+        given in path
+        """
+        debug_print('MainWindow.new_document [{0}]'.format(path))
 
-                self.run_in_worker(NewDoc(Path(path)), 'New document',
-                                   self.new_document_finished)
+        # Callable for worker thread
+        class NewDoc(object):
+            def __init__(self, image):
+                self.image = image
+
+            def __call__(self, progress):
+                progress('Creating thumbnail of scanned image')
+                doc = ingest_image(self.image, self.image.parent)
+                self.document_path = doc.document_path
+
+        self.run_in_worker(NewDoc(Path(path)), 'New document',
+                           self.new_document_finished)
 
     def new_document_finished(self, operation):
         """Called when new_document worker has finished
@@ -174,45 +208,32 @@ class MainWindow(QtGui.QMainWindow):
         debug_print('MainWindow.new_document_finished')
 
         document_path = operation.document_path
-        self.open_document(document_path)
+        self.open_file(document_path)
         msg = 'New inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
         QMessageBox.information(self, "Document created", msg)
 
-    @report_to_user
-    def open_document(self, filename=None):
-        """Opens filename. If filename does not evaluate to True, the user is
-        prompted for a filename.
+    def open_document(self, path):
+        """Opens the inselect document given by path
         """
-        debug_print('MainWindow.open_document', '[{0}]'.format(str(filename)))
+        debug_print('MainWindow.open_document [{0}]'.format(path))
 
-        if not filename:
-            folder = inselect.settings.get("working_directory")
-            filename, _ = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, self.FILE_FILTER)
+        path = Path(path)
+        document = InselectDocument.load(path)
+        inselect.settings.set_value('working_directory', str(path.parent))
 
-        if filename:
-            # Will be None if user cancelled getOpenFileName
-            if not self.close_document():
-                # User does not want to close the existing document
-                pass
-            else:
-                filename = Path(filename)
-                document = InselectDocument.load(filename)
-                inselect.settings.set_value('working_directory', str(filename.parent))
+        self.document = document
+        self.document_path = path
+        self.model.from_document(self.document)
 
-                self.document = document
-                self.document_path = filename
-                self.model.from_document(self.document)
+        # TODO LH Prefer setWindowFilePath to setWindowTitle?
+        self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
 
-                # TODO LH Prefer setWindowFilePath to setWindowTitle?
-                self.setWindowTitle(u"inselect [{0}]".format(self.document_path.stem))
-
-                self.sync_ui()
+        self.sync_ui()
 
     @report_to_user
     def save_document(self):
-        """Saves the document and, if the OKed by the user, writes crops
+        """Saves the document
         """
         debug_print('MainWindow.save_document')
         items = []
@@ -223,6 +244,8 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def save_crops(self):
+        """Saves cropped specimen images
+        """
         debug_print('MainWindow.save_crops')
         res = QMessageBox.Yes
         existing_crops = self.document.crops_dir.is_dir()
@@ -505,11 +528,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def create_actions(self):
         # File menu
-        self.new_action = QAction("&New...", self,
-            shortcut=QtGui.QKeySequence.New, triggered=self.new_document,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_FileIcon))
         self.open_action = QAction("&Open...", self,
-            shortcut=QtGui.QKeySequence.Open, triggered=self.open_document,
+            shortcut=QtGui.QKeySequence.Open, triggered=self.open_file,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
         self.save_action = QAction("&Save", self,
             shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
@@ -597,7 +617,6 @@ class MainWindow(QtGui.QMainWindow):
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
-        self.toolbar.addAction(self.new_action)
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
         for action in [a for a in self.plugin_actions if a.icon()]:
@@ -607,7 +626,6 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         self.fileMenu = QMenu("&File", self)
-        self.fileMenu.addAction(self.new_action)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
         self.fileMenu.addAction(self.save_crops_action)
@@ -668,15 +686,23 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.showFullScreen()
 
+    def _accept_drag_drop(self, event):
+        """If event refers to a single file that can opened, returns the path.
+        Returns None otherwise.
+        """
+        urls = event.mimeData().urls() if event.mimeData() else None
+        path = Path(urls[0].toLocalFile()) if urls and 1 == len(urls) else None
+        if (path and
+            path.suffix in chain([InselectDocument.EXTENSION], IMAGE_SUFFIXES)):
+            return urls[0].toLocalFile()
+        else:
+            return None
+
     def dragEnterEvent(self, event):
         """QWidget virtual
         """
-        # Accept drag-drop of a single inselect file
         debug_print('MainWindow.dragEnterEvent')
-        mimeData = event.mimeData()
-        urls = mimeData.urls()
-        if (mimeData.hasUrls() and 1==len(urls) and
-            urls[0].toLocalFile().endswith(InselectDocument.EXTENSION)):
+        if self._accept_drag_drop(event):
             event.acceptProposedAction()
         else:
             super(MainWindow, self).dragEnterEvent(event)
@@ -684,14 +710,11 @@ class MainWindow(QtGui.QMainWindow):
     def dropEvent(self, event):
         """QWidget virtual
         """
-        # Accept drag-drop of a single inselect file
-        debug_print('MainWindow.dropEvent', event)
-        mimeData = event.mimeData()
-        urls = mimeData.urls()
-        if (mimeData.hasUrls() and 1==len(urls) and
-            urls[0].toLocalFile().endswith(InselectDocument.EXTENSION)):
+        debug_print('MainWindow.dropEvent')
+        res = self._accept_drag_drop(event)
+        if res:
             event.acceptProposedAction()
-            self.open_document(urls[0].toLocalFile())
+            self.open_file(res)
         else:
             super(MainWindow, self).dropEvent(event)
 

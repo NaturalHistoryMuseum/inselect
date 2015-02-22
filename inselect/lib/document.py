@@ -15,12 +15,6 @@ from .utils import debug_print, validate_normalised
 from .rect import Rect
 
 
-def _thumbnail_path(scanned):
-    """Returns the path of the thumbnail image for the given scanned image path
-    """
-    return scanned.parent / (scanned.stem + '_thumbnail.jpg')
-
-
 class InselectDocument(object):
     """Simple represention of an Inselect document.
 
@@ -30,6 +24,7 @@ class InselectDocument(object):
 
     VERSION = 1
     EXTENSION = '.inselect'
+    THUMBNAIL_SUFFIX = '_thumbnail.jpg'
 
     # A temporary solution to metadata fields
     METADATA_FIELDS = ('Specimen number', 'Location', 'Taxonomic group',)
@@ -52,10 +47,32 @@ class InselectDocument(object):
         if thumbnail:
             self._thumbnail = thumbnail
         else:
-            t = _thumbnail_path(self._scanned.path)
+            t = self.thumbnail_path_of_scanned(self._scanned.path)
             self._thumbnail = InselectImage(t) if t.is_file() else None
 
         self._items = items
+
+    @classmethod
+    def document_path_of_scanned(cls, scanned):
+        """Returns the path of the document for the given scanned image
+        """
+        scanned = Path(scanned)
+        return scanned.parent / (scanned.stem + cls.EXTENSION)
+
+    @classmethod
+    def document_path_of_thumbnail(cls, thumbnail):
+        """Returns the path of the document for the given thumbnail image
+        """
+        thumbnail = Path(thumbnail)
+        fname = thumbnail.name.replace(cls.THUMBNAIL_SUFFIX, cls.EXTENSION)
+        return thumbnail.parent / fname
+
+    @classmethod
+    def thumbnail_path_of_scanned(cls, scanned):
+        """Returns the path of the thumbnail image for the given scanned image
+        """
+        scanned = Path(scanned)
+        return scanned.parent / (scanned.stem + cls.THUMBNAIL_SUFFIX)
 
     def copy(self):
         """Returns a new instance of InselectDocument that is a copy of this
@@ -213,7 +230,7 @@ class InselectDocument(object):
 
     def ensure_thumbnail(self, width=4096):
         if self._thumbnail is None:
-            p = _thumbnail_path(self._scanned.path)
+            p = self.thumbnail_path_of_scanned(self._scanned.path)
 
             # File might have been created after this instance
             if not p.is_file():

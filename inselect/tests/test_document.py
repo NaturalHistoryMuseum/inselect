@@ -234,6 +234,18 @@ class TestDocument(unittest.TestCase):
         finally:
             os.unlink(temp.name)
 
+    def test_document_path_of_scanned(self):
+        self.assertEqual(Path('x.inselect'),
+                         InselectDocument.document_path_of_scanned('x.png'))
+
+    def test_document_path_of_thumbnail(self):
+        self.assertEqual(Path('x.inselect'),
+                         InselectDocument.document_path_of_thumbnail('x_thumbnail.jpg'))
+
+    def test_thumbnail_path_of_scanned(self):
+        self.assertEqual(Path('x_thumbnail.jpg'),
+                         InselectDocument.thumbnail_path_of_scanned('x.png'))
+
 
 if __name__=='__main__':
     unittest.main()

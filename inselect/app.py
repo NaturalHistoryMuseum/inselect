@@ -37,6 +37,6 @@ def main():
 
 
     if args.file:
-        window.open_document(args.file)
+        window.open_file(args.file)
 
     sys.exit(app.exec_())
