@@ -586,6 +586,14 @@ class MainWindow(QtGui.QMainWindow):
             self.plugin_actions[index] = action
 
         # View menu
+        # The obvious approach is to set the trigger to
+        # partial(self.tabs.setCurrentIndex, 0) but this causes a segfault when
+        # the application exits on linux.
+        self.boxes_view_action = QAction("&Boxes", self, checkable=True,
+            triggered=partial(self.show_tab, 0))
+        self.metadata_view_action = QAction("&Metadata", self, checkable=True,
+            triggered=partial(self.show_tab, 1))
+
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
         if not hasattr(QtGui.QKeySequence, 'FullScreen'):
@@ -656,8 +664,11 @@ class MainWindow(QtGui.QMainWindow):
             self.editMenu.addAction(action)
 
         self.viewMenu = QMenu("&View", self)
+        self.viewMenu.addAction(self.boxes_view_action)
+        self.viewMenu.addAction(self.metadata_view_action)
+        self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.full_screen_action)
-        self.fileMenu.addSeparator()
+        self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.zoom_in_action)
         self.viewMenu.addAction(self.zoom_out_action)
         self.viewMenu.addAction(self.toogle_zoom_action)
@@ -673,6 +684,9 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.editMenu)
         self.menuBar().addMenu(self.viewMenu)
         self.menuBar().addMenu(self.helpMenu)
+
+    def show_tab(self, index):
+        self.tabs.setCurrentIndex(index)
 
     def current_tab_changed(self, index):
         """Slot for self.tabs.currentChanged() signal
@@ -751,6 +765,8 @@ class MainWindow(QtGui.QMainWindow):
             action.setEnabled(document)
 
         # View
+        self.boxes_view_action.setChecked(boxes_view_visible)
+        self.metadata_view_action.setChecked(not boxes_view_visible)
         self.zoom_in_action.setEnabled(document and boxes_view_visible)
         self.zoom_out_action.setEnabled(document and boxes_view_visible)
         self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
