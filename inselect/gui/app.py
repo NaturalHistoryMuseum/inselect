@@ -154,7 +154,7 @@ class MainWindow(QtGui.QMainWindow):
             filter = u'Inselect documents (*{0});;Images ({1})'
             filter = filter.format(InselectDocument.EXTENSION,
                                    u' '.join(IMAGE_PATTERNS))
-            path, _ = QtGui.QFileDialog.getOpenFileName(
+            path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
                 self, "Open", folder, filter)
 
         if path:
@@ -171,20 +171,24 @@ class MainWindow(QtGui.QMainWindow):
                     doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
                     doc_of_image = path.parent / doc_of_image
                     doc_of_image = doc_of_image.with_suffix(InselectDocument.EXTENSION)
+                else:
+                    doc_of_image = None
 
                 if InselectDocument.EXTENSION == path.suffix:
                     # Open the .inselect document
                     debug_print('Opening inselect document [{0}]'.format(path))
                     self.open_document(path)
-                elif doc_of_image.is_file():
-                    # A thumbnail file corresponding to an existing .inselect file
+                elif doc_of_image and doc_of_image.is_file():
+                    # An image file corresponding to an existing .inselect file
                     msg = u'Opening inselect document [{0}] of thumbnail [{1}]'
                     debug_print(msg.format(doc_of_image, path))
                     self.open_document(doc_of_image)
-                else:
-                    debug_print(u'Creating new inselect document for image [{0}]'.format(path))
+                elif path.suffix in IMAGE_SUFFIXES:
+                    msg = u'Creating new inselect document for image [{0}]'
+                    debug_print(msg.format(path))
                     self.new_document(path)
-
+                else:
+                    raise InselectError('Unknown file type [{0}]'.format(path))
 
     def new_document(self, path):
         """Creates and opens a new inselect document for the scanned image
@@ -470,7 +474,7 @@ class MainWindow(QtGui.QMainWindow):
         sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
 
     @report_to_user
-    def delete(self):
+    def delete_selected(self):
         """Deletes the selected boxes
         """
         # Delete contiguous blocks of rows
@@ -558,7 +562,7 @@ class MainWindow(QtGui.QMainWindow):
             shortcut="P", triggered=partial(self.select_next, forwards=False))
         # TODO LH Does CMD + Backspace work on a mac?
         self.delete_action = QAction("&Delete selected", self,
-            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete)
+            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
         self.rotate_clockwise_action = QAction(
             "Rotate clockwise", self,
             shortcut="R", triggered=partial(self.rotate90, clockwise=True))

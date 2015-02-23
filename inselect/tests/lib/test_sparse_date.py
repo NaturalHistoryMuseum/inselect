@@ -4,6 +4,7 @@ import unittest
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.sparse_date import SparseDate
 
+
 class TestSparseDate(unittest.TestCase):
     def test_SparseDate(self):
         self.assertRaises(ValueError, SparseDate, None, None, None)

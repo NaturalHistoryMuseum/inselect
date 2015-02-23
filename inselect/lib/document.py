@@ -35,7 +35,7 @@ class InselectDocument(object):
     or load.
     """
 
-    FILE_VERSION = 2
+    FILE_VERSIONS = (1,2,)
     EXTENSION = '.inselect'
     THUMBNAIL_SUFFIX = '_thumbnail'
 
@@ -157,7 +157,7 @@ class InselectDocument(object):
             v = doc.get('inselect version')
             if not v:
                 raise InselectError('Not an inselect document')
-            elif v > cls.FILE_VERSION:
+            elif not v in cls.FILE_VERSIONS:
                 raise InselectError('Unsupported version [{0}]'.format(v))
             else:
                 if 1 == v:
@@ -191,7 +191,7 @@ class InselectDocument(object):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = [l,t,w,h]
 
-        doc = { 'inselect version': self.FILE_VERSION,
+        doc = { 'inselect version': self.FILE_VERSIONS[-1],
                 'scanned extension': self._scanned.path.suffix,
                 'items' : items,
               }
@@ -242,6 +242,7 @@ class InselectDocument(object):
                 shutil.rmtree(str(tempdir))
 
     def ensure_thumbnail(self, width=4096):
+        "Create thumbnail image, if it does not already exist"
         if self._thumbnail is None:
             p = self.thumbnail_path_of_scanned(self._scanned.path)
 
@@ -274,11 +275,21 @@ class InselectDocument(object):
         # The union of fields among all items
         return set(itertools.chain(*(i['fields'].keys() for i in self._items)))
 
-    def export_csv(self, path):
+    def export_csv(self, path=None):
+        """Exports metadata to a CSV file given in path, defaults to
+        self.document_path with .csv extension. Path is returned.
+        """
+        if not path:
+            path = self.document_path.with_suffix('.csv')
+        else:
+            path = Path(path)
+
         # TODO fields in order given by dca terms
         fields = sorted(self.metadata_fields)
-        with Path(path).open('wb') as f:
+        with path.open('wb') as f:
             w = UnicodeWriter(f)
             w.writerow(['Item',] + fields)
             for index,item in enumerate(self._items):
                 w.writerow([1+index] + [item['fields'].get(f) for f in fields])
+
+        return path

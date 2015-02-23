@@ -5,7 +5,7 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.segment import segment_document
 
 
-TESTDATA = Path(__file__).parent / 'test_data'
+TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 class TestSegment(unittest.TestCase):

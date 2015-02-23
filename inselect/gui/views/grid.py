@@ -4,7 +4,7 @@ from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
                           QStyleOptionButton)
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import PaintState
+from inselect.gui.utils import painter_state
 from inselect.gui.roles import RectRole, PixmapRole, RotationRole
 
 class CropDelegate(QAbstractItemDelegate):
@@ -41,7 +41,7 @@ class CropDelegate(QAbstractItemDelegate):
         """The grey box
         """
         selected = QStyle.State_Selected & option.state
-        with PaintState(painter):
+        with painter_state(painter):
             painter.setBrush(self.GREY if selected else self.DARK_GREY)
             painter.drawRect(option.rect)
  
@@ -77,7 +77,7 @@ class CropDelegate(QAbstractItemDelegate):
         t.translate(-option.rect.width()/2-option.rect.left(),
                     -option.rect.height()/2-option.rect.top())
 
-        with PaintState(painter):
+        with painter_state(painter):
             painter.setTransform(t)
             painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
 
@@ -88,7 +88,7 @@ class CropDelegate(QAbstractItemDelegate):
         """Arrows to rotate crops
         """
 
-        with PaintState(painter):
+        with painter_state(painter):
             selected = QStyle.State_Selected & option.state
             painter.setBrush(self.WHITE if selected else self.GREY)
             f = option.font

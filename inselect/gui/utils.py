@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from functools import wraps
 from itertools import groupby
 from operator import itemgetter
@@ -65,18 +66,15 @@ def contiguous(values):
         count = upper - lower + 1
         yield lower, count
 
-class PaintState(object):
-    """Context manager that saves and restores a QtGui.QPainter's state
+@contextmanager
+def painter_state(painter):
+    """A context manager that saves and restores a QtGui.QPainter's state
     """
-    def __init__(self, painter):
-        self._p = painter
-
-    def __enter__(self):
-        self._p.save()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._p.restore()
-
+    painter.save()
+    try:
+        yield
+    finally:
+        painter.restore()
 
 def report_to_user(f):
     """Decorator that reports exceptions to the user

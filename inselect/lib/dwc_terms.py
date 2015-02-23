@@ -1,3 +1,5 @@
+"""Darwin Core terms
+"""
 DWC_TERMS = [
     {
         "Group": "IdentifierTerms",

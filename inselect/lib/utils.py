@@ -19,9 +19,12 @@ def debug_print(*args, **kwargs):
         print(*args, **kwargs)
 
 def make_readonly(path):
+    """Alters path to be read-only and return the original mode
+    """
     path = Path(path)
     mode = path.stat()[stat.ST_MODE]
     path.chmod(mode ^ (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
+    return mode
 
 def validate_normalised(boxes):
     for l,t,w,h in boxes:

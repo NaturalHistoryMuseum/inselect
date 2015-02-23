@@ -5,7 +5,7 @@ from PySide.QtCore import Qt
 from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import PaintState
+from inselect.gui.utils import painter_state
 
 from .resize_handle import ResizeHandle
 
@@ -66,7 +66,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
                            self.scene().pixmap,
                            self.sceneBoundingRect())
 
-        with PaintState(painter):
+        with painter_state(painter):
             # Zero thickness indicates a cosmetic pen, which is drawn with the
             # same thickness regardless of the view's scale factor
             painter.setPen(QPen(self.colour, 0, Qt.SolidLine))

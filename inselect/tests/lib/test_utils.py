@@ -10,6 +10,7 @@ from inselect.lib.utils import (make_readonly, validate_normalised,
                                 rmtree_readonly)
 from inselect.lib.rect import Rect
 
+
 class TestMakeReadOnly(unittest.TestCase):
     def test_makereadonly_file(self):
         f = tempfile.NamedTemporaryFile()
