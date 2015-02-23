@@ -1,4 +1,5 @@
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -121,6 +122,8 @@ class TestImage(unittest.TestCase):
         finally:
             shutil.rmtree(temp)
 
+    @unittest.skipIf(sys.platform.startswith("win"),
+                     "Read-only directories not available on Windows")
     def test_save_crops_read_only_directory(self):
         "Can't write crops to a read-only directory"
         # This case is doing more than simply testing filesystem behavour

@@ -150,7 +150,7 @@ class InselectDocument(object):
         path = Path(path)
 
         # Sniff the first few bytes - file must look like a json document
-        if not re.match('{[ \n]*"', path.open('rb').read(20)):
+        if not re.match('^{[ (\n)|(\r\n)]*"', path.open('rb').read(20)):
             raise InselectError('Not an inselect document')
         else:
             doc = json.load(path.open())
@@ -196,8 +196,12 @@ class InselectDocument(object):
                 'items' : items,
               }
 
+        # Tip from SO about writing utf-8 encoded files
+        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
         # Specify separators to prevent trailing whitespace
-        json.dump(doc, open(str(path), "w"), indent=4, separators=(',', ': '))
+        with path.open("w", newline='\n', encoding='utf8') as f:
+            f.write(unicode(json.dumps(doc, ensure_ascii=True, indent=4,
+                                       separators=(',', ': '), sort_keys=True)))
 
         debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 

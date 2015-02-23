@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import stat
+import sys
 import tempfile
 import unittest
 
@@ -210,6 +211,8 @@ class TestDocument(unittest.TestCase):
             self.assertRaises(InselectError, doc.ensure_thumbnail, 50)
             self.assertRaises(InselectError, doc.ensure_thumbnail, 20000)
 
+    @unittest.skipIf(sys.platform.startswith("win"),
+                     "Read-only directories not available on Windows")
     def test_ensure_thumbnail_read_only(self):
         "Can't write thumbnail to a read-only directory"
         # This case is doing more than simply testing filesystem behavour
