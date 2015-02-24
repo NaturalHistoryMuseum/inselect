@@ -170,7 +170,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         if Qt.ShiftModifier == event.modifiers():
             # Add sub-segmentation seed point
-            self._seeds.append(event.pos())
+            self.append_subsegmentation_seed_point(event.pos())
         else:
             # Starting a move
             self.setCursor(Qt.ClosedHandCursor)
@@ -224,6 +224,11 @@ class BoxItem(QtGui.QGraphicsRectItem):
         if r.width()>1.0 and r.height()>1.0:
             self.prepareGeometryChange()
             self.setRect(r)
+
+    def append_subsegmentation_seed_point(self, pos):
+        "Appends pos (a QPoint) to the list of subsegmentation seeds points"
+        debug_print('New subsegmentation seed point at [{0}]'.format(pos))
+        self._seeds.append(pos)
 
     @property
     def subsegmentation_seed_points(self):

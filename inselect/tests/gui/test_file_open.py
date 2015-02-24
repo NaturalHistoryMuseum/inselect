@@ -12,8 +12,6 @@ from inselect.gui.app import MainWindow
 from inselect.tests.utils import temp_directory_with_files
 
 from PySide.QtGui import QMessageBox, QFileDialog
-from PySide.QtCore import Qt
-from PySide.QtTest import QTest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
