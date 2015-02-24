@@ -245,6 +245,8 @@ class TestDocument(unittest.TestCase):
                     expected.update({'Item' : str(1+index)})
                     actual = {k: v for k,v in row.items() if v}
                     self.assertEqual(expected, actual)
+        # Expect 4 rows
+        self.assertEqual(index, 4)
 
     def test_thumbnail_path_of_scanned(self):
         self.assertEqual(Path('x_thumbnail.jpg'),

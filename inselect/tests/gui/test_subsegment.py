@@ -62,6 +62,8 @@ class TestSubsegment(GUITest):
         self.assertEqual(1, w.model.rowCount())
         self.assertFalse(w.model.modified)
 
+        # User should have been warned
+        self.assertTrue(mock_warning.called)
         expected = ('Please select exactly one box that contains at least two '
                     'seed points')
         self.assertTrue(expected in mock_warning.call_args[0])

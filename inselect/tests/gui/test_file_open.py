@@ -1,7 +1,10 @@
 import unittest
 
+from functools import partial
 from mock import patch
 from pathlib import Path
+
+from PySide.QtGui import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
 
@@ -10,8 +13,6 @@ from gui_test import GUITest
 from inselect.gui.app import MainWindow
 
 from inselect.tests.utils import temp_directory_with_files
-
-from PySide.QtGui import QMessageBox, QFileDialog
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
@@ -57,24 +58,54 @@ class TestFileOpen(GUITest):
     def test_new_document(self, mock_new_document):
         """Open an image file for which no inselect document exists
         """
-        # TODO LH Need to check that the document has actually been created.
-        # This is hard to test because the new_document operation runs in a
-        # separate thread
+        # open_file delegates to new_document, which runs an operation runs in a
+        # worker thread - I could not think of a way to test the complete
+        # operation in a single test.
+        # This test checks that new_document is called as expected.
         with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
             self.window.open_file(tempdir / 'test_segment.png')
+            self.assertTrue(mock_new_document.called)
             self.assertEqual(tempdir / 'test_segment.png',
                              mock_new_document.call_args[0][0])
 
-    def test_open_non_existant_image(self):
+    @patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes)
+    def test_new_document_thread(self, mock_information):
+        """Open an image file for which no inselect document exists
+        """
+        # open_file delegates to new_document, which runs an operation runs in a
+        # worker thread - I could not think of a way to test the complete
+        # operation in a single test.
+        # This test checks that new_document behaves as expected.
+        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
+            self.run_async_operation(partial(self.window.new_document,
+                                             tempdir / 'test_segment.png'))
+
+            # New document should have been created
+            self.assertTrue((TESTDATA / 'test_segment.inselect').is_file())
+
+            # User should have been told about the new document
+            self.assertTrue(mock_information.called)
+            expected = u'New Inselect document [test_segment] created in [{0}]'
+            expected = expected.format(tempdir)
+            self.assertTrue(expected in mock_information.call_args[0])
+
+    @patch.object(QMessageBox, 'critical', return_value=QMessageBox.Yes)
+    def test_open_non_existant_image(self, mock_critical):
         "Try to open a non-existant image file"
-        # TODO LH this is hard to test because the new_document operation runs
-        # in a separate thread
-        pass
+        self.assertRaises(InselectError, self.window.open_file,
+                          'I do not exist.png')
+
+        # User should have been told about the error
+        self.assertTrue(mock_critical.called)
+        expected = (u"An error occurred:\n"
+                    u"Image file [I do not exist.png] does not exist")
+        self.assertTrue(expected in mock_critical.call_args[0])
 
     @patch.object(QMessageBox, 'critical', return_value=QMessageBox.Yes)
     def test_open_non_existant_inselect(self, mock_critical):
         "Try to open a non-existant inselect file"
         self.assertRaises(IOError, self.window.open_file, 'I do not exist.inselect')
+        self.assertTrue(mock_critical.called)
         expected = (u"An error occurred:\n"
                     u"[Errno 2] No such file or directory: 'I do not exist.inselect'")
         self.assertTrue(expected in mock_critical.call_args[0])
@@ -83,6 +114,7 @@ class TestFileOpen(GUITest):
     def test_open_non_existant_unrecognised(self, mock_critical):
         "Try to open a non-existant file with an unrecognised extension"
         self.assertRaises(InselectError, self.window.open_file, 'I do not exist')
+        self.assertTrue(mock_critical.called)
         expected = u'An error occurred:\nUnknown file type [I do not exist]'
         self.assertTrue(expected in mock_critical.call_args[0])
 
@@ -96,6 +128,7 @@ class TestFileOpen(GUITest):
 
         # Open another doc - user says not to save
         w.open_file(TESTDATA / 'test_subsegment.inselect')
+        self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
         self.assertTrue(expected in mock_question.call_args[0])
 
@@ -121,6 +154,7 @@ class TestFileOpen(GUITest):
 
             # Open another doc - user says not to save
             w.open_file(TESTDATA / 'test_subsegment.inselect')
+            self.assertTrue(mock_question.called)
             expected = "Save the document before closing?"
             self.assertTrue(expected in mock_question.call_args[0])
 
@@ -144,6 +178,7 @@ class TestFileOpen(GUITest):
 
         # Open another document - user says not to save
         w.open_file(TESTDATA / 'test_subsegment.inselect')
+        self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
         self.assertTrue(expected in mock_question.call_args[0])
 

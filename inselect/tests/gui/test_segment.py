@@ -49,7 +49,8 @@ class TestSegment(GUITest):
         # Check that bounding boxes are the same as the original boxes
         self.assertEqual(expected, actual)
 
-        # Was the user prompted?
+        # User should have been prompted
+        self.assertTrue(mock_question.called)
         expected = ('Segmenting will cause all boxes and metadata to be '
                     'replaced.\n\nContinue and replace all existing '
                     'boxes and metadata')

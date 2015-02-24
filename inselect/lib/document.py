@@ -132,12 +132,12 @@ class InselectDocument(object):
         # TODO LH Raise error if a thumbnail image is ingested
         scanned = Path(scanned)
         if not scanned.is_file():
-            raise InselectError('Image file [{0}] does not exist'.format(scanned))
+            raise InselectError(u'Image file [{0}] does not exist'.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
             doc = cls(scanned_path=scanned, items=[])
             if doc.document_path.is_file():
-                raise InselectError('Document file [{0}] already exists'.format(doc.document_path))
+                raise InselectError(u'Document file [{0}] already exists'.format(doc.document_path))
             else:
                 doc.save()
                 return doc
@@ -175,7 +175,7 @@ class InselectDocument(object):
 
                 scanned = path.with_suffix(doc['scanned extension'])
 
-                msg = 'Loaded [{0}] items from [{1}]'
+                msg = u'Loaded [{0}] items from [{1}]'
                 debug_print(msg.format(len(doc['items']), path))
 
                 return cls(scanned_path=scanned, items=doc['items'])
@@ -183,7 +183,7 @@ class InselectDocument(object):
     def save(self):
         "Saves to self.document_path"
         path = self.document_path
-        debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
+        debug_print(u'Saving [{0}] items to [{1}]'.format(len(self._items), path))
 
         # Convert Rect instances to lists
         items = deepcopy(self._items)
@@ -203,7 +203,7 @@ class InselectDocument(object):
             f.write(unicode(json.dumps(doc, ensure_ascii=True, indent=4,
                                        separators=(',', ': '), sort_keys=True)))
 
-        debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
+        debug_print(u'Saved [{0}] items to [{1}]'.format(len(items), path))
 
     @property
     def crops(self):
@@ -252,7 +252,7 @@ class InselectDocument(object):
 
             # File might have been created after this instance
             if not p.is_file():
-                debug_print('Creating [{0}] with width of [{1}] pixels'.format(p, width))
+                debug_print(u'Creating [{0}] with width of [{1}] pixels'.format(p, width))
                 # TODO LH Sensible limits?
                 # TODO LH What if self._scanned.width<width?
                 min, max = 512, 8192
@@ -267,7 +267,7 @@ class InselectDocument(object):
                     # TODO Copy EXIF tags?
                     res = cv2.imwrite(str(p), thumbnail)
                     if not res:
-                        raise InselectError('Unable to write thumbnail [{0}]'.format(p))
+                        raise InselectError(u'Unable to write thumbnail [{0}]'.format(p))
 
             # Load it
             self._thumbnail = InselectImage(p)

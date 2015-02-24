@@ -196,18 +196,22 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.new_document [{0}]'.format(path))
 
-        # Callable for worker thread
-        class NewDoc(object):
-            def __init__(self, image):
-                self.image = image
+        path = Path(path)
+        if not path.is_file():
+            raise InselectError(u'Image file [{0}] does not exist'.format(path))
+        else:
+            # Callable for worker thread
+            class NewDoc(object):
+                def __init__(self, image):
+                    self.image = image
 
-            def __call__(self, progress):
-                progress('Creating thumbnail of scanned image')
-                doc = ingest_image(self.image, self.image.parent)
-                self.document_path = doc.document_path
+                def __call__(self, progress):
+                    progress('Creating thumbnail of scanned image')
+                    doc = ingest_image(self.image, self.image.parent)
+                    self.document_path = doc.document_path
 
-        self.run_in_worker(NewDoc(Path(path)), 'New document',
-                           self.new_document_finished)
+            self.run_in_worker(NewDoc(path), 'New document',
+                               self.new_document_finished)
 
     def new_document_finished(self, operation):
         """Called when new_document worker has finished
@@ -504,15 +508,16 @@ class MainWindow(QtGui.QMainWindow):
             self.model.removeRows(row, count)
 
     @report_to_user
-    def select_next(self, forwards):
-        """The user wants to select the next/previous box
+    def select_next_prev(self, next):
+        """Selects the next box in the mode if next is True, the previous
+        box in the model if next if False.
         """
         sm = self.view_grid.selectionModel()
         model = self.view_grid.model()
         current = sm.currentIndex()
         current = current.row() if current else -1
 
-        select = current + (1 if forwards else -1)
+        select = current + (1 if next else -1)
         if select == model.rowCount():
             select = 0
         elif -1 == select:
@@ -573,9 +578,9 @@ class MainWindow(QtGui.QMainWindow):
         self.select_none_action = QAction("Select &None", self,
             shortcut="ctrl+D", triggered=self.select_none)
         self.next_box_action = QAction("Next box", self,
-            shortcut="N", triggered=partial(self.select_next, forwards=True))
+            shortcut="N", triggered=partial(self.select_next_prev, forwards=True))
         self.previous_box_action = QAction("Previous box", self,
-            shortcut="P", triggered=partial(self.select_next, forwards=False))
+            shortcut="P", triggered=partial(self.select_next_prev, forwards=False))
 
         # TODO LH Does CMD + Backspace work on a mac?
         self.delete_action = QAction("&Delete selected", self,

@@ -106,15 +106,15 @@ class TestActionState(GUITest):
         "Checked state of biew actions reflects the active view"
         w = self.window
 
-        w.tabs.setCurrentIndex(0)
+        w.show_tab(0)
         self.assertTrue(w.boxes_view_action.isChecked())
         self.assertFalse(w.metadata_view_action.isChecked())
 
-        w.tabs.setCurrentIndex(1)
+        w.show_tab(1)
         self.assertFalse(w.boxes_view_action.isChecked())
         self.assertTrue(w.metadata_view_action.isChecked())
 
-        w.tabs.setCurrentIndex(0)
+        w.show_tab(0)
 
 
 if __name__=='__main__':
