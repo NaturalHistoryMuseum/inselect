@@ -154,6 +154,10 @@ class TestFileOpen(GUITest):
         self.assertEqual('Inselect [test_segment]', w.windowTitle())
         self.assertTrue(w.model.modified)
 
+        # Close the document
+        with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
+            self.assertTrue(self.window.close_document())
+
     @patch.object(QFileDialog, 'getOpenFileName', return_value=(None,None))
     def test_cancel_file_choose(self, mock_gofn):
         "User cancels the 'choose a file to open' box"
@@ -165,6 +169,10 @@ class TestFileOpen(GUITest):
         self.assertEqual(0, w.model.rowCount())
         self.assertEqual('Inselect [test_segment]', w.windowTitle())
         self.assertTrue(w.model.modified)
+
+        # Close the document
+        with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
+            self.assertTrue(self.window.close_document())
 
 
 if __name__=='__main__':

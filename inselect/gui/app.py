@@ -10,10 +10,10 @@ from pathlib import Path
 import numpy as np
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt, QEvent
+from PySide.QtCore import Qt, QEvent, QSettings
 from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
 
-import inselect.settings
+import inselect
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
@@ -150,7 +150,7 @@ class MainWindow(QtGui.QMainWindow):
         debug_print(u'MainWindow.open_file [{0}]'.format(path))
 
         if not path:
-            folder = inselect.settings.get("working_directory")
+            folder = QSettings().value("working_directory")
             filter = u'Inselect documents (*{0});;Images ({1})'
             filter = filter.format(InselectDocument.EXTENSION,
                                    u' '.join(IMAGE_PATTERNS))
@@ -164,7 +164,7 @@ class MainWindow(QtGui.QMainWindow):
                 pass
             else:
                 path = Path(path)
-                inselect.settings.set_value('working_directory', str(path.parent))
+
                 if path.suffix in IMAGE_SUFFIXES:
                     # Compute the path to the inselect document (which may or
                     # may not already exist) of the image file
@@ -215,6 +215,8 @@ class MainWindow(QtGui.QMainWindow):
         debug_print('MainWindow.new_document_finished')
 
         document_path = operation.document_path
+        QSettings().set_value('working_directory', str(document_path.parent))
+
         self.open_file(document_path)
         msg = u'New Inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
@@ -227,7 +229,7 @@ class MainWindow(QtGui.QMainWindow):
 
         path = Path(path)
         document = InselectDocument.load(path)
-        inselect.settings.set_value('working_directory', str(path.parent))
+        QSettings().setValue("working_directory", str(path.parent))
 
         self.document = document
         self.document_path = path
@@ -351,6 +353,7 @@ class MainWindow(QtGui.QMainWindow):
         debug_print('MainWindow.closeEvent')
         if self.close_document():
             # User wants to close
+            self.write_geometry_settings()
             event.accept()
         else:
             # User does not want to close
@@ -374,11 +377,24 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def about(self):
-        QMessageBox.about(
-            self,
-            inselect.settings.get('about_label'),
-            inselect.settings.get('about_text')
-        )
+        text = u"""<h1>Inselect {version}</h1>
+           <h2>Contributors</h2>
+           <p>
+               <strong>Stefan van der Walt</strong>: Application development
+               and segmentation algorithm
+           </p>
+           <p>
+               <strong>Pieter Holtzhausen</strong>: Application development
+               and segmentation algorithm
+           </p>
+           <p>
+               <strong>Alice Heaton</strong>: Application development
+           </p>
+           <p>
+               <strong>Lawrence Hudson</strong>: Application development
+           </p>
+        """.format(version=inselect.__version__)
+        QMessageBox.about(self, 'Inselect', text)
 
     @report_to_user
     def help(self):
@@ -738,6 +754,40 @@ class MainWindow(QtGui.QMainWindow):
             self.open_file(res)
         else:
             super(MainWindow, self).dropEvent(event)
+
+    def write_geometry_settings(self):
+        "Writes geometry to settings"
+        debug_print('MainWindow.write_geometry_settings')
+
+        # Taken from http://stackoverflow.com/a/8736705
+        # TODO LH Test on multiple display system
+        s = QSettings()
+
+        s.setValue("mainwindow/geometry", self.saveGeometry())
+        s.setValue("mainwindow/pos", self.pos())
+        s.setValue("mainwindow/size", self.size())
+
+    def show_from_geometry_settings(self):
+        debug_print('MainWindow.show_from_geometry_settings')
+
+        # TODO LH What if screen resolution, desktop config change or roaming
+        # profile means that restored state is outside desktop?
+        s = QSettings()
+
+        self.restoreGeometry(s.value("mainwindow/geometry", self.saveGeometry()))
+        if not (self.isMaximized() or self.isFullScreen()):
+            self.move(s.value("mainwindow/pos", self.pos()))
+            self.resize(s.value("mainwindow/size", self.size()))
+        self.show()
+        # if read_bool("mainwindow/maximized", self.isMaximized()):
+        #     debug_print('Will show maximized')
+        #     self.showMaximized()
+        # elif read_bool("mainwindow/full_screen", self.isMaximized()):
+        #     debug_print('Will show full screen')
+        #     self.showFullScreen()
+        # else:
+        #     debug_print('Will show normally')
+        #     self.show()
 
     def sync_ui(self):
         """Synchronise the user interface with the application state
