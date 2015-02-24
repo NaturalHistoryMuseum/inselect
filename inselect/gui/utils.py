@@ -28,27 +28,6 @@ def unite_rects(rects):
     """
     return reduce(lambda x, y: x.united(y), rects)
 
-def get_corners(x1, y1, x2, y2):
-    """Given two diagonally opposite corners of a box, return the top left and
-    bottom right corners
-
-    Parameters
-    ----------
-    x1 : float
-    y1 : float
-    x2 : float
-    y2 : float
-
-    Returns
-    -------
-    tuple
-    """
-    if x1 > x2:
-        x1, x2 = x2, x1
-    if y1 > y2:
-        y1, y2 = y2, y1
-    return (x1, y1), (x2, y2)
-
 def contiguous(values):
     """yields tuples (value, count) of contiguous blocks of integers in values
 
@@ -59,7 +38,7 @@ def contiguous(values):
     (22, 1)
     (25, 4)
     """
-    # http://stackoverflow.com/questions/2361945/detecting-consecutive-integers-in-a-list
+    # Taken from http://stackoverflow.com/a/2361991
     for k, g in groupby(enumerate(values), lambda (i,x):i-x):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
