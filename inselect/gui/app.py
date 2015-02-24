@@ -264,8 +264,6 @@ class MainWindow(QtGui.QMainWindow):
         existing_crops = self.document.crops_dir.is_dir()
 
         if existing_crops:
-            # TODO LH Prompt should mention that full-res scan will need to be
-            # loaded
             msg = 'Overwrite the existing cropped specimen images?'
             res = QMessageBox.question(self, 'Write cropped specimen images?',
                 msg, QMessageBox.No, QMessageBox.Yes)
@@ -578,9 +576,9 @@ class MainWindow(QtGui.QMainWindow):
         self.select_none_action = QAction("Select &None", self,
             shortcut="ctrl+D", triggered=self.select_none)
         self.next_box_action = QAction("Next box", self,
-            shortcut="N", triggered=partial(self.select_next_prev, forwards=True))
+            shortcut="N", triggered=partial(self.select_next_prev, next=True))
         self.previous_box_action = QAction("Previous box", self,
-            shortcut="P", triggered=partial(self.select_next_prev, forwards=False))
+            shortcut="P", triggered=partial(self.select_next_prev, next=False))
 
         # TODO LH Does CMD + Backspace work on a mac?
         self.delete_action = QAction("&Delete selected", self,
