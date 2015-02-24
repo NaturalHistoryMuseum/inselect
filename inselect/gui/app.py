@@ -215,7 +215,7 @@ class MainWindow(QtGui.QMainWindow):
         debug_print('MainWindow.new_document_finished')
 
         document_path = operation.document_path
-        QSettings().set_value('working_directory', str(document_path.parent))
+        QSettings().setValue('working_directory', str(document_path.parent))
 
         self.open_file(document_path)
         msg = u'New Inselect document [{0}] created in [{1}]'
@@ -576,6 +576,7 @@ class MainWindow(QtGui.QMainWindow):
             shortcut="N", triggered=partial(self.select_next, forwards=True))
         self.previous_box_action = QAction("Previous box", self,
             shortcut="P", triggered=partial(self.select_next, forwards=False))
+
         # TODO LH Does CMD + Backspace work on a mac?
         self.delete_action = QAction("&Delete selected", self,
             shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
