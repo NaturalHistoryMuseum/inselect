@@ -9,3 +9,6 @@ htmlcov
 cover
 MANIFEST
 *.spec
+*tar.gz
+*dmg
+

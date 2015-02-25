@@ -4,9 +4,10 @@ import sys
 import inselect
 
 # Generic setup data used for both the distutils setup and the cx_Freeze setup.
-# win32.extra_packages and win32.include_files indicate extra packages/files that are
-# not automatically detected by cx_Freeze. If running into problems, try including the whole
-# of numpy/scipy.
+# win32.extra_packages and win32.include_files indicate extra packages/files
+# that are not automatically detected by cx_Freeze. If running into problems,
+# try including the whole of numpy/scipy.
+
 setup_data = {
     'name': 'inselect',
     'version': inselect.__version__,
@@ -14,7 +15,9 @@ setup_data = {
     'packages': ['inselect','inselect.gui.plugins', 'inselect.gui.views',
                  'inselect.gui.views.boxes', 'inselect.lib', 'inselect.workflow'],
     'test_suite': 'inselect.tests',
-    'scripts': ['inselect/workflow/ingest.py',
+    'scripts': ['inselect/workflow/export_metadata.py',
+                'inselect/workflow/ingest.py',
+                'inselect/workflow/save_crops.py',
                 'inselect/workflow/segment.py'],
     'install_requires' : open('requirements.txt').readlines(),
     'entry_points': {
@@ -27,32 +30,40 @@ setup_data = {
             {
                 'script': 'inselect.py',
                 'targetName': 'inselect.exe',
-                'icon': 'data\inselect.ico',
+                'icon': 'data/inselect.ico',
                 'base': 'Win32GUI',
-                'shortcutName': 'Inselect', # See http://stackoverflow.com/questions/15734703/use-cx-freeze-to-create-an-msi-that-adds-a-shortcut-to-the-desktop
+                'shortcutName': 'Inselect', # See http://stackoverflow.com/a/15736406
                 'shortcutDir': 'ProgramMenuFolder'
             },
             {
-                'script': 'inselect.py',
-                'targetName': 'inselect_cli.exe',
-                'icon': 'data\inselect.ico',
+                'script': 'inselect/workflow/export_metadata.py',
+                'targetName': 'export_metadata.exe',
+                'icon': 'data/inselect.ico',
+                'base': 'Console'
+            },
+            {
+                'script': 'inselect/workflow/ingest.py',
+                'targetName': 'ingest.exe',
+                'icon': 'data/inselect.ico',
+                'base': 'Console'
+            },
+            {
+                'script': 'inselect/workflow/save_crops.py',
+                'targetName': 'save_crops.exe',
+                'icon': 'data/inselect.ico',
+                'base': 'Console'
+            },
+            {
+                'script': 'inselect/workflow/segment.py',
+                'targetName': 'segment.exe',
+                'icon': 'data/inselect.ico',
                 'base': 'Console'
             },
         ],
-        'extra_packages': [
-            'matplotlib.backends.backend_qt4agg',
-#            'scipy.special._ufuncs_cxx',
-#            'scipy.sparse.csgraph._validation',
-#            'scipy.integrate.vode',
-#            'scipy.integrate.lsoda'
-        ],
         'include_files': [
-            (r'{site_packages}\skimage', 'skimage'),
-#            (r'{site_packages}\numpy\core\libifcoremd.dll', 'libifcoremd.dll'),
-#            (r'{site_packages}\numpy\core\libmmd.dll', 'libmmd.dll')
-            (r'{site_packages}\numpy', 'numpy'),
-            (r'{site_packages}\scipy', 'scipy')
+            ('{site_packages}/numpy', 'numpy'),
         ],
+         'extra_packages': [],
         'excludes': ['Tkinter', 'ttk', 'Tkconstants', 'tcl']
     }
 }
@@ -95,7 +106,7 @@ def cx_setup():
                 'packages': setup_data['packages'] + setup_data['win32']['extra_packages'],
                 'excludes': setup_data['win32']['excludes'],
                 'include_files': include_files,
-                'icon': 'data\inselect.ico'
+                'icon': 'data/inselect.ico'
             },
             'bdist_msi': {
                 'upgrade_code': '{fe2ed61d-cd5e-45bb-9d16-146f725e522f}'
