@@ -426,10 +426,10 @@ class MainWindow(QtGui.QMainWindow):
 
         if user_cancelled:
             QMessageBox.information(self, 'Cancelled',
-                                    '{0} cancelled'.format(name))
+                                    "'{0} cancelled'".format(name))
         elif error_message:
             QMessageBox.information(self,
-                    'An error occurred running'.format(name),
+                    "An error occurred running '{0}'".format(name),
                     error_message + '\n\nExisting data has not been altered')
         else:
             if complete_fn:
