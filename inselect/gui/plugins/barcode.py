@@ -29,7 +29,7 @@ class BarcodePlugin(Plugin):
     def name(cls):
         """Name of the plugin
         """
-        return 'Decode barcodes'
+        return 'Read barcodes'
 
     @classmethod
     def description(cls):
