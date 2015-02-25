@@ -3,12 +3,22 @@ from __future__ import print_function, division
 import argparse
 import sys
 
-from PySide import QtCore, QtGui
+from PySide.QtCore import QSettings, QLocale, QCoreApplication
+from PySide.QtGui import QApplication
 
 import inselect
 
 from inselect.lib.utils import debug_print
 from inselect.gui.app import MainWindow
+
+# The QSettings default constructor uses the application's organizationName
+# and applicationName properties.
+QCoreApplication.setOrganizationName('NHM')
+QCoreApplication.setApplicationName('inselect')
+
+# No obvious benefit to also setting these but neither is there any obvious harm
+QCoreApplication.setApplicationVersion(inselect.__version__)
+QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
 
 def main():
@@ -24,24 +34,15 @@ def main():
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
-    # The QSettings default constructor uses the application's organizationName
-    # and applicationName properties.
-    app.setOrganizationName('NHM')
-    app.setApplicationName('inselect')
-
-    debug_print(u'Settings stored in [{0}]'.format(QtCore.QSettings().fileName()))
-
-    # No obvious benefit to also setting the version but neither is there any
-    # obvious harm
-    app.setApplicationVersion(inselect.__version__)
+    debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
 
     if args.locale:
         debug_print('Will set locale to [{0}]'.format(args.locale))
-        QtCore.QLocale.setDefault(QtCore.QLocale(args.locale))
+        QLocale.setDefault(QLocale(args.locale))
 
-    debug_print(u'Locale is [{0}]'.format(QtCore.QLocale().name()))
+    debug_print(u'Locale is [{0}]'.format(QLocale().name()))
 
     window = MainWindow(app)
     window.show_from_geometry_settings()
