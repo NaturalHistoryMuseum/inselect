@@ -153,15 +153,6 @@ class Model(QAbstractItemModel):
         """
         return 1
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        """QAbstractItemModel virtual
-        """
-        if Qt.DisplayRole==role:
-            if Qt.Vertical==orientation:
-                return str(1+section)
-            else:
-                return 'Specimen crop'
-
     def data(self, index, role=Qt.DisplayRole):
         """QAbstractItemModel virtual
         """
