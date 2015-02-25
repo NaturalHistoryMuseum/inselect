@@ -128,7 +128,8 @@ class InselectDocument(object):
 
     @classmethod
     def new_from_scan(cls, scanned):
-        "Creates, saves and returns a new InselectDocument on the scanned image"
+        """Creates, saves and returns a new InselectDocument for the scanned
+        image"""
         # TODO LH Raise error if a thumbnail image is ingested
         scanned = Path(scanned)
         if not scanned.is_file():
