@@ -11,7 +11,7 @@ import numpy as np
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon
+from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon, QDesktopServices
 
 import inselect
 
@@ -143,7 +143,9 @@ class MainWindow(QtGui.QMainWindow):
         debug_print(u'MainWindow.open_file [{0}]'.format(path))
 
         if not path:
-            folder = QSettings().value("working_directory")
+            folder = QSettings().value('working_directory',
+                QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
+
             filter = u'Inselect documents (*{0});;Images ({1})'
             filter = filter.format(InselectDocument.EXTENSION,
                                    u' '.join(IMAGE_PATTERNS))
