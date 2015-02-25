@@ -32,6 +32,8 @@ def main():
                         version='%(prog)s ' + inselect.__version__)
     args = parser.parse_args()
 
+    # TODO LH A command-line switch to clear all QSettings
+
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
     app = QApplication(sys.argv)
