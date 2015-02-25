@@ -36,7 +36,7 @@ class BarcodePlugin(Plugin):
         """A description of the effect of running this plugin.
         """
         return ("Will load the full-resolution scanned image and will set each "
-                "box's 'Other catalog numbers' metadata field with value(s) of "
+                "box's 'catalogNumber' metadata field with value(s) of "
                 "any barcodes.")
 
     @classmethod
@@ -67,7 +67,7 @@ class BarcodePlugin(Plugin):
                 debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
 
                 # TODO LH This mapping to come from metadata config?
-                item['fields']['otherCatalogNumbers'] = barcodes
+                item['fields']['catalogNumber'] = barcodes
             else:
                 debug_print('Crop [{0}] - no barcodes'.format(index))
 
