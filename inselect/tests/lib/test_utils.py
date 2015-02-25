@@ -35,6 +35,9 @@ class TestRMTreeReadOnly(unittest.TestCase):
         d = tempfile.mkdtemp()
         path = Path(d)
         try:
+            (path / 'a file').open('w')
+            (path / 'a directory').mkdir()
+            (path / 'a directory' / 'another file').open('w')
             make_readonly(path)
             self.assertTrue(path.is_dir())
         finally:
