@@ -202,7 +202,8 @@ class BoxesView(QtGui.QGraphicsView):
             self.zoom_home()
         else:
             f = min(self.MAXIMUM_ZOOM, f)
-            debug_print('Change absolute zoom from [{0}] to [{1}]'.format(self.absolute_zoom, f))
+            msg = 'Change absolute zoom from [{0}] to [{1}]'
+            debug_print(msg.format(self.absolute_zoom, f))
 
             self.setTransform(QtGui.QTransform.fromScale(f, f))
             self.fit_to_view = False
