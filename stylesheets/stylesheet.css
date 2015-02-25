@@ -109,6 +109,12 @@ header h2 {
   max-width: 100%;
 }
 
+#header_logo {
+  float: left;
+  padding-left: 0px;
+  padding-right: 50px;
+}
+
 aside#sidebar {
   width: 200px;
   padding-left: 20px;
