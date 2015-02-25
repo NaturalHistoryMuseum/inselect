@@ -41,7 +41,7 @@ class MainWindow(QtGui.QMainWindow):
     """
     FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
 
-    def __init__(self, app, filename=None, tabbed=True):
+    def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
         self.app = app
 
@@ -58,18 +58,11 @@ class MainWindow(QtGui.QMainWindow):
         metadata.addWidget(self.view_metadata.widget)
         metadata.setSizes([600, 300])
 
-        if tabbed:
-            # Views in tabs
-            self.tabs = QtGui.QTabWidget(self)
-            self.tabs.addTab(self.boxes_view, 'Boxes')
-            self.tabs.addTab(metadata, 'Metadata')
-            self.tabs.setCurrentIndex(0)
-        else:
-            # Views in a splitter
-            self.tabs = QtGui.QSplitter(self)
-            self.tabs.addWidget(self.boxes_view)
-            self.tabs.addWidget(metadata)
-            self.tabs.setSizes([500, 500])
+        # Views in tabs
+        self.tabs = QtGui.QTabWidget(self)
+        self.tabs.addTab(self.boxes_view, 'Boxes')
+        self.tabs.addTab(metadata, 'Metadata')
+        self.tabs.setCurrentIndex(0)
 
         # Summary view
         self.view_summary = SummaryView()
