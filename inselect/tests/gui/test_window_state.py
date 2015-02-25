@@ -1,16 +1,22 @@
 import unittest
-from pathlib import Path
 
-from PySide import QtGui
+from PySide.QtCore import QCoreApplication
 
 from gui_test import GUITest
-
-TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 class TestPersistWindowState(GUITest):
     """The main window's size, position and state - maximized and full screen
     """
+    @classmethod
+    def setUpClass(cls):
+        super(TestPersistWindowState, cls).setUpClass()
+
+        # The QSettings default constructor uses the application's
+        # organizationName and applicationName properties.
+        QCoreApplication.setOrganizationName('NHM')
+        QCoreApplication.setApplicationName('inselect')
+
     def test_full_screen_persisted(self):
         "Full-screen state persisted correctly"
         w = self.window
