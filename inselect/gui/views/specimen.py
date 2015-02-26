@@ -9,54 +9,51 @@ from inselect.gui.roles import RectRole, PixmapRole, RotationRole
 
 
 class CropDelegate(QAbstractItemDelegate):
-    """Delegate that shows cropped specimen images with a grey box and
+    """Delegate that shows cropped gecimen images with a grey box and
     provides editing of rotation and some flags.
     """
 
+    # Brushes
+    BLACK = QBrush(Qt.black)
+    WHITE = QBrush(Qt.white)
+    GREY = QBrush(Qt.gray)
+    DARK_GREY = QBrush(Qt.darkGray)
+
+    # Size of the rotation controls
+    CONTROLS_SIZE = 23
+
+    # Border around cropped image
+    BORDER = 25
+
     @property
-    def BOX_RECT(self):
+    def box_rect(self):
         "QRect of the complete box"
         expanded = self.parent().expanded
         return self.parent().viewport().rect() if expanded else QRect(0, 0, 250, 250)
  
     @property
-    def TITLE_RECT(self):
+    def title_rect(self):
         "Bounding QRect of the title"
-        return QRect(QPoint(0, 0), self.BOX_RECT.size()).adjusted(5, 5, -5, -5)
-
-    @property
-    def BORDER(self):
-        # Border around cropped image
-        return 25
+        return QRect(QPoint(0, 0), self.box_rect.size()).adjusted(5, 5, -5, -5)
 
     @property
     def CROP_RECT(self):
         # Bounding rectangle within which the cropped image will be drawn
         b = self.BORDER
-        return self.BOX_RECT.adjusted(b, b, -b, -b)
+        return self.box_rect.adjusted(b, b, -b, -b)
 
     @property
-    def CONTROLS_SIZE(self):
-        # Controls
-        return 23
-
-    @property
-    def ROTATE_COUNTERCLOCKWISE_RECT(self):
+    def rotate_counterclockwise_rect(self):
         r = QRect(0, 0, self.CONTROLS_SIZE, self.CONTROLS_SIZE)
-        r.translate(QPoint(0, self.BOX_RECT.height()-self.CONTROLS_SIZE))
+        r.translate(QPoint(0, self.box_rect.height()-self.CONTROLS_SIZE))
         return r
 
     @property
-    def ROTATE_CLOCKWISE_RECT(self):
+    def rotate_clockwise_rect(self):
         r = QRect(0, 0, self.CONTROLS_SIZE, self.CONTROLS_SIZE)
-        r.translate(QPoint(self.BOX_RECT.width()-self.CONTROLS_SIZE,
-                           self.BOX_RECT.height()-self.CONTROLS_SIZE))
+        r.translate(QPoint(self.box_rect.width()-self.CONTROLS_SIZE,
+                           self.box_rect.height()-self.CONTROLS_SIZE))
         return r
-
-    BLACK = QBrush(Qt.black)
-    WHITE = QBrush(Qt.white)
-    GREY = QBrush(Qt.gray)
-    DARK_GREY = QBrush(Qt.darkGray)
 
     def _paint_box(self, painter, option, index):
         """The grey box
@@ -70,7 +67,7 @@ class CropDelegate(QAbstractItemDelegate):
         """Title of this crop
         """
         title = index.data(Qt.DisplayRole)
-        rect = self.TITLE_RECT.translated(option.rect.topLeft())
+        rect = self.title_rect.translated(option.rect.topLeft())
         painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft, title)
 
     def _paint_crop(self, painter, option, index):
@@ -157,11 +154,11 @@ class CropDelegate(QAbstractItemDelegate):
             # \u293e and \u293f are unicode characters for 'lower right
             # semicircular clockwise arrow' and 'lower right semicircular
             # anticlockwise arrow' respectively
-            clockwise = self.ROTATE_CLOCKWISE_RECT.translated(option.rect.topLeft())
+            clockwise = self.rotate_clockwise_rect.translated(option.rect.topLeft())
             painter.drawRect(clockwise)
             painter.drawText(clockwise, Qt.AlignVCenter | Qt.AlignHCenter, u'\u293e')
 
-            clockwise = self.ROTATE_COUNTERCLOCKWISE_RECT.translated(option.rect.topLeft())
+            clockwise = self.rotate_counterclockwise_rect.translated(option.rect.topLeft())
             painter.drawRect(clockwise)
             painter.drawText(clockwise, Qt.AlignVCenter | Qt.AlignHCenter, u'\u293f')
 
@@ -174,7 +171,7 @@ class CropDelegate(QAbstractItemDelegate):
         self._paint_controls(painter, option, index)
 
     def sizeHint(self, option, index):
-        return self.BOX_RECT.size()
+        return self.box_rect.size()
  
     def closeEditor(self, editor, hint):
         """QAbstractItemDelegate signal
@@ -201,11 +198,11 @@ class CropDelegate(QAbstractItemDelegate):
             p = event.pos() - option.rect.topLeft()
             # Not returning True here so that base handler will set selection
             # to index, if it is not already selected
-            if self.ROTATE_CLOCKWISE_RECT.contains(p):
+            if self.rotate_clockwise_rect.contains(p):
                 debug_print('CropDelegate.editorEvent rotate clockwise')
                 current = index.data(RotationRole)
                 model.setData(index, current+90, RotationRole)
-            elif self.ROTATE_COUNTERCLOCKWISE_RECT.contains(p):
+            elif self.rotate_counterclockwise_rect.contains(p):
                 debug_print('CropDelegate.editorEvent rotate counter-clockwise')
                 current = index.data(RotationRole)
                 model.setData(index, current-90, RotationRole)
@@ -219,20 +216,15 @@ class CropDelegate(QAbstractItemDelegate):
         return super(CropDelegate, self).setEditorData(event, editor, index)
 
 
-class GridView(QListView):
-    """Shows cropped images in a grid
+class SpecimenView(QListView):
+    """Shows cropped specimen images either in a grid or expanded
     """
     def __init__(self, parent=None):
-        super(GridView, self).__init__(parent)
+        super(SpecimenView, self).__init__(parent)
 
-        # Items are shown in a grid if False
+        # Items are shown in a grid if False.
         # A single item is shown expanded if True.
-
-        # A serious problem with this approach is that multiple selections are
-        # possible (despite setting SingleSelection in show_expanded):
-        # Select All shortcut
-        # Select None shortcut
-        # Select none or multiple on Boxes view, then go to metadataview
+        # When more than one item is selected, view changes to grid.
 
         self.expanded = False
 
@@ -243,36 +235,37 @@ class GridView(QListView):
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.setStyleSheet("background-color: darkgray;")
 
+    def selectionChanged(self, selected, deselected):
+        """QAbstractItemView slot
+        """
+        debug_print('SpecimenView.selectionChanged')
+
+        # Grid view unless exactly one item selected
+        if self.expanded and 1 != len(self.selectionModel().selectedIndexes()):
+            self.show_grid()
+
     def show_grid(self):
-        debug_print('GridView.show_grid')
+        debug_print('SpecimenView.show_grid')
         self.expanded = False
-        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self._refresh()
 
     def show_expanded(self):
-        debug_print('GridView.show_expanded')
+        debug_print('SpecimenView.show_expanded')
         self.expanded = True
-        self.setSelectionMode(QAbstractItemView.SingleSelection)
 
         # Select a single item
         sm = self.selectionModel()
-        selected = self.selectionModel().selectedIndexes()
+        selected = sm.selectedIndexes()
         if len(selected)>1:
-            sm.select(selected[0], QItemSelectionModel.Select)
+            sm.select(selected[0], QItemSelectionModel.ClearAndSelect)
         elif not selected:
             sm.select(self.model().index(0, 0), QItemSelectionModel.Select)
 
         self._refresh()
 
     def _refresh(self):
-        debug_print('GridView.toggle_display_size')
+        debug_print('SpecimenView.toggle_display_size')
         self.scheduleDelayedItemsLayout()
         selected = self.selectionModel().selectedIndexes()
         if selected:
             self.scrollTo(selected[0])
-
-    def toggle_zoom(self):
-        debug_print('GridView.toggle_zoom')
-
-        selected = self.selectionModel().selectedIndexes()
-        self.toggle_item_display_size(selected[0])
