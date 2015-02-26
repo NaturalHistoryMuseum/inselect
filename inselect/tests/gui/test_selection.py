@@ -5,13 +5,13 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestSelection(GUITest):
+class TestSelection(MainWindowTest):
     """Tests selection
     """
     def test_select_all_none(self):

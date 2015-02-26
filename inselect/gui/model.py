@@ -1,5 +1,6 @@
 import json
 
+from copy import deepcopy
 from itertools import izip
 
 from PySide import QtCore, QtGui
@@ -14,14 +15,21 @@ class Model(QAbstractItemModel):
     """
     """
 
+    # TODO LH Model should encapsulate InselectDocument
+    # TODO LH Plugins should operate on Model, not InselectDocument
+
+    # Emitted when modified status changes
+    modified_changed = QtCore.Signal()
+
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
+        self._modified = False
         self._clear_model_data()
 
     def _clear_model_data(self):
         """Clear data structures
         """
-        self._modified = False
+        self.set_modified(False)
         self._data = [] # A list of dicts
         self._image_array = None    # np.nd_array, for segmentation
         self._pixmap = None    # Instance of QPixmap
@@ -31,7 +39,7 @@ class Model(QAbstractItemModel):
         """
         self.beginResetModel()
         self._clear_model_data()
-        self.endResetModel ()
+        self.endResetModel()
 
     def from_document(self, document):
         """Load data from document
@@ -84,11 +92,10 @@ class Model(QAbstractItemModel):
         if new:
             self.beginInsertRows(QModelIndex(), 0, len(new)-1)
             self._data = new
-            self._modified = True
+            self.set_modified(True)
             self.endInsertRows()
             self.dataChanged.emit(self.index(0, 0),
                                   self.index(len(new)-1, 0))
-
 
     @property
     def image_array(self):
@@ -97,15 +104,18 @@ class Model(QAbstractItemModel):
         return self._image_array
 
     @property
-    def modified(self):
-        """bool - True if the model has been modified
+    def is_modified(self):
+        """True if the model has been modified; False if not modified
         """
         return self._modified
 
-    def clear_modified(self):
-        """Clears modified
+    def set_modified(self, modified):
+        """Sets modified flag with bool modified. If this changes modified
+        flag, also emits self.modified_changed().
         """
-        self._modified = False
+        previous, self._modified = self._modified, modified
+        if previous != self._modified:
+            self.modified_changed.emit()
 
     def to_document(self, document):
         """Write data to document
@@ -188,10 +198,10 @@ class Model(QAbstractItemModel):
                 msg = 'Model.setData rect for [{0}] from [{1}] to [{2}]'
                 debug_print(msg.format(index.row(), current, value))
 
-                self._data[index.row()]['rect'] = value
-            self.dataChanged.emit(index, index)
-            self._modified = True
-            return True
+                if value != self._data[index.row()]['rect']:
+                    self.dataChanged.emit(index, index)
+                    self.set_modified(True)
+                    return True
         elif RotationRole == role:
             # A new rotation for index
             if not isinstance(value, (int, long)) or 0 != value%90:
@@ -205,10 +215,11 @@ class Model(QAbstractItemModel):
                 msg = 'Model.setData rotation for [{0}] from [{1}] to [{2}]'
                 debug_print(msg.format(index.row(), current, value))
 
-                self._data[index.row()]['rotation'] = value
-                self.dataChanged.emit(index, index)
-                self._modified = True
-                return True
+                if current != value:
+                    self._data[index.row()]['rotation'] = value
+                    self.dataChanged.emit(index, index)
+                    self.set_modified(True)
+                    return True
         elif MetadataRole == role:
             # value is a dict containing one or more fields
             if not isinstance(value, dict):
@@ -217,14 +228,17 @@ class Model(QAbstractItemModel):
                 msg = 'Model.setData for [{0}] update [{1}]'
                 debug_print(msg.format(index.row(), value))
 
-                current = self._data[index.row()]['metadata']
-                current.update(value)
+                new = deepcopy(self._data[index.row()]['metadata'])
+                new.update(value)
 
                 # Only fields that have a value
-                current = {k: v for k, v in current.iteritems() if '' != v}
+                new = {k: v for k, v in new.iteritems() if '' != v}
 
-                self.dataChanged.emit(index, index)
-                self._modified = True
+                # Update if only if changed
+                if new != self._data[index.row()]['metadata']:
+                    self._data[index.row()]['metadata'] = new
+                    self.dataChanged.emit(index, index)
+                    self.set_modified(True)
                 return True
         else:
             return super(Model, self).setData(index, value, role)
@@ -256,7 +270,7 @@ class Model(QAbstractItemModel):
                                "rotation": 0}
 
             self._data[row:row] = new_rows
-            self._modified = True
+            self.set_modified(True)
             self.endInsertRows()
             self.dataChanged.emit(self.index(row, 0), self.index(upper, 0))
 
@@ -274,24 +288,7 @@ class Model(QAbstractItemModel):
 
             self.beginRemoveRows(parent, first, last)
             del self._data[first:last]
-            self._modified = True
-            self.endRemoveRows()
-
-            return True
-
-    def removeRows(self, row, count, parent=QModelIndex()):
-        """QAbstractItemModel virtual
-        """
-        debug_print('Model.removeRows row [{0}] count [{1}]'.format(row, count))
-
-        if row < 0 or row > len(self._data) or count < 1:
-            raise ValueError('Bad row [{0}] or count [{1}]'.format(row, count))
-        else:
-            first, last = row, row+count
-
-            self.beginRemoveRows(parent, first, last)
-            del self._data[first:last]
-            self._modified = True
+            self.set_modified(True)
             self.endRemoveRows()
 
             return True

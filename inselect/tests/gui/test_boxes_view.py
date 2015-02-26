@@ -3,12 +3,12 @@ import unittest
 from itertools import repeat
 from pathlib import Path
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestBoxesView(GUITest):
+class TestBoxesView(MainWindowTest):
     """Activities in boxes view
     """
     def setUp(self):

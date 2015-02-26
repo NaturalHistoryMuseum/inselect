@@ -39,7 +39,9 @@ from .worker_thread import WorkerThread
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
-    FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
+    FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
+                           InselectDocument.EXTENSION,
+                           u' '.join(IMAGE_PATTERNS))
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -82,6 +84,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Model
         self.model = Model()
+        self.model.modified_changed.connect(self.modified_changed)
+
+        # Views
         self.view_graphics_item.setModel(self.model)
         self.view_specimen.setModel(self.model)
         self.view_metadata.setModel(self.model)
@@ -122,7 +127,13 @@ class MainWindow(QtGui.QMainWindow):
         if filename:
             self.open_file(filename)
 
+    def modified_changed(self):
+        "Updated UI's modified state"
+        debug_print('MainWindow.modified_changed')
+        self.setWindowModified(self.model.is_modified)
+
     def eventFilter(self, obj, event):
+        "Event filter that accepts drag-drop events"
         if event.type() in (QEvent.DragEnter, QEvent.Drop):
             return True
         else:
@@ -147,11 +158,8 @@ class MainWindow(QtGui.QMainWindow):
             folder = QSettings().value('working_directory',
                 QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
 
-            filter = u'Inselect documents (*{0});;Images ({1})'
-            filter = filter.format(InselectDocument.EXTENSION,
-                                   u' '.join(IMAGE_PATTERNS))
             path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, filter)
+                self, "Open", folder, self.FILE_FILTER)
 
         # path will be None if user cancelled getOpenFileName
         if path:
@@ -238,8 +246,8 @@ class MainWindow(QtGui.QMainWindow):
         self.document_path = path
         self.model.from_document(self.document)
 
-        # TODO LH Prefer setWindowFilePath to setWindowTitle?
-        self.setWindowTitle(u"Inselect [{0}]".format(self.document_path.stem))
+        self.setWindowTitle('')
+        self.setWindowFilePath(str(self.document_path))
 
         self.sync_ui()
 
@@ -252,7 +260,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.model.to_document(self.document)
         self.document.save()
-        self.model.clear_modified()
+        self.model.set_modified(False)
 
     @report_to_user
     def save_crops(self):
@@ -324,7 +332,7 @@ class MainWindow(QtGui.QMainWindow):
         if (self.document_path and self.document_path.is_file() and 
             document_to_open and document_to_open.is_file() and
             self.document_path.resolve() == document_to_open.resolve()):
-            if self.model.modified:
+            if self.model.is_modified:
                 # Ask the user if they work like to revert
                 msg = (u'The document [{0}] is already open and has been '
                        u'changed. Would you like to discard your changes and '
@@ -342,7 +350,7 @@ class MainWindow(QtGui.QMainWindow):
                 QMessageBox.information(self, 'Document already open', msg,
                                         QMessageBox.Ok)
                 close = False
-        elif self.model.modified:
+        elif self.model.is_modified:
             # Ask the user if they work like to save before closing
             res = QMessageBox.question(self, 'Save document?',
                 'Save the document before closing?',
@@ -375,8 +383,8 @@ class MainWindow(QtGui.QMainWindow):
         self.plugin_image_visible = False
         self.model.clear()
 
-        # TODO LH Prefer setWindowFilePath to setWindowTitle?
-        self.setWindowTitle("Inselect")
+        self.setWindowTitle('Inselect')
+        self.setWindowFilePath(None)
 
         self.sync_ui()
 

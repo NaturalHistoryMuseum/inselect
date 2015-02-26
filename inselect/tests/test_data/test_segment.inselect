@@ -2,8 +2,8 @@
     "items": [
         {
             "fields": {
-                "Specimen number": "1",
-                "Taxonomic group": "ABC"
+                "catalogNumber": "1",
+                "scientificName": "ABC"
             },
             "rect": [
                 0.0002, 
@@ -14,8 +14,8 @@
         }, 
         {
             "fields": {
-                "Specimen number": "2",
-                "Taxonomic group": "ABC"
+                "catalogNumber": "2",
+                "scientificName": "ABC"
             },
             "rect": [
                 0.5936, 
@@ -26,8 +26,8 @@
         }, 
         {
             "fields": {
-                "Specimen number": "3",
-                "Taxonomic group": "インセクト"
+                "catalogNumber": "3",
+                "scientificName": "インセクト"
             },
             "rect": [
                 0.42560000000000003, 

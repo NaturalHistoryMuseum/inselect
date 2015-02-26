@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 from inselect.gui.roles import RectRole
 
@@ -17,7 +17,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 # TODO LH coverage does not detect code executed within a QThread
 
 
-class TestSegment(GUITest):
+class TestSegment(MainWindowTest):
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_segment(self, mock_question):
         """Segment a document that already has boxes, making sure that the
