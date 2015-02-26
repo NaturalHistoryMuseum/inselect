@@ -17,7 +17,7 @@ class TestSelection(GUITest):
     def test_select_all_none(self):
         "Select all and then none"
         w = self.window
-        sm = w.view_grid.selectionModel()
+        sm = w.view_specimen.selectionModel()
 
         # Open a document
         w.open_file(TESTDATA / 'test_segment.inselect')
@@ -40,7 +40,7 @@ class TestSelection(GUITest):
     def test_next_previous(self):
         "Select the next box in the model, then the previous box"
         w = self.window
-        sm = w.view_grid.selectionModel()
+        sm = w.view_specimen.selectionModel()
 
         # Open a document
         w.open_file(TESTDATA / 'test_segment.inselect')

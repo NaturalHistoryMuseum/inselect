@@ -31,8 +31,8 @@ from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
-from .views.grid import GridView
 from .views.metadata import MetadataView
+from .views.specimen import SpecimenView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
@@ -51,17 +51,18 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
         # Metadata view
-        self.view_grid = GridView()
+        self.view_specimen = SpecimenView()
         self.view_metadata = MetadataView()
-        metadata = QtGui.QSplitter()
-        metadata.addWidget(self.view_grid)
-        metadata.addWidget(self.view_metadata.widget)
-        metadata.setSizes([600, 300])
+
+        self.specimens = QtGui.QSplitter()
+        self.specimens.addWidget(self.view_specimen)
+        self.specimens.addWidget(self.view_metadata.widget)
+        self.specimens.setSizes([600, 300])
 
         # Views in tabs
         self.tabs = QtGui.QTabWidget(self)
         self.tabs.addTab(self.boxes_view, 'Boxes')
-        self.tabs.addTab(metadata, 'Metadata')
+        self.tabs.addTab(self.specimens, 'Specimens')
         self.tabs.setCurrentIndex(0)
 
         # Summary view
@@ -82,12 +83,12 @@ class MainWindow(QtGui.QMainWindow):
         # Model
         self.model = Model()
         self.view_graphics_item.setModel(self.model)
-        self.view_grid.setModel(self.model)
+        self.view_specimen.setModel(self.model)
         self.view_metadata.setModel(self.model)
         self.view_summary.setModel(self.model)
 
         # A consistent selection across all views
-        sm = self.view_grid.selectionModel()
+        sm = self.view_specimen.selectionModel()
         self.view_graphics_item.setSelectionModel(sm)
         self.view_metadata.setSelectionModel(sm)
         self.view_summary.setSelectionModel(sm)
@@ -111,7 +112,7 @@ class MainWindow(QtGui.QMainWindow):
         # Filter events
         self.tabs.installEventFilter(self)
         self.boxes_view.installEventFilter(self)
-        self.view_grid.installEventFilter(self)
+        self.view_specimen.installEventFilter(self)
         self.view_metadata.installEventFilter(self)
 
         self.empty_document()
@@ -373,6 +374,14 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view.zoom_home()
 
     @report_to_user
+    def show_grid(self):
+        self.view_specimen.show_grid()
+
+    @report_to_user
+    def show_expanded(self):
+        self.view_specimen.show_expanded()
+
+    @report_to_user
     def about(self):
         text = u"""<h1>Inselect {version}</h1>
            <h2>Contributors</h2>
@@ -476,14 +485,14 @@ class MainWindow(QtGui.QMainWindow):
     def select_all(self):
         """Selects all boxes in the model
         """
-        sm = self.view_grid.selectionModel()
+        sm = self.view_specimen.selectionModel()
         m = self.model
         sm.select(QtGui.QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
                   QtGui.QItemSelectionModel.Select)
 
     @report_to_user
     def select_none(self):
-        sm = self.view_grid.selectionModel()
+        sm = self.view_specimen.selectionModel()
         sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
 
     @report_to_user
@@ -491,7 +500,7 @@ class MainWindow(QtGui.QMainWindow):
         """Deletes the selected boxes
         """
         # Delete contiguous blocks of rows
-        selected = self.view_grid.selectionModel().selectedIndexes()
+        selected = self.view_specimen.selectionModel().selectedIndexes()
         selected = sorted([i.row() for i in selected])
 
         # Remove blocks in reverse order so that row indices are not invalidated
@@ -505,19 +514,18 @@ class MainWindow(QtGui.QMainWindow):
         """Selects the next box in the mode if next is True, the previous
         box in the model if next if False.
         """
-        sm = self.view_grid.selectionModel()
-        model = self.view_grid.model()
+        sm = self.view_specimen.selectionModel()
         current = sm.currentIndex()
         current = current.row() if current else -1
 
         select = current + (1 if next else -1)
-        if select == model.rowCount():
+        if select == self.model.rowCount():
             select = 0
         elif -1 == select:
-            select = model.rowCount()-1
+            select = self.model.rowCount()-1
 
         debug_print('Will move selection [{0}] from [{1}]'.format(current, select))
-        select = model.index(select, 0)
+        select = self.model.index(select, 0)
         sm.select(QtGui.QItemSelection(select, select),
                   QtGui.QItemSelectionModel.ClearAndSelect)
         sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
@@ -528,7 +536,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.rotate')
         value = 90 if clockwise else -90
-        selected = self.view_grid.selectionModel().selectedIndexes()
+        selected = self.view_specimen.selectionModel().selectedIndexes()
         for index in selected:
             current = index.data(RotationRole)
             self.model.setData(index, current + value, RotationRole)
@@ -606,7 +614,7 @@ class MainWindow(QtGui.QMainWindow):
         # the application exits on linux.
         self.boxes_view_action = QAction("&Boxes", self, checkable=True,
             triggered=partial(self.show_tab, 0))
-        self.metadata_view_action = QAction("&Metadata", self, checkable=True,
+        self.metadata_view_action = QAction("&Specimens", self, checkable=True,
             triggered=partial(self.show_tab, 1))
 
         # FullScreen added in Qt 5.something
@@ -632,13 +640,17 @@ class MainWindow(QtGui.QMainWindow):
         self.zoom_home_action = QAction("Fit To Window", self,
             shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
             triggered=self.zoom_home)
-
         # TODO LH Is F3 (normally meaning 'find next') really the right
-        # shortcut for the toggle segment image action?
+        # shortcut for the 'toggle plugin image' action?
         self.toggle_plugin_image_action = QAction(
             "&Display plugin image", self, shortcut="f3",
             triggered=self.toggle_plugin_image,
             statusTip="Display plugin image", checkable=True)
+
+        self.show_specimen_grid_action = QAction('Show grid', self,
+            shortcut='g', triggered=self.show_grid)
+        self.show_specimen_expanded_action = QAction('Show expanded', self,
+            shortcut='e', triggered=self.show_expanded)
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
@@ -688,8 +700,10 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.zoom_out_action)
         self.viewMenu.addAction(self.toogle_zoom_action)
         self.viewMenu.addAction(self.zoom_home_action)
-        self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.toggle_plugin_image_action)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.show_specimen_grid_action)
+        self.viewMenu.addAction(self.show_specimen_expanded_action)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.help_action)
@@ -794,7 +808,8 @@ class MainWindow(QtGui.QMainWindow):
         document = self.document is not None
         has_rows = self.model.rowCount()>0 if self.model else False
         boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
-        has_selection = len(self.view_grid.selectedIndexes())>0
+        specimens_view_visible = self.specimens == self.tabs.currentWidget()
+        has_selection = len(self.view_specimen.selectedIndexes())>0
 
         # File
         self.save_action.setEnabled(document)
@@ -820,3 +835,6 @@ class MainWindow(QtGui.QMainWindow):
         self.zoom_out_action.setEnabled(document and boxes_view_visible)
         self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
         self.zoom_home_action.setEnabled(document and boxes_view_visible)
+        self.toggle_plugin_image_action.setEnabled(document and boxes_view_visible)
+        self.show_specimen_grid_action.setEnabled(specimens_view_visible)
+        self.show_specimen_expanded_action.setEnabled(specimens_view_visible)
