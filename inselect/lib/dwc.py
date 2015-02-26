@@ -20,8 +20,7 @@ from .utils import debug_print, duplicated, unique_everseen
 
 # TODO Check against term types and date-time reg ex int
 # http://rs.tdwg.org/dwc/tdwg_basetypes.xsd
-validators = {'duplicated': dateutil.parser.parse,
-              'individualCount': parse_int_gt0,
+validators = {'individualCount': parse_int_gt0,
               'eventDate': dateutil.parser.parse,
               'eventTime': dateutil.parser.parse,
               'year': parse_four_digit_int,
@@ -34,14 +33,16 @@ validators = {'duplicated': dateutil.parser.parse,
               'minimumDistanceAboveSurfaceInMeters': parse_float_gt0,
               'maximumDistanceAboveSurfaceInMeters': parse_float_gt0,
               'decimalLatitude': parse_latitude,
-              'parse_longitude': parse_longitude,
+              'decimalLongitude': parse_longitude,
               'coordinateUncertaintyInMeters': parse_float_gt0,
               'coordinatePrecision': parse_float_gt0,
               'georeferencedDate': dateutil.parser.parse,
               'dateIdentified': dateutil.parser.parse,
               'namePublishedInYear': parse_four_digit_int,
-              'measurementDeterminedDate': dateutil.parser.parse,
              }
+
+# All validators keys should be Darwin Core terms
+assert set(validators.keys()).issubset([t['Name'] for t in DWC_TERMS])
 
 class DWCTerms(object):
     """Darwin Core terms
