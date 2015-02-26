@@ -18,12 +18,12 @@ class WorkerThread(QtCore.QThread):
     while the callable runs.
     """
 
-    # Signalled when the operation has either finished or been cancelled, and 
+    # Emitted when the operation has either finished or been cancelled, and
     # self.run() is about to exit. Arguments are user cancelled, error that
     # occurred.
     completed = QtCore.Signal(bool, str)
 
-    # Signalled when the callable wants to set a new message- see progress()
+    # Emitted when the callable wants to set a new message- see progress()
     new_message = QtCore.Signal(str)
 
     def __init__(self, operation, box_title, parent=None):
@@ -54,7 +54,7 @@ class WorkerThread(QtCore.QThread):
         self._progress_box.show()
 
     def _thread_finished(self):
-        """Slot signalled by self.finished
+        """Slot for self.finished
         """
         debug_print('WorkerThread.finished')
         assert(self.thread() == QtCore.QThread.currentThread())
@@ -79,7 +79,7 @@ class WorkerThread(QtCore.QThread):
             self.completed.emit(False, u'An error occurred:\n{0}'.format(e))
 
     def user_cancelled(self):
-        """Slot that is signalled by the cancel button on the dialog
+        """Slot for the cancel button on the dialog
         """
         self._user_cancelled = True
 
@@ -99,8 +99,9 @@ class WorkerThread(QtCore.QThread):
             self.new_message.emit(message)
 
     def _set_message(self, message):
-        """Slot signalled by self.new_message
+        """Slot for self.new_message
         """
         debug_print("WorkerThread._set_message [{0}]".format(message))
+        # Must only be called from the main thread
         assert(self.thread() == QtCore.QThread.currentThread())
         self._progress_box.setLabelText(message)
