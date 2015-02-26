@@ -33,16 +33,28 @@ class MetadataView(QAbstractItemView):
         # A container for the controls
         self._form_container = FormContainer()
 
-        # A container for the form
-        self.widget = QScrollArea(parent)
-        self.widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.widget.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.widget.setWidget(self._form_container)
+        # A scrollable container for the form
+        self._form_scroll = QScrollArea(parent)
+        self._form_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._form_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self._form_scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self._form_scroll.setWidget(self._form_container)
 
         # Make the controls fill the available horizontal space
         # http://qt-project.org/forums/viewthread/11012
-        self.widget.setWidgetResizable(True)
+        self._form_scroll.setWidgetResizable(True)
+
+        # Title
+        self._title = QLabel()
+
+        # Title is fixed at the top - form can be scrolled
+        layout = QVBoxLayout()
+        layout.addWidget(self._title)
+        layout.addWidget(self._form_scroll)
+
+        # Top-level container for the title and form
+        self.widget = QWidget(parent)
+        self.widget.setLayout(layout)
 
     def reset(self):
         """QAbstractItemView virtual
@@ -67,7 +79,7 @@ class MetadataView(QAbstractItemView):
             title = self.MESSAGE_MULTIPLE_SELECTION.format(len(selected))
         else:
             title = self.MESSAGE_NO_SELECTION
-        self._form_container.title.setText(title)
+        self._title.setText(title)
 
         # TODO Combo should indicate multiple and unrecognised values
         # Put values into the controls
@@ -100,22 +112,12 @@ class FormContainer(QWidget):
         self._main_layout = QFormLayout()
         self._main_layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
 
-        # title control
-        self.title = self._create_header()
-
         # Controls
         self.controls, self._groups = self._create_field_controls()
 
         self.setLayout(self._main_layout)
 
         self.setStyleSheet(self.STYLESHEET)
-
-    def _create_header(self):
-        """Creates and returns title QLabel
-        """
-        title = QLabel()
-        self._main_layout.addRow(title)
-        return title
 
     def _create_field_controls(self):
         """Creates QWidgets for editing each field in DWC_TERMS and returns
@@ -405,4 +407,3 @@ class LanguageComboBox(FieldComboBox):
         codes = sorted(LANGUAGES.keys())
         values = ((display.format(code, LANGUAGES[code]), code) for code in codes)
         super(LanguageComboBox, self).__init__('language', values, parent)
-
