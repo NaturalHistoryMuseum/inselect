@@ -27,7 +27,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 class TestDocument(unittest.TestCase):
     def test_load(self):
-        "Load a document from a file and assertt that properties are as expected"
+        "Load a document from a file"
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
 
@@ -64,17 +64,20 @@ class TestDocument(unittest.TestCase):
             os.unlink(f.name)
 
     def test_load_not_json_document(self):
+        "Try to load a file that is not a json document"
         self._test_load_fails('XYZ')
 
     def test_load_not_inselect_document(self):
+        "Try to load a json file that is not an inselect document"
         self._test_load_fails('{"x": 1}')
 
     def test_load_bad_version(self):
+        "Try to load an inselect document with an unsupported version"
         self._test_load_fails('{"items": [], "inselect version": 1000}')
         self._test_load_fails('{"items": [], "inselect version": -1}')
 
     def test_load_images(self):
-        "Document's images are loaded as expected"
+        "Load document's images"
         source = TESTDATA / 'test_segment.inselect'
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect') as tempdir:
             doc_temp = tempdir / 'test_segment.inselect'
@@ -98,7 +101,7 @@ class TestDocument(unittest.TestCase):
             self.assertTrue(actual.thumbnail)
 
     def test_save(self):
-        "Document save writes items"
+        "Save document"
         source = TESTDATA / 'test_segment.inselect'
         temp = tempfile.mkdtemp()
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
