@@ -8,7 +8,7 @@ from PySide.QtGui import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 from inselect.gui.app import MainWindow
 
@@ -18,7 +18,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestFileOpen(GUITest):
+class TestFileOpen(MainWindowTest):
     """Tests the several routes to opening a file
     """
     def _load_and_modify(self, path):
@@ -36,7 +36,7 @@ class TestFileOpen(GUITest):
         "Open an inselect document"
         self.window.open_file(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, self.window.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', self.window.windowTitle())
+        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
 
     def test_open_scanned_of_doc(self):
         """Open the scanned image file of an existing inselect document - the
@@ -44,7 +44,7 @@ class TestFileOpen(GUITest):
         """
         self.window.open_file(TESTDATA / 'test_segment.png')
         self.assertEqual(5, self.window.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', self.window.windowTitle())
+        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
 
     def test_open_thumbnail_of_doc(self):
         """Open the thumbnail image file of an existing inselect document - the
@@ -52,7 +52,7 @@ class TestFileOpen(GUITest):
         """
         self.window.open_file(TESTDATA / 'test_segment_thumbnail.png')
         self.assertEqual(5, self.window.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', self.window.windowTitle())
+        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
 
     @patch.object(MainWindow, 'new_document')
     def test_new_document(self, mock_new_document):
@@ -133,12 +133,12 @@ class TestFileOpen(GUITest):
         self.assertTrue(expected in mock_question.call_args[0])
 
         self.assertEqual(1, w.model.rowCount())
-        self.assertEqual('Inselect [test_subsegment]', w.windowTitle())
+        self.assertEqual('test_subsegment.inselect[*]', w.windowTitle())
 
         # Original document should not have changed
         w.open_file(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, w.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', w.windowTitle())
+        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_open_save_existing_modified(self, mock_question):
@@ -159,12 +159,12 @@ class TestFileOpen(GUITest):
             self.assertTrue(expected in mock_question.call_args[0])
 
             self.assertEqual(1, w.model.rowCount())
-            self.assertEqual('Inselect [test_subsegment]', w.windowTitle())
+            self.assertEqual('test_subsegment.inselect[*]', w.windowTitle())
 
             # Original document should have changed - it should contain no boxes
             w.open_file(tempdir / 'test_segment.inselect')
             self.assertEqual(0, w.model.rowCount())
-            self.assertEqual('Inselect [test_segment]', w.windowTitle())
+            self.assertEqual('test_segment.inselect[*]', w.windowTitle())
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Cancel)
     def test_open_cancel_existing_modified(self, mock_question):
@@ -184,8 +184,8 @@ class TestFileOpen(GUITest):
 
         # Assert that the open document has not changed and has not been saved
         self.assertEqual(0, w.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', w.windowTitle())
-        self.assertTrue(w.model.modified)
+        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
+        self.assertTrue(w.model.is_modified)
 
         # Close the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
@@ -200,8 +200,8 @@ class TestFileOpen(GUITest):
         w.open_file(None)
 
         self.assertEqual(0, w.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', w.windowTitle())
-        self.assertTrue(w.model.modified)
+        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
+        self.assertTrue(w.model.is_modified)
 
         # Close the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):

@@ -1,13 +1,13 @@
 import unittest
 from pathlib import Path
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestActionState(GUITest):
+class TestActionState(MainWindowTest):
     """Test the state of UI actions
     """
     def _test_no_document(self):
@@ -76,7 +76,7 @@ class TestActionState(GUITest):
 
         self.window.open_document(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, w.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', self.window.windowTitle())
+        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
         self._test_document_open()
 
         self.window.close_document()

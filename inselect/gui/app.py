@@ -39,7 +39,9 @@ from .worker_thread import WorkerThread
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
-    FILE_FILTER = "inselect files (*{0})".format(InselectDocument.EXTENSION)
+    FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
+                           InselectDocument.EXTENSION,
+                           u' '.join(IMAGE_PATTERNS))
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -81,6 +83,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Model
         self.model = Model()
+        self.model.modified_changed.connect(self.modified_changed)
+
+        # Views
         self.view_graphics_item.setModel(self.model)
         self.view_grid.setModel(self.model)
         self.view_metadata.setModel(self.model)
@@ -121,7 +126,13 @@ class MainWindow(QtGui.QMainWindow):
         if filename:
             self.open_file(filename)
 
+    def modified_changed(self):
+        "Updated UI's modified state"
+        debug_print('MainWindow.modified_changed')
+        self.setWindowModified(self.model.is_modified)
+
     def eventFilter(self, obj, event):
+        "Event filter that accepts drag-drop events"
         if event.type() in (QEvent.DragEnter, QEvent.Drop):
             return True
         else:
@@ -146,11 +157,8 @@ class MainWindow(QtGui.QMainWindow):
             folder = QSettings().value('working_directory',
                 QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
 
-            filter = u'Inselect documents (*{0});;Images ({1})'
-            filter = filter.format(InselectDocument.EXTENSION,
-                                   u' '.join(IMAGE_PATTERNS))
             path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, filter)
+                self, "Open", folder, self.FILE_FILTER)
 
         if path:
             # Will be None if user cancelled getOpenFileName
@@ -248,7 +256,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.model.to_document(self.document)
         self.document.save()
-        self.model.clear_modified()
+        self.model.set_modified(False)
 
     @report_to_user
     def save_crops(self):
@@ -307,7 +315,7 @@ class MainWindow(QtGui.QMainWindow):
         if modified and users cancels.
         """
         debug_print('MainWindow.close_document')
-        if self.model.modified:
+        if self.model.is_modified:
             # Ask the user if they work like to save before closing
             res = QMessageBox.question(self, 'Save document?',
                 'Save the document before closing?',

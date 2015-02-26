@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 from inselect.lib.unicode_csv import UnicodeDictReader
 
@@ -16,7 +16,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestExportCSV(GUITest):
+class TestExportCSV(MainWindowTest):
     """Metadata CSV files are written
     """
     def _test_csv(self):

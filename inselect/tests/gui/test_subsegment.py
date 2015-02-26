@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide.QtCore import QPointF
 from PySide.QtGui import QMessageBox
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -15,7 +15,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 # TODO LH coverage does not detect code executed within a QThread
 
 
-class TestSubsegment(GUITest):
+class TestSubsegment(MainWindowTest):
     def test_subsegment(self):
         "Subsegment a single box with three seeds points"
         w = self.window
@@ -40,7 +40,7 @@ class TestSubsegment(GUITest):
 
         # Should have three boxes
         self.assertEqual(3, w.model.rowCount())
-        self.assertTrue(w.model.modified)
+        self.assertTrue(w.model.is_modified)
 
         # Close the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
@@ -60,7 +60,7 @@ class TestSubsegment(GUITest):
 
         # Document should not have changed
         self.assertEqual(1, w.model.rowCount())
-        self.assertFalse(w.model.modified)
+        self.assertFalse(w.model.is_modified)
 
         # User should have been warned
         self.assertTrue(mock_warning.called)

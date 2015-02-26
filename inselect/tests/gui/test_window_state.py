@@ -2,10 +2,10 @@ import unittest
 
 from PySide.QtCore import QCoreApplication
 
-from gui_test import GUITest
+from gui_test import MainWindowTest
 
 
-class TestPersistWindowState(GUITest):
+class TestPersistWindowState(MainWindowTest):
     """The main window's size, position and state - maximized and full screen
     """
     @classmethod

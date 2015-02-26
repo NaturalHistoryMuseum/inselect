@@ -10,19 +10,27 @@ from inselect.gui.app import MainWindow
 
 
 class GUITest(unittest.TestCase):
-    """Base class for testing the GUI. Creates QApplication and, as a class
-    attribute, MainWindow.
+    """Base class for GUI tests, which require a QApplication.
     """
-
     @classmethod
     def setUpClass(cls):
         # Only one QApplication can be constructed
-        if QtGui.qApp == None:
+        if not QtGui.qApp:
             QtGui.QApplication([])
+
+
+class MainWindowTest(GUITest):
+    """Base class for tests that require a MainWindow.
+    """
+    @classmethod
+    def setUpClass(cls):
+        "Creates a class attribute cls.window"
+        super(MainWindowTest, cls).setUpClass()
         cls.window = MainWindow(QtGui.qApp)
 
     @classmethod
     def tearDownClass(cls):
+        "Closes cls.window"
         cls.window.close()
         delattr(cls, 'window')
 
