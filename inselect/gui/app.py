@@ -234,8 +234,8 @@ class MainWindow(QtGui.QMainWindow):
         self.document_path = path
         self.model.from_document(self.document)
 
-        # TODO LH Prefer setWindowFilePath to setWindowTitle?
-        self.setWindowTitle(u"Inselect [{0}]".format(self.document_path.stem))
+        self.setWindowTitle('')
+        self.setWindowFilePath(str(self.document_path))
 
         self.sync_ui()
 
@@ -339,8 +339,8 @@ class MainWindow(QtGui.QMainWindow):
         self.plugin_image_visible = False
         self.model.clear()
 
-        # TODO LH Prefer setWindowFilePath to setWindowTitle?
-        self.setWindowTitle("Inselect")
+        self.setWindowTitle('Inselect')
+        self.setWindowFilePath(None)
 
         self.sync_ui()
 
