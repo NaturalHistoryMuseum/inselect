@@ -12,10 +12,12 @@ class TestBoxesView(GUITest):
     """Activities in boxes view
     """
     def setUp(self):
+        super(TestBoxesView, self).setUp()
         self.window.open_file(TESTDATA / 'test_segment.inselect')
 
     def tearDown(self):
         self.window.close()
+        super(TestBoxesView, self).tearDown()
 
     def test_zoom_in(self):
         "User zooms in"

@@ -153,38 +153,41 @@ class MainWindow(QtGui.QMainWindow):
             path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
                 self, "Open", folder, filter)
 
+        # path will be None if user cancelled getOpenFileName
         if path:
-            # Will be None if user cancelled getOpenFileName
-            if not self.close_document():
+            path = Path(path)
+
+            # What type of file did the user select?
+            document_path = image_path = None
+            if InselectDocument.EXTENSION == path.suffix:
+                # An inselect document
+                document_path = path
+            elif path.suffix in IMAGE_SUFFIXES:
+                # Compute the path to the inselect document (which may or
+                # may not already exist) of the image file
+                doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
+                doc_of_image = path.parent / doc_of_image
+                doc_of_image = doc_of_image.with_suffix(InselectDocument.EXTENSION)
+                if doc_of_image.is_file():
+                    # An image file corresponding to an existing .inselect file
+                    document_path = doc_of_image
+                else:
+                    # An image file
+                    image_path = path
+
+            if not self.close_document(document_path):
                 # User does not want to close the existing document
                 pass
+            elif document_path:
+                # Open the .inselect document
+                debug_print('Opening inselect document [{0}]'.format(document_path))
+                self.open_document(document_path)
+            elif image_path:
+                msg = u'Creating new inselect document for image [{0}]'
+                debug_print(msg.format(image_path))
+                self.new_document(image_path)
             else:
-                path = Path(path)
-
-                if path.suffix in IMAGE_SUFFIXES:
-                    # Compute the path to the inselect document (which may or
-                    # may not already exist) of the image file
-                    doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
-                    doc_of_image = path.parent / doc_of_image
-                    doc_of_image = doc_of_image.with_suffix(InselectDocument.EXTENSION)
-                else:
-                    doc_of_image = None
-
-                if InselectDocument.EXTENSION == path.suffix:
-                    # Open the .inselect document
-                    debug_print('Opening inselect document [{0}]'.format(path))
-                    self.open_document(path)
-                elif doc_of_image and doc_of_image.is_file():
-                    # An image file corresponding to an existing .inselect file
-                    msg = u'Opening inselect document [{0}] of thumbnail [{1}]'
-                    debug_print(msg.format(doc_of_image, path))
-                    self.open_document(doc_of_image)
-                elif path.suffix in IMAGE_SUFFIXES:
-                    msg = u'Creating new inselect document for image [{0}]'
-                    debug_print(msg.format(path))
-                    self.new_document(path)
-                else:
-                    raise InselectError('Unknown file type [{0}]'.format(path))
+                raise InselectError('Unknown file type [{0}]'.format(path))
 
     def new_document(self, path):
         """Creates and opens a new inselect document for the scanned image
@@ -302,13 +305,44 @@ class MainWindow(QtGui.QMainWindow):
             QMessageBox.information(self, "CSV saved", msg)
 
     @report_to_user
-    def close_document(self):
+    def close_document(self, document_to_open=None):
         """Closes the document and returns True if not modified or if modified
-        and user does not cancel. Does not close the document and returns False
-        if modified and users cancels.
+        and user does not cancel.
+
+        If document_to_open is given and is the same as self.document_path then
+        one of two things will happen. If the model is not modified, the user
+        is informed and False is returned. If the model is modified, the user is
+        asked if they would like to discard their changes and revert to the
+        version on the filesystem. If the user selects No, False is returned.
+        If the user selects Yes, the document is closed and True is returned.
+
+        In all cases, if the user selects cancels then the document is not
+        closes and False is returned.
         """
-        debug_print('MainWindow.close_document')
-        if self.model.modified:
+        debug_print('MainWindow.close_document', document_to_open)
+        # Must make sure that files exist before calling resolve
+        if (self.document_path and self.document_path.is_file() and 
+            document_to_open and document_to_open.is_file() and
+            self.document_path.resolve() == document_to_open.resolve()):
+            if self.model.modified:
+                # Ask the user if they work like to revert
+                msg = (u'The document [{0}] is already open and has been '
+                       u'changed. Would you like to discard your changes and '
+                       u'revert to the previous version?')
+                msg = msg.format(self.document_path.stem)
+                res = QMessageBox.question(self, u'Discard changes?', msg,
+                                           (QMessageBox.Yes | QMessageBox.No),
+                                            QMessageBox.No)
+                close = QMessageBox.Yes == res
+            else:
+                # Let the user know that the document is already open and
+                # take no action
+                msg = u'The document [{0}] is already open'
+                msg = msg.format(self.document_path.stem)
+                QMessageBox.information(self, 'Document already open', msg,
+                                        QMessageBox.Ok)
+                close = False
+        elif self.model.modified:
             # Ask the user if they work like to save before closing
             res = QMessageBox.question(self, 'Save document?',
                 'Save the document before closing?',
@@ -336,6 +370,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.empty_document')
         self.document = None
+        self.document_path = None
         self.plugin_image = None
         self.plugin_image_visible = False
         self.model.clear()

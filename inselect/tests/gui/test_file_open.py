@@ -1,3 +1,4 @@
+import shutil
 import unittest
 
 from functools import partial
@@ -50,9 +51,17 @@ class TestFileOpen(GUITest):
         """Open the thumbnail image file of an existing inselect document - the
         inselect document should be opened
         """
-        self.window.open_file(TESTDATA / 'test_segment_thumbnail.png')
-        self.assertEqual(5, self.window.model.rowCount())
-        self.assertEqual('Inselect [test_segment]', self.window.windowTitle())
+        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
+                                       TESTDATA / 'test_segment.png',
+                                       ) as tempdir:
+            thumbnail = tempdir / 'test_segment_thumbnail.png'
+
+            # The test document contains no thumbnail file - create one now
+            shutil.copy(str(tempdir / 'test_segment.png'), str(thumbnail))
+
+            self.window.open_file(thumbnail)
+            self.assertEqual(5, self.window.model.rowCount())
+            self.assertEqual('Inselect [test_segment]', self.window.windowTitle())
 
     @patch.object(MainWindow, 'new_document')
     def test_new_document(self, mock_new_document):
@@ -88,6 +97,7 @@ class TestFileOpen(GUITest):
             expected = u'New Inselect document [test_segment] created in [{0}]'
             expected = expected.format(tempdir)
             self.assertTrue(expected in mock_information.call_args[0])
+            self.assertFalse(self.window.model.modified)
 
     @patch.object(QMessageBox, 'critical', return_value=QMessageBox.Yes)
     def test_open_non_existant_image(self, mock_critical):
@@ -140,6 +150,8 @@ class TestFileOpen(GUITest):
         self.assertEqual(5, w.model.rowCount())
         self.assertEqual('Inselect [test_segment]', w.windowTitle())
 
+        self.assertFalse(w.model.modified)
+
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_open_save_existing_modified(self, mock_question):
         "User chooses to save the existing modified document"
@@ -166,6 +178,8 @@ class TestFileOpen(GUITest):
             self.assertEqual(0, w.model.rowCount())
             self.assertEqual('Inselect [test_segment]', w.windowTitle())
 
+            self.assertFalse(w.model.modified)
+
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Cancel)
     def test_open_cancel_existing_modified(self, mock_question):
         """User chooses to cancel open file when the existing document has been
@@ -178,6 +192,7 @@ class TestFileOpen(GUITest):
 
         # Open another document - user says not to save
         w.open_file(TESTDATA / 'test_subsegment.inselect')
+
         self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
         self.assertTrue(expected in mock_question.call_args[0])
@@ -187,25 +202,80 @@ class TestFileOpen(GUITest):
         self.assertEqual('Inselect [test_segment]', w.windowTitle())
         self.assertTrue(w.model.modified)
 
-        # Close the document
+        # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
 
     @patch.object(QFileDialog, 'getOpenFileName', return_value=(None,None))
     def test_cancel_file_choose(self, mock_gofn):
         "User cancels the 'choose a file to open' box"
-        # Load and modify a document
-        self._load_and_modify(TESTDATA / 'test_segment.inselect')
         w = self.window
+
+        # Open a file
         w.open_file(None)
 
+        self.assertEqual(1, mock_gofn.call_count)
+
+        # No document should be open
+        self.assertEqual(0, w.model.rowCount())
+        self.assertEqual('Inselect', w.windowTitle())
+        self.assertFalse(w.model.modified)
+
+    @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
+    def test_reopen_replace_modified(self, mock_question):
+        "User chooses to reopen a document that is already open and modified"
+        w = self.window
+
+        # Open and modify a document
+        self._load_and_modify(TESTDATA / 'test_segment.inselect')
+
+        # Open the same document again
+        w.open_file(TESTDATA / 'test_segment.inselect')
+
+        self.assertTrue(mock_question.called)
+        self.assertTrue('Discard changes?' in mock_question.call_args[0])
+
+        # Document should have been reopened
+        self.assertEqual(5, w.model.rowCount())
+        self.assertEqual('Inselect [test_segment]', w.windowTitle())
+        self.assertFalse(w.model.modified)
+
+    @patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
+    def test_reopen_do_notreplace_modified(self, mock_question):
+        "User chooses not to reopen a document that is already open and modified"
+        w = self.window
+
+        # Open and modify a document
+        self._load_and_modify(TESTDATA / 'test_segment.inselect')
+
+        # Open the same document again
+        w.open_file(TESTDATA / 'test_segment.inselect')
+
+        self.assertTrue(mock_question.called)
+        self.assertTrue('Discard changes?' in mock_question.call_args[0])
+
+        # Document should not have been reopened
         self.assertEqual(0, w.model.rowCount())
         self.assertEqual('Inselect [test_segment]', w.windowTitle())
         self.assertTrue(w.model.modified)
 
-        # Close the document
+        # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
+
+    @patch.object(QMessageBox, 'information')
+    def test_reopen(self, mock_information):
+        "User tries to reopen a document that is already open and not modified"
+        w = self.window
+
+        # Open a document again
+        w.open_file(TESTDATA / 'test_segment.inselect')
+
+        # Open the document again
+        w.open_file(TESTDATA / 'test_segment.inselect')
+
+        self.assertTrue(mock_information.called)
+        self.assertTrue('Document already open' in mock_information.call_args[0])
 
 
 if __name__=='__main__':

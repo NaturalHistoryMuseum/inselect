@@ -19,12 +19,14 @@ class GUITest(unittest.TestCase):
         # Only one QApplication can be constructed
         if QtGui.qApp == None:
             QtGui.QApplication([])
-        cls.window = MainWindow(QtGui.qApp)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.window.close()
-        delattr(cls, 'window')
+    def setUp(self):
+        assert not hasattr(self, 'window')
+        self.window = MainWindow(QtGui.qApp)
+
+    def tearDown(self):
+        self.window.close()
+        delattr(self, 'window')
 
     def run_async_operation(self, operation):
         """Runs an async operation in self.window's worker thread and waits for
