@@ -244,6 +244,8 @@ class SpecimenView(QListView):
         if self.expanded and 1 != len(self.selectionModel().selectedIndexes()):
             self.show_grid()
 
+        super(SpecimenView, self).selectionChanged(selected, deselected)
+
     def show_grid(self):
         debug_print('SpecimenView.show_grid')
         self.expanded = False
