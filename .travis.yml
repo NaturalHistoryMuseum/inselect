@@ -4,10 +4,13 @@ python:
 virtualenv:
   system_site_packages: true
 
+before_install:
+  - sudo apt-get update
+
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-      sudo apt-get install python-opencv python-numpy python-scipy \
-        python-matplotlib python-pyside libtiff4-dev libjpeg8-dev zlib1g-dev;
+      sudo apt-get install --fix-missing python-opencv python-numpy \
+        python-pyside libtiff4-dev libjpeg8-dev zlib1g-dev;
     fi
   - pip install -r requirements.txt
   - "export DISPLAY=:99.0"
