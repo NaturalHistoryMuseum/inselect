@@ -199,6 +199,7 @@ class Model(QAbstractItemModel):
                 debug_print(msg.format(index.row(), current, value))
 
                 if value != self._data[index.row()]['rect']:
+                    self._data[index.row()]['rect'] = value
                     self.dataChanged.emit(index, index)
                     self.set_modified(True)
                     return True
