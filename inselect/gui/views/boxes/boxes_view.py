@@ -172,7 +172,7 @@ class BoxesView(QtGui.QGraphicsView):
         if self.fit_to_view:
             selected = self.scene().selectedItems()
             if selected:
-                r = unite_rects([i.rect() for i in selected])
+                r = unite_rects([i.sceneBoundingRect() for i in selected])
 
                 # Some space
                 r.adjust(-20, -20, 40, 40)
