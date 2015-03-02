@@ -76,7 +76,7 @@ class BoxesView(QtGui.QGraphicsView):
         """QGraphicsView virtual
         """
         if self._pending_box:
-            debug_print('Updating pending box')
+            debug_print('BoxesView.mouseMoveEvent Updating pending box')
             r = self._pending_box.rect()
             r.setBottomRight(self.mapToScene(event.pos()))
             self._pending_box.setRect(r)
@@ -104,7 +104,7 @@ class BoxesView(QtGui.QGraphicsView):
                 r = r.normalized()
 
                 if r.width()>0 and r.height()>0:
-                    debug_print('Creating a new box')
+                    debug_print('BoxesView.mouseReleaseEvent creating a new box')
                     # Add the box
                     self.scene().user_add_box(r)
                 else:
