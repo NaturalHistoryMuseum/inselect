@@ -13,7 +13,6 @@ class TestActionState(MainWindowTest):
     def _test_no_document(self):
         "Enabled state for actions when no document is open"
         w = self.window
-        self.assertEqual('Inselect', w.windowTitle())
         self.assertEqual(0, w.model.rowCount())
 
         # File menu
@@ -76,7 +75,6 @@ class TestActionState(MainWindowTest):
 
         self.window.open_document(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, w.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
         self._test_document_open()
 
         self.window.close_document()

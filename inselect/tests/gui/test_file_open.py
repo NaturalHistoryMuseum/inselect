@@ -33,11 +33,27 @@ class TestFileOpen(MainWindowTest):
         w.delete_selected()
         self.assertEqual(0, w.model.rowCount())
 
+    def assertWindowTitleNoDocument(self):
+        """Asserts that self.window.windowTitle is as expected
+        """
+        self.assertEqual('Inselect', self.window.windowTitle())
+
+    def assertWindowTitleOpenDocument(self):
+        """Asserts that self.window.windowTitle is as expected.
+        """
+        # Some OSes append ' \u2014 inselect' to the window title, so assert
+        # using a regular expression rather than equality. Not possible to
+        # check modified behaviour because MainWindow.modified_changed slot
+        # is not called without event loop.
+        self.assertRegexpMatches(self.window.windowTitle(),
+                                 '^test_segment\\.inselect.*')
+
     def test_open_doc(self):
         "Open an inselect document"
         self.window.open_file(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, self.window.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
+        self.assertWindowTitleOpenDocument()
+        self.assertFalse(self.window.model.is_modified)
 
     def test_open_scanned_of_doc(self):
         """Open the scanned image file of an existing inselect document - the
@@ -45,7 +61,8 @@ class TestFileOpen(MainWindowTest):
         """
         self.window.open_file(TESTDATA / 'test_segment.png')
         self.assertEqual(5, self.window.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
+        self.assertFalse(self.window.model.is_modified)
+        self.assertWindowTitleOpenDocument()
 
     def test_open_thumbnail_of_doc(self):
         """Open the thumbnail image file of an existing inselect document - the
@@ -61,7 +78,8 @@ class TestFileOpen(MainWindowTest):
 
             self.window.open_file(thumbnail)
             self.assertEqual(5, self.window.model.rowCount())
-            self.assertEqual('test_segment.inselect[*]', self.window.windowTitle())
+            self.assertFalse(self.window.model.is_modified)
+            self.assertWindowTitleOpenDocument()
 
     @patch.object(MainWindow, 'new_document')
     def test_new_document(self, mock_new_document):
@@ -97,7 +115,9 @@ class TestFileOpen(MainWindowTest):
             expected = u'New Inselect document [test_segment] created in [{0}]'
             expected = expected.format(tempdir)
             self.assertTrue(expected in mock_information.call_args[0])
+
             self.assertFalse(self.window.model.is_modified)
+            self.assertWindowTitleOpenDocument()
 
     @patch.object(QMessageBox, 'critical', return_value=QMessageBox.Yes)
     def test_open_non_existant_image(self, mock_critical):
@@ -111,6 +131,9 @@ class TestFileOpen(MainWindowTest):
                     u"Image file [I do not exist.png] does not exist")
         self.assertTrue(expected in mock_critical.call_args[0])
 
+        self.assertFalse(self.window.model.is_modified)
+        self.assertWindowTitleNoDocument()
+
     @patch.object(QMessageBox, 'critical', return_value=QMessageBox.Yes)
     def test_open_non_existant_inselect(self, mock_critical):
         "Try to open a non-existant inselect file"
@@ -120,6 +143,9 @@ class TestFileOpen(MainWindowTest):
                     u"[Errno 2] No such file or directory: 'I do not exist.inselect'")
         self.assertTrue(expected in mock_critical.call_args[0])
 
+        self.assertFalse(self.window.model.is_modified)
+        self.assertWindowTitleNoDocument()
+
     @patch.object(QMessageBox, 'critical', return_value=QMessageBox.Yes)
     def test_open_non_existant_unrecognised(self, mock_critical):
         "Try to open a non-existant file with an unrecognised extension"
@@ -127,6 +153,9 @@ class TestFileOpen(MainWindowTest):
         self.assertTrue(mock_critical.called)
         expected = u'An error occurred:\nUnknown file type [I do not exist]'
         self.assertTrue(expected in mock_critical.call_args[0])
+
+        self.assertFalse(self.window.model.is_modified)
+        self.assertWindowTitleNoDocument()
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
     def test_open_do_not_save_existing_modified(self, mock_question):
@@ -143,14 +172,12 @@ class TestFileOpen(MainWindowTest):
         self.assertTrue(expected in mock_question.call_args[0])
 
         self.assertEqual(1, w.model.rowCount())
-        self.assertEqual('test_subsegment.inselect[*]', w.windowTitle())
 
         # Original document should not have changed
         w.open_file(TESTDATA / 'test_segment.inselect')
         self.assertEqual(5, w.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
-
         self.assertFalse(w.model.is_modified)
+        self.assertWindowTitleOpenDocument()
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_open_save_existing_modified(self, mock_question):
@@ -170,15 +197,11 @@ class TestFileOpen(MainWindowTest):
             expected = "Save the document before closing?"
             self.assertTrue(expected in mock_question.call_args[0])
 
-            self.assertEqual(1, w.model.rowCount())
-            self.assertEqual('test_subsegment.inselect[*]', w.windowTitle())
-
             # Original document should have changed - it should contain no boxes
             w.open_file(tempdir / 'test_segment.inselect')
             self.assertEqual(0, w.model.rowCount())
-            self.assertEqual('test_segment.inselect[*]', w.windowTitle())
-
             self.assertFalse(w.model.is_modified)
+            self.assertWindowTitleOpenDocument()
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Cancel)
     def test_open_cancel_existing_modified(self, mock_question):
@@ -199,8 +222,8 @@ class TestFileOpen(MainWindowTest):
 
         # Assert that the open document has not changed and has not been saved
         self.assertEqual(0, w.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
-        self.assertTrue(w.model.is_modified)
+        self.assertTrue(self.window.model.is_modified)
+        self.assertWindowTitleOpenDocument()
 
         # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
@@ -218,8 +241,8 @@ class TestFileOpen(MainWindowTest):
 
         # No document should be open
         self.assertEqual(0, w.model.rowCount())
-        self.assertEqual('Inselect', w.windowTitle())
         self.assertFalse(w.model.is_modified)
+        self.assertWindowTitleNoDocument()
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_reopen_replace_modified(self, mock_question):
@@ -237,8 +260,8 @@ class TestFileOpen(MainWindowTest):
 
         # Document should have been reopened
         self.assertEqual(5, w.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
         self.assertFalse(w.model.is_modified)
+        self.assertWindowTitleOpenDocument()
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
     def test_reopen_do_notreplace_modified(self, mock_question):
@@ -256,8 +279,8 @@ class TestFileOpen(MainWindowTest):
 
         # Document should not have been reopened
         self.assertEqual(0, w.model.rowCount())
-        self.assertEqual('test_segment.inselect[*]', w.windowTitle())
         self.assertTrue(w.model.is_modified)
+        self.assertWindowTitleOpenDocument()
 
         # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
@@ -276,6 +299,9 @@ class TestFileOpen(MainWindowTest):
 
         self.assertTrue(mock_information.called)
         self.assertTrue('Document already open' in mock_information.call_args[0])
+
+        self.assertFalse(w.model.is_modified)
+        self.assertWindowTitleOpenDocument()
 
 
 if __name__=='__main__':
