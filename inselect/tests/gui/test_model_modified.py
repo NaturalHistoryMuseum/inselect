@@ -42,6 +42,9 @@ class TestModelModified(GUITest):
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), -90, RotationRole)
+
+        # Rotation stored 0 <= v < 360
+        self.assertEqual(270, m.data(m.index(0, 0), RotationRole))
         mock_modified_changed.assert_called_once_with()
         self.assertTrue(m.is_modified)
 
@@ -52,6 +55,7 @@ class TestModelModified(GUITest):
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), 0, RotationRole)
+        self.assertEqual(0, m.data(m.index(0, 0), RotationRole))
         self.assertFalse(mock_modified_changed.called)
         self.assertFalse(m.is_modified)
 
@@ -62,6 +66,7 @@ class TestModelModified(GUITest):
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), QRect(0, 0, 1, 1), RectRole)
+        self.assertEqual(QRect(0, 0, 1, 1), m.data(m.index(0, 0), RectRole))
         mock_modified_changed.assert_called_once_with()
         self.assertTrue(m.is_modified)
 
