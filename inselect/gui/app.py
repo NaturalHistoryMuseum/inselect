@@ -33,7 +33,6 @@ from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
 from .views.specimen import SpecimenView
-from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
 class MainWindow(QtGui.QMainWindow):
@@ -52,31 +51,24 @@ class MainWindow(QtGui.QMainWindow):
         # self.boxes_view is a QGraphicsView, not a QAbstractItemView
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
-        # Metadata view
+        # Speciment and metadata views
         self.view_specimen = SpecimenView()
         self.view_metadata = MetadataView()
 
-        self.specimens = QtGui.QSplitter()
-        self.specimens.addWidget(self.view_specimen)
-        self.specimens.addWidget(self.view_metadata.widget)
-        self.specimens.setSizes([600, 300])
-
         # Views in tabs
-        self.tabs = QtGui.QTabWidget(self)
+        self.tabs = QtGui.QTabWidget()
         self.tabs.addTab(self.boxes_view, 'Boxes')
-        self.tabs.addTab(self.specimens, 'Specimens')
+        self.tabs.addTab(self.view_specimen, 'Specimens')
         self.tabs.setCurrentIndex(0)
 
-        # Summary view
-        self.view_summary = SummaryView()
+        # Tabs alongside metadata fields
+        self.splitter = QtGui.QSplitter()
+        self.splitter.addWidget(self.tabs)
+        self.splitter.addWidget(self.view_metadata.widget)
+        self.splitter.setSizes([600, 300])
 
         # Main window layout
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.view_summary.widget)
-        layout.addWidget(self.tabs)
-        box = QtGui.QWidget()
-        box.setLayout(layout)
-        self.setCentralWidget(box)
+        self.setCentralWidget(self.splitter)
 
         # Document
         self.document = None
@@ -90,13 +82,11 @@ class MainWindow(QtGui.QMainWindow):
         self.view_graphics_item.setModel(self.model)
         self.view_specimen.setModel(self.model)
         self.view_metadata.setModel(self.model)
-        self.view_summary.setModel(self.model)
 
         # A consistent selection across all views
         sm = self.view_specimen.selectionModel()
         self.view_graphics_item.setSelectionModel(sm)
         self.view_metadata.setSelectionModel(sm)
-        self.view_summary.setSelectionModel(sm)
 
         # Plugins
         self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
@@ -858,7 +848,7 @@ class MainWindow(QtGui.QMainWindow):
         document = self.document is not None
         has_rows = self.model.rowCount()>0 if self.model else False
         boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
-        specimens_view_visible = self.specimens == self.tabs.currentWidget()
+        specimens_view_visible = self.view_specimen == self.tabs.currentWidget()
         has_selection = len(self.view_specimen.selectedIndexes())>0
 
         # File
