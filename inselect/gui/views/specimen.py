@@ -135,16 +135,7 @@ class CropDelegate(QAbstractItemDelegate):
         with painter_state(painter):
             if angle:
                 painter.setTransform(t)
-
-            # Fill with black before painting the bitmap. This so that the
-            # parts of source_rect that are outside of the source image are
-            # shown in black.
-            brush = painter.brush()
-            painter.setBrush(self.BLACK)
-            painter.drawRect(target_rect)
             painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
-
-            painter.setBrush(brush)
             painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
             painter.drawRect(target_rect)
 
