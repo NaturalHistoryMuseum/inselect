@@ -1,7 +1,6 @@
 import unittest
 
 from inselect.lib.rect import Coordinates, Point, Rect
-from inselect.lib.inselect_error import InselectError
 
 
 class TestCoordinates(unittest.TestCase):
@@ -24,10 +23,6 @@ class TestRect(unittest.TestCase):
         self.assertEqual(1, self.R.top)
         self.assertEqual(2, self.R.width)
         self.assertEqual(3, self.R.height)
-        self.assertRaises(InselectError, Rect,-1, 1, 2, 3)
-        self.assertRaises(InselectError, Rect, 0,-1, 2, 3)
-        self.assertRaises(InselectError, Rect, 0, 1, 0, 3)
-        self.assertRaises(InselectError, Rect, 0, 1, 2, 0)
 
     def test_iter(self):
         left, top, width, height = self.R

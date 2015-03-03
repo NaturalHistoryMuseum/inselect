@@ -77,17 +77,6 @@ class TestImage(unittest.TestCase):
         self.assertEqual([Rect(0, 0, 1, 1), Rect(0, 0, 1.0/3, 1.0/19)],
                          list(i.to_normalised(boxes)))
 
-    def test_validate_in_bounds(self):
-        i = InselectImage(TESTDATA / 'test_segment.png')
-
-        # Check that valid boxes do not raise an error
-        i.validate_in_bounds([(0,  0, 459, 437)])
-
-        self.assertRaises(InselectError, i.validate_in_bounds, [(-1,  0, 459, 437)])
-        self.assertRaises(InselectError, i.validate_in_bounds, [( 0, -1, 459, 437)])
-        self.assertRaises(InselectError, i.validate_in_bounds, [( 0,  0, 460, 437)])
-        self.assertRaises(InselectError, i.validate_in_bounds, [( 0,  0, 459, 438)])
-
     def test_save_crops(self):
         "Cropped images are as expected"
         i = InselectImage(TESTDATA / 'test_segment.png')

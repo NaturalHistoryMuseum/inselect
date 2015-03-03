@@ -2,9 +2,10 @@ from itertools import izip, count
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import debug_print, validate_normalised
+from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
 
@@ -48,20 +49,11 @@ class InselectImage(object):
         return self._array
 
     def from_normalised(self, boxes):
-        validate_normalised(boxes)
         h, w = self.array.shape[:2]
         for left, top, width, height in boxes:
             yield Rect(int(w*left), int(h*top), int(w*width), int(h*height))
 
-    def validate_in_bounds(self, boxes):
-        h, w = self.array.shape[:2]
-        for left, top, width, height in boxes:
-            if not (left>=0 and top>=0 and left<w and top<h and width>0 and
-                    left+width<=w and height>0 and top+height<=h):
-                raise InselectError('One or more boxes are not in bounds')
-
     def to_normalised(self, boxes):
-        self.validate_in_bounds(boxes)
         h, w = self.array.shape[:2]
         for left, top, width, height in boxes:
             yield Rect(float(left)/w, float(top)/h, float(width)/w,
@@ -69,9 +61,16 @@ class InselectImage(object):
 
     def crops(self, normalised):
         "Iterate over crops."
+        # TODO LH Fill back if not in self.array.shape[:2]
+        w, h = self.array.shape[:2]
         for box in self.from_normalised(normalised):
             x0, y0, x1, y1 = box.coordinates
-            yield self.array[y0:y1, x0:x1]
+            if 0 <= x0 <= w and 0 <= y0 <= h and 0 <= x1 <= w and 0 <= y1 <= h:
+                # View
+                yield self.array[y0:y1, x0:x1]
+            else:
+                # TODO LH Create new array and fill. Transparency?
+                yield self.array[y0:y1, x0:x1]
 
     def save_crops(self, normalised, paths, progress=None):
         "Saves crops given in normalised to paths."
