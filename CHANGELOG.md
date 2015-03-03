@@ -1,14 +1,22 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.7
+-------------
+- Fixed #137 - Metadata title should not scroll with fields (@quicklizard)
+- Fixed #136 - Reopening the currently open document is confusing (@quicklizard)
+- Added #133 - Show proxy icon on Mac OS X (@quicklizard)
+- Added #132 - Show modified state in title (@quicklizard)
+- Added #109 - Larger images in metadata view (@quicklizard)
+
 Version 0.1.6
 -------------
 - Workaround for broken barcode reading on Windows (#130) (@quicklizard)
 - Metadata fields are Simple Darwin Core terms (#116) (@quicklizard)
-- Improved test coverage (#84) - (@quicklizard)
+- Improved test coverage (#84) (@quicklizard)
 - Fixed #127 - .tif file extension not recognised (@quicklizard)
 - Fixed #125 - Display issue on Windows: After startup, Window title, frame and controls out of screen (@quicklizard)
 - Fixed #124 - "New" doesn't work if inselect document already exists (@quicklizard)
-- Fixed #119 Non-latin characters in 'Specimen number' metadata field causes grid item title to disappear (@quicklizard)
+- Fixed #119 - Non-latin characters in 'Specimen number' metadata field causes grid item title to disappear (@quicklizard)
 - Fixed #115 - Silly wording when a single box selected (@quicklizard)
 - Fixed #106 - Select newly created bounding box (@quicklizard)
 - Fixed #104 - File, Open versus File, New ambiguity (@quicklizard)
