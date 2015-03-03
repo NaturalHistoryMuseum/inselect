@@ -776,6 +776,13 @@ class MainWindow(QtGui.QMainWindow):
         """
         if self.isFullScreen():
             self.showNormal()
+
+            # When leaving full screen, Qt (or something else) forgets the
+            # Mac OS X proxy icon. Clearing and then setting the window file
+            # path restores the proxy icon.
+            if self.document_path:
+                self.setWindowFilePath('')
+                self.setWindowFilePath(str(self.document_path))
         else:
             self.showFullScreen()
 
