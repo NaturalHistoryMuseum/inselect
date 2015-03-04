@@ -3,6 +3,7 @@ import sys
 from PySide import QtGui
 from PySide.QtCore import Qt, QRectF, QSizeF
 
+from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
 
