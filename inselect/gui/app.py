@@ -269,18 +269,45 @@ class MainWindow(QtGui.QMainWindow):
             QMessageBox.information(self, "CSV saved", msg)
 
     @report_to_user
-    def save_boxes_image(self):
-        """Saves the boxes view to an image file
+    def save_screengrab(self):
+        """Saves a screenshot to an image file
         """
-        debug_print('MainWindow,save_boxes_image_action')
+        debug_print('MainWindow,save_screengrab')
+
+        # Do not use OpenCV to write the image because the conversion from Qt's
+        # QPixmap to a numpy array is non-trivial
+        # Investigate https://pypi.python.org/pypi/qimage2ndarray/0.2
+
+        # Work out the supported image file extensions
+        extensions = QtGui.QImageWriter.supportedImageFormats()
+        extensions = sorted([str(e).lower() for e in extensions])
+        extensions = ['*.{0}'.format(e) for e in extensions]
+
+        print(extensions)
+        print(IMAGE_PATTERNS)
+        # Only some of these make sense. For example, do not offer the user
+        # the change to save an eps, which is a format supported by QImageWriter
+        extensions = sorted(set(extensions).intersection(IMAGE_PATTERNS))
+        print(extensions)
+
+        filter = 'Images ({0})'.format(' '.join(extensions))
+        print(filter)
         folder = inselect.settings.get("working_directory")
-        filter = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
         path, selected_filter = QtGui.QFileDialog.getSaveFileName(
                 self, "Save image file of boxes view", folder,
                 filter=filter)
 
         if path:
-            self.boxes_view.save_to_file(path)
+            pm = QtGui.QPixmap.grabWidget(self)
+
+            # Write using QImageWriter, which makes richer error information
+            # avaible than QPixmap.save()
+            writer = QtGui.QImageWriter(path)
+            if not writer.write(pm.toImage()):
+                msg = 'An error occurred writing to [{0}]: [{1}]'
+                raise InselectError(msg.format(path, writer.errorString()))
+            else:
+                debug_print('BoxesView.save_screengrab [{0}]'.format(path))
 
     @report_to_user
     def close_document(self):
@@ -529,8 +556,8 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.save_crops)
         self.export_csv_action = QAction("&Export CSV", self,
             triggered=self.export_csv)
-        self.save_boxes_image_action = QAction("Save boxes image", self,
-            triggered=self.save_boxes_image)
+        self.save_screengrab_action = QAction("Save screen grab", self,
+            triggered=self.save_screengrab)
         self.close_action = QAction("&Close", self,
             shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
         self.exit_action = QAction("E&xit", self,
@@ -625,7 +652,7 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu.addAction(self.save_action)
         self.fileMenu.addAction(self.save_crops_action)
         self.fileMenu.addAction(self.export_csv_action)
-        self.fileMenu.addAction(self.save_boxes_image_action)
+        self.fileMenu.addAction(self.save_screengrab_action)
         self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
@@ -721,7 +748,6 @@ class MainWindow(QtGui.QMainWindow):
         self.save_action.setEnabled(document)
         self.save_crops_action.setEnabled(has_rows)
         self.export_csv_action.setEnabled(has_rows)
-        self.save_boxes_image_action.setEnabled(document)
         self.close_action.setEnabled(document)
 
         # Edit
