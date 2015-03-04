@@ -235,6 +235,9 @@ class SpecimenView(QListView):
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.setStyleSheet("background-color: darkgray;")
 
+        # Activating an item toggles the expanded state
+        self.activated.connect(self.toggle_expanded)
+
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView slot
         """
@@ -264,6 +267,15 @@ class SpecimenView(QListView):
             sm.select(self.model().index(0, 0), QItemSelectionModel.Select)
 
         self._refresh()
+
+    def toggle_expanded(self, index):
+        """Toggles the expanded state and selects index
+        """
+        self.selectionModel().select(index, QItemSelectionModel.Select)
+        if self.expanded:
+            self.show_grid()
+        else:
+            self.show_expanded()
 
     def _refresh(self):
         debug_print('SpecimenView.toggle_display_size')
