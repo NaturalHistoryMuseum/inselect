@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.7
 -------------
+- Added #138 - Metadata fields to be available on boxes view (@quicklizard)
 - Fixed #137 - Metadata title should not scroll with fields (@quicklizard)
 - Fixed #136 - Reopening the currently open document is confusing (@quicklizard)
 - Added #133 - Show proxy icon on Mac OS X (@quicklizard)
