@@ -54,7 +54,7 @@ def main():
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
-    save_crops(args.dir, args.overwrite_existing)
+    save_crops(args.dir, args.overwrite)
 
 if __name__=='__main__':
     main()

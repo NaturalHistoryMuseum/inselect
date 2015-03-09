@@ -50,7 +50,7 @@ def main():
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
-    export_csv(args.dir, args.overwrite_existing)
+    export_csv(args.dir, args.overwrite)
 
 if __name__=='__main__':
     main()
