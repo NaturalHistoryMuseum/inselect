@@ -1,4 +1,7 @@
 # Temporary solution until I get round to writing a makefile
+
+set -e  # Exit on failure
+
 VERSION=`python inselect.py --version 2>&1 | sed 's/inselect.py //g'`
 
 echo Building Inselect $VERSION
@@ -6,7 +9,7 @@ echo Building Inselect $VERSION
 echo Clean
 find . -name "*pyc" -print0 | xargs -0 rm -rf
 find . -name __pycache__ -print0 | xargs -0 rm -rf
-rm -rf *spec dist build inselect-$VERSION.dmg
+rm -rf *spec dist build cover inselect-$VERSION.dmg
 
 echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
