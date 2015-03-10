@@ -12,7 +12,7 @@ import cv2
 from .image import InselectImage
 from .inselect_error import InselectError
 from .unicode_csv import UnicodeWriter
-from .utils import debug_print, validate_normalised
+from .utils import debug_print
 from .rect import Rect
 
 
@@ -50,8 +50,6 @@ class InselectDocument(object):
         items = self._preprocess_items(items)
 
         # TODO Validate metadata fields
-
-        validate_normalised([i['rect'] for i in items])
 
         self._scanned = scanned if scanned else InselectImage(scanned_path)
 
@@ -111,7 +109,6 @@ class InselectDocument(object):
         "Replace self.items with items"
         items = deepcopy(items)
         items = self._preprocess_items(items)
-        validate_normalised(i['rect'] for i in items)
         self._items = items
 
     def _preprocess_items(self, items):

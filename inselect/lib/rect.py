@@ -1,7 +1,5 @@
 import collections
 
-from inselect.lib.inselect_error import InselectError
-
 
 # Simple representations of Points and rectangles
 Point = collections.namedtuple('Point', ['x', 'y'])
@@ -9,12 +7,6 @@ Coordinates = collections.namedtuple('Coordinates', ['x0', 'y0', 'x1', 'y1'])
 
 
 class Rect(collections.namedtuple('Rect', ['left', 'top', 'width', 'height'])):
-    def __new__(cls, left, top, width, height):
-        if left<0 or top<0 or width<=0 or height<=0:
-            raise InselectError('Bad rectangle')
-        else:
-            return super(Rect, cls).__new__(cls, left, top, width, height)
-
     @property
     def area(self):
         "The product of width and height"

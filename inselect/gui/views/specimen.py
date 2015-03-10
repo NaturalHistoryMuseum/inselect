@@ -136,7 +136,6 @@ class CropDelegate(QAbstractItemDelegate):
             if angle:
                 painter.setTransform(t)
             painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
-
             painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
             painter.drawRect(target_rect)
 

@@ -162,10 +162,6 @@ class TestDocument(unittest.TestCase):
         doc.set_items(items)
         self.assertEqual(items, doc.items)
 
-        # Not normalised
-        items = [ {'fields': {}, 'rect': Rect(0, 0, 1, 2)}, ]
-        self.assertRaises(InselectError, doc.set_items, items)
-
     def test_new_from_scan(self):
         "New document is created and saved"
         with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
