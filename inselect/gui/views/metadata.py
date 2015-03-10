@@ -22,10 +22,6 @@ _MULTIPLE_FIELD_VALUES = u'*'
 
 
 class MetadataView(QAbstractItemView):
-    MESSAGE_NO_SELECTION = 'Metadata'
-    MESSAGE_SINGLE_SELECTION = 'Metadata for 1 box'
-    MESSAGE_MULTIPLE_SELECTION = 'Metadata for {0} boxes'
-
     def __init__(self, parent=None):
         # This view is never made visible
         super(MetadataView, self).__init__()
@@ -45,7 +41,7 @@ class MetadataView(QAbstractItemView):
         self._form_scroll.setWidgetResizable(True)
 
         # Title
-        self._title = QLabel()
+        self._title = QLabel('Metadata')
 
         # Title is fixed at the top - form can be scrolled
         layout = QVBoxLayout()
@@ -72,15 +68,6 @@ class MetadataView(QAbstractItemView):
 
         selected = self.selectionModel().selectedIndexes()
 
-        # Set title
-        if 1 == len(selected):
-            title = self.MESSAGE_SINGLE_SELECTION
-        elif selected:
-            title = self.MESSAGE_MULTIPLE_SELECTION.format(len(selected))
-        else:
-            title = self.MESSAGE_NO_SELECTION
-        self._title.setText(title)
-
         # TODO Combo should indicate multiple and unrecognised values
         # Put values into the controls
         metadata = [i.data(MetadataRole) for i in selected]
@@ -105,6 +92,9 @@ class FormContainer(QWidget):
         color: black;
     }
     """
+
+    # TODO LH Text colour to come from system
+
     def __init__(self, parent=None):
         super(FormContainer, self).__init__(parent)
 
@@ -212,6 +202,7 @@ class URLLabel(QLabel):
     """A label that displays a clickable URL in black.
     """
 
+    # TODO LH Text colour to come from system
     HTML = '''<html><head><style type=text/css>
     a:link {{ color: black; text-decoration: underline;}}
     </style></head>

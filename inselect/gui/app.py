@@ -11,8 +11,7 @@ import numpy as np
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import (QMenu, QAction, QMessageBox, QIcon, QDesktopServices,
-                          QLabel)
+from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon, QDesktopServices
 
 import inselect
 
@@ -34,6 +33,7 @@ from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
 from .views.specimen import SpecimenView
+from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
 class MainWindow(QtGui.QMainWindow):
@@ -53,8 +53,9 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
         # Speciment and metadata views
-        self.view_specimen = SpecimenView()
         self.view_metadata = MetadataView()
+        self.view_specimen = SpecimenView()
+        self.view_summary = SummaryView()
 
         # Views in tabs
         self.tabs = QtGui.QTabWidget()
@@ -81,13 +82,15 @@ class MainWindow(QtGui.QMainWindow):
 
         # Views
         self.view_graphics_item.setModel(self.model)
-        self.view_specimen.setModel(self.model)
         self.view_metadata.setModel(self.model)
+        self.view_specimen.setModel(self.model)
+        self.view_summary.setModel(self.model)
 
         # A consistent selection across all views
         sm = self.view_specimen.selectionModel()
         self.view_graphics_item.setSelectionModel(sm)
         self.view_metadata.setSelectionModel(sm)
+        self.view_summary.setSelectionModel(sm)
 
         # Plugins
         self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
@@ -108,8 +111,9 @@ class MainWindow(QtGui.QMainWindow):
         # Filter events
         self.tabs.installEventFilter(self)
         self.boxes_view.installEventFilter(self)
-        self.view_specimen.installEventFilter(self)
         self.view_metadata.installEventFilter(self)
+        self.view_specimen.installEventFilter(self)
+        self.view_summary.installEventFilter(self)
 
         self.empty_document()
 
@@ -240,7 +244,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowTitle('')
         self.setWindowFilePath(str(self.document_path))
-        self.document_path_label.setText(self.document_path.stem)
+        self.view_summary.set_document(self.document)
 
         self.sync_ui()
 
@@ -417,7 +421,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowTitle('Inselect')
         self.setWindowFilePath(None)
-        self.document_path_label.setText('')
+        self.view_summary.set_document(None)
 
         self.sync_ui()
 
@@ -746,8 +750,7 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
         self.toolbar.addSeparator()
-        self.document_path_label = QtGui.QLabel()
-        self.toolbar.addWidget(self.document_path_label)
+        self.toolbar.addWidget(self.view_summary.widget)
 
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.open_action)

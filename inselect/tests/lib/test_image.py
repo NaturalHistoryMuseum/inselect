@@ -52,7 +52,7 @@ class TestImage(unittest.TestCase):
         self.assertEqual("InselectImage ['{0}'] [Loaded]".format(str(p)), str(i))
 
     def test_array(self):
-        "Array is read-only and has the expected dimenions"
+        "Array is read-only and has the expected dimensions"
         i = InselectImage(TESTDATA / 'test_segment.png')
         self.assertFalse(i._array)
         self.assertEqual((437, 459), i.array.shape[:2])
@@ -138,6 +138,17 @@ class TestImage(unittest.TestCase):
         finally:
             rmtree_readonly(temp)
 
+    def test_size_bytes(self):
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        self.assertEqual( 24197, i.size_bytes)
+
+        # Load the array and check again - different code path
+        i.array
+        self.assertEqual( 24197, i.size_bytes)
+
+    def test_dimensions(self):
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        self.assertEqual( (459, 437), i.dimensions)
 
 if __name__=='__main__':
     unittest.main()

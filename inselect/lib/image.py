@@ -27,7 +27,6 @@ class InselectImage(object):
         else:
             self._path = path
             self._array = None
-            self.print_info()
 
     def __repr__(self):
         return "InselectImage('{0}')".format(str(self._path))
@@ -92,28 +91,25 @@ class InselectImage(object):
             else:
                 debug_print('Wrote crop [{0}]'.format(path))
 
-    def print_info(self):
-        """WARNING - this function not intended to be used 'as is' but is a
-        record of code fragments that might be used to satisfy issue 120
+    @property
+    def size_bytes(self):
+        "The iteger size of this file in bytes"
+        return self._path.stat().st_size
 
-        """
-
+    @property
+    def pil_image(self):
+        "Returns a PIL.Image instance represention"
         with warnings.catch_warnings(), self._path.open('rb') as f:
-            # Ignore DecompressionBombWarning - SatScan images are > 89478485 pixels
+            # Ignore DecompressionBombWarning - expect images to be > 89478485
+            # pixels
             warnings.simplefilter("ignore", Image.DecompressionBombWarning)
-            im = Image.open(f)
-            f.seek(0)
-            tags = exifread.process_file(f)
-        debug_print('Information about [{0}]'.format(self._path))
-        debug_print('\tst_size', humanize.naturalsize(self._path.stat().st_size))
-        debug_print('\tdimensions', im.size)
-        debug_print('\tbands', im.getbands())
-        debug_print('\tmode', im.mode)
-        debug_print('\tinfo keys')
-        for k in sorted(im.info.keys()):
-            debug_print(u'\t\t[{0}]'.format(k))
-        debug_print('\tformat', im.format)
-        debug_print('\tformat_description', im.format_description)
-        debug_print('\tEXIF tags')
-        for k in sorted(tags.keys()):
-            debug_print(u'\t\t[{0}]'.format(k))
+            return Image.open(f)
+
+    @property
+    def dimensions(self):
+        "A tuple (height, width)"
+        if self._array is not None:
+            # Get directly from the array
+            return self._array.shape[:2]
+        else:
+            return self.pil_image.size
