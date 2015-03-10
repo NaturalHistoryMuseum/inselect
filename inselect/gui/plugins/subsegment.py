@@ -37,7 +37,7 @@ class SubsegmentPlugin(Plugin):
 
     def proceed(self):
         # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
-        selected = self.parent.view_grid.selectedIndexes()
+        selected = self.parent.view_specimen.selectedIndexes()
         items_of_indexes = self.parent.view_graphics_item.items_of_indexes
         item = items_of_indexes(selected).next() if 1 == len(selected) else None
         seeds = item.subsegmentation_seed_points if item else None

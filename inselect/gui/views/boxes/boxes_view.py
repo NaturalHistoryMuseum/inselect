@@ -3,6 +3,7 @@ import sys
 from PySide import QtGui
 from PySide.QtCore import Qt, QRectF, QSizeF
 
+from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
 
@@ -76,7 +77,7 @@ class BoxesView(QtGui.QGraphicsView):
         """QGraphicsView virtual
         """
         if self._pending_box:
-            debug_print('Updating pending box')
+            debug_print('BoxesView.mouseMoveEvent Updating pending box')
             r = self._pending_box.rect()
             r.setBottomRight(self.mapToScene(event.pos()))
             self._pending_box.setRect(r)
@@ -104,7 +105,7 @@ class BoxesView(QtGui.QGraphicsView):
                 r = r.normalized()
 
                 if r.width()>0 and r.height()>0:
-                    debug_print('Creating a new box')
+                    debug_print('BoxesView.mouseReleaseEvent creating a new box')
                     # Add the box
                     self.scene().user_add_box(r)
                 else:
@@ -172,7 +173,7 @@ class BoxesView(QtGui.QGraphicsView):
         if self.fit_to_view:
             selected = self.scene().selectedItems()
             if selected:
-                r = unite_rects([i.rect() for i in selected])
+                r = unite_rects([i.sceneBoundingRect() for i in selected])
 
                 # Some space
                 r.adjust(-20, -20, 40, 40)
@@ -202,7 +203,8 @@ class BoxesView(QtGui.QGraphicsView):
             self.zoom_home()
         else:
             f = min(self.MAXIMUM_ZOOM, f)
-            debug_print('Change absolute zoom from [{0}] to [{1}]'.format(self.absolute_zoom, f))
+            msg = 'Change absolute zoom from [{0}] to [{1}]'
+            debug_print(msg.format(self.absolute_zoom, f))
 
             self.setTransform(QtGui.QTransform.fromScale(f, f))
             self.fit_to_view = False

@@ -5,7 +5,7 @@ from PySide.QtCore import Qt
 from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import PaintState
+from inselect.gui.utils import painter_state
 
 from .resize_handle import ResizeHandle
 
@@ -66,7 +66,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
                            self.scene().pixmap,
                            self.sceneBoundingRect())
 
-        with PaintState(painter):
+        with painter_state(painter):
             # Zero thickness indicates a cosmetic pen, which is drawn with the
             # same thickness regardless of the view's scale factor
             painter.setPen(QPen(self.colour, 0, Qt.SolidLine))
@@ -170,7 +170,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         if Qt.ShiftModifier == event.modifiers():
             # Add sub-segmentation seed point
-            self._seeds.append(event.pos())
+            self.append_subsegmentation_seed_point(event.pos())
         else:
             # Starting a move
             self.setCursor(Qt.ClosedHandCursor)
@@ -224,6 +224,11 @@ class BoxItem(QtGui.QGraphicsRectItem):
         if r.width()>1.0 and r.height()>1.0:
             self.prepareGeometryChange()
             self.setRect(r)
+
+    def append_subsegmentation_seed_point(self, pos):
+        "Appends pos (a QPoint) to the list of subsegmentation seeds points"
+        debug_print('New subsegmentation seed point at [{0}]'.format(pos))
+        self._seeds.append(pos)
 
     @property
     def subsegmentation_seed_points(self):

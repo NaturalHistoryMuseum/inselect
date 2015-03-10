@@ -10,6 +10,7 @@ from inselect.lib.utils import (make_readonly, validate_normalised,
                                 rmtree_readonly)
 from inselect.lib.rect import Rect
 
+
 class TestMakeReadOnly(unittest.TestCase):
     def test_makereadonly_file(self):
         f = tempfile.NamedTemporaryFile()
@@ -34,6 +35,9 @@ class TestRMTreeReadOnly(unittest.TestCase):
         d = tempfile.mkdtemp()
         path = Path(d)
         try:
+            (path / 'a file').open('w')
+            (path / 'a directory').mkdir()
+            (path / 'a directory' / 'another file').open('w')
             make_readonly(path)
             self.assertTrue(path.is_dir())
         finally:

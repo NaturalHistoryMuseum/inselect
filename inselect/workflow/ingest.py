@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Ingest scanned images
+"""Ingests scanned images
 """
 
 import argparse
@@ -19,6 +19,10 @@ import inselect.lib.utils
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
 
 from inselect.lib.inselect_error import InselectError
+
+
+# TODO Ignore existing documents
+# TODO Recursive option
 
 def ingest_from_directory(inbox, docs):
     """Ingest images from the directory given by inbox to the directory given
@@ -41,10 +45,11 @@ def ingest_from_directory(inbox, docs):
             traceback.print_exc()
 
 def main():
-    parser = argparse.ArgumentParser(description='Ingests images into inselect')
+    parser = argparse.ArgumentParser(description='Ingests images into Inselect')
     parser.add_argument("inbox", help='Source directory containing scanned images')
     parser.add_argument("docs", help='Destination directory to which images '
-                        'will be moved and in which new documents will be created')
+                        'will be moved and in which Inselect documents will be '
+                        'created')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)

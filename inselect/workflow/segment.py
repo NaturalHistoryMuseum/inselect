@@ -18,11 +18,15 @@ from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
 
+# TODO Recursive option
+# TODO Option to resegment documents with existing boxes
+
 def segment(dir):
     dir = Path(dir)
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         doc = InselectDocument.load(p)
         if not doc.items:
+            print('Segmenting [{0}]'.format(p))
             try:
                 debug_print('Will segment [{0}]'.format(p))
                 doc, display_image = segment_document(doc)
@@ -35,8 +39,8 @@ def segment(dir):
             print('Skipping [{0}] as it already contains items'.format(p))
 
 def main():
-    parser = argparse.ArgumentParser(description='Segments inselect documents')
-    parser.add_argument("dir", help='Directory containing inselect documents')
+    parser = argparse.ArgumentParser(description='Segments Inselect documents')
+    parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)

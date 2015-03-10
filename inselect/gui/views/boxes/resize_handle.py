@@ -1,13 +1,11 @@
 import math
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt, QPoint, QRectF
+from PySide.QtGui import QGraphicsItem
+from PySide.QtCore import Qt, QRectF
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import contiguous, PaintState
-from inselect.gui.roles import RectRole, PixmapRole, RotationRole
 
-class ResizeHandle(QtGui.QGraphicsItem):
+class ResizeHandle(QGraphicsItem):
     """A resize handle
     """
 

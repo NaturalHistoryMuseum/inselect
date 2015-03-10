@@ -50,5 +50,5 @@ class Rect(collections.namedtuple('Rect', ['left', 'top', 'width', 'height'])):
         else:
             raise NotImplementedError()
 
-    def __neq__(self, other):
+    def __ne__(self, other):
       return not self==other

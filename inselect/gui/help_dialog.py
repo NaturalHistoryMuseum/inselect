@@ -1,8 +1,7 @@
 from PySide import QtCore, QtGui
 from inselect import __version__ as inselect_version
 _help = """
-    <h1>Inselect</h1>
-    <p>Insect selector, v.{version}
+    <h1>Inselect {version}</h1>
     <h2>Usage</h2>
 
     <p>Inselect is an application designed to help in identifying insects in an

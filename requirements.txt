@@ -1,4 +1,7 @@
 ExifRead==2.0.0
 humanize>=0.5.1
-Pillow>=2.7.0
+mock>=1.0.1
+nose>=1.3.4
 pathlib>=1.0
+Pillow>=2.7.0
+python-dateutil>=2.3

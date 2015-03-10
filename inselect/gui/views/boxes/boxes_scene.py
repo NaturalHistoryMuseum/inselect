@@ -1,3 +1,5 @@
+from itertools import ifilter
+
 from PySide import QtGui
 from PySide.QtCore import Qt
 
@@ -53,11 +55,17 @@ class BoxesScene(QtGui.QGraphicsScene):
         if not items:
             return None
         else:
-            items = [i for i in items if isinstance(i, QtGui.QGraphicsPixmapItem)]
-            if 1 != len(items):
-                raise ValueError('Unexpected number of graphics pixmap items')
+            items = ifilter(lambda i: isinstance(i, QtGui.QGraphicsPixmapItem),
+                              items)
+            pixmap = items.next()
+
+            # There should be only one pixmap item
+            try:
+                items.next()
+            except StopIteration:
+                return pixmap
             else:
-                return items[0]
+                raise ValueError('Unexpected number of graphics pixmap items')
 
     def set_pixmap(self, pixmap):
         """Sets pixmap as the display image. pixmap should be a QPixmap with the
@@ -73,6 +81,10 @@ class BoxesScene(QtGui.QGraphicsScene):
                 pixmap_item.setPixmap(pixmap)
                 self.pixmap = pixmap
                 self.update()
+
+    def box_items(self):
+        "Iterable containin just BoxItems"
+        return ifilter(lambda i: isinstance(i, BoxItem), self.items())
 
     def add_box(self, rect):
         """Notification from source that a box has been added.

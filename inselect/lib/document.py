@@ -1,3 +1,4 @@
+import itertools
 import json
 import re
 import shutil
@@ -15,24 +16,28 @@ from .utils import debug_print, validate_normalised
 from .rect import Rect
 
 
-def _thumbnail_path(scanned):
-    """Returns the path of the thumbnail image for the given scanned image path
-    """
-    return scanned.parent / (scanned.stem + '_thumbnail.jpg')
-
-
 class InselectDocument(object):
-    """Simple represention of an Inselect document.
+    """An Inselect document.
+
+    scanned_extension :                      File extension of the
+                                             full-resolution image.
+    items : list of dicts { fields: {k: v},  Metadata. All k and v should be
+                                             strings.
+                            rotation: int,   Integer that is a multiple of 90.
+                            rect: [x,        Normalised (i.e., between 0.0 and
+                                   y,        1.0) floats.
+                                   width,
+                                   height,
+                                  ],
+                          }
 
     You should probably create instances using the class methods new_from_scan
     or load.
     """
 
-    VERSION = 1
+    FILE_VERSIONS = (1,2,)
     EXTENSION = '.inselect'
-
-    # A temporary solution to metadata fields
-    METADATA_FIELDS = ('Specimen number', 'Location', 'Taxonomic group',)
+    THUMBNAIL_SUFFIX = '_thumbnail'
 
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
@@ -44,7 +49,8 @@ class InselectDocument(object):
         """
         items = self._preprocess_items(items)
 
-        # TODO Validate metadata
+        # TODO Validate metadata fields
+
         validate_normalised([i['rect'] for i in items])
 
         self._scanned = scanned if scanned else InselectImage(scanned_path)
@@ -52,10 +58,17 @@ class InselectDocument(object):
         if thumbnail:
             self._thumbnail = thumbnail
         else:
-            t = _thumbnail_path(self._scanned.path)
+            t = self.thumbnail_path_of_scanned(self._scanned.path)
             self._thumbnail = InselectImage(t) if t.is_file() else None
 
         self._items = items
+
+    @classmethod
+    def thumbnail_path_of_scanned(cls, scanned):
+        """Returns the path of the thumbnail image for the given scanned image
+        """
+        scanned = Path(scanned)
+        return scanned.parent / (scanned.stem + cls.THUMBNAIL_SUFFIX + '.jpg')
 
     def copy(self):
         """Returns a new instance of InselectDocument that is a copy of this
@@ -98,29 +111,34 @@ class InselectDocument(object):
         "Replace self.items with items"
         items = deepcopy(items)
         items = self._preprocess_items(items)
-        # TODO Validate metadata
         validate_normalised(i['rect'] for i in items)
         self._items = items
 
     def _preprocess_items(self, items):
-        # Returns items with tuples of boxes replaced with Rect instances
+        # Returns items with tuples of boxes replaced with Rect instances and
+        # metadata items with no values removed
         for i in xrange(0, len(items)):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = Rect(l,t,w,h)
+
+            fields = items[i].get('fields', {})
+            fields = {k: v for k, v in fields.iteritems() if '' != v}
+            items[i]['fields'] = fields
         return items
 
     @classmethod
     def new_from_scan(cls, scanned):
-        "Creates, saves and returns a new InselectDocument on the scanned image"
+        """Creates, saves and returns a new InselectDocument for the scanned
+        image"""
         # TODO LH Raise error if a thumbnail image is ingested
         scanned = Path(scanned)
         if not scanned.is_file():
-            raise InselectError('Image file [{0}] does not exist'.format(scanned))
+            raise InselectError(u'Image file [{0}] does not exist'.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
             doc = cls(scanned_path=scanned, items=[])
             if doc.document_path.is_file():
-                raise InselectError('Document file [{0}] already exists'.format(doc.document_path))
+                raise InselectError(u'Document file [{0}] already exists'.format(doc.document_path))
             else:
                 doc.save()
                 return doc
@@ -133,19 +151,32 @@ class InselectDocument(object):
         path = Path(path)
 
         # Sniff the first few bytes - file must look like a json document
-        if not re.match('{[ \n]*"', path.open('r').read(20)):
+        if not re.match('^{[ (\n)|(\r\n)]*"', path.open('rb').read(20)):
             raise InselectError('Not an inselect document')
         else:
             doc = json.load(path.open())
             v = doc.get('inselect version')
             if not v:
                 raise InselectError('Not an inselect document')
-            elif v > cls.VERSION:
+            elif not v in cls.FILE_VERSIONS:
                 raise InselectError('Unsupported version [{0}]'.format(v))
             else:
+                if 1 == v:
+                    # Version 1 contained just three illustrative fields -
+                    # convert these to Darwin Core fields
+                    for item in doc['items']:
+                        fields = item['fields']
+                        if fields.get('Taxonomic group'):
+                            fields['scientificName'] = fields.pop('Taxonomic group')
+                        if fields.get('Location'):
+                            fields['otherCatalogNumbers'] = fields.pop('Location')
+                        if fields.get('Specimen number'):
+                            fields['catalogNumber'] = fields.pop('Specimen number')
+                        item['fields'] = fields
+
                 scanned = path.with_suffix(doc['scanned extension'])
 
-                msg = 'Loaded [{0}] items from [{1}]'
+                msg = u'Loaded [{0}] items from [{1}]'
                 debug_print(msg.format(len(doc['items']), path))
 
                 return cls(scanned_path=scanned, items=doc['items'])
@@ -153,7 +184,7 @@ class InselectDocument(object):
     def save(self):
         "Saves to self.document_path"
         path = self.document_path
-        debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
+        debug_print(u'Saving [{0}] items to [{1}]'.format(len(self._items), path))
 
         # Convert Rect instances to lists
         items = deepcopy(self._items)
@@ -161,15 +192,19 @@ class InselectDocument(object):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = [l,t,w,h]
 
-        doc = { 'inselect version': self.VERSION,
+        doc = { 'inselect version': self.FILE_VERSIONS[-1],
                 'scanned extension': self._scanned.path.suffix,
                 'items' : items,
               }
 
+        # Tip from SO about writing utf-8 encoded files
+        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
         # Specify separators to prevent trailing whitespace
-        json.dump(doc, open(str(path), "w"), indent=4, separators=(',', ': '))
+        with path.open("w", newline='\n', encoding='utf8') as f:
+            f.write(unicode(json.dumps(doc, ensure_ascii=True, indent=4,
+                                       separators=(',', ': '), sort_keys=True)))
 
-        debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
+        debug_print(u'Saved [{0}] items to [{1}]'.format(len(items), path))
 
     @property
     def crops(self):
@@ -212,12 +247,13 @@ class InselectDocument(object):
                 shutil.rmtree(str(tempdir))
 
     def ensure_thumbnail(self, width=4096):
+        "Create thumbnail image, if it does not already exist"
         if self._thumbnail is None:
-            p = _thumbnail_path(self._scanned.path)
+            p = self.thumbnail_path_of_scanned(self._scanned.path)
 
             # File might have been created after this instance
             if not p.is_file():
-                debug_print('Creating [{0}] with width of [{1}] pixels'.format(p, width))
+                debug_print(u'Creating [{0}] with width of [{1}] pixels'.format(p, width))
                 # TODO LH Sensible limits?
                 # TODO LH What if self._scanned.width<width?
                 min, max = 512, 8192
@@ -232,7 +268,7 @@ class InselectDocument(object):
                     # TODO Copy EXIF tags?
                     res = cv2.imwrite(str(p), thumbnail)
                     if not res:
-                        raise InselectError('Unable to write thumbnail [{0}]'.format(p))
+                        raise InselectError(u'Unable to write thumbnail [{0}]'.format(p))
 
             # Load it
             self._thumbnail = InselectImage(p)
@@ -241,13 +277,24 @@ class InselectDocument(object):
     def metadata_fields(self):
         """An iterable of metadata field names
         """
-        # Temporary solution
-        return self.METADATA_FIELDS
+        # The union of fields among all items
+        return set(itertools.chain(*(i['fields'].keys() for i in self._items)))
 
-    def export_csv(self, path):
-        fields = self.metadata_fields
-        with Path(path).open('wb') as f:
+    def export_csv(self, path=None):
+        """Exports metadata to a CSV file given in path, defaults to
+        self.document_path with .csv extension. Path is returned.
+        """
+        if not path:
+            path = self.document_path.with_suffix('.csv')
+        else:
+            path = Path(path)
+
+        # TODO fields in order given by dca terms
+        fields = sorted(self.metadata_fields)
+        with path.open('wb') as f:
             w = UnicodeWriter(f)
-            w.writerow(('Item',) + fields)
+            w.writerow(['Item',] + fields)
             for index,item in enumerate(self._items):
                 w.writerow([1+index] + [item['fields'].get(f) for f in fields])
+
+        return path
