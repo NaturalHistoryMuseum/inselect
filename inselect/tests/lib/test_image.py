@@ -77,24 +77,91 @@ class TestImage(unittest.TestCase):
         self.assertEqual([Rect(0, 0, 1, 1), Rect(0, 0, 1.0/3, 1.0/19)],
                          list(i.to_normalised(boxes)))
 
-    def test_save_crops(self):
-        "Cropped images are as expected"
+    def test_overwrite_existing_crop(self):
+        "Overwrite an existing file with a crop that is the entire image"
         i = InselectImage(TESTDATA / 'test_segment.png')
         temp = tempfile.mkdtemp()
         try:
-            # A crop that is the entire image
             p = Path(temp) / 'whole.png'
+
+            # Create an image that is all black
+            self.assertTrue(cv2.imwrite(str(p),
+                            np.zeros((500, 500, 3), dtype='uint8')))
+
+            # A crop that is the entire image
             i.save_crops([Rect(0, 0, 1, 1)], [p])
-            self.assertTrue(np.all(i.array==InselectImage(p).array))
 
+            crop = InselectImage(p).array
+
+            # Crop should be the same shape as the image
+            self.assertEqual(i.array.shape, crop.shape)
+
+            # Crop should have the same pixels as the image
+            self.assertTrue(np.all(i.array==crop))
+        finally:
+            shutil.rmtree(temp)
+
+    def test_save_crop_partial(self):
+        "Save a crop that is a portion of the image"
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        temp = tempfile.mkdtemp()
+        try:
             # A crop that is a portion of the image
-
-            # Make sure that existing file is overwritten
             p = Path(temp) / 'partial.png'
-            p.open('w')    # File just needs to exist
             i.save_crops([Rect(0.1, 0.2, 0.4, 0.3)], [p])
+
+            crop = InselectImage(p).array
+
+            # Crop should have this shape
+            self.assertEqual((131, 183, 3), crop.shape)
+
+            # Crop should have these pixels
             expected = i.array[87:218, 45:228]
             self.assertTrue(np.all(expected==InselectImage(p).array))
+        finally:
+            shutil.rmtree(temp)
+
+    def test_save_crop_overlapping(self):
+        "Save a crop that is partially overlapping the image"
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        temp = tempfile.mkdtemp()
+        try:
+            # A crop that is partially overlapping the image
+            p = Path(temp) / 'overlapping.png'
+            i.save_crops([Rect(-0.1, -0.1, 0.4, 0.3)], [p])
+
+            crop = InselectImage(p).array
+
+            # Crop should have this shape
+            self.assertEqual((131, 183, 3), crop.shape)
+
+            # Non-intersecting regions should be all zeroes
+            self.assertTrue(np.all(0==crop[0:43, 0:45]))
+            self.assertTrue(np.all(0==crop[0:43,]))
+            self.assertTrue(np.all(0==crop[:,0:45]))
+
+            expected = i.array[0:88, 0:138,]
+
+            self.assertTrue(np.all(expected == crop[43:, 45:,]))
+        finally:
+            shutil.rmtree(temp)
+
+    def test_save_crop_outside(self):
+        "Save a crop that is a entirely outside of the image"
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        temp = tempfile.mkdtemp()
+        try:
+            # A crop that is a entirely outside of the image
+            p = Path(temp) / 'outside.png'
+            i.save_crops([Rect(-1.5, -5.0, 1.0, 3.0)], [p])
+
+            crop = InselectImage(p).array
+
+            # Crop should have this shape
+            self.assertEqual((1311, 459, 3), crop.shape)
+
+            # All of the crop should be all zeroes
+            self.assertTrue(np.all(0 == crop))
         finally:
             shutil.rmtree(temp)
 

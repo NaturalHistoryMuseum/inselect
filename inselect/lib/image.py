@@ -1,4 +1,4 @@
-from itertools import izip, count
+from itertools import izip, count, chain
 from pathlib import Path
 
 import cv2
@@ -36,7 +36,7 @@ class InselectImage(object):
 
     @property
     def array(self):
-        """ Lazy-load np.array of the image
+        """Lazy-load np.array of the image
         """
         if self._array is None:
             p = str(self._path)
@@ -49,28 +49,44 @@ class InselectImage(object):
         return self._array
 
     def from_normalised(self, boxes):
+        """Generator function that yields instances of Rect
+        """
         h, w = self.array.shape[:2]
         for left, top, width, height in boxes:
             yield Rect(int(w*left), int(h*top), int(w*width), int(h*height))
 
     def to_normalised(self, boxes):
+        """Generator function that yields instances of Rect
+        """
         h, w = self.array.shape[:2]
         for left, top, width, height in boxes:
             yield Rect(float(left)/w, float(top)/h, float(width)/w,
                        float(height)/h)
 
     def crops(self, normalised):
-        "Iterate over crops."
-        # TODO LH Fill back if not in self.array.shape[:2]
-        w, h = self.array.shape[:2]
+        """Generator function that yields cropped images.
+        """
+        h, w = self.array.shape[:2]
         for box in self.from_normalised(normalised):
             x0, y0, x1, y1 = box.coordinates
-            if 0 <= x0 <= w and 0 <= y0 <= h and 0 <= x1 <= w and 0 <= y1 <= h:
+            x_in_bounds = [0 <= x0 <= w, 0 <= x1 <= w]
+            y_in_bounds = [0 <= y0 <= h, 0 <= y1 <= h]
+            if all(chain(x_in_bounds, y_in_bounds)):
                 # View
                 yield self.array[y0:y1, x0:x1]
             else:
-                # TODO LH Create new array and fill. Transparency?
-                yield self.array[y0:y1, x0:x1]
+                # Create a new array, all zeroes (black)
+                crop_w, crop_h = x1-x0, y1-y0
+                crop = np.zeros((crop_h, crop_w, self.array.shape[2]),
+                                dtype=self.array.dtype)
+                if any(x_in_bounds) and any(y_in_bounds):
+                    # Partial overlap
+                    overlapping = self.array[max(y0, 0):min(y1, h),
+                                             max(x0, 0):min(x1, w)]
+                    dest_y, dest_x = max(0, 0-y0), max(0, 0-x0)
+                    crop[dest_y:(dest_y+overlapping.shape[0]),
+                         dest_x:(dest_x+overlapping.shape[1]),] = overlapping
+                yield crop
 
     def save_crops(self, normalised, paths, progress=None):
         "Saves crops given in normalised to paths."
