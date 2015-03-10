@@ -23,7 +23,6 @@ from inselect.lib.utils import debug_print
 
 import icons        # Register our icon resources with QT
 
-from .help_dialog import HelpDialog
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
@@ -458,27 +457,21 @@ class MainWindow(QtGui.QMainWindow):
         text = u"""<h1>Inselect {version}</h1>
            <h2>Contributors</h2>
            <p>
-               <strong>Stefan van der Walt</strong>: Application development
-               and segmentation algorithm
+               <strong>Alice Heaton</strong>: Application development
+           </p>
+           <p>
+               <strong>Lawrence Hudson</strong>: Application development
            </p>
            <p>
                <strong>Pieter Holtzhausen</strong>: Application development
                and segmentation algorithm
            </p>
            <p>
-               <strong>Alice Heaton</strong>: Application development
-           </p>
-           <p>
-               <strong>Lawrence Hudson</strong>: Application development
+               <strong>Stefan van der Walt</strong>: Application development
+               and segmentation algorithm
            </p>
         """.format(version=inselect.__version__)
         QMessageBox.about(self, 'Inselect', text)
-
-    @report_to_user
-    def help(self):
-        """Open the help dialog"""
-        d = HelpDialog(self)
-        d.exec_()
 
     def run_in_worker(self, operation, name, complete_fn=None):
         """Runs the callable operation in a worker thread. The callable
@@ -728,8 +721,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
-        self.help_action = QAction("&Help", self,
-            shortcut=QtGui.QKeySequence.HelpContents, triggered=self.help)
 
     def create_menus(self):
         self.toolbar = self.addToolBar("Edit")
@@ -781,7 +772,6 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.show_specimen_expanded_action)
 
         self.helpMenu = QMenu("&Help", self)
-        self.helpMenu.addAction(self.help_action)
         self.helpMenu.addAction(self.about_action)
 
         self.menuBar().addMenu(self.fileMenu)
