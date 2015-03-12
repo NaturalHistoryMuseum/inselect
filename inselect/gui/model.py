@@ -300,3 +300,9 @@ class Model(QAbstractItemModel):
             self.endRemoveRows()
 
             return True
+
+    def metadata_template_changed(self):
+        """Informs the model that the user's choice of metadata template has
+        changed. Informs all views.
+        """
+        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount(), 0))
