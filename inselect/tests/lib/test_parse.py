@@ -1,117 +1,34 @@
 # -*- coding: utf-8 -*-
+import re
 import unittest
 
 from datetime import date
+from functools import partial
 
-from inselect.lib.parse import (parse_latitude, parse_int, parse_float,
-                                parse_int_gt0, parse_float_gt0,
+from inselect.lib.parse import (parse_latitude,  parse_int_gt0, parse_float_gt0,
+                                parse_int_ge0, parse_float_ge0,
                                 parse_four_digit_int, parse_one_or_two_digit_int,
-                                parse_date, parse_sparse_date,
-                                parse_latitude, parse_longitude,
-                                assemble_dms)
+                                parse_date, parse_sparse_date, parse_latitude,
+                                parse_longitude, assemble_dms, parse_matches_re,
+                                parse_in_choices)
 
 
 class TestParse(unittest.TestCase):
-    def test_int(self):
-        # Empty
-        self.assertIsNone(parse_int(''))
-        self.assertIsNone(parse_int(' '))
-        self.assertIsNone(parse_int(None))
-
-        # Zero
-        self.assertEqual(0, parse_int('0'))
-
-        # Spaces
-        self.assertEqual(1, parse_int('1'))
-        self.assertEqual(1, parse_int(' 1 '))
-        self.assertEqual(1, parse_int(' 1'))
-        self.assertEqual(1, parse_int('1 '))
-
-        # Negative
-        self.assertEqual(-1, parse_int('-1'))
-        self.assertEqual(-1, parse_int(' -1 '))
-        self.assertEqual(-1, parse_int(' -1'))
-        self.assertEqual(-1, parse_int('-1 '))
-
-        # Leading zeroes
-        self.assertEqual(10, parse_int(' 00010'))
-        self.assertEqual(-10, parse_int('-00010 '))
-
-        # Other values
-        self.assertEqual(23, parse_int('  23  '))
-        self.assertEqual(600001, parse_int('600001'))
-        self.assertEqual(-1234567890, parse_int('-1234567890'))
-
-        # Bad values
-        self.assertRaises(ValueError, parse_int, 'a')
-        self.assertRaises(ValueError, parse_int, '1.1')
-        self.assertRaises(ValueError, parse_int, '1.0')
-        self.assertRaises(ValueError, parse_int, '1.')
-
-    def test_float(self):
-        self.assertIsNone(parse_float(''))
-        self.assertIsNone(parse_float(' '))
-        self.assertIsNone(parse_float(None))
-
-        self.assertEqual(0, parse_float('0'))
-
-        # Integer
-        self.assertEqual(1.0, parse_float('1'))
-        self.assertEqual(1.0, parse_float(' 1'))
-        self.assertEqual(1.0, parse_float('1 '))
-        self.assertEqual(1.0, parse_float(' 1 '))
-
-        # Float
-        self.assertEqual(1.0, parse_float('1.0'))
-        self.assertEqual(1.0, parse_float(' 1.0'))
-        self.assertEqual(1.0, parse_float('1.0 '))
-        self.assertEqual(1.0, parse_float(' 1.0 '))
-
-        # More traling zeroes
-        self.assertEqual(1.0, parse_float('1.00'))
-        self.assertEqual(1.0, parse_float('1.0000000000'))
-
-        # Fractional part
-        self.assertEqual(1.1, parse_float('1.1'))
-        self.assertEqual(1.1, parse_float('1.10'))
-
-        # Negative numbers
-        self.assertEqual(-1.1, parse_float('-1.1'))
-        self.assertEqual(-1.1, parse_float('-1.10'))
-
-        # Leading zeroes
-        self.assertEqual(99, parse_float(' 0099  '))
-        self.assertEqual(-1.1, parse_float('-001.1'))
-
-        # Engineering form
-        self.assertEqual(1e10, parse_float('1e10'))
-        self.assertEqual(1e-10, parse_float('1e-10'))
-        self.assertEqual(0.0, parse_float('0.0'))
-        self.assertEqual(1e5, parse_float('1e5'))
-        self.assertEqual(1e-5, parse_float('1e-5'))
-        self.assertEqual(-1e-5, parse_float('-1e-5'))
-
-        # Bad values
-        self.assertRaises(ValueError, parse_float, '1.0.')
-        self.assertRaises(ValueError, parse_float, 'e5')
-        self.assertRaises(ValueError, parse_float, '1e')
-
     def test_parse_int_gt0(self):
-        self.assertIsNone(parse_int_gt0(''))
-        self.assertIsNone(parse_int_gt0(' '))
-        self.assertIsNone(parse_int_gt0(None))
-
         self.assertEqual(1, parse_int_gt0('1'))
-        self.assertEqual(2001, parse_int_gt0(' 2001   '))
-
+        self.assertEqual(1000, parse_int_gt0('1000'))
+        self.assertRaises(ValueError, parse_int_gt0, '1.5')
         self.assertRaises(ValueError, parse_int_gt0, '0')
         self.assertRaises(ValueError, parse_int_gt0,'-10')
 
-    def test_parse_float_gt0(self):
-        self.assertIsNone(parse_float_gt0(''))
-        self.assertIsNone(parse_float_gt0(' '))
-        self.assertIsNone(parse_float_gt0(None))
+    def test_parse_int_ge0(self):
+        self.assertEqual(0, parse_int_ge0('0'))
+        self.assertEqual(1, parse_int_ge0('1'))
+        self.assertEqual(1000, parse_int_ge0('1000'))
+        self.assertRaises(ValueError, parse_int_ge0, '1.5')
+        self.assertRaises(ValueError, parse_int_ge0,'-10')
 
+    def test_parse_float_gt0(self):
         self.assertEqual(1.0, parse_float_gt0('1'))
         self.assertEqual(1.0, parse_float_gt0('1.0'))
         self.assertEqual(2001, parse_float_gt0(' 2001   '))
@@ -120,14 +37,18 @@ class TestParse(unittest.TestCase):
         self.assertRaises(ValueError, parse_float_gt0, '0')
         self.assertRaises(ValueError, parse_float_gt0,'-10')
 
-    def test_parse_date(self):
-        self.assertIsNone(parse_date(''))
-        self.assertIsNone(parse_date(' '))
-        self.assertIsNone(parse_date(None))
+    def test_parse_float_ge0(self):
+        self.assertEqual(0.0, parse_float_ge0('0'))
+        self.assertEqual(1.0, parse_float_ge0('1'))
+        self.assertEqual(1.0, parse_float_ge0('1.0'))
+        self.assertEqual(2001, parse_float_ge0(' 2001   '))
+        self.assertEqual(2001.0, parse_float_ge0(' 2001   '))
 
+        self.assertRaises(ValueError, parse_float_gt0,'-10')
+
+    def test_parse_date(self):
         self.assertEqual(date(2012,8,1), parse_date('2012-08-01'))
         self.assertEqual(date(2012,8,1), parse_date('2012-8-1'))
-        self.assertEqual(date(2012,8,1), parse_date(' 2012-8-1 '))
 
         self.assertRaises(ValueError, parse_date, '12-8-1')
         self.assertRaises(ValueError, parse_date, '12--1')
@@ -137,7 +58,6 @@ class TestParse(unittest.TestCase):
     def test_parse_sparse_date(self):
         # sparse_date delegates to assemble_sparse_date(), which has a more
         # comprehensive test plan.
-        self.assertIsNone(parse_sparse_date(None, None, None))
         self.assertEqual( (2012,1,1),
                           tuple(parse_sparse_date('2012', '1', '1')))
         self.assertEqual( (2012,12,31),
@@ -152,22 +72,13 @@ class TestParse(unittest.TestCase):
                           parse_sparse_date, '2011', '2', '29')
 
     def test_parse_four_digit_int(self):
-        self.assertIsNone(parse_four_digit_int(''))
-        self.assertIsNone(parse_four_digit_int(' '))
-        self.assertIsNone(parse_four_digit_int(None))
-
         self.assertEqual(2001, parse_four_digit_int('2001'))
-        self.assertEqual(2001, parse_four_digit_int(' 2001   '))
 
         self.assertRaises(ValueError, parse_four_digit_int, '1')
         self.assertRaises(ValueError, parse_four_digit_int, '-2001')
         self.assertRaises(ValueError, parse_four_digit_int, '20001')
 
     def test_parse_one_or_two_digit_int(self):
-        self.assertIsNone(parse_one_or_two_digit_int(''))
-        self.assertIsNone(parse_one_or_two_digit_int(' '))
-        self.assertIsNone(parse_one_or_two_digit_int(None))
-
         self.assertEqual(1, parse_one_or_two_digit_int('1'))
         self.assertEqual(1, parse_one_or_two_digit_int('01'))
         self.assertEqual(31, parse_one_or_two_digit_int('31'))
@@ -189,8 +100,6 @@ class TestParseDegrees(unittest.TestCase):
         self.assertEqual(-41.38, parse_latitude(u'41°22′48″S'))
 
     def test_arithmetic(self):
-        self.assertIsNone(parse_latitude(None))
-        self.assertIsNone(parse_latitude(''))
         self.assertEqual( 1, parse_latitude('1'))
         self.assertEqual(-1, parse_latitude('-1'))
         self.assertEqual( 1, parse_latitude('1 n'))
@@ -266,6 +175,18 @@ class TestParseDegrees(unittest.TestCase):
         # There is one route through assemble_dms() that it is impossible to
         # reach via parse_latitude or parse_longitude
         self.assertRaises(ValueError, assemble_dms, 1, 1, 1, 'x', True)
+
+    def test_parse_matches_re(self):
+        f = partial(parse_matches_re, re.compile('^[0-9]{5,10}$'),
+                    'Invalid value [{0}]: must be between 5 and 10 digits')
+        self.assertEqual('12345', f('12345'))
+        self.assertEqual('1234567890', f('1234567890'))
+        self.assertRaises(ValueError, f, '')
+        self.assertRaises(ValueError, f, '123456789101')
+
+    def test_parse_in_choices(self):
+        self.assertEqual('1', parse_in_choices(('1', '2', '3'), '1'))
+        self.assertRaises(ValueError, parse_in_choices, ('1', '2', '3'), '')
 
 
 if __name__=='__main__':

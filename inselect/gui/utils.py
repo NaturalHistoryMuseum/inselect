@@ -8,6 +8,7 @@ import numpy as np
 
 from PySide import QtGui
 
+
 def qimage_of_bgr(bgr):
     """ A QtGui.QImage representation of a BGR numpy array
     """
@@ -68,3 +69,15 @@ def report_to_user(f):
                 u'An error occurred:\n{0}'.format(e))
             raise
     return wrapper
+
+def relayout_widget(widget, new_layout):
+    """Replaces widget's existing layout with new_layout
+    """
+    # http://stackoverflow.com/a/10439207/1773758
+
+    # Reparent the old layout to a temporary widget
+    old_layout = widget.layout()
+    QtGui.QWidget().setLayout(old_layout)
+    del old_layout
+
+    widget.setLayout(new_layout)

@@ -6,9 +6,13 @@ from itertools import izip
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
 
+from inselect.lib.metadata import MetadataTemplate
 from inselect.lib.utils import debug_print
+
+from .metadata_library import metadata_library
+from .roles import (RectRole, PixmapRole, RotationRole, MetadataRole,
+                    MetadataValidRole)
 from .utils import qimage_of_bgr
-from .roles import RectRole, PixmapRole, RotationRole, MetadataRole
 
 
 class Model(QAbstractItemModel):
@@ -174,8 +178,9 @@ class Model(QAbstractItemModel):
         else:
             item = index.internalPointer()
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
-                return u'{0:03} {1}'.format(1+index.row(),
-                                            item['metadata'].get('catalogNumber', ''))
+                m = item['metadata']
+                m.update({'ItemNumber' : 1 + index.row()})
+                return metadata_library.current.format_label(m)
             elif Qt.WhatsThisRole == role:
                 return 'Cropped specimen image'
             elif RectRole == role:
@@ -184,6 +189,8 @@ class Model(QAbstractItemModel):
                 return item['rotation']
             elif MetadataRole == role:
                 return item['metadata']
+            elif MetadataValidRole == role:
+                return metadata_library.current.validate_record(item['metadata'])
 
     def setData(self, index, value, role):
         """QAbstractItemModel virtual

@@ -1,11 +1,13 @@
 from PySide.QtCore import QRect, QSize, QPoint, Qt, QCoreApplication
 from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
                           QAbstractItemView, QAbstractItemDelegate,
-                          QStyleOptionButton, QItemSelectionModel)
+                          QStyleOptionButton, QItemSelectionModel,
+                          QColor, QFont)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import painter_state
-from inselect.gui.roles import RectRole, PixmapRole, RotationRole
+from inselect.gui.roles import (RectRole, PixmapRole, RotationRole,
+                                MetadataValidRole)
 
 
 class CropDelegate(QAbstractItemDelegate):
@@ -16,6 +18,7 @@ class CropDelegate(QAbstractItemDelegate):
     # Brushes
     BLACK = QBrush(Qt.black)
     WHITE = QBrush(Qt.white)
+    PINK = QBrush(QColor(0xff, 0xc0, 0xcb))
     GREY = QBrush(Qt.gray)
     DARK_GREY = QBrush(Qt.darkGray)
 
@@ -37,7 +40,7 @@ class CropDelegate(QAbstractItemDelegate):
         return QRect(QPoint(0, 0), self.box_rect.size()).adjusted(5, 5, -5, -5)
 
     @property
-    def CROP_RECT(self):
+    def crop_rect(self):
         # Bounding rectangle within which the cropped image will be drawn
         b = self.BORDER
         return self.box_rect.adjusted(b, b, -b, -b)
@@ -58,30 +61,39 @@ class CropDelegate(QAbstractItemDelegate):
     def _paint_box(self, painter, option, index):
         """The grey box
         """
+        valid = index.data(MetadataValidRole)
         selected = QStyle.State_Selected & option.state
         with painter_state(painter):
-            painter.setBrush(self.GREY if selected else self.DARK_GREY)
+            if not valid:
+                painter.setBrush(self.PINK)
+            else:
+                painter.setBrush(self.GREY if selected else self.DARK_GREY)
             painter.drawRect(option.rect)
  
     def _paint_title(self, painter, option, index):
         """Title of this crop
         """
-        title = index.data(Qt.DisplayRole)
-        rect = self.title_rect.translated(option.rect.topLeft())
-        painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft, title)
+        with painter_state(painter):
+            font = painter.font()
+            font.setPointSize(14)  # TODO LH Arbitrary font size
+            font.setWeight(QFont.Black)
+            painter.setFont(font)
+            title = index.data(Qt.DisplayRole)
+            rect = self.title_rect.translated(option.rect.topLeft())
+            painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft, title)
 
     def _paint_crop(self, painter, option, index):
         """The cropped image
         """
         source_rect = index.data(RectRole)
-        crop_rect = self.CROP_RECT.translated(option.rect.topLeft())
+        crop_rect = self.crop_rect.translated(option.rect.topLeft())
         angle = index.data(RotationRole)
 
         # Target rect with same aspect ratio as source
         source_aspect = float(source_rect.width()) / source_rect.height()
         crop_aspect = float(crop_rect.width()) / crop_rect.height()
 
-        # True is the item has been rotated by a multiple of 90 degrees
+        # True if the item has been rotated by a multiple of 90 degrees
         perpendicular = 1 == (angle / 90) % 2
 
         # Some nasty logic to compute the target rect

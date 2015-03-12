@@ -286,7 +286,7 @@ class InselectDocument(object):
         else:
             path = Path(path)
 
-        # TODO fields in order given by dca terms
+        # TODO Fields in order given in a metadata template
         fields = sorted(self.metadata_fields)
         with path.open('wb') as f:
             w = UnicodeWriter(f)

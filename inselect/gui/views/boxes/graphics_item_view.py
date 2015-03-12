@@ -20,8 +20,10 @@ class GraphicsItemView(QtGui.QAbstractItemView):
     A limited number of events are passed between the two systems:
     * changes in selection
     * changes in boxes' position and size (RectRole)
-    * addition of boxes (TODO)
-    * deletion of boxes (TODO)
+    * addition of boxes
+    * deletion of boxes
+    * TODO metadata valid status
+    * TODO box verified status
     """
 
     # Based on idea in:

@@ -2,8 +2,9 @@ from __future__ import print_function
 
 import errno
 import os
-import stat
 import shutil
+import stat
+import string
 
 from collections import Counter
 from itertools import ifilterfalse
@@ -70,3 +71,28 @@ def duplicated(v):
     """Returns values within v that appear more than once
     """
     return [x for x, y in Counter(v).items() if y > 1]
+
+
+class FormatDefault(string.Formatter):
+    """A string formatter than returns a default value for missing keys
+    http://stackoverflow.com/a/19800610
+
+    >>> fmt = FormatDefault(default='???')
+    >>> metadata = {'ItemNumber' : 23, 'catalogNumber' : '1234'}
+    >>> template = '{ItemNumber:03}-{catalogNumber}-{x}'
+    >>> print(fmt.format(template, **metadata))
+    '023-1234-???'
+
+    """
+    def __init__(self, default=''):
+        self.default=default
+
+    def get_value(self, key, args, kwds):
+        # key will be either an integer or a string. If it is an integer, it
+        # represents the index of the positional argument in args; if it is
+        # a string, then it represents a named argument in kwargs.
+        if isinstance(key, int):
+            Formatter.get_value(key, args, kwds)
+        else:
+            return kwds.get(key, self.default)
+
