@@ -86,12 +86,13 @@ class BoxesScene(QtGui.QGraphicsScene):
         "Iterable containin just BoxItems"
         return ifilter(lambda i: isinstance(i, BoxItem), self.items())
 
-    def add_box(self, rect):
+    def add_box(self, rect, isvalid):
         """Notification from source that a box has been added.
 
         Adds a Box item at the given rect.
         """
-        item = BoxItem(rect.left(), rect.top(), rect.width(), rect.height())
+        item = BoxItem(rect.left(), rect.top(), rect.width(), rect.height(),
+                       isvalid)
         self.addItem(item)
         return item
 

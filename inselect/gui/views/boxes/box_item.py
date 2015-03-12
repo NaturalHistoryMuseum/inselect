@@ -1,7 +1,7 @@
 from itertools import chain
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QRect, QRectF
 from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
@@ -14,26 +14,17 @@ class BoxItem(QtGui.QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    DRAW_INNER = False
+    # Blue unselected, red selected
+    UNSELECTED = Qt.blue
+    SELECTED =   Qt.red
+    RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
 
-    if True:
-        # Blue unselected, red selected
-        UNSELECTED = Qt.blue
-        SELECTED =   Qt.red
-        RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
+    INVALID =    QBrush(QColor(0x50, 0x50, 0x50, 0x50))
 
-        INNER =         Qt.black
-        INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
-    else:
-        # Light outer, dark inner
-        UNSELECTED = Qt.lightGray
-        SELECTED =   Qt.white
-        RESIZING =   QColor(0xff, 0xff, 0xff, 0xa0)
+    INNER =         Qt.black
+    INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
 
-        INNER =         Qt.black
-        INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
-
-    def __init__(self, x, y, w, h, parent=None, scene=None):
+    def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
         self.setFlags(QGraphicsItem.ItemIsFocusable |
                       QGraphicsItem.ItemIsSelectable |
@@ -42,6 +33,9 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         self.setCursor(Qt.OpenHandCursor)
         self.setAcceptHoverEvents(True)
+
+        # True if the box has valid metadata
+        self._isvalid = isvalid
 
         # Sub-segmentation seed points - QPointF objects in item coordinates
         self._seeds = []
@@ -80,10 +74,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
                 for point in self._seeds:
                     painter.drawEllipse(point, 5, 5)
 
-            if self.DRAW_INNER:
-                painter.setPen(QPen(self.inner_colour, 1, Qt.SolidLine))
-                r.adjust(1, 1, -1, -1)
-                painter.drawRect(r)
+            if not self._isvalid:
+                painter.fillRect(r, self.INVALID)
 
     def has_mouse(self):
         """True if self or self._handles has grabbed the mouse
@@ -99,16 +91,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
             return self.RESIZING
         else:
             return self.SELECTED if self.isSelected() else self.UNSELECTED
-
-    @property
-    def inner_colour(self):
-        """QColor to use for drawing the rectangle within the box's border
-        """
-        if self.has_mouse():
-            return self.INNER_RESIZE
-        else:
-            return self.INNER
-
 
     def update(self, rect=QtCore.QRectF()):
         """QGraphicsRectItem function
@@ -196,6 +178,30 @@ class BoxItem(QtGui.QGraphicsRectItem):
             # Item has gained or lost selection
             self._set_z_index()
         return super(BoxItem, self).itemChange(change, value)
+
+    def set_rect(self, new_rect):
+        """Sets a new QRect in integer coordinates
+        """
+
+        # Cumbersome conversion to ints
+        current = self.sceneBoundingRect()
+        current = QRect(current.left(), current.top(),
+                        current.width(), current.height())
+        if current!=new_rect:
+            msg = 'Update rect for [{0}] from [{1}] to [{2}]'
+            debug_print(msg.format(self, current, new_rect))
+            self.prepareGeometryChange()
+
+            # setrect() expects floating point rect
+            self.setRect(QRectF(new_rect))
+
+    def set_isvalid(self, isvalid):
+        """Sets a new 'is valid'
+        """
+        if isvalid != self._isvalid:
+            print('xxx update isvalid')
+            self._isvalid = isvalid
+            self.update()
 
     def _set_z_index(self):
         """Updates the Z-index of the box

@@ -5,7 +5,7 @@ from PySide.QtCore import Qt, QRect, QRectF
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
-from inselect.gui.roles import PixmapRole, RectRole
+from inselect.gui.roles import PixmapRole, RectRole, MetadataValidRole
 from inselect.gui.utils import unite_rects, contiguous
 
 from .boxes_scene import BoxesScene
@@ -22,7 +22,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
     * changes in boxes' position and size (RectRole)
     * addition of boxes
     * deletion of boxes
-    * TODO metadata valid status
+    * metadata valid status (MetadataValidRole)
     * TODO box verified status
     """
 
@@ -49,12 +49,12 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         self.scene.new_document(model.data(QtCore.QModelIndex(), PixmapRole))
 
         # Build up new mapping
-        r = [None] * model.rowCount()
+        rows = [None] * model.rowCount()
         for row in xrange(0, model.rowCount()):
-            rect = self.model().index(row, 0).data(RectRole)
-            r[row] = self.scene.add_box(rect)
-
-        self._rows = r
+            index = model.index(row, 0)
+            rows[row] = self.scene.add_box(index.data(RectRole),
+                                           index.data(MetadataValidRole))
+        self._rows = rows
 
     def show_alternative_pixmap(self, pixmap):
         """Show or clear an alternative pixmap in place of the document's usual
@@ -79,7 +79,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         new = [None] * n
         rect = QRect(0, 0, 0, 0)
         for row in xrange(0, n):
-            new[row] = self.scene.add_box(rect)
+            new[row] = self.scene.add_box(rect, False)
         self._rows[start:start] = new
 
     def dataChanged(self, topLeft, bottomRight):
@@ -88,21 +88,12 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
 
         for row in xrange(topLeft.row(), 1+bottomRight.row()):
-            # new is a QRect - integer coordinates
-            new = self.model().index(row, 0).data(RectRole)
 
-            # Cumbersome conversion to ints
             item = self._rows[row]
-            current = item.sceneBoundingRect()
-            current = QRect(current.left(), current.top(),
-                            current.width(), current.height())
-            if current!=new:
-                msg = 'Update rect for [{0}] from [{1}] to [{2}]'
-                debug_print(msg.format(row, current, new))
-                item.prepareGeometryChange()
-
-                # setrect() expects floating point rect
-                item.setRect(QRectF(new))
+            # new is a QRect - integer coordinates
+            index = self.model().index(row, 0)
+            item.set_rect(index.data(RectRole))
+            item.set_isvalid(index.data(MetadataValidRole))
 
     def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot

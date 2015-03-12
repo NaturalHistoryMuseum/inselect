@@ -305,4 +305,7 @@ class Model(QAbstractItemModel):
         """Informs the model that the user's choice of metadata template has
         changed. Informs all views.
         """
-        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount(), 0))
+        debug_print('Model.metadata_template_changed')
+        if self._data:
+            self.dataChanged.emit(self.index(0, 0),
+                                  self.index(self.rowCount()-1, 0))

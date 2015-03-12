@@ -84,6 +84,8 @@ class MetadataView(QAbstractItemView):
         # TODO Should be a signal
         self.model().metadata_template_changed()
 
+        self._populate_controls()
+
     def _populate_controls(self):
         """Populates the controls with metadata values in the selection
         """
