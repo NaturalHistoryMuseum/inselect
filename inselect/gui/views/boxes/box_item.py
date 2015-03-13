@@ -199,7 +199,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """Sets a new 'is valid'
         """
         if isvalid != self._isvalid:
-            print('xxx update isvalid')
             self._isvalid = isvalid
             self.update()
 
