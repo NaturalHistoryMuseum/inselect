@@ -62,9 +62,9 @@ class MetadataView(QAbstractItemView):
         """
         c = QComboBox()
         select_index = 0
-        for index, template in enumerate(metadata_library.library):
+        for index, template in enumerate(metadata_library().choices):
             c.addItem(template.name, index)
-            if metadata_library.current == template.name:
+            if metadata_library().current.name == template.name:
                 select_index = index
         c.setCurrentIndex(select_index)
         return c
@@ -75,7 +75,7 @@ class MetadataView(QAbstractItemView):
         debug_print('MetadataView._template_changed')
 
         # Save the user's choice
-        metadata_library.set_current(self._templates.currentText())
+        metadata_library().set_current(self._templates.currentText())
 
         # Recreate controls
         self._create_controls()
@@ -102,7 +102,7 @@ class MetadataView(QAbstractItemView):
         """Creates controls for editing fields in the selected template
         """
         value = self._templates.itemData(self._templates.currentIndex())
-        self._form_container.controls_from_template(metadata_library.current)
+        self._form_container.controls_from_template(metadata_library().current)
 
     def reset(self):
         """QAbstractItemView virtual

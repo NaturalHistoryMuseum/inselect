@@ -180,7 +180,7 @@ class Model(QAbstractItemModel):
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 m = item['metadata']
                 m.update({'ItemNumber' : 1 + index.row()})
-                return metadata_library.current.format_label(m)
+                return metadata_library().current.format_label(m)
             elif Qt.WhatsThisRole == role:
                 return 'Cropped specimen image'
             elif RectRole == role:
@@ -190,7 +190,7 @@ class Model(QAbstractItemModel):
             elif MetadataRole == role:
                 return item['metadata']
             elif MetadataValidRole == role:
-                return metadata_library.current.validate_record(item['metadata'])
+                return metadata_library().current.validate_record(item['metadata'])
 
     def setData(self, index, value, role):
         """QAbstractItemModel virtual
