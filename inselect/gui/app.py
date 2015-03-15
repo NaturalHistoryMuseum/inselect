@@ -11,7 +11,8 @@ import numpy as np
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon, QDesktopServices
+from PySide.QtGui import (QMenu, QAction, QMessageBox, QIcon, QDesktopServices,
+                          QVBoxLayout, QWidget)
 
 import inselect
 
@@ -23,15 +24,18 @@ from inselect.lib.utils import debug_print
 
 import icons        # Register our icon resources with QT
 
+from .info_widget import InfoWidget
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
+from .toggle_widget_label import ToggleWidgetLabel
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
 from .views.specimen import SpecimenView
+from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
 class MainWindow(QtGui.QMainWindow):
@@ -50,9 +54,10 @@ class MainWindow(QtGui.QMainWindow):
         # self.boxes_view is a QGraphicsView, not a QAbstractItemView
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
-        # Speciment and metadata views
-        self.view_specimen = SpecimenView()
+        # Specimen, metadata and summary views
         self.view_metadata = MetadataView()
+        self.view_specimen = SpecimenView()
+        self.view_summary = SummaryView()
 
         # Views in tabs
         self.tabs = QtGui.QTabWidget()
@@ -60,10 +65,22 @@ class MainWindow(QtGui.QMainWindow):
         self.tabs.addTab(self.view_specimen, 'Specimens')
         self.tabs.setCurrentIndex(0)
 
+        # Information about the loaded document
+        self.info_widget = InfoWidget()
+
+        # Metadata view above info
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.addWidget(self.view_metadata.widget)
+        sidebar_layout.addWidget(self.info_widget)
+        self.info_widget.setVisible(False)
+        sidebar_layout.addWidget(ToggleWidgetLabel('Information', self.info_widget))
+        sidebar = QWidget()
+        sidebar.setLayout(sidebar_layout)
+
         # Tabs alongside metadata fields
         self.splitter = QtGui.QSplitter()
         self.splitter.addWidget(self.tabs)
-        self.splitter.addWidget(self.view_metadata.widget)
+        self.splitter.addWidget(sidebar)
         self.splitter.setSizes([600, 300])
 
         # Main window layout
@@ -79,13 +96,15 @@ class MainWindow(QtGui.QMainWindow):
 
         # Views
         self.view_graphics_item.setModel(self.model)
-        self.view_specimen.setModel(self.model)
         self.view_metadata.setModel(self.model)
+        self.view_specimen.setModel(self.model)
+        self.view_summary.setModel(self.model)
 
         # A consistent selection across all views
         sm = self.view_specimen.selectionModel()
         self.view_graphics_item.setSelectionModel(sm)
         self.view_metadata.setSelectionModel(sm)
+        self.view_summary.setSelectionModel(sm)
 
         # Plugins
         self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
@@ -106,8 +125,9 @@ class MainWindow(QtGui.QMainWindow):
         # Filter events
         self.tabs.installEventFilter(self)
         self.boxes_view.installEventFilter(self)
-        self.view_specimen.installEventFilter(self)
         self.view_metadata.installEventFilter(self)
+        self.view_specimen.installEventFilter(self)
+        self.view_summary.installEventFilter(self)
 
         self.empty_document()
 
@@ -206,6 +226,7 @@ class MainWindow(QtGui.QMainWindow):
                     doc = ingest_image(self.image, self.image.parent)
                     self.document_path = doc.document_path
 
+
             self.run_in_worker(NewDoc(path), 'New document',
                                self.new_document_finished)
 
@@ -237,6 +258,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowTitle('')
         self.setWindowFilePath(str(self.document_path))
+        self.info_widget.set_document(self.document)
 
         self.sync_ui()
 
@@ -250,6 +272,7 @@ class MainWindow(QtGui.QMainWindow):
         self.model.to_document(self.document)
         self.document.save()
         self.model.set_modified(False)
+        self.info_widget.set_document(self.document)
 
     @report_to_user
     def save_crops(self):
@@ -413,6 +436,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowTitle('Inselect')
         self.setWindowFilePath(None)
+        self.info_widget.set_document(None)
 
         self.sync_ui()
 
@@ -731,6 +755,9 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+
+        self.toolbar.addSeparator()
+        self.toolbar.addWidget(self.view_summary.widget)
 
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.open_action)

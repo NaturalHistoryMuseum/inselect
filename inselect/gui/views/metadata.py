@@ -12,9 +12,8 @@ from inselect.lib.unicode_csv import UnicodeDictReader
 from inselect.lib.utils import debug_print
 
 from inselect.gui.roles import MetadataRole
+from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
-
-# Quick, imperfect and (hopefully) temporary solution to metadata fields
 
 # The value that is displayed for a field when more than one box is selected
 # and the items have more than one unique value for that field
@@ -22,10 +21,6 @@ _MULTIPLE_FIELD_VALUES = u'*'
 
 
 class MetadataView(QAbstractItemView):
-    MESSAGE_NO_SELECTION = 'Metadata'
-    MESSAGE_SINGLE_SELECTION = 'Metadata for 1 box'
-    MESSAGE_MULTIPLE_SELECTION = 'Metadata for {0} boxes'
-
     def __init__(self, parent=None):
         # This view is never made visible
         super(MetadataView, self).__init__()
@@ -45,7 +40,7 @@ class MetadataView(QAbstractItemView):
         self._form_scroll.setWidgetResizable(True)
 
         # Title
-        self._title = QLabel()
+        self._title = QLabel('Metadata')
 
         # Title is fixed at the top - form can be scrolled
         layout = QVBoxLayout()
@@ -72,15 +67,6 @@ class MetadataView(QAbstractItemView):
 
         selected = self.selectionModel().selectedIndexes()
 
-        # Set title
-        if 1 == len(selected):
-            title = self.MESSAGE_SINGLE_SELECTION
-        elif selected:
-            title = self.MESSAGE_MULTIPLE_SELECTION.format(len(selected))
-        else:
-            title = self.MESSAGE_NO_SELECTION
-        self._title.setText(title)
-
         # TODO Combo should indicate multiple and unrecognised values
         # Put values into the controls
         metadata = [i.data(MetadataRole) for i in selected]
@@ -105,6 +91,9 @@ class FormContainer(QWidget):
         color: black;
     }
     """
+
+    # TODO LH Text colour to come from system
+
     def __init__(self, parent=None):
         super(FormContainer, self).__init__(parent)
 
@@ -188,30 +177,11 @@ class FormContainer(QWidget):
             return edit
 
 
-class ToggleWidgetLabel(QLabel):
-    """A QLabel that, when clicked, toggles the visibility of a widget
-    """
-    def __init__(self, label, widget, parent=None, flags=0):
-        super(ToggleWidgetLabel, self).__init__(label, parent, flags)
-        self.widget = widget
-        self.setCursor(Qt.PointingHandCursor)
-
-    def mouseReleaseEvent(self, event):
-        """QLabel virtual
-        """
-        self.toggle()
-
-    def toggle(self):
-        """Toggle the visible state of self.widget
-        """
-        visible = self.widget.isVisible()
-        self.widget.setVisible(not visible)
-
-
 class URLLabel(QLabel):
     """A label that displays a clickable URL in black.
     """
 
+    # TODO LH Text colour to come from system
     HTML = '''<html><head><style type=text/css>
     a:link {{ color: black; text-decoration: underline;}}
     </style></head>

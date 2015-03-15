@@ -1,13 +1,22 @@
 from __future__ import print_function
 
 import errno
+import locale
 import os
+import pwd
 import stat
 import shutil
 
 from collections import Counter
 from itertools import ifilterfalse
 from pathlib import Path
+
+from dateutil.tz import tzlocal
+
+try:
+    import win32api
+except ImportError:
+    win32api = None
 
 from inselect.lib.inselect_error import InselectError
 
@@ -70,3 +79,18 @@ def duplicated(v):
     """Returns values within v that appear more than once
     """
     return [x for x, y in Counter(v).items() if y > 1]
+
+def user_name():
+    """The name of the current user
+    """
+    if win32api:
+        return win32api.GetUserName()
+        # NameDisplay = 3
+        # win32api.GetUserNameEx(NameDisplay)
+    else:
+        return pwd.getpwuid(os.getuid()).pw_gecos
+
+def utc_format_local_display(dt):
+    """Returns a local-time string representation of the datetime instance dt
+    """
+    return dt.astimezone(tzlocal()).strftime(locale.nl_langinfo(locale.D_T_FMT))

@@ -1,11 +1,13 @@
 import json
 import os
+import pytz
 import shutil
 import stat
 import sys
 import tempfile
 import unittest
 
+from datetime import datetime
 from itertools import izip, count
 from pathlib import Path
 
@@ -38,6 +40,12 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
         self.assertTrue(doc.thumbnail is None)
         self.assertEqual(TESTDATA / 'test_segment_crops', doc.crops_dir)
+        self.assertEqual('Lawrence Hudson', doc.properties['Created by'])
+        self.assertEqual("2015-03-14T09:19:47",
+                    doc.properties['Created on'].strftime('%Y-%m-%dT%H:%M:%S'))
+        self.assertEqual('Lawrence Hudson', doc.properties['Saved by'])
+        self.assertEqual("2015-03-14T09:19:47",
+                    doc.properties['Saved on'].strftime('%Y-%m-%dT%H:%M:%S'))
 
         # Check read-only properties
         with self.assertRaises(AttributeError):
@@ -114,6 +122,12 @@ class TestDocument(unittest.TestCase):
             d.save()
 
             self.assertEqual(items, InselectDocument.load(doc_temp).items)
+            self.assertEqual('Lawrence Hudson', d.properties['Saved by'])
+
+            # Saved on time should be within last 2 seconds
+            now = datetime.now(pytz.timezone("UTC"))
+            saved_on = d.properties['Saved on']
+            self.assertLessEqual((now - saved_on).seconds, 2)
 
     def test_repr(self):
         path = TESTDATA / 'test_segment.inselect'
@@ -168,6 +182,13 @@ class TestDocument(unittest.TestCase):
             doc = InselectDocument.new_from_scan(tempdir / 'test_segment.png')
             self.assertTrue(doc.document_path.is_file())
             self.assertEqual(tempdir / 'test_segment.png', doc.scanned.path)
+
+            self.assertEqual('Lawrence Hudson', doc.properties['Created by'])
+
+            # Saved on time should be within last 2 seconds
+            now = datetime.now(pytz.timezone("UTC"))
+            created_on = doc.properties['Created on']
+            self.assertLessEqual((now - created_on).seconds, 2)
 
     def test_new_from_scan_doc_exists(self):
         "Document of scanned image already exists"
