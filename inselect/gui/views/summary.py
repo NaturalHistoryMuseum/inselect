@@ -1,5 +1,3 @@
-import humanize
-
 from PySide.QtCore import Qt
 from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
@@ -14,18 +12,6 @@ class SummaryView(QAbstractItemView):
 
         layout = QHBoxLayout()
 
-        self.path = QLabel()
-        layout.addWidget(self.path)
-
-        layout.addSpacing(10)
-        self.scanned_size = QLabel()
-        layout.addWidget(self.scanned_size)
-
-        layout.addSpacing(10)
-        self.scanned_dimensions = QLabel()
-        layout.addWidget(self.scanned_dimensions)
-
-        layout.addSpacing(10)
         self.n_boxes = QLabel()
         layout.addWidget(self.n_boxes)
 
@@ -76,17 +62,3 @@ class SummaryView(QAbstractItemView):
         """
         debug_print('SummaryView.rowsAboutToBeRemoved')
         self._n_boxes(self.model().rowCount() - (end - start))
-
-    def set_document(self, document):
-        """Set s a new document
-        """
-        if document:
-            self.path.setText(document.scanned.path.name)
-            self.scanned_size.setText(humanize.naturalsize(document.scanned.size_bytes))
-            self.scanned_dimensions.setText('{0:,} x {1:,}'.format(*document.scanned.dimensions))
-        else:
-            self.path.setText('')
-            self.scanned_size.setText('')
-            self.scanned_dimensions.setText('')
-            self.n_boxes.setText('')
-            self.n_selected.setText('')

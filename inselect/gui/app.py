@@ -11,7 +11,8 @@ import numpy as np
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import QMenu, QAction, QMessageBox, QIcon, QDesktopServices
+from PySide.QtGui import (QMenu, QAction, QMessageBox, QIcon, QDesktopServices,
+                          QVBoxLayout, QWidget)
 
 import inselect
 
@@ -23,12 +24,14 @@ from inselect.lib.utils import debug_print
 
 import icons        # Register our icon resources with QT
 
+from .info_widget import InfoWidget
 from .help_dialog import HelpDialog
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
+from .toggle_widget_label import ToggleWidgetLabel
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
@@ -52,7 +55,7 @@ class MainWindow(QtGui.QMainWindow):
         # self.boxes_view is a QGraphicsView, not a QAbstractItemView
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
-        # Speciment and metadata views
+        # Specimen, metadata and summary views
         self.view_metadata = MetadataView()
         self.view_specimen = SpecimenView()
         self.view_summary = SummaryView()
@@ -63,10 +66,22 @@ class MainWindow(QtGui.QMainWindow):
         self.tabs.addTab(self.view_specimen, 'Specimens')
         self.tabs.setCurrentIndex(0)
 
+        # Information about the loaded document
+        self.info_widget = InfoWidget()
+
+        # Metadata view above info
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.addWidget(self.view_metadata.widget)
+        sidebar_layout.addWidget(self.info_widget)
+        self.info_widget.setVisible(False)
+        sidebar_layout.addWidget(ToggleWidgetLabel('Information', self.info_widget))
+        sidebar = QWidget()
+        sidebar.setLayout(sidebar_layout)
+
         # Tabs alongside metadata fields
         self.splitter = QtGui.QSplitter()
         self.splitter.addWidget(self.tabs)
-        self.splitter.addWidget(self.view_metadata.widget)
+        self.splitter.addWidget(sidebar)
         self.splitter.setSizes([600, 300])
 
         # Main window layout
@@ -244,7 +259,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowTitle('')
         self.setWindowFilePath(str(self.document_path))
-        self.view_summary.set_document(self.document)
+        self.info_widget.set_document(self.document)
 
         self.sync_ui()
 
@@ -258,6 +273,7 @@ class MainWindow(QtGui.QMainWindow):
         self.model.to_document(self.document)
         self.document.save()
         self.model.set_modified(False)
+        self.info_widget.set_document(self.document)
 
     @report_to_user
     def save_crops(self):
@@ -421,7 +437,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setWindowTitle('Inselect')
         self.setWindowFilePath(None)
-        self.view_summary.set_document(None)
+        self.info_widget.set_document(None)
 
         self.sync_ui()
 

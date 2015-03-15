@@ -12,9 +12,8 @@ from inselect.lib.unicode_csv import UnicodeDictReader
 from inselect.lib.utils import debug_print
 
 from inselect.gui.roles import MetadataRole
+from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
-
-# Quick, imperfect and (hopefully) temporary solution to metadata fields
 
 # The value that is displayed for a field when more than one box is selected
 # and the items have more than one unique value for that field
@@ -176,26 +175,6 @@ class FormContainer(QWidget):
             parser = field.get('Parser', None)
             edit = FieldEdit(field['Name'], parser)
             return edit
-
-
-class ToggleWidgetLabel(QLabel):
-    """A QLabel that, when clicked, toggles the visibility of a widget
-    """
-    def __init__(self, label, widget, parent=None, flags=0):
-        super(ToggleWidgetLabel, self).__init__(label, parent, flags)
-        self.widget = widget
-        self.setCursor(Qt.PointingHandCursor)
-
-    def mouseReleaseEvent(self, event):
-        """QLabel virtual
-        """
-        self.toggle()
-
-    def toggle(self):
-        """Toggle the visible state of self.widget
-        """
-        visible = self.widget.isVisible()
-        self.widget.setVisible(not visible)
 
 
 class URLLabel(QLabel):
