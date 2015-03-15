@@ -1,10 +1,12 @@
 import itertools
 import json
+import pytz
 import re
 import shutil
 import tempfile
 
 from copy import deepcopy
+from datetime import datetime
 from pathlib import Path
 
 import cv2
@@ -12,7 +14,7 @@ import cv2
 from .image import InselectImage
 from .inselect_error import InselectError
 from .unicode_csv import UnicodeWriter
-from .utils import debug_print
+from .utils import debug_print, user_name
 from .rect import Rect
 
 
@@ -39,17 +41,33 @@ class InselectDocument(object):
     EXTENSION = '.inselect'
     THUMBNAIL_SUFFIX = '_thumbnail'
 
+    # Format for datetime objects. Conforms to http://www.ietf.org/rfc/rfc3339.txt
+    DT_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
+    @classmethod
+    def _format_datetime(cls, v):
+        """Returns string representation of v
+        """
+        return v.strftime(cls.DT_FORMAT)
+
+    @classmethod
+    def _parse_datetime(cls, v):
+        """Returns datetime of v
+        """
+        return datetime.strptime(v, cls.DT_FORMAT).replace(tzinfo=pytz.timezone("UTC"))
+
     # TODO LH __eq__, __ne__?
     # TODO LH Store Rect instances within items
     # TODO LH Validate rotation?
 
     def __init__(self, scanned=None, scanned_path=None, thumbnail=None,
-                 items=[]):
+                 items=[], properties={}):
         """
         """
         items = self._preprocess_items(items)
 
         # TODO Validate metadata fields
+        # TODO Validate properties
 
         self._scanned = scanned if scanned else InselectImage(scanned_path)
 
@@ -60,6 +78,7 @@ class InselectDocument(object):
             self._thumbnail = InselectImage(t) if t.is_file() else None
 
         self._items = items
+        self._properties = properties
 
     @classmethod
     def thumbnail_path_of_scanned(cls, scanned):
@@ -105,6 +124,10 @@ class InselectDocument(object):
     def n_items(self):
         return len(self._items)
 
+    @property
+    def properties(self):
+        return self._properties
+
     def set_items(self, items):
         "Replace self.items with items"
         items = deepcopy(items)
@@ -133,9 +156,14 @@ class InselectDocument(object):
             raise InselectError(u'Image file [{0}] does not exist'.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
-            doc = cls(scanned_path=scanned, items=[])
+            doc = cls(scanned_path=scanned, items=[],
+                      properties={'Created by': user_name(),
+                                  'Created on': datetime.now(pytz.timezone("UTC")),
+                                 })
+
             if doc.document_path.is_file():
-                raise InselectError(u'Document file [{0}] already exists'.format(doc.document_path))
+                msg = u'Document file [{0}] already exists'
+                raise InselectError(msg.format(doc.document_path))
             else:
                 doc.save()
                 return doc
@@ -173,10 +201,17 @@ class InselectDocument(object):
 
                 scanned = path.with_suffix(doc['scanned extension'])
 
+                properties = doc.get('properties', {})
+
+                # Parse datetimes
+                for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
+                    properties[dt] = cls._parse_datetime(properties[dt])
+
                 msg = u'Loaded [{0}] items from [{1}]'
                 debug_print(msg.format(len(doc['items']), path))
 
-                return cls(scanned_path=scanned, items=doc['items'])
+                return cls(scanned_path=scanned, items=doc['items'],
+                           properties=properties)
 
     def save(self):
         "Saves to self.document_path"
@@ -189,13 +224,24 @@ class InselectDocument(object):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = [l,t,w,h]
 
+        self.properties.update({'Saved by': user_name(),
+                                'Saved on': datetime.now(pytz.timezone("UTC")),
+                               })
+
+        properties = deepcopy(self.properties)
+
+        # Format datetimes
+        for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
+            properties[dt] = self._format_datetime(properties[dt])
+
         doc = { 'inselect version': self.FILE_VERSIONS[-1],
                 'scanned extension': self._scanned.path.suffix,
                 'items' : items,
+                'properties': properties,
               }
 
         # Tip from SO about writing utf-8 encoded files
-        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
+        # http://stackoverflow.com/a/14870531/1773758
         # Specify separators to prevent trailing whitespace
         with path.open("w", newline='\n', encoding='utf8') as f:
             f.write(unicode(json.dumps(doc, ensure_ascii=True, indent=4,
@@ -232,11 +278,13 @@ class InselectDocument(object):
             shutil.rmtree(str(crops_dir), ignore_errors=True)
 
             # Rename temp dir
-            debug_print('Moving temp crops dir [{0}] to [{1}]'.format(tempdir, crops_dir))
+            msg = 'Moving temp crops dir [{0}] to [{1}]'
+            debug_print(msg.format(tempdir, crops_dir))
             tempdir.rename(crops_dir)
             tempdir = None
 
-            debug_print('Saved [{0}] crops to [{1}]'.format(len(self.items), crops_dir))
+            msg = 'Saved [{0}] crops to [{1}]'
+            debug_print(msg.format(len(self.items), crops_dir))
 
             return crops_dir
         finally:
@@ -250,12 +298,14 @@ class InselectDocument(object):
 
             # File might have been created after this instance
             if not p.is_file():
-                debug_print(u'Creating [{0}] with width of [{1}] pixels'.format(p, width))
+                msg = u'Creating [{0}] with width of [{1}] pixels'
+                debug_print(msg.format(p, width))
                 # TODO LH Sensible limits?
                 # TODO LH What if self._scanned.width<width?
                 min, max = 512, 8192
                 if not min<width<max:
-                    raise InselectError('width should be between [{0}] and [{1}]'.format(min, max))
+                    msg = 'width should be between [{0}] and [{1}]'
+                    raise InselectError(msg.format(min, max))
                 else:
                     img = self._scanned.array
                     factor  = float(width)/img.shape[1]
@@ -265,7 +315,8 @@ class InselectDocument(object):
                     # TODO Copy EXIF tags?
                     res = cv2.imwrite(str(p), thumbnail)
                     if not res:
-                        raise InselectError(u'Unable to write thumbnail [{0}]'.format(p))
+                        msg = u'Unable to write thumbnail [{0}]'
+                        raise InselectError(msg.format(p))
 
             # Load it
             self._thumbnail = InselectImage(p)

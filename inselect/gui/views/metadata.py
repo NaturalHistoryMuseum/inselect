@@ -13,6 +13,7 @@ from inselect.lib.utils import debug_print
 from inselect.gui.metadata_library import metadata_library
 from inselect.gui.roles import MetadataRole
 from inselect.gui.utils import relayout_widget
+from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
 
 # The value that is displayed for a field when more than one box is selected
@@ -136,6 +137,9 @@ class FormContainer(QWidget):
         color: black;
     }
     """
+
+    # TODO LH Text colour to come from system
+
     def __init__(self, parent=None):
         super(FormContainer, self).__init__(parent)
 
@@ -235,30 +239,11 @@ class FormContainer(QWidget):
             return edit
 
 
-class ToggleWidgetLabel(QLabel):
-    """A QLabel that, when clicked, toggles the visibility of a widget
-    """
-    def __init__(self, label, widget, parent=None, flags=0):
-        super(ToggleWidgetLabel, self).__init__(label, parent, flags)
-        self.widget = widget
-        self.setCursor(Qt.PointingHandCursor)
-
-    def mouseReleaseEvent(self, event):
-        """QLabel virtual
-        """
-        self.toggle()
-
-    def toggle(self):
-        """Toggle the visible state of self.widget
-        """
-        visible = self.widget.isVisible()
-        self.widget.setVisible(not visible)
-
-
 class URLLabel(QLabel):
     """A label that displays a clickable URL in black.
     """
 
+    # TODO LH Text colour to come from system
     HTML = '''<html><head><style type=text/css>
     a:link {{ color: black; text-decoration: underline;}}
     </style></head>

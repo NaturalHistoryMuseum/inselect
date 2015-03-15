@@ -1,8 +1,12 @@
+import warnings
+
 from itertools import izip, count, chain
 from pathlib import Path
 
 import cv2
 import numpy as np
+
+from PIL import Image
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
@@ -99,3 +103,26 @@ class InselectImage(object):
                 raise InselectError('Unable to write crop [{0}]'.format(path))
             else:
                 debug_print('Wrote crop [{0}]'.format(path))
+
+    @property
+    def size_bytes(self):
+        "The iteger size of this file in bytes"
+        return self._path.stat().st_size
+
+    @property
+    def pil_image(self):
+        "Returns a PIL.Image instance represention"
+        with warnings.catch_warnings(), self._path.open('rb') as f:
+            # Ignore DecompressionBombWarning - expect images to be > 89478485
+            # pixels
+            warnings.simplefilter("ignore", Image.DecompressionBombWarning)
+            return Image.open(f)
+
+    @property
+    def dimensions(self):
+        "A tuple (height, width)"
+        if self._array is not None:
+            # Get directly from the array
+            return self._array.shape[:2]
+        else:
+            return self.pil_image.size

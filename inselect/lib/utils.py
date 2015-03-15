@@ -1,7 +1,10 @@
 from __future__ import print_function
 
 import errno
+import locale
 import os
+import pwd
+import stat
 import shutil
 import stat
 import string
@@ -9,6 +12,13 @@ import string
 from collections import Counter
 from itertools import ifilterfalse
 from pathlib import Path
+
+from dateutil.tz import tzlocal
+
+try:
+    import win32api
+except ImportError:
+    win32api = None
 
 from inselect.lib.inselect_error import InselectError
 
@@ -72,7 +82,6 @@ def duplicated(v):
     """
     return [x for x, y in Counter(v).items() if y > 1]
 
-
 class FormatDefault(string.Formatter):
     """A string formatter than returns a default value for missing keys
     http://stackoverflow.com/a/19800610
@@ -96,3 +105,17 @@ class FormatDefault(string.Formatter):
         else:
             return kwds.get(key, self.default)
 
+def user_name():
+    """The name of the current user
+    """
+    if win32api:
+        return win32api.GetUserName()
+        # NameDisplay = 3
+        # win32api.GetUserNameEx(NameDisplay)
+    else:
+        return pwd.getpwuid(os.getuid()).pw_gecos
+
+def utc_format_local_display(dt):
+    """Returns a local-time string representation of the datetime instance dt
+    """
+    return dt.astimezone(tzlocal()).strftime(locale.nl_langinfo(locale.D_T_FMT))

@@ -1,32 +1,33 @@
-from PySide import QtCore, QtGui
 from PySide.QtCore import Qt
+from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print
 
-class SummaryView(QtGui.QAbstractItemView):
+class SummaryView(QAbstractItemView):
     """View that provides a summary of the model
     """
     def __init__(self, parent=None):
         # This view is not visible
         super(SummaryView, self).__init__(None)
 
-        layout = QtGui.QHBoxLayout()
+        layout = QHBoxLayout()
 
-        def new_label(label, *args, **kwargs):
-            l = QtGui.QLabel(label)
-            layout.addWidget(l, *args, **kwargs)
-            return l
+        self.n_boxes = QLabel()
+        layout.addWidget(self.n_boxes)
 
-        self.n_boxes = new_label('0 boxes')
         # Last item has stretch greater than zero to force all labels to be
         # left-aligned
-        self.n_selected = new_label('0 selected', stretch=1)
+        self.n_selected = QLabel()
+        layout.addWidget(self.n_selected, stretch=1)
 
-        self.widget = QtGui.QWidget(parent)
+        self.widget = QWidget(parent)
         self.widget.setLayout(layout)
 
     def _n_boxes(self, n):
         self.n_boxes.setText('{0} boxes'.format(n))
+
+    def _n_selected(self, n):
+        self.n_selected.setText('{0} selected'.format(n))
 
     def reset(self):
         """QAbstractItemView virtual
@@ -34,6 +35,7 @@ class SummaryView(QtGui.QAbstractItemView):
         debug_print('SummaryView.reset')
         super(SummaryView, self).reset()
         self._n_boxes(self.model().rowCount())
+        self._n_selected(0)
 
     def setModel(self, model):
         """QAbstractItemView virtual
