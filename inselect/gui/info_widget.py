@@ -1,18 +1,32 @@
 import humanize
 
 from PySide.QtCore import QLocale
-from PySide.QtGui import QWidget, QFormLayout, QLabel, QSizePolicy
+from PySide.QtGui import (QWidget, QFormLayout, QLabel, QSizePolicy, QGroupBox,
+                          QVBoxLayout)
 
-from inselect.lib.utils import utc_format_local_display
+from inselect.lib.utils import format_dt_display
 
-class InfoWidget(QWidget):
+from .toggle_widget_label import ToggleWidgetLabel
+
+
+class InfoWidget(QGroupBox):
     """Shows information about the document and the scanned image
     """
+
+    STYLESHEET = """
+    ToggleWidgetLabel {
+        text-decoration: none;
+        font-weight: bold;
+        color: black;
+    }
+    """
+
     def __init__(self, parent=None):
         super(InfoWidget, self).__init__(parent)
 
+        self.setStyleSheet(self.STYLESHEET)
+
         layout = QFormLayout()
-        # layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
 
         layout.addRow(QLabel('Document'))
 
@@ -41,9 +55,18 @@ class InfoWidget(QWidget):
         self._scanned_dimensions = QLabel()
         layout.addRow('Dimensions', self._scanned_dimensions)
 
-        self.setLayout(layout)
+        labels_widget = QWidget()
+        labels_widget.setLayout(layout)
+        labels_widget.setVisible(False)
 
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        # Show the labels about the toggle
+        vlayout = QVBoxLayout()
+        vlayout.addWidget(labels_widget)
+        vlayout.addWidget(ToggleWidgetLabel('Information', labels_widget))
+
+        self.setLayout(vlayout)
+
+        #self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
     def set_document(self, document):
         """Set s a new document
@@ -55,12 +78,12 @@ class InfoWidget(QWidget):
             self._created_by.setText(p.get('Created by'))
 
             dt = p.get('Created on')
-            self._created_on.setText(utc_format_local_display(dt) if dt else '')
+            self._created_on.setText(format_dt_display(dt) if dt else '')
 
             self._last_saved_by.setText(p.get('Saved by'))
 
             dt = p.get('Saved on')
-            self._last_saved_on.setText(utc_format_local_display(dt) if dt else '')
+            self._last_saved_on.setText(format_dt_display(dt) if dt else '')
 
             self._scanned_path.setText(document.scanned.path.name)
             self._scanned_size.setText(humanize.naturalsize(document.scanned.size_bytes))

@@ -30,7 +30,6 @@ from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole, RectRole
-from .toggle_widget_label import ToggleWidgetLabel
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
@@ -72,8 +71,6 @@ class MainWindow(QtGui.QMainWindow):
         sidebar_layout = QVBoxLayout()
         sidebar_layout.addWidget(self.view_metadata.widget)
         sidebar_layout.addWidget(self.info_widget)
-        self.info_widget.setVisible(False)
-        sidebar_layout.addWidget(ToggleWidgetLabel('Information', self.info_widget))
         sidebar = QWidget()
         sidebar.setLayout(sidebar_layout)
 
