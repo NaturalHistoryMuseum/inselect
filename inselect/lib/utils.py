@@ -3,7 +3,6 @@ from __future__ import print_function
 import errno
 import locale
 import os
-import pwd
 import stat
 import shutil
 
@@ -14,9 +13,16 @@ from pathlib import Path
 from dateutil.tz import tzlocal
 
 try:
+    import pwd
+except ImportError:
+    pwd = None
+
+
+try:
     import win32api
 except ImportError:
     win32api = None
+
 
 from inselect.lib.inselect_error import InselectError
 
@@ -84,13 +90,31 @@ def user_name():
     """The name of the current user
     """
     if win32api:
-        return win32api.GetUserName()
-        # NameDisplay = 3
-        # win32api.GetUserNameEx(NameDisplay)
+        NameDisplay = 3
+        return win32api.GetUserNameEx(NameDisplay)
+    elif pwd:
+        # Strip trailing commans seen on Linux
+        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
     else:
-        return pwd.getpwuid(os.getuid()).pw_gecos
+        return ''
 
-def utc_format_local_display(dt):
+def format_dt_display(dt):
     """Returns a local-time string representation of the datetime instance dt
     """
-    return dt.astimezone(tzlocal()).strftime(locale.nl_langinfo(locale.D_T_FMT))
+    # Convert tz-aware datetime to local time zone
+    if dt.tzinfo:
+        dt = dt.astimezone(tzlocal())
+
+    if hasattr(locale, 'nl_langinfo'):
+        # nl_langinfo "...is not available on all systems, and the set of
+        # possible options might also vary across platforms"
+        return dt.strftime(locale.nl_langinfo(locale.D_T_FMT))
+    elif win32api:
+        # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
+        LOCALE_USER_DEFAULT = 0x0400
+        DATE_LONGDATE = 2
+        time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
+        date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
+        return u'{0} {1}'.format(date, time)
+    else:
+        return dt.isoformat()
