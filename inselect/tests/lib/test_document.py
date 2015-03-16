@@ -122,7 +122,6 @@ class TestDocument(unittest.TestCase):
             d.save()
 
             self.assertEqual(items, InselectDocument.load(doc_temp).items)
-            self.assertEqual('Lawrence Hudson', d.properties['Saved by'])
 
             # Saved on time should be within last 2 seconds
             now = datetime.now(pytz.timezone("UTC"))
@@ -182,8 +181,6 @@ class TestDocument(unittest.TestCase):
             doc = InselectDocument.new_from_scan(tempdir / 'test_segment.png')
             self.assertTrue(doc.document_path.is_file())
             self.assertEqual(tempdir / 'test_segment.png', doc.scanned.path)
-
-            self.assertEqual('Lawrence Hudson', doc.properties['Created by'])
 
             # Saved on time should be within last 2 seconds
             now = datetime.now(pytz.timezone("UTC"))
