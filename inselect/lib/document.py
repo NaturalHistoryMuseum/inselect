@@ -337,6 +337,8 @@ class InselectDocument(object):
         else:
             path = Path(path)
 
+        debug_print(u'InselectDocument.export_csv to [{0}]'.format(path))
+
         # TODO Fields in order given in a metadata template
         fields = sorted(self.metadata_fields)
         with path.open('wb') as f:
