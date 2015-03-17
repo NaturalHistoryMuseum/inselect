@@ -19,7 +19,7 @@ from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
 # The value that is displayed for a field when more than one box is selected
 # and the items have more than one unique value for that field
-_MULTIPLE_FIELD_VALUES = u'*'
+_MULTIPLE_FIELD_VALUES = '*'
 
 
 class MetadataView(QAbstractItemView):
@@ -300,6 +300,12 @@ class FieldEdit(QLineEdit):
         # is not self.multiple_values
         self.multiple_values = False
 
+    def __repr__(self):
+        return u'<FieldEdit [{0}]>'.format(self._field)
+
+    def __str__(self):
+        return u'FieldEdit [{0}]'.format(self._field)
+
     def _editing_finished(self):
         """QLineEdit signal
         """
@@ -357,7 +363,6 @@ class FieldEdit(QLineEdit):
             # Multiple values selected
             return True
         else:
-            
             return self._template.validate_field(self._field, value)
 
 
@@ -396,6 +401,12 @@ class FieldComboBox(QComboBox):
         for label, value in izip(labels, values if values else repeat(None)):
             self.addItem(label, value)
 
+    def __repr__(self):
+        return u'<FieldComboBox [{0}]>'.format(self._field)
+
+    def __str__(self):
+        return u'FieldComboBox [{0}]'.format(self._field)
+
     @property
     def is_multiple(self):
         """True if multiple values are selected
@@ -407,7 +418,7 @@ class FieldComboBox(QComboBox):
         """Ensures that the the 'multiple values' choice is not in the list
         """
         if _MULTIPLE_FIELD_VALUES != self.itemText(0):
-            self.insertItem(_MULTIPLE_FIELD_VALUES)
+            self.insertItem(0, _MULTIPLE_FIELD_VALUES)
 
     def _remove_multiple_choice(self):
         """Ensures that the the 'multiple values' choice is not in the list
@@ -466,7 +477,7 @@ class FieldComboBox(QComboBox):
         if not self.selected:
             return True
 
-        if not self.is_multiple:
+        if self.is_multiple:
             # Multiple values selected
             return True
         else:
