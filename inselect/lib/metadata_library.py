@@ -33,7 +33,7 @@ def _load_library():
             else:
                 template = getattr(pkg, 'template', None)
                 if isinstance(template, MetadataTemplate):
-                    print('Loaded MetadataTemplate from [{0}]'.format(name))
+                    debug_print('Loaded MetadataTemplate from [{0}]'.format(name))
                     library.append(template)
                 else:
                     msg = u'Not an instance of MetadataTemplate [{0}]'
