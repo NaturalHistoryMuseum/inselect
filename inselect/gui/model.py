@@ -25,6 +25,9 @@ class Model(QAbstractItemModel):
     # Emitted when modified status changes
     modified_changed = QtCore.Signal()
 
+    # For formatting DisplayRole
+    DISPLAY_TEMPLATE = '{0:03} {1}'
+
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
         self._modified = False
@@ -173,14 +176,11 @@ class Model(QAbstractItemModel):
         if PixmapRole == role:
             # This role applies to the document as a whole
             return self._pixmap
-        elif not index.isValid():
-            return None
-        else:
+        elif index.isValid():
             item = index.internalPointer()
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
-                m = item['metadata']
-                m.update({'ItemNumber' : 1 + index.row()})
-                return metadata_library().current.format_label(m)
+                return self.DISPLAY_TEMPLATE.format(1 + index.row(),
+                     metadata_library().current.format_label(**item['metadata']))
             elif Qt.WhatsThisRole == role:
                 return 'Cropped specimen image'
             elif RectRole == role:

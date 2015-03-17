@@ -1,5 +1,6 @@
 import re
 from functools import partial
+from itertools import izip, repeat
 
 from PySide.QtGui import (QAbstractItemView, QSizePolicy, QScrollArea,
                           QWidget, QGroupBox, QLabel, QLineEdit, QComboBox,
@@ -92,12 +93,22 @@ class MetadataView(QAbstractItemView):
         """
         selected = self.selectionModel().selectedIndexes()
 
-        # TODO Combos should indicate multiple and unrecognised values
-        # Put values into the controls
-        metadata = [i.data(MetadataRole) for i in selected]
-        for field, control in self._form_container.controls.iteritems():
-            values = {m.get(field,'') for m in metadata}
-            control.selection_changed(selected, values)
+        if 0 == len(selected):
+            # No boxes selected
+            for control in self._form_container.controls.iterkeys():
+                control.clear_selection()
+                control.setEnabled(False)
+        else:
+            metadata = [i.data(MetadataRole) for i in selected]
+            for control, field in self._form_container.controls.iteritems():
+                control.setEnabled(True)
+                values = set(m.get(field, '') for m in metadata)
+                if 1 < len(values):
+                    # Indicate multiple values
+                    control.set_multiple(selected)
+                else:
+                    # Put the value into the controls
+                    control.set_value(selected, values.pop())
 
     def _create_controls(self):
         """Creates controls for editing fields in the selected template
@@ -131,6 +142,10 @@ class FormContainer(QWidget):
         background: pink;
     }
 
+    FieldComboBox[invalid="true"] {
+        background: pink;
+    }
+
     ToggleWidgetLabel {
         text-decoration: none;
         font-weight: bold;
@@ -145,25 +160,24 @@ class FormContainer(QWidget):
 
         self.setStyleSheet(self.STYLESHEET)
 
-        # Mapping { field name: control }
+        # Mapping { control: field name }
         self.controls = {}
 
     def controls_from_template(self, template):
-        # TODO Remove existing controls
-
-        # Create new controls and layout
+        "Create new controls and layout"
         self.controls, layout = self._create_field_controls(template)
 
         relayout_widget(self, layout)
 
     def _new_group(self):
-        # Returns a new layout
+        """Returns a new layout, used during controls creation
+        """
         l = QFormLayout()
         l.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
         return l
 
     def _close_group(self, main_layout, group_name, group_layout):
-        """Closes the the existing group
+        """Closes the the existing group, used during controls creation
         """
         debug_print('FormContainer._close_group close group', group_name)
 
@@ -198,7 +212,7 @@ class FormContainer(QWidget):
         main_layout = QFormLayout()
         main_layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
 
-        # Mapping { field name: control }
+        # Mapping { control, field name }
         controls = {}
 
         group_layout = current_group = None
@@ -220,7 +234,7 @@ class FormContainer(QWidget):
                 group_layout.addRow(URLLabel(field['URI'], label), control)
             else:
                 group_layout.addRow(QLabel(label), control)
-            controls[field['Name']] = control
+            controls[control] = field['Name']
 
         self._close_group(main_layout, current_group, group_layout)
 
@@ -230,9 +244,16 @@ class FormContainer(QWidget):
         """Returns a QWidget for editing field, validated using template
         """
         if 'countryCode' == field['Name']:
-            return CountryComboBox()
+            return CountryComboBox(template)
         elif 'language' == field['Name']:
-            return LanguageComboBox()
+            return LanguageComboBox(template)
+        elif 'ChoicesWithLabels' in field:
+            choices = field['ChoicesWithLabels']
+            combo = FieldComboBox(field['Name'],
+                                  template,
+                                  labels=choices.itervalues(),
+                                  values=choices.iterkeys())
+            return combo
         else:
             # Not using Qt's very restrictive QValidator scheme
             edit = FieldEdit(field['Name'], template)
@@ -267,7 +288,6 @@ class FieldEdit(QLineEdit):
         self.editingFinished.connect(self._editing_finished)
 
         self.selected = None
-        self.setEnabled(False)
 
         # The name of the field
         self._field = field
@@ -291,30 +311,28 @@ class FieldEdit(QLineEdit):
             value = self.text().strip()
             if (not self.multiple_values or
                 (self.multiple_values and _MULTIPLE_FIELD_VALUES != value)):
+                new = {self._field : value}
                 for i in self.selected:
-                    i.model().setData(i, {self._field : value}, MetadataRole)
+                    i.model().setData(i, new, MetadataRole)
             self.sync_background()
 
-    def selection_changed(self, selected, values):
-        """New items selected. Values should be the set of unique values of this
-        field in selected.
-        """
-        if 1 < len(values):
-            # Indicate that there is more than one value of field among
-            # the selected items
-            self.setText(_MULTIPLE_FIELD_VALUES)
-            self.multiple_values = True
-        elif 1 == len(values):
-            # Show the single value common to the whole selection
-            self.setText(values.pop())
-            self.multiple_values = False
-        else:
-            # No items selected
-            self.setText(u'')
-            self.multiple_values = False
+    def clear_selection(self):
+        self.selected = None
+        self.multiple_values = False
+        self.setText('')
+        self.sync_background()
 
+    def set_multiple(self, selected):
         self.selected = selected
-        self.setEnabled(len(selected) > 0)
+        self.multiple_values = False
+        self.setText(_MULTIPLE_FIELD_VALUES)
+        self.sync_background()
+
+    def set_value(self, selected, value):
+        # Show the single value common to the whole selection
+        self.selected = selected
+        self.multiple_values = False
+        self.setText(value)
         self.sync_background()
 
     def sync_background(self):
@@ -344,19 +362,22 @@ class FieldEdit(QLineEdit):
 
 
 class FieldComboBox(QComboBox):
-    """Updates the relevant model field when setCurrentIndex is called.
-    The list is populated with value, which should be an iterable of
-    (text, userdata) tuples.
+    """Updates the relevant model field when the user selects different options
+    from the drop-down list.
+    The 0th item is either empty or _MULTIPLE_FIELD_VALUES.
     """
 
     # TODO Prevent keypress from being propogated to application when list
     # is collapsed.
 
-    def __init__(self, field, values=[], parent=None):
+    def __init__(self, field, template, labels=[], values=None, parent=None):
+        """labels - an iterable of strings
+        values - an iterable of len(labels)
+        """
         super(FieldComboBox, self).__init__(parent)
         self.activated.connect(self._user_selected_item)
+
         self.selected = None
-        self.setEnabled(False)
 
         # QComboBox's default behaviour is to set a minimum width that is large
         # enough to show the longest item in the list. This has the effect of
@@ -365,48 +386,92 @@ class FieldComboBox(QComboBox):
         # shrink to a narrower width.
         self.setMinimumContentsLength(1)
 
+        self._template = template
+
         # The name of the field
         self._field = field
 
-        # If True there is more than one value of self._field among the selected
-        # items and editing_finished() will update the model only if self.text()
-        # is not self.multiple_values
-        self.multiple_values = False
-
         # Empty item at the top of the list
         self.addItem('', '')
-        for text, userdata in values:
-            self.addItem(text, userdata)
+        for label, value in izip(labels, values if values else repeat(None)):
+            self.addItem(label, value)
+
+    @property
+    def is_multiple(self):
+        """True if multiple values are selected
+        """
+        return (_MULTIPLE_FIELD_VALUES == self.currentText() and
+                0 == self.currentIndex())
+
+    def _ensure_multiple_choice(self):
+        """Ensures that the the 'multiple values' choice is not in the list
+        """
+        if _MULTIPLE_FIELD_VALUES != self.itemText(0):
+            self.insertItem(_MULTIPLE_FIELD_VALUES)
+
+    def _remove_multiple_choice(self):
+        """Ensures that the the 'multiple values' choice is not in the list
+        """
+        if _MULTIPLE_FIELD_VALUES == self.itemText(0):
+            self.removeItem(0)
 
     def _user_selected_item(self):
         """The user changed the selected item
         """
         debug_print('FieldComboBox._user_selected_item', self._field)
-        value = self.itemData(self.currentIndex())
-        new = {self._field : value}
-        for i in self.selected:
-            i.model().setData(i, new, MetadataRole)
+        if not self.is_multiple:
+            # Update the selected items with the user's choice
+            value = self.itemData(self.currentIndex())
+            new = {self._field : value}
+            for i in self.selected:
+                i.model().setData(i, new, MetadataRole)
+            self.sync_background()
 
-    def selection_changed(self, selected, values):
-        """New items selected. Values should be the set of unique values of this
-        field in selected.
-        """
-        if 1 < len(values):
-            # Indicate that there is more than one value of field among
-            # the selected items
-            self.setCurrentIndex(0)
-            self.multiple_values = True
-        elif 1 == len(values):
-            # Show the single value common to the whole selection
-            self.setCurrentIndex(self.findData(values.pop()))
-            self.multiple_values = False
-        else:
-            # No items selected
-            self.setCurrentIndex(0)
-            self.multiple_values = False
+            # The user may have altered the choice from multiple to a value
+            self._remove_multiple_choice()
 
+    def clear_selection(self):
+        self.selected = None
+        self._remove_multiple_choice()
+        self.setCurrentIndex(0)
+        self.sync_background()
+
+    def set_multiple(self, selected):
         self.selected = selected
-        self.setEnabled(len(selected) > 0)
+        self._ensure_multiple_choice()
+        self.setCurrentIndex(0)
+        self.sync_background()
+
+    def set_value(self, selected, value):
+        # Show the single value common to the whole selection
+        self.selected = selected
+        self._remove_multiple_choice()
+        self.setCurrentIndex(self.findData(value))
+        self.sync_background()
+
+    def sync_background(self):
+        current, new = self.property("invalid"), not self.is_valid()
+        if current != new:
+            self.setProperty("invalid", new)
+            # Annoying stuff that we need to do to get the control to refresh
+            # http://qt-project.org/wiki/DynamicPropertiesAndStylesheets
+            self.style().unpolish(self)
+            self.style().polish(self)
+            self.update()
+
+    def is_valid(self):
+        """True if this field contains either a valid value or
+        _MULTIPLE_FIELD_VALUES
+        """
+        if not self.selected:
+            return True
+
+        if not self.is_multiple:
+            # Multiple values selected
+            return True
+        else:
+            value = self.itemData(self.currentIndex())
+            return self._template.validate_field(self._field, value)
 
 
 class CountryComboBox(FieldComboBox):
@@ -417,19 +482,19 @@ class CountryComboBox(FieldComboBox):
     # TODO Integrate with 'Choices' of metadata spec
     # TODO How to set country and countryCode as user changes selection
 
-    def __init__(self, parent=None):
+    def __init__(self, template, parent=None):
         display = u'{0} ({1})'
         codes = sorted(COUNTRIES.keys())
-        values = ((display.format(code, COUNTRIES[code]), code) for code in codes)
-        super(CountryComboBox, self).__init__('countryCode', values, parent)
+        labels = (display.format(code, COUNTRIES[code]) for code in codes)
+        super(CountryComboBox, self).__init__('countryCode', template, labels, codes, parent)
 
 
 class LanguageComboBox(FieldComboBox):
     """List of 2-digit language codes and localised language names. The
     language field is updated.
     """
-    def __init__(self, parent=None):
+    def __init__(self, template, parent=None):
         display = u'{0} ({1})'
         codes = sorted(LANGUAGES.keys())
-        values = ((display.format(code, LANGUAGES[code]), code) for code in codes)
-        super(LanguageComboBox, self).__init__('language', values, parent)
+        labels = (display.format(code, LANGUAGES[code]) for code in codes)
+        super(LanguageComboBox, self).__init__('language', template, labels, codes, parent)

@@ -6,6 +6,7 @@ import json
 import re
 
 from collections import OrderedDict
+from functools import partial
 from itertools import chain, ifilter
 from pathlib import Path
 
@@ -42,6 +43,7 @@ class MetadataTemplate(object):
             raise ValueError("'ItemNumber' is a reserved field name")
 
         # Choices must be lists with no duplicates
+        # TODO Validate choices values vs labels and vs default
         for field in ifilter(lambda t: 'Choices' in t, fields):
             if duplicated(field['Choices']):
                 msg = u'Duplicated "Choices" for [{0}]'
@@ -51,11 +53,18 @@ class MetadataTemplate(object):
                 raise ValueError(msg.format(field['Name']))
 
         self._name = template['Name'].strip()
-        self._object_label = template.get('Object label', '{ItemNumber:03}')
         self._fields = fields
+
+        # A method that returns labels from metadata dicts
+        self.format_label = partial(FormatDefault(default='').format,
+                                    template.get('Object label', ''))
+        self.format_label.__doc__ = "Returns a string assembled from metadata values"
 
         # Map fromm field name to field
         self._fields_mapping = {f['Name'] : f for f in fields}
+
+        # Mapping from name to field for fields that have a parser
+        self._parse_mapping = {k: v for k, v in self._fields_mapping.iteritems() if 'Parser' in v}
 
         # List of mandatory fields
         self._mandatory = [f['Name'] for f in self._fields if f.get('Mandatory')]
@@ -86,11 +95,6 @@ class MetadataTemplate(object):
         """
         return self._mandatory
 
-    def format_label(self, fields):
-        """Returns a string
-        """
-        return FormatDefault(default='').format(self._object_label, **fields)
-
     def validate_record(self, record):
         """Returns True if record validates against this template; False if not
         """
@@ -98,12 +102,9 @@ class MetadataTemplate(object):
         if any(not record.get(f) for f in self.mandatory):
             return False
 
-        # Fields that need to be parsed
-        parse = {k: v for k, v in self._fields_mapping.iteritems() if 'Parser' in v}
-        intersect = set(parse.keys()).intersection(record.keys())
         try:
-            for k in intersect:
-                parse[k]['Parser'](record[k])
+            for k in set(self._parse_mapping.keys()).intersection(record.keys()):
+                self._parse_mapping[k]['Parser'](record[k])
         except ValueError:
             return False
         else:

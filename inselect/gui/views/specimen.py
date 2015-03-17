@@ -18,7 +18,8 @@ class CropDelegate(QAbstractItemDelegate):
     # Brushes
     BLACK = QBrush(Qt.black)
     WHITE = QBrush(Qt.white)
-    PINK = QBrush(QColor(0xff, 0xc0, 0xcb))
+    DARK_PINK = QBrush(QColor(0xb5, 0x88, 0x90))
+    LIGHT_PINK = QBrush(QColor(0xff, 0xc0, 0xcb))
     GREY = QBrush(Qt.gray)
     DARK_GREY = QBrush(Qt.darkGray)
 
@@ -65,7 +66,7 @@ class CropDelegate(QAbstractItemDelegate):
         selected = QStyle.State_Selected & option.state
         with painter_state(painter):
             if not valid:
-                painter.setBrush(self.PINK)
+                painter.setBrush(self.LIGHT_PINK if selected else self.DARK_PINK)
             else:
                 painter.setBrush(self.GREY if selected else self.DARK_GREY)
             painter.drawRect(option.rect)

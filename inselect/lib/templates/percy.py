@@ -11,7 +11,7 @@ from inselect.lib.parse import parse_matches_re, parse_int_gt0
 template = MetadataTemplate(
 {
     'Name': 'Percy slides',
-    'Object label': u'{ItemNumber:03} {catalogNumber}',
+    'Object label': u'{catalogNumber}-{Location}',
     'Fields': [
         {
           "Name": "catalogNumber",
@@ -20,6 +20,17 @@ template = MetadataTemplate(
           "Mandatory": True,
           "Parser": partial(parse_matches_re, re.compile('^[0-9]{5,10}$'),
                 'Invalid value [{0}]: must be between 5 and 10 digits'),
+        },
+        {
+            "Name": "Location",
+            "Mandatory": True,
+            "ChoicesWithLabels" : {
+                123: 'Drawer 8',
+                124: 'Drawer 9',
+                125: 'Drawer 10',
+                126: 'Drawer 11',
+            },
+            "Default": 125,
         },
         {
             "Name": "individualCount",
