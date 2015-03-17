@@ -330,7 +330,7 @@ class FieldEdit(QLineEdit):
 
     def set_multiple(self, selected):
         self.selected = selected
-        self.multiple_values = False
+        self.multiple_values = True
         self.setText(_MULTIPLE_FIELD_VALUES)
         self.sync_background()
 
