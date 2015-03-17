@@ -11,7 +11,7 @@ from inselect.lib.parse import parse_matches_re, parse_int_gt0
 template = MetadataTemplate(
 {
     'Name': 'Percy slides',
-    'Object label': u'{catalogNumber}-{Location}',
+    'Object label': u'{catalogNumber}-{family}',
     'Fields': [
         {
           "Name": "catalogNumber",
