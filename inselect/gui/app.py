@@ -25,6 +25,7 @@ from inselect.lib.utils import debug_print
 import icons        # Register our icon resources with QT
 
 from .info_widget import InfoWidget
+from .metadata_library import metadata_library
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
@@ -316,7 +317,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if QMessageBox.Yes == res:
             self.model.to_document(self.document)
-            self.document.export_csv(path)
+            self.document.export_csv(path, metadata_library().current)
             msg = "Data for {0} boxes written to {1}"
             msg = msg.format(self.document.n_items, path)
             QMessageBox.information(self, "CSV saved", msg)

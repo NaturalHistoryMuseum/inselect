@@ -1,4 +1,3 @@
-import itertools
 import json
 import pytz
 import re
@@ -7,6 +6,7 @@ import tempfile
 
 from copy import deepcopy
 from datetime import datetime
+from itertools import chain
 from pathlib import Path
 
 import cv2
@@ -326,11 +326,12 @@ class InselectDocument(object):
         """An iterable of metadata field names
         """
         # The union of fields among all items
-        return set(itertools.chain(*(i['fields'].keys() for i in self._items)))
+        return set(chain(*(i['fields'].keys() for i in self._items)))
 
-    def export_csv(self, path=None):
+    def export_csv(self, path=None, metadata_template=None):
         """Exports metadata to a CSV file given in path, defaults to
         self.document_path with .csv extension. Path is returned.
+        Columns are taken from metadata_template, if given.
         """
         if not path:
             path = self.document_path.with_suffix('.csv')
@@ -339,12 +340,18 @@ class InselectDocument(object):
 
         debug_print(u'InselectDocument.export_csv to [{0}]'.format(path))
 
-        # TODO Fields in order given in a metadata template
-        fields = sorted(self.metadata_fields)
+        if metadata_template:
+            fields = [f['Name'] for f in metadata_template.fields]
+            # Include fields that are in this document but not defined by the
+            # template
+            fields += sorted(set(self.metadata_fields).difference(fields))
+        else:
+            fields = sorted(self.metadata_fields)
+
         with path.open('wb') as f:
             w = UnicodeWriter(f)
-            w.writerow(['Item',] + fields)
+            w.writerow(chain(['Item'], fields))
             for index,item in enumerate(self._items):
-                w.writerow([1+index] + [item['fields'].get(f) for f in fields])
+                w.writerow(chain([1+index], (item['fields'].get(f) for f in fields)))
 
         return path
