@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import json
 import os
 import pytz
@@ -114,7 +115,8 @@ class TestDocument(unittest.TestCase):
         temp = tempfile.mkdtemp()
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
                                        TESTDATA / 'test_segment.png') as tempdir:
-            items = [ {'fields': {}, 'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
+            items = [ {'fields': {'type' : u'インセクト'},
+                       'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
 
             doc_temp = tempdir / 'test_segment.inselect'
             d = InselectDocument.load(doc_temp)
