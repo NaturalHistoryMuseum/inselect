@@ -668,9 +668,9 @@ class MainWindow(QtGui.QMainWindow):
         self.select_none_action = QAction("Select &None", self,
             shortcut="ctrl+D", triggered=self.select_none)
         self.next_box_action = QAction("Next box", self,
-            shortcut="N", triggered=partial(self.select_next_prev, next=True))
+            shortcut="ctrl+N", triggered=partial(self.select_next_prev, next=True))
         self.previous_box_action = QAction("Previous box", self,
-            shortcut="P", triggered=partial(self.select_next_prev, next=False))
+            shortcut="ctrl+P", triggered=partial(self.select_next_prev, next=False))
 
         # TODO LH Does CMD + Backspace work on a mac?
         self.delete_action = QAction("&Delete selected", self,

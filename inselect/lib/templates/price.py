@@ -1,4 +1,4 @@
-"""Template for Diana Percy's microscope slides project
+"""Template for Ben Prices's Ephemeroptera microscope slides
 """
 
 import re
@@ -10,16 +10,16 @@ from inselect.lib.parse import parse_matches_re, parse_int_gt0
 
 template = MetadataTemplate(
 {
-    'Name': 'Percy slides',
-    'Object label': u'{catalogNumber}-{family}',
+    'Name': 'Price Ephemeroptera slides',
+    'Object label': u'{catalogNumber}-{genus}-{specificEpithet}',
     'Fields': [
         {
-          "Name": "catalogNumber",
-          "Label": "Catalog number",
-          "URI": "http://rs.tdwg.org/dwc/terms/catalogNumber",
-          "Mandatory": True,
-          "Parser": partial(parse_matches_re, re.compile('^[0-9]{5,10}$'),
-                'Invalid value [{0}]: must be between 5 and 10 digits'),
+            "Name": "catalogNumber",
+            "Label": "Catalog number",
+            "URI": "http://rs.tdwg.org/dwc/terms/catalogNumber",
+            "Mandatory": True,
+            "Parser": partial(parse_matches_re, re.compile('^[0-9]{5,10}$'),
+                        'Invalid value [{0}]: must be between 5 and 10 digits'),
         },
         {
             "Name": "Location",
@@ -34,6 +34,7 @@ template = MetadataTemplate(
         },
         {
             "Name": "individualCount",
+            "Mandatory": True,
             "Label": "Individual count",
             "URI": "http://rs.tdwg.org/dwc/terms/individualCount",
             "Default": 1,
@@ -50,36 +51,43 @@ template = MetadataTemplate(
         {
             "Name": "kingdom",
             "Label": "Kingdom",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/kingdom",
         },
         {
             "Name": "phylum",
             "Label": "Phylum",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/phylum",
         },
         {
             "Name": "class",
             "Label": "Class",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/class",
         },
         {
             "Name": "order",
             "Label": "Order",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/order",
         },
         {
             "Name": "family",
             "Label": "Family",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/family",
         },
         {
             "Name": "genus",
             "Label": "Genus",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/genus",
         },
         {
             "Name": "specificEpithet",
             "Label": "Specific epithet",
+            "Mandatory": True,
             "URI": "http://rs.tdwg.org/dwc/terms/specificEpithet",
         },
         {

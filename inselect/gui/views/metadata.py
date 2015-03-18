@@ -2,6 +2,7 @@ import re
 from functools import partial
 from itertools import izip, repeat
 
+from PySide import QtGui
 from PySide.QtGui import (QAbstractItemView, QSizePolicy, QScrollArea,
                           QWidget, QGroupBox, QLabel, QLineEdit, QComboBox,
                           QFormLayout, QVBoxLayout)
@@ -129,6 +130,11 @@ class MetadataView(QAbstractItemView):
         """QAbstractItemView slot
         """
         debug_print('MetadataView.selectionChanged')
+
+        # If one of our controls has focus, update the model before refreshing
+        # the UI
+        if QtGui.qApp.focusWidget() in self._form_container.controls:
+            QtGui.qApp.focusWidget().update_model()
         self._populate_controls()
 
 
@@ -285,7 +291,7 @@ class FieldEdit(QLineEdit):
     def __init__(self, field, template, parent=None):
         super(FieldEdit, self).__init__(parent)
 
-        self.editingFinished.connect(self._editing_finished)
+        self.textEdited.connect(self._text_edited)
 
         self.selected = None
 
@@ -306,10 +312,15 @@ class FieldEdit(QLineEdit):
     def __str__(self):
         return u'FieldEdit [{0}]'.format(self._field)
 
-    def _editing_finished(self):
+    def _text_edited(self, text):
         """QLineEdit signal
         """
-        debug_print('FieldEdit._editing_finished', self._field,
+        self.update_model()
+
+    def update_model(self):
+        """Updates the model
+        """
+        debug_print('FieldEdit.update_model', self._field,
                     'modified' if self.isModified() else 'unmodified',
                     'valid' if self.is_valid() else 'invalid')
         if self.isModified():
@@ -429,7 +440,12 @@ class FieldComboBox(QComboBox):
     def _user_selected_item(self):
         """The user changed the selected item
         """
-        debug_print('FieldComboBox._user_selected_item', self._field)
+        self.update_model()
+
+    def update_model(self):
+        """Updates the model
+        """
+        debug_print('FieldComboBox.update_model', self._field)
         if not self.is_multiple:
             # Update the selected items with the user's choice
             value = self.itemData(self.currentIndex())
