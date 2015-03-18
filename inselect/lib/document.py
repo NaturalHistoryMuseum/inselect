@@ -252,13 +252,13 @@ class InselectDocument(object):
     @property
     def crops(self):
         "Iterate over cropped specimen image arrays"
-        return self._scanned.crops([i['rect'] for i in self.items])
+        return self._scanned.crops(i['rect'] for i in self._items)
 
     def save_crops_from_image(self, dir, image, progress=None):
         "Saves images cropped from image to dir. dir must exist."
-        boxes = [i['rect'] for i in self.items]
+        boxes = (i['rect'] for i in self._items)
         template = '{0:03}' + image.path.suffix
-        paths = [dir / template.format(1+i) for i in xrange(0, len(self.items))]
+        paths = (dir / template.format(1+i) for i in xrange(0, len(self._items)))
         image.save_crops(boxes, paths, progress)
 
     def save_crops(self, progress=None):
@@ -284,7 +284,7 @@ class InselectDocument(object):
             tempdir = None
 
             msg = 'Saved [{0}] crops to [{1}]'
-            debug_print(msg.format(len(self.items), crops_dir))
+            debug_print(msg.format(len(self._items), crops_dir))
 
             return crops_dir
         finally:
