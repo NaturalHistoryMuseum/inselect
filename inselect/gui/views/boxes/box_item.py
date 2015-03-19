@@ -5,6 +5,7 @@ from PySide.QtCore import Qt, QRect, QRectF
 from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
+from inselect.gui.colours import COLOURS
 from inselect.gui.utils import painter_state
 
 from .resize_handle import ResizeHandle
@@ -14,15 +15,15 @@ class BoxItem(QtGui.QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    # Blue unselected, red selected
-    UNSELECTED = Qt.blue
-    SELECTED =   Qt.red
-    RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
+    SELECTED = QColor(COLOURS['Selected'])
+    VALID = QColor(COLOURS['Valid'])
+    INVALID = QColor(COLOURS['Invalid'])
 
-    INVALID =    QBrush(QColor(0x50, 0x50, 0x50, 0x50))
+    RESIZING = QColor(SELECTED)
+    RESIZING.setAlpha(0x50)
 
-    INNER =         Qt.black
-    INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
+    INVALID_FILL = QColor(INVALID)
+    INVALID_FILL.setAlpha(0x50)
 
     def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
@@ -63,7 +64,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
         with painter_state(painter):
             # Zero thickness indicates a cosmetic pen, which is drawn with the
             # same thickness regardless of the view's scale factor
-            painter.setPen(QPen(self.colour, 0, Qt.SolidLine))
+            outline_colour, fill_colour = self.colours
+            painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
             r = self.boundingRect()
             painter.drawRect(r)
 
@@ -74,8 +76,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
                 for point in self._seeds:
                     painter.drawEllipse(point, 5, 5)
 
-            if not self._isvalid:
-                painter.fillRect(r, self.INVALID)
+            if fill_colour:
+                painter.fillRect(r, fill_colour)
 
     def has_mouse(self):
         """True if self or self._handles has grabbed the mouse
@@ -83,14 +85,26 @@ class BoxItem(QtGui.QGraphicsRectItem):
         return self.scene().mouseGrabberItem() in chain([self], self._handles)
 
     @property
-    def colour(self):
-        """QColor to use for drawing the box's border
+    def colours(self):
+        """Tuple of two QColors to use for the box's border and fill
+        respectively
         """
-        # TODO LH Transparency on resize better handled by setOpacity()?
         if self.has_mouse():
-            return self.RESIZING
+            outline = self.RESIZING
+        if self.isSelected():
+            outline = self.SELECTED
+        elif self._isvalid:
+            outline = self.VALID
         else:
-            return self.SELECTED if self.isSelected() else self.UNSELECTED
+            outline = self.INVALID
+
+        if not self._isvalid and not self.has_mouse():
+            # Fill only if invalid and not resizing
+            fill = self.INVALID_FILL
+        else:
+            fill = None
+
+        return outline, fill
 
     def update(self, rect=QtCore.QRectF()):
         """QGraphicsRectItem function

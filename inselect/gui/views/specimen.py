@@ -5,6 +5,7 @@ from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
                           QColor, QFont)
 
 from inselect.lib.utils import debug_print
+from inselect.gui.colours import COLOURS
 from inselect.gui.utils import painter_state
 from inselect.gui.roles import (RectRole, PixmapRole, RotationRole,
                                 MetadataValidRole)
@@ -18,8 +19,8 @@ class CropDelegate(QAbstractItemDelegate):
     # Brushes
     BLACK = QBrush(Qt.black)
     WHITE = QBrush(Qt.white)
-    DARK_PINK = QBrush(QColor(0xb5, 0x88, 0x90))
-    LIGHT_PINK = QBrush(QColor(0xff, 0xc0, 0xcb))
+    INVALID = QBrush(QColor(COLOURS['Invalid']))
+    INVALID_SELECTED = QBrush(QColor(COLOURS['Invalid']))
     GREY = QBrush(Qt.gray)
     DARK_GREY = QBrush(Qt.darkGray)
 
@@ -66,7 +67,7 @@ class CropDelegate(QAbstractItemDelegate):
         selected = QStyle.State_Selected & option.state
         with painter_state(painter):
             if not valid:
-                painter.setBrush(self.LIGHT_PINK if selected else self.DARK_PINK)
+                painter.setBrush(self.INVALID_SELECTED if selected else self.INVALID)
             else:
                 painter.setBrush(self.GREY if selected else self.DARK_GREY)
             painter.drawRect(option.rect)
@@ -76,7 +77,7 @@ class CropDelegate(QAbstractItemDelegate):
         """
         with painter_state(painter):
             font = painter.font()
-            font.setPointSize(14)  # TODO LH Arbitrary font size
+            font.setPointSize(13)  # TODO LH Arbitrary font size
             font.setWeight(QFont.Black)
             painter.setFont(font)
             title = index.data(Qt.DisplayRole)
@@ -149,8 +150,10 @@ class CropDelegate(QAbstractItemDelegate):
             if angle:
                 painter.setTransform(t)
             painter.drawPixmap(target_rect, index.data(PixmapRole), source_rect)
-            painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
-            painter.drawRect(target_rect)
+
+            if QStyle.State_Selected & option.state:
+                painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
+                painter.drawRect(target_rect)
 
     def _paint_controls(self, painter, option, index):
         """Arrows to rotate crops

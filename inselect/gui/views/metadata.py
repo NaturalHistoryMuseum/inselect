@@ -12,6 +12,7 @@ from inselect.lib.countries import COUNTRIES
 from inselect.lib.languages import LANGUAGES
 from inselect.lib.utils import debug_print
 
+from inselect.gui.colours import COLOURS
 from inselect.gui.metadata_library import metadata_library
 from inselect.gui.roles import MetadataRole
 from inselect.gui.utils import relayout_widget
@@ -144,20 +145,20 @@ class FormContainer(QWidget):
 
     # Set when field contains an invalid value
     STYLESHEET = """
-    FieldEdit[invalid="true"] {
-        background: pink;
-    }
+    FieldEdit[invalid="true"] {{
+        background: {Invalid};
+    }}
 
-    FieldComboBox[invalid="true"] {
-        background: pink;
-    }
+    FieldComboBox[invalid="true"] {{
+        background: {Invalid};
+    }}
 
-    ToggleWidgetLabel {
+    ToggleWidgetLabel {{
         text-decoration: none;
         font-weight: bold;
         color: black;
-    }
-    """
+    }}
+    """.format(**COLOURS)
 
     # TODO LH Text colour to come from system
 
