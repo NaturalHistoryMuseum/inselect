@@ -677,9 +677,9 @@ class MainWindow(QtGui.QMainWindow):
             shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
         self.rotate_clockwise_action = QAction(
             "Rotate clockwise", self,
-            shortcut="R", triggered=partial(self.rotate90, clockwise=True))
+            shortcut="ctrl+R", triggered=partial(self.rotate90, clockwise=True))
         self.rotate_counter_clockwise_action = QAction(
-            "Rotate counter-clockwise", self, shortcut="L",
+            "Rotate counter-clockwise", self, shortcut="ctrl+L",
             triggered=partial(self.rotate90, clockwise=False))
 
         # Plugins
@@ -737,9 +737,9 @@ class MainWindow(QtGui.QMainWindow):
             statusTip="Display plugin image", checkable=True)
 
         self.show_specimen_grid_action = QAction('Show grid', self,
-            shortcut='g', triggered=self.show_grid)
+            shortcut='ctrl+G', triggered=self.show_grid)
         self.show_specimen_expanded_action = QAction('Show expanded', self,
-            shortcut='e', triggered=self.show_expanded)
+            shortcut='ctrl+E', triggered=self.show_expanded)
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
