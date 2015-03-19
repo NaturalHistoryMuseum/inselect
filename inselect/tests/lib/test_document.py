@@ -135,7 +135,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(expected, repr(doc))
 
     def test_crops(self):
-        "Cropped specimen images are as expected"
+        "Cropped object images are as expected"
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
 
@@ -148,7 +148,7 @@ class TestDocument(unittest.TestCase):
             self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] == crop))
 
     def test_save_crops(self):
-        "Cropped specimen images are written correctly"
+        "Cropped object images are written correctly"
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
                                        TESTDATA / 'test_segment.png') as tempdir:
             doc = InselectDocument.load(tempdir / 'test_segment.inselect')

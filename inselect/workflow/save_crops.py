@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Saves cropped specimen images
+"""Saves cropped object images
 """
 
 import argparse
@@ -43,7 +43,7 @@ def save_crops(dir, overwrite_existing):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Writes cropped specimen images from Inselect documents')
+    parser = argparse.ArgumentParser(description='Writes cropped object images from Inselect documents')
     parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('-o', '--overwrite', action='store_true',
         help='Overwrite existing crops directories')

@@ -251,7 +251,7 @@ class InselectDocument(object):
 
     @property
     def crops(self):
-        "Iterate over cropped specimen image arrays"
+        "Iterate over cropped object image arrays"
         return self._scanned.crops([i['rect'] for i in self.items])
 
     def save_crops_from_image(self, dir, image, progress=None):
