@@ -68,6 +68,11 @@ cd inselect
 ./inselect.py
 ```
 
+## Barcode reading
+
+Install [gouda](https://github.com/NaturalHistoryMuseum/gouda/). See
+`inselect/gui/plugins/barcode.py`.
+
 ## Toolbar icons in the compiled application,
 If the toolbar icons in inselect/data change then you need to refresh a Python
 file:
