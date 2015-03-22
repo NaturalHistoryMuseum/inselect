@@ -660,6 +660,13 @@ class MainWindow(QtGui.QMainWindow):
         self.exit_action = QAction("E&xit", self,
             shortcut=QtGui.QKeySequence.Quit, triggered=self.close)
 
+        if 'win32' == sys.platform:
+            # Support ctrl+w and ctrl+q on Windows
+            self.close_action.setShortcuts(['ctrl+w',
+                                            self.close_action.shortcut()])
+            self.exit_action.setShortcuts(['ctrl+q',
+                                            self.exit_action.shortcut()])
+
         # Edit menu
         self.select_all_action = QAction("Select &All", self,
             shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
