@@ -50,6 +50,7 @@ def segment_document(doc, resize=None, *args, **kwargs):
     items = [{"fields": {}, 'rect': r, 'rotation': 0} for r in rects]
     doc = doc.copy()    # Deep copy to avoid altering argument
     doc.set_items(items)
+    debug_print('Segmented [{0}]'.format(doc))
     return doc, display_image
 
 
