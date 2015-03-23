@@ -74,10 +74,10 @@ class DocumentExport(object):
 
         # Field names
         if self._template:
-            fields = (f['Name'] for f in self._template.fields)
+            fields = [f['Name'] for f in self._template.fields]
 
-            # Include fields that are in the document and not the template
-            fields = sorted(set(document.metadata_fields).difference(fields))
+            # Append fields that are in the document and not the template
+            fields += [f for f in document.metadata_fields if f not in fields]
         else:
             fields = sorted(document.metadata_fields)
 
