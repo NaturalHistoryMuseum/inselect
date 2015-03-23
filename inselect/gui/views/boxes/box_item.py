@@ -57,9 +57,10 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # QAbstractGraphicsItems with a larger zorder
 
         # TODO LH Get pixmap without tight coupling to scene
-        painter.drawPixmap(self.boundingRect(),
-                           self.scene().pixmap,
-                           self.sceneBoundingRect())
+        if not self.has_mouse():
+            painter.drawPixmap(self.boundingRect(),
+                               self.scene().pixmap,
+                               self.sceneBoundingRect())
 
         with painter_state(painter):
             # Zero thickness indicates a cosmetic pen, which is drawn with the

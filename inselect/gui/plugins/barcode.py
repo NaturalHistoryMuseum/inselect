@@ -82,5 +82,5 @@ class BarcodePlugin(Plugin):
             result = strategy(crop, engine)
             if result:
                 strategy, barcodes = result
-                return u' '.join([b.data for b in barcodes])
+                return u' '.join(sorted([b.data for b in barcodes]))
         return None

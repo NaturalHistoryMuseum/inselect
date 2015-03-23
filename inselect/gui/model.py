@@ -26,7 +26,7 @@ class Model(QAbstractItemModel):
     modified_changed = QtCore.Signal()
 
     # For formatting DisplayRole
-    DISPLAY_TEMPLATE = '{0:03} {1}'
+    DISPLAY_TEMPLATE = '{0:04} {1}'
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)

@@ -1,7 +1,6 @@
 import json
 import pytz
 import re
-import shutil
 import tempfile
 
 from copy import deepcopy
@@ -13,7 +12,6 @@ import cv2
 
 from .image import InselectImage
 from .inselect_error import InselectError
-from .unicode_csv import UnicodeWriter
 from .utils import debug_print, user_name
 from .rect import Rect
 
@@ -41,7 +39,8 @@ class InselectDocument(object):
     EXTENSION = '.inselect'
     THUMBNAIL_SUFFIX = '_thumbnail'
 
-    # Format for datetime objects. Conforms to http://www.ietf.org/rfc/rfc3339.txt
+    # Format for serializing datetime objects.
+    # Conforms to http://www.ietf.org/rfc/rfc3339.txt
     DT_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
     @classmethod
@@ -254,42 +253,10 @@ class InselectDocument(object):
         "Iterate over cropped object image arrays"
         return self._scanned.crops(i['rect'] for i in self._items)
 
-    def save_crops_from_image(self, dir, image, progress=None):
+    def save_crops_from_image(self, image, crop_paths, progress=None):
         "Saves images cropped from image to dir. dir must exist."
         boxes = (i['rect'] for i in self._items)
-        template = '{0:03}' + image.path.suffix
-        paths = (dir / template.format(1+i) for i in xrange(0, len(self._items)))
-        image.save_crops(boxes, paths, progress)
-
-    def save_crops(self, progress=None):
-        "Saves images cropped from self._scanned to self.crops_dir"
-        # TODO LH Test that cancel of export leaves existing crops dir.
-        # Create temp dir alongside scan
-        tempdir = tempfile.mkdtemp(dir=str(self._scanned.path.parent),
-            prefix=self._scanned.path.stem + '_temp_crops')
-        tempdir = Path(tempdir)
-        debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
-        try:
-            # Save crops
-            self.save_crops_from_image(tempdir, self._scanned, progress)
-
-            # rm existing crops dir
-            crops_dir = self.crops_dir
-            shutil.rmtree(str(crops_dir), ignore_errors=True)
-
-            # Rename temp dir
-            msg = 'Moving temp crops dir [{0}] to [{1}]'
-            debug_print(msg.format(tempdir, crops_dir))
-            tempdir.rename(crops_dir)
-            tempdir = None
-
-            msg = 'Saved [{0}] crops to [{1}]'
-            debug_print(msg.format(len(self._items), crops_dir))
-
-            return crops_dir
-        finally:
-            if tempdir:
-                shutil.rmtree(str(tempdir))
+        image.save_crops(boxes, crop_paths, progress)
 
     def ensure_thumbnail(self, width=4096):
         "Create thumbnail image, if it does not already exist"
@@ -327,31 +294,3 @@ class InselectDocument(object):
         """
         # The union of fields among all items
         return set(chain(*(i['fields'].keys() for i in self._items)))
-
-    def export_csv(self, path=None, metadata_template=None):
-        """Exports metadata to a CSV file given in path, defaults to
-        self.document_path with .csv extension. Path is returned.
-        Columns are taken from metadata_template, if given.
-        """
-        if not path:
-            path = self.document_path.with_suffix('.csv')
-        else:
-            path = Path(path)
-
-        debug_print(u'InselectDocument.export_csv to [{0}]'.format(path))
-
-        if metadata_template:
-            fields = [f['Name'] for f in metadata_template.fields]
-            # Include fields that are in this document but not defined by the
-            # template
-            fields += sorted(set(self.metadata_fields).difference(fields))
-        else:
-            fields = sorted(self.metadata_fields)
-
-        with path.open('wb') as f:
-            w = UnicodeWriter(f)
-            w.writerow(chain(['Item'], fields))
-            for index,item in enumerate(self._items):
-                w.writerow(chain([1+index], (item['fields'].get(f) for f in fields)))
-
-        return path

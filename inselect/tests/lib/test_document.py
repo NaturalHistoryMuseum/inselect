@@ -2,7 +2,6 @@
 import json
 import os
 import pytz
-import shutil
 import stat
 import sys
 import tempfile
@@ -14,12 +13,9 @@ from pathlib import Path
 
 import numpy as np
 
-import cv2
-
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.rect import Rect
-from inselect.lib.unicode_csv import UnicodeDictReader
 from inselect.lib.utils import make_readonly
 
 from inselect.tests.utils import temp_directory_with_files
@@ -149,24 +145,6 @@ class TestDocument(unittest.TestCase):
             x0, y0, x1, y1 = box.coordinates
             self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] == crop))
 
-    def test_save_crops(self):
-        "Cropped object images are written correctly"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-
-            crops_dir = doc.save_crops()
-            self.assertTrue(crops_dir.is_dir())
-            self.assertEqual(crops_dir, doc.crops_dir)
-            self.assertEqual(5, len(list(crops_dir.glob('*.png'))))
-
-            # Check the contents of each file
-            boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-            for box, path in izip(boxes, sorted(crops_dir.glob('*.png'))):
-                x0, y0, x1, y1 = box.coordinates
-                self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
-                                       cv2.imread(str(path))))
-
     def test_set_items(self):
         "Items are set as expected"
         # TODO LH Check field validation
@@ -247,25 +225,6 @@ class TestDocument(unittest.TestCase):
 
             # Restor the original mode
             tempdir.chmod(mode)
-
-    def test_csv_export(self):
-        "CSV data are exported as expected"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-            csv_fname = doc.export_csv()
-            self.assertEqual(csv_fname, tempdir / 'test_segment.csv')
-
-            # Check CSV contents
-            with csv_fname.open('rb') as f:
-                res = UnicodeDictReader(f)
-                for index, item, row in izip(count(), doc.items, res):
-                    expected = item['fields']
-                    expected.update({'Item' : str(1+index)})
-                    actual = {k: v for k,v in row.items() if v}
-                    self.assertEqual(expected, actual)
-        # Expect 4 rows
-        self.assertEqual(index, 4)
 
     def test_thumbnail_path_of_scanned(self):
         self.assertEqual(Path('x_thumbnail.jpg'),

@@ -10,8 +10,7 @@ from functools import partial
 from itertools import chain, ifilter
 from pathlib import Path
 
-from inselect.lib.utils import (debug_print, duplicated, unique_everseen,
-                                FormatDefault)
+from .utils import debug_print, duplicated, unique_everseen, FormatDefault
 
 
 class MetadataTemplate(object):
@@ -38,10 +37,6 @@ class MetadataTemplate(object):
             msg = u'Duplicated fields {0}'
             raise ValueError(msg.format(sorted(list(dup))))
 
-        # Reserved name
-        if 'ItemNumber' in names:
-            raise ValueError("'ItemNumber' is a reserved field name")
-
         # Choices must be lists with no duplicates
         # TODO Validate choices values vs labels and vs default
         for field in ifilter(lambda t: 'Choices' in t, fields):
@@ -57,7 +52,7 @@ class MetadataTemplate(object):
 
         # A method that returns labels from metadata dicts
         self.format_label = partial(FormatDefault(default='').format,
-                                    template.get('Object label', ''))
+                                     template.get('Object label', ''))
         self.format_label.__doc__ = "Returns a string assembled from metadata values"
 
         # Map fromm field name to field
@@ -85,9 +80,13 @@ class MetadataTemplate(object):
 
     @property
     def fields(self):
-        """List of fields
+        """A list of dicts
         """
         return self._fields
+
+    def format_label(self, **kwargs):
+         "Returns a string assembled from metadata values"
+         raise NotImplementedError('format_label')
 
     @property
     def mandatory(self):

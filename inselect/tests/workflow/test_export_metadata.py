@@ -34,7 +34,9 @@ class TestExportCSV(unittest.TestCase):
                 res = UnicodeDictReader(f)
                 for index, item, row in izip(count(), doc.items, res):
                     expected = item['fields']
-                    expected.update({'Item' : str(1+index)})
+                    expected.update({'Item' : str(1+index),
+                                     'Cropped_image_name' : '{0:04}.png'.format(1+index)
+                                    })
                     actual = {k: v for k,v in row.items() if v}
                     self.assertEqual(expected, actual)
 

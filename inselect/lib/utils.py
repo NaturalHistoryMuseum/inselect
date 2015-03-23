@@ -24,7 +24,7 @@ try:
     import pywintypes
     import win32api
 except ImportError:
-    win32api = None
+    pywintypes = win32api = None
 
 
 from inselect.lib.inselect_error import InselectError
@@ -94,10 +94,10 @@ class FormatDefault(string.Formatter):
     http://stackoverflow.com/a/19800610
 
     >>> fmt = FormatDefault(default='???')
-    >>> metadata = {'ItemNumber' : 23, 'catalogNumber' : '1234'}
-    >>> template = '{ItemNumber:03}-{catalogNumber}-{x}'
+    >>> metadata = {'catalogNumber' : '1234'}
+    >>> template = '{catalogNumber}-{x}'
     >>> print(fmt.format(template, **metadata))
-    '023-1234-???'
+    '1234-???'
 
     """
     def __init__(self, default=''):

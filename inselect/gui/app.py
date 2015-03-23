@@ -18,6 +18,7 @@ import inselect
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
+from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
@@ -273,7 +274,7 @@ class MainWindow(QtGui.QMainWindow):
         self.info_widget.set_document(self.document)
 
     @report_to_user
-    def save_crops(self):
+    def save_crops(self, use_metadata_template=True):
         """Saves cropped object images
         """
         debug_print('MainWindow.save_crops')
@@ -291,7 +292,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.document.scanned.array
 
                 progress('Saving crops')
-                self.document.save_crops(progress)
+                if use_metadata_template:
+                    export = DocumentExport(metadata_library().current)
+                else:
+                    export = DocumentExport(None)
+                export.save_crops(self.document, progress)
 
             def completed(operation):
                 QMessageBox.information(self, "Crops saved", msg)
@@ -302,10 +307,15 @@ class MainWindow(QtGui.QMainWindow):
             self.run_in_worker(save_crops, 'Save crops', completed)
 
     @report_to_user
-    def export_csv(self):
+    def export_csv(self, use_metadata_template=True):
         debug_print('MainWindow.export_csv')
 
-        path = self.document.document_path.with_suffix('.csv')
+        if use_metadata_template:
+            export = DocumentExport(metadata_library().current)
+        else:
+            export = DocumentExport(None)
+
+        path = export.csv_path(self.document)
 
         res = QMessageBox.Yes
         existing_csv = path.is_file()
@@ -317,7 +327,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if QMessageBox.Yes == res:
             self.model.to_document(self.document)
-            self.document.export_csv(path, metadata_library().current)
+            export.export_csv(self.document)
             msg = "Data for {0} boxes written to {1}"
             msg = msg.format(self.document.n_items, path)
             QMessageBox.information(self, "CSV saved", msg)
