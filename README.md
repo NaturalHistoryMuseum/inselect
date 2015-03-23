@@ -2,7 +2,7 @@
 
 [ ![Travis status](https://travis-ci.org/NaturalHistoryMuseum/inselect.svg?branch=master) ](https://travis-ci.org/NaturalHistoryMuseum/inselect)
 
-A tool for the semi-automated segmentation and annotation of scanned images of museum specimen trays.
+A tool for the semi-automated segmentation and annotation of scanned images of museum objects.
 
 You can download the latest release of Inselect for Windows, for Mac and the Python source from our [Project page](http://naturalhistorymuseum.github.io/inselect).
 
@@ -67,6 +67,11 @@ git clone https://github.com/NaturalHistoryMuseum/inselect.git
 cd inselect
 ./inselect.py
 ```
+
+## Barcode reading
+
+Install [gouda](https://github.com/NaturalHistoryMuseum/gouda/). See
+`inselect/gui/plugins/barcode.py`.
 
 ## Toolbar icons in the compiled application,
 If the toolbar icons in inselect/data change then you need to refresh a Python

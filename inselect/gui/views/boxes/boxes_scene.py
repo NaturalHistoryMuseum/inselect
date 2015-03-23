@@ -8,7 +8,7 @@ from inselect.lib.utils import debug_print
 from .box_item import BoxItem
 
 class BoxesScene(QtGui.QGraphicsScene):
-    """Boxes on an image of specimens
+    """Boxes on an image of objects
     """
     def __init__(self, source, parent=None):
         super(BoxesScene, self).__init__(parent)

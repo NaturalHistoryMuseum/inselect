@@ -182,7 +182,7 @@ class Model(QAbstractItemModel):
                 return self.DISPLAY_TEMPLATE.format(1 + index.row(),
                      metadata_library().current.format_label(**item['metadata']))
             elif Qt.WhatsThisRole == role:
-                return 'Cropped specimen image'
+                return 'Cropped object image'
             elif RectRole == role:
                 return item['rect']
             elif RotationRole == role:

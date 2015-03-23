@@ -21,6 +21,7 @@ except ImportError:
 
 
 try:
+    import pywintypes
     import win32api
 except ImportError:
     win32api = None
@@ -114,9 +115,15 @@ class FormatDefault(string.Formatter):
 def user_name():
     """The name of the current user
     """
-    if win32api:
+    if win32api and pywintypes:
         NameDisplay = 3
-        return win32api.GetUserNameEx(NameDisplay)
+        try:
+            return win32api.GetUserNameEx(NameDisplay)
+        except pywintypes.error:
+            try:
+                return win32api.GetUserName()
+            except pywintypes.error:
+                return ''
     elif pwd:
         # Strip trailing commans seen on Linux
         return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')

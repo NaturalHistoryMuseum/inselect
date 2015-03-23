@@ -231,11 +231,11 @@ class CropDelegate(QAbstractItemDelegate):
         return super(CropDelegate, self).setEditorData(event, editor, index)
 
 
-class SpecimenView(QListView):
-    """Shows cropped specimen images either in a grid or expanded
+class ObjectView(QListView):
+    """Shows cropped object images either in a grid or expanded
     """
     def __init__(self, parent=None):
-        super(SpecimenView, self).__init__(parent)
+        super(ObjectView, self).__init__(parent)
 
         # Items are shown in a grid if False.
         # A single item is shown expanded if True.
@@ -256,21 +256,21 @@ class SpecimenView(QListView):
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView slot
         """
-        debug_print('SpecimenView.selectionChanged')
+        debug_print('ObjectView.selectionChanged')
 
         # Grid view unless exactly one item selected
         if self.expanded and 1 != len(self.selectionModel().selectedIndexes()):
             self.show_grid()
 
-        super(SpecimenView, self).selectionChanged(selected, deselected)
+        super(ObjectView, self).selectionChanged(selected, deselected)
 
     def show_grid(self):
-        debug_print('SpecimenView.show_grid')
+        debug_print('ObjectView.show_grid')
         self.expanded = False
         self._refresh()
 
     def show_expanded(self):
-        debug_print('SpecimenView.show_expanded')
+        debug_print('ObjectView.show_expanded')
         self.expanded = True
 
         # Select a single item
@@ -293,7 +293,7 @@ class SpecimenView(QListView):
             self.show_expanded()
 
     def _refresh(self):
-        debug_print('SpecimenView.toggle_display_size')
+        debug_print('ObjectView.toggle_display_size')
         self.scheduleDelayedItemsLayout()
         selected = self.selectionModel().selectedIndexes()
         if selected:

@@ -34,7 +34,7 @@ from .roles import RotationRole, RectRole
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
-from .views.specimen import SpecimenView
+from .views.object import ObjectView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
@@ -54,15 +54,15 @@ class MainWindow(QtGui.QMainWindow):
         # self.boxes_view is a QGraphicsView, not a QAbstractItemView
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
 
-        # Specimen, metadata and summary views
+        # Object, metadata and summary views
         self.view_metadata = MetadataView()
-        self.view_specimen = SpecimenView()
+        self.view_object = ObjectView()
         self.view_summary = SummaryView()
 
         # Views in tabs
         self.tabs = QtGui.QTabWidget()
         self.tabs.addTab(self.boxes_view, 'Boxes')
-        self.tabs.addTab(self.view_specimen, 'Specimens')
+        self.tabs.addTab(self.view_object, 'Objects')
         self.tabs.setCurrentIndex(0)
 
         # Information about the loaded document
@@ -95,11 +95,11 @@ class MainWindow(QtGui.QMainWindow):
         # Views
         self.view_graphics_item.setModel(self.model)
         self.view_metadata.setModel(self.model)
-        self.view_specimen.setModel(self.model)
+        self.view_object.setModel(self.model)
         self.view_summary.setModel(self.model)
 
         # A consistent selection across all views
-        sm = self.view_specimen.selectionModel()
+        sm = self.view_object.selectionModel()
         self.view_graphics_item.setSelectionModel(sm)
         self.view_metadata.setSelectionModel(sm)
         self.view_summary.setSelectionModel(sm)
@@ -124,7 +124,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tabs.installEventFilter(self)
         self.boxes_view.installEventFilter(self)
         self.view_metadata.installEventFilter(self)
-        self.view_specimen.installEventFilter(self)
+        self.view_object.installEventFilter(self)
         self.view_summary.installEventFilter(self)
 
         self.empty_document()
@@ -274,15 +274,15 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def save_crops(self):
-        """Saves cropped specimen images
+        """Saves cropped object images
         """
         debug_print('MainWindow.save_crops')
         res = QMessageBox.Yes
         existing_crops = self.document.crops_dir.is_dir()
 
         if existing_crops:
-            msg = 'Overwrite the existing cropped specimen images?'
-            res = QMessageBox.question(self, 'Write cropped specimen images?',
+            msg = 'Overwrite the existing cropped object images?'
+            res = QMessageBox.question(self, 'Write cropped object images?',
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         if QMessageBox.Yes == res:
@@ -468,11 +468,11 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def show_grid(self):
-        self.view_specimen.show_grid()
+        self.view_object.show_grid()
 
     @report_to_user
     def show_expanded(self):
-        self.view_specimen.show_expanded()
+        self.view_object.show_expanded()
 
     @report_to_user
     def about(self):
@@ -534,7 +534,7 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def run_plugin(self, plugin_number):
-        """Passes each cropped specimen image through plugin
+        """Passes each cropped object image through plugin
         """
         debug_print("MainWindow.run_plugin")
 
@@ -572,14 +572,14 @@ class MainWindow(QtGui.QMainWindow):
     def select_all(self):
         """Selects all boxes in the model
         """
-        sm = self.view_specimen.selectionModel()
+        sm = self.view_object.selectionModel()
         m = self.model
         sm.select(QtGui.QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
                   QtGui.QItemSelectionModel.Select)
 
     @report_to_user
     def select_none(self):
-        sm = self.view_specimen.selectionModel()
+        sm = self.view_object.selectionModel()
         sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
 
     @report_to_user
@@ -587,7 +587,7 @@ class MainWindow(QtGui.QMainWindow):
         """Deletes the selected boxes
         """
         # Delete contiguous blocks of rows
-        selected = self.view_specimen.selectionModel().selectedIndexes()
+        selected = self.view_object.selectionModel().selectedIndexes()
         selected = sorted([i.row() for i in selected])
 
         # Remove blocks in reverse order so that row indices are not invalidated
@@ -601,7 +601,7 @@ class MainWindow(QtGui.QMainWindow):
         """Selects the next box in the mode if next is True, the previous
         box in the model if next if False.
         """
-        sm = self.view_specimen.selectionModel()
+        sm = self.view_object.selectionModel()
         current = sm.currentIndex()
         current = current.row() if current else -1
 
@@ -623,7 +623,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.rotate')
         value = 90 if clockwise else -90
-        selected = self.view_specimen.selectionModel().selectedIndexes()
+        selected = self.view_object.selectionModel().selectedIndexes()
         for index in selected:
             current = index.data(RotationRole)
             self.model.setData(index, current + value, RotationRole)
@@ -703,7 +703,7 @@ class MainWindow(QtGui.QMainWindow):
         # the application exits on linux.
         self.boxes_view_action = QAction("&Boxes", self, checkable=True,
             triggered=partial(self.show_tab, 0))
-        self.metadata_view_action = QAction("&Specimens", self, checkable=True,
+        self.metadata_view_action = QAction("&Objects", self, checkable=True,
             triggered=partial(self.show_tab, 1))
 
         # FullScreen added in Qt 5.something
@@ -736,9 +736,9 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.toggle_plugin_image,
             statusTip="Display plugin image", checkable=True)
 
-        self.show_specimen_grid_action = QAction('Show grid', self,
+        self.show_object_grid_action = QAction('Show grid', self,
             shortcut='ctrl+G', triggered=self.show_grid)
-        self.show_specimen_expanded_action = QAction('Show expanded', self,
+        self.show_object_expanded_action = QAction('Show expanded', self,
             shortcut='ctrl+E', triggered=self.show_expanded)
 
         # Help menu
@@ -793,8 +793,8 @@ class MainWindow(QtGui.QMainWindow):
         self.viewMenu.addAction(self.zoom_home_action)
         self.viewMenu.addAction(self.toggle_plugin_image_action)
         self.viewMenu.addSeparator()
-        self.viewMenu.addAction(self.show_specimen_grid_action)
-        self.viewMenu.addAction(self.show_specimen_expanded_action)
+        self.viewMenu.addAction(self.show_object_grid_action)
+        self.viewMenu.addAction(self.show_object_expanded_action)
 
         self.helpMenu = QMenu("&Help", self)
         self.helpMenu.addAction(self.about_action)
@@ -905,8 +905,8 @@ class MainWindow(QtGui.QMainWindow):
         document = self.document is not None
         has_rows = self.model.rowCount()>0 if self.model else False
         boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
-        specimens_view_visible = self.view_specimen == self.tabs.currentWidget()
-        has_selection = len(self.view_specimen.selectedIndexes())>0
+        objects_view_visible = self.view_object == self.tabs.currentWidget()
+        has_selection = len(self.view_object.selectedIndexes())>0
 
         # File
         self.save_action.setEnabled(document)
@@ -933,5 +933,5 @@ class MainWindow(QtGui.QMainWindow):
         self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
         self.zoom_home_action.setEnabled(document and boxes_view_visible)
         self.toggle_plugin_image_action.setEnabled(document and boxes_view_visible)
-        self.show_specimen_grid_action.setEnabled(specimens_view_visible)
-        self.show_specimen_expanded_action.setEnabled(specimens_view_visible)
+        self.show_object_grid_action.setEnabled(objects_view_visible)
+        self.show_object_expanded_action.setEnabled(objects_view_visible)

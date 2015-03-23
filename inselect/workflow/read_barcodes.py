@@ -58,7 +58,7 @@ class BarcodeReader(object):
     def process_dir(self, dir):
         # TODO LH Read image from crops dir, if it exists?
         for p in dir.glob('*' + InselectDocument.EXTENSION):
-            # TODO LH Do not overwrite existing specimen numbers, or whatever
+            # TODO LH Do not overwrite existing object numbers, or whatever
             # field it is that barcodes are written to
             print(p)
             try:
@@ -77,7 +77,7 @@ class BarcodeReader(object):
                 debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
 
                 # TODO LH This mapping to come from metadata config?
-                # TODO LH Could be more than one specimen, and hence barcode,
+                # TODO LH Could be more than one object, and hence barcode,
                 #         on a crop
                 item['fields']['Specimen Number'] = barcodes
             else:
@@ -95,7 +95,7 @@ class BarcodeReader(object):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Read barcodes in cropped specimens')
+    parser = argparse.ArgumentParser(description='Reads barcodes within boxes')
     parser.add_argument("dir", help='Directory containing inselect documents')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--debug-barcodes', action='store_true')
