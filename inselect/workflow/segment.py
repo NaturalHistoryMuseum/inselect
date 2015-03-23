@@ -35,6 +35,8 @@ def segment(dir):
             except Exception:
                 print('Error segmenting [{0}]'.format(p))
                 traceback.print_exc()
+            else:
+                print('Segmented [{0}]'.format(doc))
         else:
             print('Skipping [{0}] as it already contains items'.format(p))
 
