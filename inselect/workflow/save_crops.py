@@ -15,6 +15,7 @@ import inselect
 import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
+from inselect.lib.document_export import DocumentExport
 from inselect.lib.utils import debug_print
 
 
@@ -23,6 +24,7 @@ from inselect.lib.utils import debug_print
 
 def save_crops(dir, overwrite_existing):
     dir = Path(dir)
+    export = DocumentExport()
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         try:
             debug_print('Loading [{0}]'.format(p))
@@ -36,7 +38,7 @@ def save_crops(dir, overwrite_existing):
                 doc.scanned.array
 
                 debug_print('Saving crops')
-                doc.save_crops()
+                export.save_crops(doc)
         except Exception:
             print('Error saving crops from [{0}]'.format(p))
             traceback.print_exc()
