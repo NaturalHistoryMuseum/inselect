@@ -123,6 +123,6 @@ class InselectImage(object):
         "A tuple (height, width)"
         if self._array is not None:
             # Get directly from the array
-            return self._array.shape[:2]
+            return self._array.shape[1], self._array.shape[0]
         else:
             return self.pil_image.size
