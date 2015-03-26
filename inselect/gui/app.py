@@ -26,6 +26,7 @@ from inselect.lib.utils import debug_print
 import icons        # Register our icon resources with QT
 
 from .info_widget import InfoWidget
+from .format_validation_problems import format_validation_problems
 from .metadata_library import metadata_library
 from .model import Model
 from .plugins.barcode import BarcodePlugin
@@ -278,12 +279,31 @@ class MainWindow(QtGui.QMainWindow):
         """Saves cropped object images
         """
         debug_print('MainWindow.save_crops')
-        res = QMessageBox.Yes
-        existing_crops = self.document.crops_dir.is_dir()
 
-        if existing_crops:
-            msg = 'Overwrite the existing cropped object images?'
-            res = QMessageBox.question(self, 'Write cropped object images?',
+        if use_metadata_template:
+            export = DocumentExport(metadata_library().current)
+        else:
+            export = DocumentExport(None)
+
+        self.model.to_document(self.document)
+
+        crops_dir = export.crops_dir(self.document)
+
+        res = QMessageBox.Yes
+        if crops_dir.is_dir():
+            msg = 'Overwrite the existing object images?'
+            res = QMessageBox.question(self, 'Save object images?',
+                msg, QMessageBox.No, QMessageBox.Yes)
+
+        validation = export.validation_problems(self.document)
+        if validation and validation.any_problems:
+            msg = ('The document contains one or more validation problems:\n'
+                   '\n'
+                   '{0}\n'
+                   '\n'
+                   'Would you like to save the object images?')
+            msg = msg.format('\n'.join(format_validation_problems(validation)))
+            res = QMessageBox.question(self, 'Save object images?',
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         if QMessageBox.Yes == res:
@@ -292,18 +312,13 @@ class MainWindow(QtGui.QMainWindow):
                 self.document.scanned.array
 
                 progress('Saving crops')
-                if use_metadata_template:
-                    export = DocumentExport(metadata_library().current)
-                else:
-                    export = DocumentExport(None)
                 export.save_crops(self.document, progress)
 
             def completed(operation):
                 QMessageBox.information(self, "Crops saved", msg)
 
-            self.model.to_document(self.document)
             msg = "{0} crops saved in {1}"
-            msg = msg.format(self.document.n_items, self.document.crops_dir)
+            msg = msg.format(self.document.n_items, crops_dir)
             self.run_in_worker(save_crops, 'Save crops', completed)
 
     @report_to_user
@@ -315,6 +330,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             export = DocumentExport(None)
 
+        self.model.to_document(self.document)
         path = export.csv_path(self.document)
 
         res = QMessageBox.Yes
@@ -325,8 +341,18 @@ class MainWindow(QtGui.QMainWindow):
             res = QMessageBox.question(self, 'Export CSV file?',
                 msg, QMessageBox.No, QMessageBox.Yes)
 
+        validation = export.validation_problems(self.document)
+        if validation and validation.any_problems:
+            msg = ('The document contains one or more validation problems:\n'
+                   '\n'
+                   '{0}\n'
+                   '\n'
+                   'Would you like to export to a CSV file?')
+            msg = msg.format('\n'.join(format_validation_problems(validation)))
+            res = QMessageBox.question(self, 'Export CSV file?',
+                msg, QMessageBox.No, QMessageBox.Yes)
+
         if QMessageBox.Yes == res:
-            self.model.to_document(self.document)
             export.export_csv(self.document)
             msg = "Data for {0} boxes written to {1}"
             msg = msg.format(self.document.n_items, path)
@@ -770,10 +796,12 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
+        self.fileMenu.addAction(self.close_action)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.save_crops_action)
         self.fileMenu.addAction(self.export_csv_action)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.save_screengrab_action)
-        self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 

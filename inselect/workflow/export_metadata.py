@@ -24,11 +24,11 @@ from inselect.lib.utils import debug_print
 
 def export_csv(dir, overwrite_existing):
     dir = Path(dir)
+    export = DocumentExport()
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         try:
             debug_print('Loading [{0}]'.format(p))
             doc = InselectDocument.load(p)
-            export = DocumentExport()
             csv_path = export.csv_path(doc)
             if not overwrite_existing and csv_path.is_file():
                 print('CSV file [{0}] exists - skipping'.format(csv_path))

@@ -4,6 +4,7 @@ import tempfile
 from itertools import chain, count, izip
 from pathlib import Path
 
+from .metadata import CollectVisitor
 from .unicode_csv import UnicodeWriter
 from .utils import debug_print
 
@@ -20,8 +21,16 @@ class DocumentExport(object):
         else:
             fnames = ('{0:04}'.format(1+i) for i in xrange(0, document.n_items))
 
-        suffix = document.scanned.path.suffix
+        # Use template suffix if given
+        if self._template and self._template.cropped_image_suffix:
+            suffix = self._template.cropped_image_suffix
+        else:
+            suffix = document.scanned.path.suffix
+
         return ('{0}{1}'.format(fn, suffix) for fn in fnames)
+
+    def crops_dir(self, document):
+        return document.crops_dir
 
     def save_crops(self, document, progress=None):
         "Saves images cropped from document.scanned to document.crops_dir"
@@ -41,7 +50,7 @@ class DocumentExport(object):
                                            progress)
 
             # rm existing crops dir
-            crops_dir = document.crops_dir
+            crops_dir = self.crops_dir(document)
             shutil.rmtree(str(crops_dir), ignore_errors=True)
 
             # Rename temp dir
@@ -91,3 +100,14 @@ class DocumentExport(object):
                                  (item['fields'].get(f) for f in fields)))
 
         return path
+
+    def validation_problems(self, document):
+        """Returns a list of validation problems or None, if no template is
+        being used
+        """
+        if self._template:
+            visitor = CollectVisitor()
+            self._template.visit_document(document, visitor)
+            return visitor.all_problems()
+        else:
+            return None

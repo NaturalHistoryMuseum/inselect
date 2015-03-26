@@ -101,7 +101,7 @@ class TestExportCSV(MainWindowTest):
 
             # Load document and export CSV file
             w.open_document(tempdir / 'test_segment.inselect')
-            w.export_csv()
+            w.export_csv(use_metadata_template=False)
 
             # File should not have been altered
             self.assertEqual('', (tempdir / 'test_segment.csv').open().read())

@@ -190,7 +190,7 @@ class Model(QAbstractItemModel):
             elif MetadataRole == role:
                 return item['metadata']
             elif MetadataValidRole == role:
-                return metadata_library().current.validate_record(item['metadata'])
+                return metadata_library().current.validate_metadata(item['metadata'])
 
     def setData(self, index, value, role):
         """QAbstractItemModel virtual
