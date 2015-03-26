@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-"""Template for Ben Prices's Ephemeroptera microscope slides
+"""Template for Ben Prices's Plectoptera microscope slides
 """
 
 import re
@@ -12,8 +12,9 @@ from inselect.lib.parse import parse_matches_re, parse_int_gt0
 
 template = MetadataTemplate(
 {
-    'Name': 'Price Ephemeroptera slides',
-    'Object label': u'{catalogNumber}',
+    'Name': 'Price Plectoptera slides',
+    'Object label': u'{catalogNumber}_{Location}_{Taxonomy}',
+    'Cropped file suffix': u'.jpg',
     'Fields': [
         {
             "Name": "catalogNumber",
@@ -1006,65 +1007,5 @@ template = MetadataTemplate(
             "URI": "http://rs.tdwg.org/dwc/terms/individualCount",
             "Parser": parse_int_gt0,
         },
-        # {
-        #     "Name": "A user-defined field",
-        # },
-        # {
-        #     "Name": "scientificName",
-        #     "Label": "Scientific name",
-        #     "URI": "http://rs.tdwg.org/dwc/terms/scientificName",
-        # },
-        # {
-        #     "Name": "kingdom",
-        #     "Label": "Kingdom",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/kingdom",
-        # },
-        # {
-        #     "Name": "phylum",
-        #     "Label": "Phylum",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/phylum",
-        # },
-        # {
-        #     "Name": "class",
-        #     "Label": "Class",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/class",
-        # },
-        # {
-        #     "Name": "order",
-        #     "Label": "Order",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/order",
-        # },
-        # {
-        #     "Name": "family",
-        #     "Label": "Family",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/family",
-        # },
-        # {
-        #     "Name": "genus",
-        #     "Label": "Genus",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/genus",
-        # },
-        # {
-        #     "Name": "specificEpithet",
-        #     "Label": "Specific epithet",
-        #     "Mandatory": True,
-        #     "URI": "http://rs.tdwg.org/dwc/terms/specificEpithet",
-        # },
-        # {
-        #     "Name": "taxonRank",
-        #     "Label": "Taxon rank",
-        #     "URI": "http://rs.tdwg.org/dwc/terms/taxonRank",
-        # },
-        # {
-        #     "Name": "scientificNameAuthorship",
-        #     "Label": "Scientific name authorship",
-        #     "URI": "http://rs.tdwg.org/dwc/terms/scientificNameAuthorship",
-        # },
     ]
 })
