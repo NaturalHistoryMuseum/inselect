@@ -2,6 +2,8 @@ import importlib
 import pkgutil
 import sys
 
+from collections import OrderedDict
+
 from inselect.lib.metadata import MetadataTemplate
 from inselect.lib.utils import debug_print
 
@@ -18,13 +20,14 @@ def library():
 
 def _load_library():
     # Import everything inselect.lib.templates that has a 'template' name
-    # that is an instance of MetadataTemplate
+    # that is an instance of MetadataTemplate.
+    # Returns an instance of OrderedDict with items sorted by key.
     try:
         templates = importlib.import_module('.lib.templates', 'inselect')
     except ImportError,e:
         debug_print(e)
     else:
-        library = []
+        library = {}
         for loader, name, is_pkg in pkgutil.iter_modules(templates.__path__):
             try:
                 pkg = importlib.import_module('{0}.{1}'.format(templates.__name__, name))
@@ -34,8 +37,10 @@ def _load_library():
                 template = getattr(pkg, 'template', None)
                 if isinstance(template, MetadataTemplate):
                     debug_print('Loaded MetadataTemplate from [{0}]'.format(name))
-                    library.append(template)
+                    # TODO Raise if duplicated name
+                    library[template.name] = template
                 else:
                     msg = u'Not an instance of MetadataTemplate [{0}]'
                     debug_print(msg.format(name))
-        return library
+
+        return OrderedDict(sorted(library.iteritems()))

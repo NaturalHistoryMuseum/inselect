@@ -22,7 +22,7 @@ template = MetadataTemplate(
             "URI": "http://rs.tdwg.org/dwc/terms/catalogNumber",
             "Mandatory": True,
             "Parser": partial(parse_matches_re, re.compile('^[0-9]{9}$'),
-                        'Invalid value [{0}]: must nine digits'),
+                        'Invalid value [{0}]: should contain nine digits'),
         },
         {
             "Name": "Location",

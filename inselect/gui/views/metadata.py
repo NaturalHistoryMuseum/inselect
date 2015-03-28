@@ -66,7 +66,7 @@ class MetadataView(QAbstractItemView):
         """
         c = QComboBox()
         select_index = 0
-        for index, template in enumerate(metadata_library().choices):
+        for index, template in enumerate(metadata_library().choices.values()):
             c.addItem(template.name, index)
             if metadata_library().current.name == template.name:
                 select_index = index

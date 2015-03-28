@@ -160,7 +160,7 @@ class MetadataTemplate(object):
 
     def _visit_box(self, visitor, index, box):
         md = box['fields']
-        for field in [f for f in self.mandatory if not md.get(f)]:
+        for field in (f for f in self.mandatory if not md.get(f)):
             visitor.missing_mandatory(index, self.format_label(**md), field)
 
         for field, parse in ( (k, v) for k, v in self._parse_mapping.iteritems() if k in set(md.keys())):
@@ -175,7 +175,7 @@ class MetadataTemplate(object):
         labels = [self.format_label(**box['fields']) for box in document.items]
 
         # Labels must be given
-        for index in [i for i, l in izip(count(), labels) if not l]:
+        for index in (i for i, l in izip(count(), labels) if not l):
             visitor.missing_label(index)
 
         # Non-missing object labels must be unique

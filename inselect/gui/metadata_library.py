@@ -10,21 +10,18 @@ class MetadataLibrary(object):
         # A list of MetadataTemplate instances
         self.choices = library()
 
-        # A mapping from name to MetadataTemplate instance
-        self.mapping = {t.name: t for t in self.choices}
-
         current = QSettings().value('metadata/current_template')
         debug_print('Current metadata template [{0}]'.format(current))
 
-        if current in self.mapping:
-            self.current = self.mapping[current]
+        if current in self.choices:
+            self.current = self.choices[current]
         else:
-            self.current = self.mapping['Simple Darwin Core terms']
+            self.current = self.choices['Simple Darwin Core terms']
 
     def set_current(self, name):
         debug_print('MetadataLibrary.set_current [{0}]'.format(name))
-        assert name in self.mapping
-        self.current = self.mapping[name]
+        assert name in self.choices
+        self.current = self.choices[name]
         QSettings().setValue('metadata/current_template', self.current.name)
         return self.current
 
