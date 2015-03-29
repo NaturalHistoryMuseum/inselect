@@ -13,6 +13,9 @@ try:
     import gouda
     from gouda.engines import InliteEngine, LibDMTXEngine
     from gouda.strategies import roi, resize
+
+    import inselect.lib.utils
+    import gouda.util
 except ImportError:
     gouda = None
 
@@ -54,6 +57,8 @@ class BarcodePlugin(Plugin):
             engine = LibDMTXEngine()
         else:
             raise InselectError('No barcode decoding engine available')
+
+        gouda.util.DEBUG_PRINT = inselect.lib.utils.DEBUG_PRINT
 
         progress('Loading full-res image')
         image_array = self.document.scanned.array
