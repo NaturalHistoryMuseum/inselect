@@ -1,5 +1,13 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.8
+-------------
+- Open-source Data Matrix barcode decoding on Linux and Mac OS X (#88) (@quicklizard)
+- Work on metadata templates and associated validation (#116) (@quicklizard)
+- Fixed #121 - A menu option to save the boxes view to an image file (@quicklizard)
+- Fixed #120 - Show information about the scanned image (@quicklizard)
+- Fixed #117 - Bounding boxes can be created and moved outside of the image (@quicklizard)
+
 Version 0.1.7
 -------------
 - Added #138 - Metadata fields to be available on boxes view (@quicklizard)
