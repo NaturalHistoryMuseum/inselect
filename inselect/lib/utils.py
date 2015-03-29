@@ -107,10 +107,11 @@ class FormatDefault(string.Formatter):
         # key will be either an integer or a string. If it is an integer, it
         # represents the index of the positional argument in args; if it is
         # a string, then it represents a named argument in kwargs.
-        if isinstance(key, int):
-            Formatter.get_value(key, args, kwds)
+        if isinstance(key, (int, long)):
+            return super(FormatDefault, self).get_value(key, args, kwds)
         else:
             return kwds.get(key, self.default)
+
 
 def user_name():
     """The name of the current user
