@@ -12,7 +12,7 @@ from inselect.lib.parse import parse_matches_re, parse_int_gt0
 
 template = MetadataTemplate(
 {
-    'Name': 'Price Plectoptera slides',
+    'Name': 'Price Plecoptera slides',
     'Object label': u'{catalogNumber}_{Location}_{Taxonomy}',
     'Cropped file suffix': u'.jpg',
     'Fields': [
