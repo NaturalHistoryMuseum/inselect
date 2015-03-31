@@ -37,12 +37,14 @@ def ingest_from_directory(inbox, docs):
         docs.mkdir(parents=True)
 
     # TODO LH Case insensitive matching
+    # TODO Prevent ingest of thumbnails
     for source in apply(chain, [inbox.glob(p) for p in IMAGE_PATTERNS]):
         try:
             ingest_image(source, docs)
         except Exception:
             print('Error ingesting [{0}]'.format(source))
             traceback.print_exc()
+
 
 def main():
     parser = argparse.ArgumentParser(description='Ingests images into Inselect')
@@ -58,6 +60,7 @@ def main():
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
     ingest_from_directory(args.inbox, args.docs)
+
 
 if __name__=='__main__':
     main()
