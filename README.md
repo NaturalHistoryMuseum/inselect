@@ -10,8 +10,25 @@ You can download the latest release of Inselect for Windows, for Mac and the Pyt
 
 - Install [git](http://git-scm.com/download/win) ;
 - Download the latest build of [Anaconda](https://store.continuum.io/cshop/anaconda/), Python 2.7.x build, and install using default options;
-- Download [OpenCV](http://opencv.org/downloads.html) (2.x version) and extract the archive;
-- Copy the file `<open cv extract root>/build/python/2.7/x86/cv2.pyd` to `<anaconda root>/Lib/site-packages` (Replace x86 by 64 as appropriate);
+- Install PySide
+
+    conda install PySide
+
+- Download [OpenCV 2.4.10](http://opencv.org/)
+
+    * Extract OpenCV 2.4.10 to c:\opencv\
+    * If you installed 32-bit Anaconda:
+
+        copy C:\opencv\build\python\2.7\x86\cv2.pyd C:\Users\lawh\Anaconda\DLLs`
+
+    * If you installed 64-bit Anaconda:
+
+        copy C:\opencv\build\python\2.7\x64\cv2.pyd C:\Users\lawh\Anaconda\DLLs`
+
+    * Test by start Anaconda prompt and running
+
+        python -c "import cv2; print cv2"
+
 - Get the Inselect source:
 ```shell
 git clone https://github.com/NaturalHistoryMuseum/inselect.git
@@ -22,7 +39,7 @@ python inselect.py
 ## To build the Windows installer
 
 ```shell
-pip install cx_Freeze
+pip install coverage cx_Freeze
 build.bat
 ```
 
