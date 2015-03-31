@@ -52,8 +52,10 @@ class BarcodePlugin(Plugin):
         debug_print('BarcodePlugin.__call__')
 
         if InliteEngine.available():
+            debug_print('Using Inlite')
             engine = InliteEngine(datamatrix=True)
         elif LibDMTXEngine.available():
+            debug_print('Using LibDMTX')
             engine = LibDMTXEngine()
         else:
             raise InselectError('No barcode decoding engine available')
