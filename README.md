@@ -18,6 +18,11 @@ git clone https://github.com/NaturalHistoryMuseum/inselect.git
 cd inselect
 python inselect.py
 ```
+- Barcode reading
+
+    * Install [gouda](https://github.com/NaturalHistoryMuseum/gouda/)
+
+    * Install either the `libdmtx` or `Inlite` barcode engines
 
 ## To build the Windows installer
 
