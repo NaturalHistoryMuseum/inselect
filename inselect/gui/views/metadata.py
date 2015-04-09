@@ -250,7 +250,6 @@ class FormContainer(QWidget):
     def _create_field_control(self, field, template):
         """Returns a QWidget for editing field, validated using template
         """
-        print(field['Name'])
         if 'countryCode' == field['Name']:
             return CountryComboBox(template)
         elif 'language' == field['Name']:
@@ -262,8 +261,8 @@ class FormContainer(QWidget):
         elif 'ChoicesWithData' in field:
             choices = field['ChoicesWithData']
             combo = ChoicesWithDataFieldComboBox(field['Name'], template,
-                                                 labels=(x for x,y in choices),
-                                                 values=(y for x,y in choices))
+                                                 labels=choices.iterkeys(),
+                                                 values=choices.itervalues())
             return combo
         else:
             # Not using Qt's very restrictive QValidator scheme
@@ -330,7 +329,7 @@ class FieldEdit(QLineEdit):
                     'valid' if self.is_valid() else 'invalid')
         if self.isModified():
             self.setModified(False)
-            value = self.text().strip()
+            value = self.text()
             if (not self.multiple_values or
                 (self.multiple_values and _MULTIPLE_FIELD_VALUES != value)):
                 new = {self._field : value}
@@ -374,7 +373,7 @@ class FieldEdit(QLineEdit):
         if not self.selected:
             return True
 
-        value = self.text().strip()
+        value = self.text()
         if self.multiple_values and _MULTIPLE_FIELD_VALUES == value:
             # Multiple values selected
             return True
@@ -491,9 +490,7 @@ class FieldComboBox(QComboBox):
         debug_print('ChoicesWithDataFieldComboBox.update_model', self._field)
         if not self.is_multiple:
             # Update the selected items with the user's choice
-
-            new = self._data_for_model()
-
+            new = {self._field : self._data_for_model()}
             for i in self.selected:
                 i.model().setData(i, new, MetadataRole)
             self.sync_background()
@@ -505,12 +502,11 @@ class FieldComboBox(QComboBox):
         # Show the single value common to the whole selection
         self.selected = selected
         self._remove_multiple_choice()
-        print(value)
         self.setCurrentIndex(self._index_of_data(value))
         self.sync_background()
 
     def _data_for_model(self):
-        """Returns a dict of data with which to update the model
+        """Returns a value with which to update the model
         """
         raise NotImplemented('_data_for_model')
 
@@ -529,8 +525,7 @@ class ChoicesFieldComboBox(FieldComboBox):
                                                    repeat(None), parent)
 
     def _data_for_model(self):
-        return {self._field : self.currentText(),
-               }
+        return self.currentText()
 
     def _index_of_data(self, value):
         # Show the single value common to the whole selection
@@ -570,8 +565,7 @@ class CountryComboBox(FieldComboBox):
         super(CountryComboBox, self).__init__('countryCode', template, labels, codes, parent)
 
     def _data_for_model(self):
-        return {self._field : self.itemData(self.currentIndex()),
-               }
+        return self.itemData(self.currentIndex())
 
     def _index_of_data(self, value):
         # Show the single value common to the whole selection
@@ -589,8 +583,7 @@ class LanguageComboBox(FieldComboBox):
         super(LanguageComboBox, self).__init__('language', template, labels, codes, parent)
 
     def _data_for_model(self):
-        return {self._field : self.itemData(self.currentIndex()),
-               }
+        return self.itemData(self.currentIndex())
 
     def _index_of_data(self, value):
         # Show the single value common to the whole selection

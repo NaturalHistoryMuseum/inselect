@@ -82,7 +82,7 @@ class Model(QAbstractItemModel):
                                 rect[1]*image_height,
                                 rect[2]*image_width,
                                 rect[3]*image_height)
-            data[index] = {"metadata": item.get('fields', {}),
+            data[index] = {"fields": item.get('fields', {}),
                            "rect": rect,
                            "rotation": item.get('rotation', 0),
                           }
@@ -137,7 +137,7 @@ class Model(QAbstractItemModel):
                                    rect.top()/h,
                                    rect.width()/w,
                                    rect.height()/h),
-                          'fields': box['metadata'],
+                          'fields': box['fields'],
                           'rotation': box['rotation'],
                         })
         document.set_items(items)
@@ -180,7 +180,7 @@ class Model(QAbstractItemModel):
             item = index.internalPointer()
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 return self.DISPLAY_TEMPLATE.format(1 + index.row(),
-                     metadata_library().current.format_label(**item['metadata']))
+                     metadata_library().current.format_label(item))
             elif Qt.WhatsThisRole == role:
                 return 'Cropped object image'
             elif RectRole == role:
@@ -188,9 +188,9 @@ class Model(QAbstractItemModel):
             elif RotationRole == role:
                 return item['rotation']
             elif MetadataRole == role:
-                return item['metadata']
+                return item['fields']
             elif MetadataValidRole == role:
-                return metadata_library().current.validate_metadata(item['metadata'])
+                return metadata_library().current.validate_metadata(item['fields'])
 
     def setData(self, index, value, role):
         """QAbstractItemModel virtual
@@ -236,15 +236,15 @@ class Model(QAbstractItemModel):
                 msg = 'Model.setData for [{0}] update [{1}]'
                 debug_print(msg.format(index.row(), value))
 
-                new = deepcopy(self._data[index.row()]['metadata'])
+                new = deepcopy(self._data[index.row()]['fields'])
                 new.update(value)
 
                 # Only fields that have a value
                 new = {k: v for k, v in new.iteritems() if '' != v}
 
                 # Update if only if changed
-                if new != self._data[index.row()]['metadata']:
-                    self._data[index.row()]['metadata'] = new
+                if new != self._data[index.row()]['fields']:
+                    self._data[index.row()]['fields'] = new
                     self.dataChanged.emit(index, index)
                     self.set_modified(True)
                 return True

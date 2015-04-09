@@ -16,8 +16,7 @@ class DocumentExport(object):
     def crop_fnames(self, document):
         "Generator function of instances of string"
         if self._template:
-            f = self._template.format_label
-            fnames = (f(**i['fields']) for i in document.items)
+            fnames = (self._template.format_label(i) for i in document.items)
         else:
             fnames = ('{0:04}'.format(1+i) for i in xrange(0, document.n_items))
 

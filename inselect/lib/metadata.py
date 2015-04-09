@@ -5,7 +5,7 @@ from __future__ import print_function
 import json
 import re
 
-from collections import Counter, namedtuple
+from collections import Counter, namedtuple, OrderedDict
 from functools import partial
 from itertools import chain, count, ifilter, izip
 from pathlib import Path
@@ -41,6 +41,7 @@ class MetadataTemplate(object):
         # TODO Validation
         #   Can't have Choices and ChoicesWithData
         #   Labels in Choices and ChoicesWithData must be unique
+        #   For each ChoicesWithData, field_name-value must not exist as a field
         #   Default must be in Choices and ChoicesWithData
         for field in ifilter(lambda t: 'Choices' in t, fields):
             if duplicated(field['Choices']):
@@ -50,22 +51,24 @@ class MetadataTemplate(object):
                 msg = u'Empty "Choices" for [{0}]'
                 raise ValueError(msg.format(field['Name']))
 
-        self._name = template['Name'].strip()
+        for field in ifilter(lambda t: 'ChoicesWithData' in t, fields):
+            field['ChoicesWithData'] = OrderedDict(field['ChoicesWithData'])
 
-        if 'Cropped file suffix' in template:
-            self._cropped_image_suffix = template['Cropped file suffix']
-        else:
-            self._cropped_image_suffix = None
+        self._name = template['Name']
+
+        self._cropped_image_suffix = template.get('Cropped file suffix')
 
         self._fields = fields
 
         # A method that returns labels from metadata dicts
-        self.format_label = partial(FormatDefault(default='').format,
-                                    template.get('Object label', '{catalogNumber}'))
-        self.format_label.__doc__ = "Returns a string assembled from metadata values"
+        self._format_label = partial(FormatDefault(default='').format,
+                                     template.get('Object label', '{catalogNumber}'))
 
         # Map fromm field name to field
         self._fields_mapping = {f['Name'] : f for f in fields}
+
+        # Map fromm field name to field
+        self._choices_with_data_mapping = {f['Name'] : f for f in fields if 'ChoicesWithData' in f}
 
         # Mapping from name to parse function, for those fields that have a parser
         self._parse_mapping = {k: v['Parser'] for k, v in self._fields_mapping.iteritems() if 'Parser' in v}
@@ -93,10 +96,20 @@ class MetadataTemplate(object):
         """
         return self._fields
 
-    def format_label(self, **kwargs):
-         "Returns a string assembled from metadata values"
-         # Implemented in __init__
-         raise NotImplementedError('format_label')
+    def box_metadata(self, box):
+        "Returns a dict {field_name: value} for box"
+        md = box['fields']
+
+        # Names of fields that have an associated data
+        c = self._choices_with_data_mapping
+        for field in ifilter(lambda f: md.get(f['Name']) in f['ChoicesWithData'], c.itervalues()):
+            value = field['ChoicesWithData'][md.get(field['Name'])]
+            md['{0}-value'.format(field['Name'])] = value
+        return md
+
+    def format_label(self, box):
+         "Returns a textual label of box "
+         return self._format_label(**self.box_metadata(box))
 
     @property
     def cropped_image_suffix(self):
@@ -116,6 +129,8 @@ class MetadataTemplate(object):
         # Mandatory fields
         if any(not md.get(f) for f in self.mandatory):
             return False
+
+        # TODO Validate choices not in list
 
         try:
             parseable = ( (k, v) for k, v in self._parse_mapping.iteritems() if k in set(md.keys()))
@@ -175,7 +190,7 @@ class MetadataTemplate(object):
     def _visit_labels(self, document, visitor):
         """Visit the document
         """
-        labels = [self.format_label(**box['fields']) for box in document.items]
+        labels = [self.format_label(box) for box in document.items]
 
         # Labels must be given
         for index in (i for i, l in izip(count(), labels) if not l):

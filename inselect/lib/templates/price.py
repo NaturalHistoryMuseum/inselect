@@ -3,7 +3,6 @@
 """
 
 import re
-from collections import OrderedDict
 from functools import partial
 
 from inselect.lib.metadata import MetadataTemplate
