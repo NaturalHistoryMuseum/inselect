@@ -38,7 +38,10 @@ class MetadataTemplate(object):
             raise ValueError(msg.format(sorted(list(dup))))
 
         # Choices must be lists with no duplicates
-        # TODO Validate choices values vs labels and vs default
+        # TODO Validation
+        #   Can't have Choices and ChoicesWithData
+        #   Labels in Choices and ChoicesWithData must be unique
+        #   Default must be in Choices and ChoicesWithData
         for field in ifilter(lambda t: 'Choices' in t, fields):
             if duplicated(field['Choices']):
                 msg = u'Duplicated "Choices" for [{0}]'
