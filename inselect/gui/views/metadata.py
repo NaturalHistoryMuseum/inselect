@@ -541,9 +541,7 @@ class ChoicesWithDataFieldComboBox(FieldComboBox):
                                                            parent)
 
     def _data_for_model(self):
-        return {self._field : self.currentText(),
-                self._field + '-value': self.itemData(self.currentIndex()),
-               }
+        return self.currentText()
 
     def _index_of_data(self, value):
         # Show the single value common to the whole selection
