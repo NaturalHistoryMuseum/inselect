@@ -24,24 +24,6 @@ template = MetadataTemplate(
                         'Invalid value [{0}]: should contain nine digits'),
         },
         {
-            "Name": "Sponge",
-            "Choices" : [
-                u'First',
-                u'Second',
-                u'Third',
-            ]
-        },
-        {
-            "Name": "countryCode",
-            "Label": "Country code",
-            "URI": "http://rs.tdwg.org/dwc/terms/country",
-        },
-        {
-            "Name": "language",
-            "Label": "Language",
-            "URI": "http://purl.org/dc/terms/language"
-        },
-        {
             "Name": "Location",
             "Mandatory": True,
             "ChoicesWithData" : [
