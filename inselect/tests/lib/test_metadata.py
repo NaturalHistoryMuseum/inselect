@@ -115,6 +115,10 @@ class TestMetadataTemplate(unittest.TestCase):
     def test_name(self):
         self.assertEqual('Test', self.TEST.name)
 
+    def test_field_names(self):
+        expected = ['First', 'Second', 'Third', 'Third-value', 'Fourth']
+        self.assertEqual(expected, list(self.TEST.field_names()))
+
     def test_cropped_image_suffix(self):
         self.assertEqual('.jpg', self.TEST.cropped_image_suffix)
 

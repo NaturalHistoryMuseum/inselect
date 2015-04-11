@@ -132,6 +132,13 @@ class MetadataTemplate(object):
         """
         return self._fields
 
+    def field_names(self):
+        "A generator of metadata field names, including synthesized fields"
+        for field in self._fields:
+            yield field['Name']
+            if 'ChoicesWithData' in field:
+                yield u'{0}-value'.format(field['Name'])
+
     def box_metadata(self, box):
         "Returns a dict {field_name: value} for box"
         md = box['fields']
@@ -140,11 +147,11 @@ class MetadataTemplate(object):
         c = self._choices_with_data_mapping
         for field in ifilter(lambda f: md.get(f['Name']) in f['ChoicesWithData'], c.itervalues()):
             value = field['ChoicesWithData'][md.get(field['Name'])]
-            md['{0}-value'.format(field['Name'])] = value
+            md[u'{0}-value'.format(field['Name'])] = value
         return md
 
     def format_label(self, box):
-         "Returns a textual label of box "
+         "Returns a textual label of box"
          return self._format_label(**self.box_metadata(box))
 
     @property

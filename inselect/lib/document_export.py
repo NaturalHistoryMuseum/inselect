@@ -82,21 +82,28 @@ class DocumentExport(object):
 
         # Field names
         if self._template:
-            fields = [f['Name'] for f in self._template.fields]
+            fields = list(self._template.field_names())
 
             # Append fields that are in the document and not the template
-            fields += [f for f in document.metadata_fields if f not in fields]
+            fields += sorted(f for f in document.metadata_fields if f not in fields)
         else:
             fields = sorted(document.metadata_fields)
 
+        # Crop filenames
         crop_fnames = self.crop_fnames(document)
+
+        # A function that returns a dict of metadata for a box
+        if self._template:
+            box_metadata = self._template.box_metadata
+        else:
+            box_metadata = lambda box: box['fields']
 
         with path.open('wb') as f:
             w = UnicodeWriter(f)
             w.writerow(chain(['Item','Cropped_image_name'], fields))
-            for index, fname, item in izip(count(), crop_fnames, document.items):
-                w.writerow(chain([1+index, fname],
-                                 (item['fields'].get(f) for f in fields)))
+            for index, fname, box in izip(count(), crop_fnames, document.items):
+                md = box_metadata(box)
+                w.writerow(chain([1+index, fname], (md.get(f) for f in fields)))
 
         return path
 

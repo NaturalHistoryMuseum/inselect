@@ -16,7 +16,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestDocumentExport(unittest.TestCase):
+class TestDocumentExportNoTemplate(unittest.TestCase):
     def test_save_crops(self):
         "Cropped object images are written correctly"
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
