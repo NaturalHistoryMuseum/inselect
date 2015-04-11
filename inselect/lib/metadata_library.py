@@ -11,6 +11,7 @@ from inselect.lib.templates import dwc, price
 
 
 if True:
+    # TODO Check that template names are unique
     _library = {}
     for template in [p.template for p in (dwc, price)]:
         _library[template.name] = template
