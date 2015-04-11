@@ -177,15 +177,16 @@ class MetadataTemplate(object):
             self._visit_box(visitor, index, box)
 
     def _visit_box(self, visitor, index, box):
+        box_label = self.format_label(box)
         md = box['fields']
         for field in (f for f in self.mandatory if not md.get(f)):
-            visitor.missing_mandatory(index, self.format_label(**md), field)
+            visitor.missing_mandatory(index, box_label, field)
 
         for field, parse in ( (k, v) for k, v in self._parse_mapping.iteritems() if k in set(md.keys())):
             try:
                 parse(md[field])
             except ValueError:
-                visitor.failed_parse(index, self.format_label(**md), field)
+                visitor.failed_parse(index, box_label, field)
 
     def _visit_labels(self, document, visitor):
         """Visit the document
