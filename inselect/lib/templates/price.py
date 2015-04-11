@@ -268,7 +268,6 @@ template = MetadataTemplate(
                 (u'tasmanica, Kimmins, [Leptoperla], T', 1257860),
                 (u'tasmanica, Tillyard, [Spaniocerca]', 524326),
                 (u'teriolensis, Kempny, [Leuctra]', 1257914),
-                (u'teriolensis, Kempny, [Leuctra]', 1257914),
                 (u'testacea, Hagen, [Phanoperla]', 1258125),
                 (u'tibetana, Kimmins, [Capnia], T', 1257683),
                 (u'tillyardi, Kimmins, [Spaniocerca]', 524327),
