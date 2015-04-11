@@ -12,62 +12,98 @@ from pathlib import Path
 
 from .utils import debug_print, duplicated, FormatDefault
 
+def _fields_from_template_spec(fields):
+    # Name field must be present
+    if any('Name' not in f for f in fields):
+        raise ValueError(u'One or more fields do not have a name')
+
+    # No names should be duplicated
+    field_names = [f['Name'] for f in fields]
+    dup = duplicated(field_names)
+    if dup:
+        msg = u'Duplicated fields {0}'
+        raise ValueError(msg.format(sorted(list(dup))))
+
+    # Can't give both Choices and ChoicesWithData
+    bad = next(ifilter(lambda f: 'Choices' in f and 'ChoicesWithData' in f, fields), None)
+    if bad:
+        msg = u'Both "Choices" and "ChoicesWithData" given for for [{0}]'
+        raise ValueError(msg.format(bad['Name']))
+
+    # Validate Choices
+    for field in ifilter(lambda f: 'Choices' in f, fields):
+        dup = duplicated(field['Choices'])
+        if dup:
+            # Labels in Choices must be unique
+            msg = u'Duplicated "Choices" label for [{0}]: {1}'
+            raise ValueError(msg.format(field['Name'], sorted(list(dup))))
+        elif not field['Choices']:
+            # No choices
+            msg = u'Empty "Choices" for [{0}]'
+            raise ValueError(msg.format(field['Name']))
+
+    # Validate ChoicesWithData
+    for field in ifilter(lambda f: 'ChoicesWithData' in f, fields):
+        # A field named '{0}-value' will be synthesized for ChoicesWithData
+        # fields
+        value_field = '{0}-value'.format(field['Name'])
+        if value_field in field_names:
+            msg = u'A field named "{0}" cannot be defined'
+            raise ValueError(msg.format(value_field))
+        dup = duplicated(label for label, data in field['ChoicesWithData'])
+        if dup:
+            # Labels in ChoiceWithData must be unique
+            msg = u'Duplicated "ChoicesWithData" label for [{0}]: {1}'
+            raise ValueError(msg.format(field['Name'], sorted(list(dup))))
+        elif not field['ChoicesWithData']:
+            # No choices
+            msg = u'Empty "ChoicesWithData" for [{0}]'
+            raise ValueError(msg.format(field['Name']))
+
+    for field in ifilter(lambda f: 'ChoicesWithData' in f, fields):
+        field['ChoicesWithData'] = OrderedDict(field['ChoicesWithData'])
+
+    return fields
+
 
 class MetadataTemplate(object):
     """Metadata fields template
     """
 
-    def __init__(self, template):
-        """template - a list that conforms for the metatadata template spec
+    def __init__(self, spec):
+        """spec - a dict that conforms for the metadata template spec.
         """
 
-        if not template.get('Name'):
-            raise ValueError('No name')
+        fields = _fields_from_template_spec(spec.get('Fields', []))
 
-        fields = template['Fields']
+        if not spec.get('Name'):
+            raise ValueError('No template name')
+        elif not fields:
+            raise ValueError('No fields')
 
-        # Name field must be present
-        if any('Name' not in f for f in fields):
-            raise ValueError(u'One or more items do not have a name')
+        self._name = spec['Name']
 
-        # No names should be duplicated
-        names = [f['Name'] for f in fields]
-        dup = duplicated(names)
-        if dup:
-            msg = u'Duplicated fields {0}'
-            raise ValueError(msg.format(sorted(list(dup))))
-
-        # Choices must be lists with no duplicates
-        # TODO Validation
-        #   Can't have Choices and ChoicesWithData
-        #   Labels in Choices and ChoicesWithData must be unique
-        #   For each ChoicesWithData, field_name-value must not exist as a field
-        #   Default must be in Choices and ChoicesWithData
-        for field in ifilter(lambda t: 'Choices' in t, fields):
-            if duplicated(field['Choices']):
-                msg = u'Duplicated "Choices" for [{0}]'
-                raise ValueError(msg.format(field['Name']))
-            elif not field['Choices']:
-                msg = u'Empty "Choices" for [{0}]'
-                raise ValueError(msg.format(field['Name']))
-
-        for field in ifilter(lambda t: 'ChoicesWithData' in t, fields):
-            field['ChoicesWithData'] = OrderedDict(field['ChoicesWithData'])
-
-        self._name = template['Name']
-
-        self._cropped_image_suffix = template.get('Cropped file suffix')
+        if 'Cropped file suffix' in spec:
+            try:
+                suffix = Path('x').with_suffix(spec['Cropped file suffix']).suffix
+            except ValueError, e:
+                msg = u'Invalid cropped file suffix [{0}]'
+                raise ValueError(msg.format(spec['Cropped file suffix']))
+            else:
+                self._cropped_image_suffix = suffix
+        else:
+            self._cropped_image_suffix = None
 
         self._fields = fields
 
         # A method that returns labels from metadata dicts
         self._format_label = partial(FormatDefault(default='').format,
-                                     template.get('Object label', '{catalogNumber}'))
+                                     spec.get('Object label', '{catalogNumber}'))
 
-        # Map fromm field name to field
+        # Map from field name to field
         self._fields_mapping = {f['Name'] : f for f in fields}
 
-        # Map fromm field name to field
+        # Map from field name to field
         self._choices_with_data_mapping = {f['Name'] : f for f in fields if 'ChoicesWithData' in f}
 
         # Mapping from name to parse function, for those fields that have a parser
@@ -122,16 +158,15 @@ class MetadataTemplate(object):
         """
         return self._mandatory
 
-    def validate_metadata(self, md):
-        """Returns True if the mapping md validates against this template;
+    def validate_box(self, box):
+        """Returns True if the box's metadata validates against this template;
         False if not
         """
+        md = box['fields']
+
         # Mandatory fields
         if any(not md.get(f) for f in self.mandatory):
             return False
-
-        # TODO Validate choices not in list
-
         try:
             parseable = ( (k, v) for k, v in self._parse_mapping.iteritems() if k in set(md.keys()))
             for field, parse in parseable:
