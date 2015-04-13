@@ -16,7 +16,6 @@ from inselect.tests.utils import temp_directory_with_files
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
-
 class TestDocumentExportNoTemplate(unittest.TestCase):
     def test_save_crops(self):
         "Cropped object images are written correctly"
@@ -76,7 +75,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 'Name': 'scientificName',
                 'ChoicesWithData': [(u'A',        1),
                                     (u'B',        2),
-                                    (u'C',        3),
+                                    (u'Caersŵs',  3),
                                     (u'D',        4),
                                     (u'インセクト', 10),
                                    ],
@@ -117,9 +116,9 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 self.assertEqual(headers, reader.next())
                 self.assertEqual([u'1', u'1.jpg', u'1', u'A', u'1'], reader.next())
                 self.assertEqual([u'2', u'2.jpg', u'2', u'B', u'2'], reader.next())
-                self.assertEqual([u'3', u'10.jpg', u'3', u'\u30a4\u30f3\u30bb\u30af\u30c8', u'10'],
+                self.assertEqual([u'3', u'10.jpg', u'3', u'インセクト', u'10'],
                                  reader.next())
-                self.assertEqual([u'4', u'3.jpg', u'', u'C', u'3'], reader.next())
+                self.assertEqual([u'4', u'3.jpg', u'', u'Caersŵs', u'3'], reader.next())
                 self.assertEqual([u'5', u'4.jpg', u'', u'D', u'4'], reader.next())
                 self.assertIsNone(next(reader, None))
 
