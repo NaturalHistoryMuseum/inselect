@@ -4,7 +4,7 @@
         {
             "fields": {
                 "catalogNumber": "1",
-                "scientificName": "ABC"
+                "scientificName": "A"
             },
             "rect": [
                 0.0002, 
@@ -16,7 +16,7 @@
         {
             "fields": {
                 "catalogNumber": "2",
-                "scientificName": "ABC"
+                "scientificName": "B"
             },
             "rect": [
                 0.5936, 
@@ -38,7 +38,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "scientificName": "C"
+            },
             "rect": [
                 0.0002, 
                 0.5730000000000001, 
@@ -47,7 +49,9 @@
             ]
         }, 
         {
-            "fields": {}, 
+            "fields": {
+                "scientificName": "D"
+            },
             "rect": [
                 0.5936, 
                 0.5730000000000001, 

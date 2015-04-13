@@ -26,7 +26,9 @@ class DocumentExport(object):
         else:
             suffix = document.scanned.path.suffix
 
-        return ('{0}{1}'.format(fn, suffix) for fn in fnames)
+        # Do not be tempted to use Path - fname might contain empty strings if
+        # the user has done something silly
+        return (u'{0}{1}'.format(fn, suffix) for fn in fnames)
 
     def crops_dir(self, document):
         return document.crops_dir
@@ -38,7 +40,7 @@ class DocumentExport(object):
         tempdir = tempfile.mkdtemp(dir=str(document.scanned.path.parent),
             prefix=document.scanned.path.stem + '_temp_crops')
         tempdir = Path(tempdir)
-        debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
+        debug_print(u'Saving crops to to temp dir [{0}]'.format(tempdir))
 
         crop_fnames = self.crop_fnames(document)
 

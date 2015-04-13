@@ -13,6 +13,7 @@ from pathlib import Path
 from .utils import debug_print, duplicated, FormatDefault
 
 def _fields_from_template_spec(fields):
+    "Validates fields and returns a list of processed fields"
     # Name field must be present
     if any('Name' not in f for f in fields):
         raise ValueError(u'One or more fields do not have a name')
