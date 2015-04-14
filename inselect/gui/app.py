@@ -296,7 +296,7 @@ class MainWindow(QtGui.QMainWindow):
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         validation = export.validation_problems(self.document)
-        if validation and validation.any_problems:
+        if QMessageBox.Yes == res and validation and validation.any_problems:
             msg = ('The document contains one or more validation problems:\n'
                    '\n'
                    '{0}\n'
@@ -342,7 +342,7 @@ class MainWindow(QtGui.QMainWindow):
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         validation = export.validation_problems(self.document)
-        if validation and validation.any_problems:
+        if QMessageBox.Yes == res and validation and validation.any_problems:
             msg = ('The document contains one or more validation problems:\n'
                    '\n'
                    '{0}\n'
