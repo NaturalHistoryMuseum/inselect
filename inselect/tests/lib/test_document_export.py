@@ -75,7 +75,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 'Name': 'scientificName',
                 'ChoicesWithData': [(u'A',        1),
                                     (u'B',        2),
-                                    (u'Caersŵs',  3),
+                                    (u'Elsinoë',  3),
                                     (u'D',        4),
                                     (u'インセクト', 10),
                                    ],
@@ -118,7 +118,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 self.assertEqual([u'2', u'2.jpg', u'2', u'B', u'2'], reader.next())
                 self.assertEqual([u'3', u'10.jpg', u'3', u'インセクト', u'10'],
                                  reader.next())
-                self.assertEqual([u'4', u'3.jpg', u'', u'Caersŵs', u'3'], reader.next())
+                self.assertEqual([u'4', u'3.jpg', u'', u'Elsinoë', u'3'], reader.next())
                 self.assertEqual([u'5', u'4.jpg', u'', u'D', u'4'], reader.next())
                 self.assertIsNone(next(reader, None))
 
