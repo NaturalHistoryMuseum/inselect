@@ -47,19 +47,6 @@ class CropDelegate(QAbstractItemDelegate):
         b = self.BORDER
         return self.box_rect.adjusted(b, b, -b, -b)
 
-    @property
-    def rotate_counterclockwise_rect(self):
-        r = QRect(0, 0, self.CONTROLS_SIZE, self.CONTROLS_SIZE)
-        r.translate(QPoint(0, self.box_rect.height()-self.CONTROLS_SIZE))
-        return r
-
-    @property
-    def rotate_clockwise_rect(self):
-        r = QRect(0, 0, self.CONTROLS_SIZE, self.CONTROLS_SIZE)
-        r.translate(QPoint(self.box_rect.width()-self.CONTROLS_SIZE,
-                           self.box_rect.height()-self.CONTROLS_SIZE))
-        return r
-
     def _paint_box(self, painter, option, index):
         """The grey box
         """
@@ -155,35 +142,12 @@ class CropDelegate(QAbstractItemDelegate):
                 painter.setPen(QPen(Qt.white, 1, Qt.SolidLine))
                 painter.drawRect(target_rect)
 
-    def _paint_controls(self, painter, option, index):
-        """Arrows to rotate crops
-        """
-
-        with painter_state(painter):
-            selected = QStyle.State_Selected & option.state
-            painter.setBrush(self.WHITE if selected else self.GREY)
-            f = option.font
-            f.setPointSize(19)  # TODO LH Arbitrary font size
-            painter.setFont(f)
-
-            # \u293e and \u293f are unicode characters for 'lower right
-            # semicircular clockwise arrow' and 'lower right semicircular
-            # anticlockwise arrow' respectively
-            clockwise = self.rotate_clockwise_rect.translated(option.rect.topLeft())
-            painter.drawRect(clockwise)
-            painter.drawText(clockwise, Qt.AlignVCenter | Qt.AlignHCenter, u'\u293e')
-
-            clockwise = self.rotate_counterclockwise_rect.translated(option.rect.topLeft())
-            painter.drawRect(clockwise)
-            painter.drawText(clockwise, Qt.AlignVCenter | Qt.AlignHCenter, u'\u293f')
-
     def paint(self, painter, option, index):
         """QAbstractItemDelegate virtual
         """
         self._paint_box(painter, option, index)
         self._paint_title(painter, option, index)
         self._paint_crop(painter, option, index)
-        self._paint_controls(painter, option, index)
 
     def sizeHint(self, option, index):
         return self.box_rect.size()
@@ -205,24 +169,6 @@ class CropDelegate(QAbstractItemDelegate):
         """
         debug_print('CropDelegate.createEditor')
         return super(CropDelegate, self).createEditor(parent, option, index)
-
-    def editorEvent(self, event, model, option, index):
-        """QAbstractItemDelegate virtual
-        """
-        if event.type() in (event.MouseButtonPress,event.MouseButtonDblClick):
-            p = event.pos() - option.rect.topLeft()
-            # Not returning True here so that base handler will set selection
-            # to index, if it is not already selected
-            if self.rotate_clockwise_rect.contains(p):
-                debug_print('CropDelegate.editorEvent rotate clockwise')
-                current = index.data(RotationRole)
-                model.setData(index, current+90, RotationRole)
-            elif self.rotate_counterclockwise_rect.contains(p):
-                debug_print('CropDelegate.editorEvent rotate counter-clockwise')
-                current = index.data(RotationRole)
-                model.setData(index, current-90, RotationRole)
-
-        return super(CropDelegate, self).editorEvent(event, model, option, index)
 
     def setEditorData(self, editor, index):
         """QAbstractItemDelegate virtual
