@@ -1,8 +1,6 @@
 import unittest
 
 from inselect.lib.metadata import MetadataTemplate
-from inselect.lib.templates.price import template as price
-from inselect.lib.templates.dwc import template as dwc
 
 
 class TestMetadataTemplateSpec(unittest.TestCase):
