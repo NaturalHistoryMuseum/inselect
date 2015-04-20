@@ -11,4 +11,4 @@ MANIFEST
 *.spec
 *tar.gz
 *dmg
-
+.directory
