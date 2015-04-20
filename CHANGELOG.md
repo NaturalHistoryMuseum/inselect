@@ -1,15 +1,21 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.10
+-------------
+*Natural History Museum internal release*
+- Added #149 - Add metadata templates for Aphididae and Ephemeroptera enhancement (@quicklizard)
+- Fixed #148 - Unable to create new boxes (@quicklizard)
+
 Version 0.1.9
 -------------
-Natural History Museum internal release
+*Natural History Museum internal release*
 - Work on open-source Data Matrix barcode decoding on Linux and Mac OS X (#88) (@quicklizard)
 - Work on metadata templates and associated validation (#116) (@quicklizard)
 - Fixed #118 - Rotation arrows on the metadata view do not appear correctly on Windows (@quicklizard)
 
 Version 0.1.8
 -------------
-Natural History Museum internal release
+*Natural History Museum internal release*
 - Work on open-source Data Matrix barcode decoding on Linux and Mac OS X (#88) (@quicklizard)
 - Work on metadata templates and associated validation (#116) (@quicklizard)
 - Fixed #121 - A menu option to save the boxes view to an image file (@quicklizard)
