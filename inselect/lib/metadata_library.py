@@ -7,13 +7,18 @@ from collections import OrderedDict
 from inselect.lib.metadata import MetadataTemplate
 from inselect.lib.utils import debug_print
 
-from inselect.lib.templates import dwc, price
+from inselect.lib.templates import (dwc, price_plecoptera, price_ephemeroptera,
+        percy_cinara, percy_macrosiphoniella, percy_macrosiphum,
+        percy_other_aphididae, percy_uroleucon)
 
 
 if True:
     # TODO Check that template names are unique
     _library = {}
-    for template in [p.template for p in (dwc, price)]:
+    modules = (dwc, price_plecoptera, price_ephemeroptera, percy_cinara,
+               percy_macrosiphoniella, percy_macrosiphum, percy_other_aphididae,
+               percy_uroleucon)
+    for template in (m.template for m in modules):
         _library[template.name] = template
     _library = OrderedDict(sorted(_library.iteritems()))
 
