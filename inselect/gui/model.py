@@ -273,7 +273,7 @@ class Model(QAbstractItemModel):
             # not 'count' different dict instances
             new_rows = [None] * count
             for i in xrange(0, count):
-                new_rows[i] = {"metadata": {},
+                new_rows[i] = {"fields": {},
                                "rect": QtCore.QRect(0, 0, 0, 0),
                                "rotation": 0}
 
