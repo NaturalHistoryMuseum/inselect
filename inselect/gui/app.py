@@ -715,9 +715,15 @@ class MainWindow(QtGui.QMainWindow):
         self.previous_box_action = QAction("Previous box", self,
             shortcut="ctrl+P", triggered=partial(self.select_next_prev, next=False))
 
-        # TODO LH Does CMD + Backspace work on a mac?
         self.delete_action = QAction("&Delete selected", self,
             shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
+        # CMD + backspace is the Mac OS X shortcut for delete. Some Mac
+        # keyboards have a Delete key, so this standard shortcut is also
+        # included.
+        if 'darwin' == sys.platform:
+            self.delete_action.setShortcuts(['ctrl+backspace',
+                                             self.delete_action.shortcut()])
+
         self.rotate_clockwise_action = QAction(
             "Rotate clockwise", self,
             shortcut="ctrl+R", triggered=partial(self.rotate90, clockwise=True))
