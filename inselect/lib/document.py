@@ -298,8 +298,6 @@ class InselectDocument(object):
 
             # File might have been created after this instance
             if not p.is_file():
-                msg = u'Creating [{0}] with width of [{1}] pixels'
-                debug_print(msg.format(p, width))
                 # TODO LH Sensible limits?
                 # TODO LH What if self._scanned.width<width?
                 min, max = 512, 8192
@@ -307,6 +305,9 @@ class InselectDocument(object):
                     msg = 'width should be between [{0}] and [{1}]'
                     raise InselectError(msg.format(min, max))
                 else:
+                    msg = u'Creating [{0}] with width of [{1}] pixels'
+                    debug_print(msg.format(p, width))
+
                     img = self._scanned.array
                     factor  = float(width)/img.shape[1]
                     debug_print('Resizing to [{0}] pixels wide'.format(width))
