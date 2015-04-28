@@ -40,7 +40,8 @@ class InselectImage(object):
 
     @property
     def array(self):
-        """Lazy-load np.array of the image
+        """Lazy-load np.array of the colour image array, with channels stored in
+        order B G R
         """
         if self._array is None:
             p = str(self._path)
