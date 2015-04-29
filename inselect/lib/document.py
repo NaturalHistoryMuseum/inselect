@@ -39,7 +39,10 @@ class InselectDocument(object):
 
     FILE_VERSIONS = (1,2,)
     EXTENSION = '.inselect'
-    THUMBNAIL_SUFFIX = '_thumbnail'
+    THUMBNAIL_SUFFIX = '_thumbnail.jpg'
+
+    # Matches filenames that are thumbnail images
+    LOOKS_LIKE_THUMBNAIL = re.compile('.+{0}'.format(THUMBNAIL_SUFFIX))
 
     # Format for datetime objects. Conforms to http://www.ietf.org/rfc/rfc3339.txt
     DT_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
@@ -85,7 +88,15 @@ class InselectDocument(object):
         """Returns the path of the thumbnail image for the given scanned image
         """
         scanned = Path(scanned)
-        return scanned.parent / (scanned.stem + cls.THUMBNAIL_SUFFIX + '.jpg')
+        return scanned.parent / u'{0}{1}'.format(scanned.stem, cls.THUMBNAIL_SUFFIX)
+
+    @classmethod
+    def path_is_thumbnail_file(cls, path):
+        """Returns True if path is a thumbnail file for an existing
+        InselectDocument
+        """
+        doc = path.parent / path.name.replace(cls.THUMBNAIL_SUFFIX, cls.EXTENSION)
+        return cls.LOOKS_LIKE_THUMBNAIL.match(str(path)) and doc.is_file()
 
     def copy(self):
         """Returns a new instance of InselectDocument that is a copy of this
@@ -154,6 +165,9 @@ class InselectDocument(object):
         scanned = Path(scanned)
         if not scanned.is_file():
             raise InselectError(u'Image file [{0}] does not exist'.format(scanned))
+        elif cls.path_is_thumbnail_file(scanned):
+            msg = u'Cannot create a document for thumbnail file [{0}]'
+            raise InselectError(msg.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
             doc = cls(scanned_path=scanned, items=[],

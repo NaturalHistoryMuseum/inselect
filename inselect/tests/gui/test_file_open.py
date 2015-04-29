@@ -71,7 +71,7 @@ class TestFileOpen(MainWindowTest):
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
                                        TESTDATA / 'test_segment.png',
                                        ) as tempdir:
-            thumbnail = tempdir / 'test_segment_thumbnail.png'
+            thumbnail = tempdir / 'test_segment_thumbnail.jpg'
 
             # The test document contains no thumbnail file - create one now
             shutil.copy(str(tempdir / 'test_segment.png'), str(thumbnail))

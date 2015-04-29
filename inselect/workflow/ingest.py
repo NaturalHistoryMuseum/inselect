@@ -3,6 +3,7 @@
 """
 
 import argparse
+import re
 import stat
 import traceback
 
@@ -21,7 +22,6 @@ from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
 from inselect.lib.inselect_error import InselectError
 
 
-# TODO Ignore existing documents
 # TODO Recursive option
 
 def ingest_from_directory(inbox, docs):
@@ -37,13 +37,15 @@ def ingest_from_directory(inbox, docs):
         docs.mkdir(parents=True)
 
     # TODO LH Case insensitive matching
-    # TODO Prevent ingest of thumbnails
     for source in apply(chain, [inbox.glob(p) for p in IMAGE_PATTERNS]):
+        print('Ingesting [{0}]'.format(source))
         try:
             ingest_image(source, docs)
         except Exception:
             print('Error ingesting [{0}]'.format(source))
             traceback.print_exc()
+        else:
+            print('Ingested [{0}]'.format(source))
 
 
 def main():
@@ -51,7 +53,7 @@ def main():
     parser.add_argument("inbox", help='Source directory containing scanned images')
     parser.add_argument("docs", help='Destination directory to which images '
                         'will be moved and in which Inselect documents will be '
-                        'created')
+                        'created. Can be the same as inbox.')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)

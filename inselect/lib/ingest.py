@@ -10,6 +10,9 @@ def ingest_image(source, dest_dir):
     """Copies the image in the path source to the directory in the path
     dest_dir. Creates an returns a new instance of InselectDocument for the
     copied image.
+
+    An exception is raised if the destination image exists.
+    An exception is raised if the Inselect document already exists.
     """
     dest = dest_dir / source.name
     if source!=dest and dest.is_file():
