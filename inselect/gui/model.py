@@ -144,7 +144,7 @@ class Model(QAbstractItemModel):
         """QAbstractItemModel virtual
         """
         if self.hasIndex(row, column, parent):
-            return self.createIndex(row, column, self._data[row])
+            return self.createIndex(row, column)
         else:
             return QModelIndex()
 
@@ -172,7 +172,7 @@ class Model(QAbstractItemModel):
         elif not index.isValid():
             return None
         else:
-            item = index.internalPointer()
+            item = self._data[index.row()]
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 return u'{0:03} {1}'.format(1+index.row(),
                                             item['metadata'].get('catalogNumber', ''))
