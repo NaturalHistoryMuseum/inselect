@@ -34,6 +34,11 @@ def debug_print(*args, **kwargs):
     if DEBUG_PRINT:
         print(*args, **kwargs)
 
+def is_writable(path):
+    """Returns True is path is writable
+    """
+    return bool(Path(path).stat()[stat.ST_MODE] & stat.S_IWUSR)
+
 def make_readonly(path):
     """Alters path to be read-only and return the original mode
     """

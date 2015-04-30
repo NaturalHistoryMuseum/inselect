@@ -20,7 +20,7 @@ from inselect.lib import utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import debug_print
+from inselect.lib.utils import debug_print, is_writable
 
 import icons        # Register our icon resources with QT
 
@@ -258,6 +258,12 @@ class MainWindow(QtGui.QMainWindow):
         self.info_widget.set_document(self.document)
 
         self.sync_ui()
+
+        if not is_writable(path):
+            msg = (u'The file [{0}] is read-only.\n\n'
+                   u'You will not be able to save any changes that you make.')
+            msg = msg.format(path.name)
+            QMessageBox.warning(self, "Document is read-only", msg)
 
     @report_to_user
     def save_document(self):

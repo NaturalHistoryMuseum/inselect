@@ -8,6 +8,7 @@ from pathlib import Path
 from PySide.QtGui import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
+from inselect.lib.utils import make_readonly
 
 from gui_test import MainWindowTest
 
@@ -54,6 +55,21 @@ class TestFileOpen(MainWindowTest):
         self.assertEqual(5, self.window.model.rowCount())
         self.assertWindowTitleOpenDocument()
         self.assertFalse(self.window.model.is_modified)
+
+    @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
+    def test_open_readonly_doc(self, mock_warning):
+        "User is warned when opening a read-only inselect document"
+        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
+                                       TESTDATA / 'test_segment.png',
+                                       ) as tempdir:
+            make_readonly(tempdir / 'test_segment.inselect')
+            self.window.open_file(tempdir / 'test_segment.inselect')
+
+            self.assertTrue(mock_warning.called)
+            expected = (u'The file [test_segment.inselect] is read-only.\n\n'
+                        u'You will not be able to save any changes that you '
+                        'make.')
+            self.assertTrue(expected in mock_warning.call_args[0])
 
     def test_open_scanned_of_doc(self):
         """Open the scanned image file of an existing inselect document - the
