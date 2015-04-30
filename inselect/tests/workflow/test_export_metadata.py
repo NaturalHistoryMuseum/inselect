@@ -1,7 +1,7 @@
 import unittest
 import shutil
 
-from itertools import izip, count
+from itertools import count
 from pathlib import Path
 
 from inselect.lib.document import InselectDocument
@@ -32,10 +32,10 @@ class TestExportCSV(unittest.TestCase):
             doc = InselectDocument.load(tempdir / 'test_segment.inselect')
             with csv.open('rb') as f:
                 res = UnicodeDictReader(f)
-                for index, item, row in izip(count(), doc.items, res):
+                for index, item, row in zip(count(), doc.items, res):
                     expected = item['fields']
                     expected.update({'Item' : str(1+index)})
-                    actual = {k: v for k,v in row.items() if v}
+                    actual = {k: v for k,v in list(row.items()) if v}
                     self.assertEqual(expected, actual)
 
 

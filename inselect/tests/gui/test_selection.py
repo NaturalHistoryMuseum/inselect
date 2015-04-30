@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'

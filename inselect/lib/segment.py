@@ -45,7 +45,7 @@ def segment_document(doc, resize=None, *args, **kwargs):
 
     # TODO LH Apply padding here?
 
-    rects = map(lambda r: Rect(r[0], r[1], r[2], r[3]), rects)
+    rects = [Rect(r[0], r[1], r[2], r[3]) for r in rects]
     rects = img.to_normalised(rects)
     items = [{"fields": {}, 'rect': r, 'rotation': 0} for r in rects]
     doc = doc.copy()    # Deep copy to avoid altering argument

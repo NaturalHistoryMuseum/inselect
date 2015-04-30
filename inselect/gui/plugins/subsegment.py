@@ -39,7 +39,7 @@ class SubsegmentPlugin(Plugin):
         # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
         selected = self.parent.view_object.selectedIndexes()
         items_of_indexes = self.parent.view_graphics_item.items_of_indexes
-        item = items_of_indexes(selected).next() if 1 == len(selected) else None
+        item = next(items_of_indexes(selected)) if 1 == len(selected) else None
         seeds = item.subsegmentation_seed_points if item else None
 
         if not seeds or len(seeds) < 2:
@@ -67,7 +67,7 @@ class SubsegmentPlugin(Plugin):
         # Perform the subsegmentation
         items = self.document.items
         row = self.row
-        window = image.from_normalised([items[row]['rect']]).next()
+        window = next(image.from_normalised([items[row]['rect']]))
 
         # Seed points as a list of tuples, with coordinates relative to
         # the top-left of the sub-segmentation window

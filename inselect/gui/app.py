@@ -4,7 +4,7 @@ import os
 import sys
 
 from functools import partial
-from itertools import chain, izip
+from itertools import chain
 from pathlib import Path
 
 import numpy as np
@@ -22,7 +22,7 @@ from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
-import icons        # Register our icon resources with QT
+from . import icons        # Register our icon resources with QT
 
 from .info_widget import InfoWidget
 from .model import Model
@@ -40,9 +40,9 @@ from .worker_thread import WorkerThread
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
-    FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
+    FILE_FILTER = 'Inselect documents (*{0});;Images ({1})'.format(
                            InselectDocument.EXTENSION,
-                           u' '.join(IMAGE_PATTERNS))
+                           ' '.join(IMAGE_PATTERNS))
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -158,7 +158,7 @@ class MainWindow(QtGui.QMainWindow):
         the .inselect file is opened
         * If an image file, a new .inselect file is created and opened
         """
-        debug_print(u'MainWindow.open_file [{0}]'.format(path))
+        debug_print('MainWindow.open_file [{0}]'.format(path))
 
         if not path:
             folder = QSettings().value('working_directory',
@@ -179,7 +179,7 @@ class MainWindow(QtGui.QMainWindow):
             elif path.suffix in IMAGE_SUFFIXES:
                 # Compute the path to the inselect document (which may or
                 # may not already exist) of the image file
-                doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
+                doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, '')
                 doc_of_image = path.parent / doc_of_image
                 doc_of_image = doc_of_image.with_suffix(InselectDocument.EXTENSION)
                 if doc_of_image.is_file():
@@ -197,7 +197,7 @@ class MainWindow(QtGui.QMainWindow):
                 debug_print('Opening inselect document [{0}]'.format(document_path))
                 self.open_document(document_path)
             elif image_path:
-                msg = u'Creating new inselect document for image [{0}]'
+                msg = 'Creating new inselect document for image [{0}]'
                 debug_print(msg.format(image_path))
                 self.new_document(image_path)
             else:
@@ -211,7 +211,7 @@ class MainWindow(QtGui.QMainWindow):
 
         path = Path(path)
         if not path.is_file():
-            raise InselectError(u'Image file [{0}] does not exist'.format(path))
+            raise InselectError('Image file [{0}] does not exist'.format(path))
         else:
             # Callable for worker thread
             class NewDoc(object):
@@ -236,7 +236,7 @@ class MainWindow(QtGui.QMainWindow):
         QSettings().setValue('working_directory', str(document_path.parent))
 
         self.open_file(document_path)
-        msg = u'New Inselect document [{0}] created in [{1}]'
+        msg = 'New Inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
         QMessageBox.information(self, "Document created", msg)
 
@@ -382,18 +382,18 @@ class MainWindow(QtGui.QMainWindow):
             self.document_path.resolve() == document_to_open.resolve()):
             if self.model.is_modified:
                 # Ask the user if they work like to revert
-                msg = (u'The document [{0}] is already open and has been '
-                       u'changed. Would you like to discard your changes and '
-                       u'revert to the previous version?')
+                msg = ('The document [{0}] is already open and has been '
+                       'changed. Would you like to discard your changes and '
+                       'revert to the previous version?')
                 msg = msg.format(self.document_path.stem)
-                res = QMessageBox.question(self, u'Discard changes?', msg,
+                res = QMessageBox.question(self, 'Discard changes?', msg,
                                            (QMessageBox.Yes | QMessageBox.No),
                                             QMessageBox.No)
                 close = QMessageBox.Yes == res
             else:
                 # Let the user know that the document is already open and
                 # take no action
-                msg = u'The document [{0}] is already open'
+                msg = 'The document [{0}] is already open'
                 msg = msg.format(self.document_path.stem)
                 QMessageBox.information(self, 'Document already open', msg,
                                         QMessageBox.Ok)
@@ -475,7 +475,7 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def about(self):
-        text = u"""<h1>Inselect {version}</h1>
+        text = """<h1>Inselect {version}</h1>
            <h2>Contributors</h2>
            <p>
                <strong>Alice Heaton</strong>: Application development

@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 
 from PySide import QtGui
+from functools import reduce
 
 def qimage_of_bgr(bgr):
     """ A QtGui.QImage representation of a BGR numpy array
@@ -39,7 +40,7 @@ def contiguous(values):
     (25, 4)
     """
     # Taken from http://stackoverflow.com/a/2361991
-    for k, g in groupby(enumerate(values), lambda (i,x):i-x):
+    for k, g in groupby(enumerate(values), lambda i_x:i_x[0]-i_x[1]):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1
@@ -64,7 +65,7 @@ def report_to_user(f):
             return f(self, *args, **kwargs)
         except Exception as e:
             parent = self if isinstance(self, QtGui.QWidget) else None
-            QtGui.QMessageBox.critical(parent, u'An error occurred',
-                u'An error occurred:\n{0}'.format(e))
+            QtGui.QMessageBox.critical(parent, 'An error occurred',
+                'An error occurred:\n{0}'.format(e))
             raise
     return wrapper

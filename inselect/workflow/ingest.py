@@ -33,19 +33,19 @@ def ingest_from_directory(inbox, docs):
         raise InselectError('Inbox directory [{0}] does not exist'.format(inbox))
 
     if not docs.is_dir():
-        print('Create document directory [{0}]'.format(docs))
+        print(('Create document directory [{0}]'.format(docs)))
         docs.mkdir(parents=True)
 
     # TODO LH Case insensitive matching
-    for source in apply(chain, [inbox.glob(p) for p in IMAGE_PATTERNS]):
-        print('Ingesting [{0}]'.format(source))
+    for source in chain(*[inbox.glob(p) for p in IMAGE_PATTERNS]):
+        print(('Ingesting [{0}]'.format(source)))
         try:
             ingest_image(source, docs)
         except Exception:
-            print('Error ingesting [{0}]'.format(source))
+            print(('Error ingesting [{0}]'.format(source)))
             traceback.print_exc()
         else:
-            print('Ingested [{0}]'.format(source))
+            print(('Ingested [{0}]'.format(source)))
 
 
 def main():

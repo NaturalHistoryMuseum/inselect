@@ -28,9 +28,9 @@ def save_crops(dir, overwrite_existing):
             debug_print('Loading [{0}]'.format(p))
             doc = InselectDocument.load(p)
             if not overwrite_existing and doc.crops_dir.is_dir():
-                print('Crops dir [{0}] exists - skipping'.format(doc.crops_dir))
+                print(('Crops dir [{0}] exists - skipping'.format(doc.crops_dir)))
             else:
-                print('Will save crops for [{0}] to [{1}]'.format(p, doc.crops_dir))
+                print(('Will save crops for [{0}] to [{1}]'.format(p, doc.crops_dir)))
 
                 debug_print('Loading full-resolution scanned image')
                 doc.scanned.array
@@ -38,7 +38,7 @@ def save_crops(dir, overwrite_existing):
                 debug_print('Saving crops')
                 doc.save_crops()
         except Exception:
-            print('Error saving crops from [{0}]'.format(p))
+            print(('Error saving crops from [{0}]'.format(p)))
             traceback.print_exc()
 
 

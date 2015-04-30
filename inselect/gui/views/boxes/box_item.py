@@ -139,7 +139,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self.update()
 
     def _set_handles_visible(self, visible):
-        map(lambda i: i.setVisible(visible), self._handles)
+        list(map(lambda i: i.setVisible(visible), self._handles))
 
     def _create_handle(self, corner):
         # Creates and returns a new ResizeHandle at the given Qt.Corner
@@ -151,7 +151,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
     def _layout_handles(self):
         """Moves handles to the appropriate positions
         """
-        map(lambda i: i.relayout(self.boundingRect()), self._handles)
+        list(map(lambda i: i.relayout(self.boundingRect()), self._handles))
 
     def setRect(self, rect):
         """QGraphicsRectItem function

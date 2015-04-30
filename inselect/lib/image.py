@@ -1,6 +1,6 @@
 import warnings
 
-from itertools import izip, count, chain
+from itertools import count, chain
 from pathlib import Path
 
 import cv2
@@ -97,7 +97,7 @@ class InselectImage(object):
         "Saves crops given in normalised to paths."
         # TODO Copy EXIF tags?
         # TODO Make read-only?
-        for index, crop, path in izip(count(), self.crops(normalised), paths):
+        for index, crop, path in zip(count(), self.crops(normalised), paths):
             if progress:
                 progress('Writing crop {0}'.format(1 + index))
             if not cv2.imwrite(str(path), crop):

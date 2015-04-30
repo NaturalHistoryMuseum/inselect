@@ -1,13 +1,13 @@
 """Darwin Core terms
 """
-from __future__ import print_function
+
 
 import dateutil.parser
 import json
 import re
 
 from collections import OrderedDict
-from itertools import chain, ifilter
+from itertools import chain
 from pathlib import Path
 
 from .dwc_terms import DWC_TERMS
@@ -54,35 +54,35 @@ class DWCTerms(object):
 
         # Name field must be present
         if any('Name' not in t for t in terms):
-            raise ValueError(u'One or more items do not have a name')
+            raise ValueError('One or more items do not have a name')
 
         # Shouldn't contain fields that we do not recognise
         fields = {'Group','Group label','Name','Label','URI','Type',
                   'Parser','Choices'}
-        keys = set(chain(*(t.keys() for t in terms)))
+        keys = set(chain(*(list(t.keys()) for t in terms)))
         unrecognised = keys.difference(fields)
         if unrecognised:
-            msg = u'Unrecognised keys {0}'
+            msg = 'Unrecognised keys {0}'
             raise ValueError(msg.format(sorted(list(unrecognised))))
 
         # No names should be duplicated
         names = [t['Name'] for t in terms]
         dup = duplicated(names)
         if dup:
-            msg = u'Duplicated terms {0}'
+            msg = 'Duplicated terms {0}'
             raise ValueError(msg.format(sorted(list(dup))))
 
         # Set parse functions
-        for t in ifilter(lambda t: t['Name'] in validators, terms):
+        for t in filter(lambda t: t['Name'] in validators, terms):
             t['Parser'] = validators[t['Name']]
 
         # Choices must be lists with no duplicates
-        for term in ifilter(lambda t: 'Choices' in t, terms):
+        for term in filter(lambda t: 'Choices' in t, terms):
             if duplicated(term['Choices']):
-                msg = u'Duplicated "Choices" for [{0}]'
+                msg = 'Duplicated "Choices" for [{0}]'
                 raise ValueError(msg.format(term['Name']))
             elif not term['Choices']:
-                msg = u'Empty "Choices" for [{0}]'
+                msg = 'Empty "Choices" for [{0}]'
                 raise ValueError(msg.format(term['Name']))
 
         self.terms = terms
@@ -103,7 +103,7 @@ DWC_TERMS = DWCTerms(DWC_TERMS).terms
 if '__main__' == __name__:
     import sys
     terms = DWCTerms.from_json(sys.argv[1]).terms
-    m = u'{0:40} {1:40} {2:30} {3:3}'
+    m = '{0:40} {1:40} {2:30} {3:3}'
     print(m.format('Group', 'Name', 'Parser', 'Choices'))
     for t in terms:
         print(m.format(t['Group'], t['Name'],

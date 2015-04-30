@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 from inselect.gui.roles import RectRole
 
@@ -31,7 +31,7 @@ class TestSegment(MainWindowTest):
         self.assertEqual(5, w.model.rowCount())
 
         # Get the rects of the existing boxes
-        indexes = [w.model.index(r, 0) for r in xrange(0, w.model.rowCount())]
+        indexes = [w.model.index(r, 0) for r in range(0, w.model.rowCount())]
         expected = [w.model.data(i, RectRole) for i in indexes]
 
         # Segment
@@ -39,7 +39,7 @@ class TestSegment(MainWindowTest):
 
         # Get the rects of the new boxes
         self.assertEqual(5, w.model.rowCount())
-        indexes = [w.model.index(r, 0) for r in xrange(0, w.model.rowCount())]
+        indexes = [w.model.index(r, 0) for r in range(0, w.model.rowCount())]
         actual = [w.model.data(i, RectRole) for i in indexes]
 
         # Close the document

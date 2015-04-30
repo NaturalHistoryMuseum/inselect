@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import errno
 import locale
@@ -7,7 +7,7 @@ import stat
 import shutil
 
 from collections import Counter
-from itertools import ifilterfalse
+from itertools import filterfalse
 from pathlib import Path
 
 from dateutil.tz import tzlocal
@@ -72,7 +72,7 @@ def unique_everseen(iterable, key=None):
     seen = set()
     seen_add = seen.add
     if key is None:
-        for element in ifilterfalse(seen.__contains__, iterable):
+        for element in filterfalse(seen.__contains__, iterable):
             seen_add(element)
             yield element
     else:
@@ -85,7 +85,7 @@ def unique_everseen(iterable, key=None):
 def duplicated(v):
     """Returns values within v that appear more than once
     """
-    return [x for x, y in Counter(v).items() if y > 1]
+    return [x for x, y in list(Counter(v).items()) if y > 1]
 
 def user_name():
     """The name of the current user
@@ -122,6 +122,6 @@ def format_dt_display(dt):
         DATE_LONGDATE = 2
         time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
         date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
-        return u'{0} {1}'.format(date, time)
+        return '{0} {1}'.format(date, time)
     else:
         return dt.isoformat()

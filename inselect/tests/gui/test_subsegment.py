@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide.QtCore import QPointF
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -27,7 +27,7 @@ class TestSubsegment(MainWindowTest):
         # Select a box and add sub-segmentation seed points
         # TODO LH Selecting the box and adding points like this is nasty -
         # possible to use QTest.mouseClick?
-        box = w.view_graphics_item.scene.box_items().next()
+        box = next(w.view_graphics_item.scene.box_items())
         box.setSelected(True)
         seeds = [QPointF(290.0, 145.0),
                  QPointF(586.0, 276.0),

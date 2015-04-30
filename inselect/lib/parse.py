@@ -7,12 +7,12 @@ from .sparse_date import SparseDate
 
 
 DATE_YMD_RE = re.compile(r'^\s*([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})\s*$')
-DEGREES_RE = re.compile(ur'^\s*'
-                        ur'(?P<degrees>-?\d+(?:\.\d+)?)\s*[\sd°:]?\s*'
-                        ur"(?:(?:(?P<minutes>\d+(?:\.\d+)?)\s*[\s'′:]?\s*)?"
-                        ur"(?:(?P<seconds>\d+(?:\.\d+)?)\s*(?:(?:[\s\"″])|(?:''))?\s*)?)?"
-                        ur'(?P<direction>[NnSsEeWw]?)'
-                        ur'\s*$', flags=re.UNICODE)
+DEGREES_RE = re.compile(r'^\s*'
+                        r'(?P<degrees>-?\d+(?:\.\d+)?)\s*[\sd°:]?\s*'
+                        r"(?:(?:(?P<minutes>\d+(?:\.\d+)?)\s*[\s'′:]?\s*)?"
+                        r"(?:(?P<seconds>\d+(?:\.\d+)?)\s*(?:(?:[\s\"″])|(?:''))?\s*)?)?"
+                        r'(?P<direction>[NnSsEeWw]?)'
+                        r'\s*$', flags=re.UNICODE)
 
 def parse_int(value):
     """value should be None or a string that contains an integer value.
@@ -37,7 +37,7 @@ def parse_int_gt0(value):
     """
     value = parse_int(value)
     if value is not None and value<=0:
-        msg = u'Invalid value [{0}]: require a whole number greater than zero'
+        msg = 'Invalid value [{0}]: require a whole number greater than zero'
         raise ValueError(msg.format(value))
     else:
         return value
@@ -47,7 +47,7 @@ def parse_float_gt0(value):
     """
     value = parse_float(value)
     if value is not None and value<=0.0:
-        msg = u'Invalid value [{0}]: require a number greater than zero'
+        msg = 'Invalid value [{0}]: require a number greater than zero'
         raise ValueError(msg.format(value))
     else:
         return value
@@ -62,8 +62,8 @@ def parse_date(value):
             year, month, day = match.groups()
             return date(int(year), int(month), int(day))
         else:
-            msg = (u'Badly formatted value [{0}]: require a date '
-                   u'in the form YYYY-MM-DD')
+            msg = ('Badly formatted value [{0}]: require a date '
+                   'in the form YYYY-MM-DD')
             raise ValueError(msg.format(value))
     else:
         return None
@@ -92,8 +92,8 @@ def parse_four_digit_int(value):
         if match:
             return int(match.group(0))
         else:
-            msg = (u'Badly formatted value [{0}]: require a four digit '
-                   u'whole number')
+            msg = ('Badly formatted value [{0}]: require a four digit '
+                   'whole number')
             raise ValueError(msg.format(value))
     else:
         return None
@@ -107,8 +107,8 @@ def parse_one_or_two_digit_int(value):
         if match:
             return int(match.group(0))
         else:
-            msg = (u'Badly formatted value [{0}]: require a one or two '
-                   u'digit whole number')
+            msg = ('Badly formatted value [{0}]: require a one or two '
+                   'digit whole number')
             raise ValueError(msg.format(value))
     else:
         return None
@@ -133,7 +133,7 @@ def parse_degrees(value, is_latitude):
             dir = dir if dir else None
             return assemble_dms(deg, min, sec, dir, is_latitude)
         else:
-            msg = u'Badly formatted d:m:s value [{0}]'
+            msg = 'Badly formatted d:m:s value [{0}]'
             raise ValueError(msg.format(value))
     else:
         return None
@@ -162,7 +162,7 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
     direction = direction.lower() if direction else None
     if direction:
         if direction not in ('n', 's', 'e', 'w'):
-            msg = u'Unexpected direction [{0}]'
+            msg = 'Unexpected direction [{0}]'
             raise ValueError(msg.format(direction))
         elif direction in ('e', 'w'):
             dir_is_latitude = False
@@ -180,21 +180,21 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
 
     # Checks
     if degrees < 0.0 and direction:
-        raise ValueError(u'Negative degrees with direction')
+        raise ValueError('Negative degrees with direction')
     elif minutes and not direction:
-        raise ValueError(u'Minutes without direction')
+        raise ValueError('Minutes without direction')
     elif seconds and minutes is None:
-        raise ValueError(u'Seconds without minutes')
+        raise ValueError('Seconds without minutes')
     elif direction and dir_is_latitude != is_latitude:
-        raise ValueError(u'Direction mismatch.')
+        raise ValueError('Direction mismatch.')
     elif minutes and not float(minutes).is_integer() and seconds:
-        msg = u'Both seconds [{0}] and fractional minutes [{1}] given'
+        msg = 'Both seconds [{0}] and fractional minutes [{1}] given'
         raise ValueError(msg.format(seconds, minutes))
     elif minutes and not 0.0<=minutes<60.0:
-        msg = u'Bad minutes [{0}]. Require a number between 0 and 60'
+        msg = 'Bad minutes [{0}]. Require a number between 0 and 60'
         raise ValueError(msg.format(minutes))
     elif seconds and not 0.0<=seconds<60.0:
-        msg = u'Bad seconds [{0}]. Require a number between 0 and 60'
+        msg = 'Bad seconds [{0}]. Require a number between 0 and 60'
         raise ValueError(msg.format(seconds))
 
     # Assemble 
@@ -205,10 +205,10 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
 
     # Check bounds
     if not is_latitude and not -180 <= degrees <= 180:
-        msg = u'Longitude [{0}] is outside of the range -180 to 180'
+        msg = 'Longitude [{0}] is outside of the range -180 to 180'
         raise ValueError(msg.format(degrees))
     elif is_latitude and not -90 <= degrees <= 90:
-        msg = u'Computed latitude [{0}] is outside of the range -90 to 90'
+        msg = 'Computed latitude [{0}] is outside of the range -90 to 90'
         raise ValueError(msg.format(degrees))
     else:
         return degrees

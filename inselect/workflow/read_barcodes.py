@@ -5,7 +5,7 @@ import argparse
 import traceback
 
 from functools import partial
-from itertools import count, izip
+from itertools import count
 from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
@@ -64,16 +64,16 @@ class BarcodeReader(object):
             try:
                 self.read_barcodes_in_document(InselectDocument.load(p))
             except Exception:
-                print('Error reading barcodes in [{0}]'.format(p))
+                print(('Error reading barcodes in [{0}]'.format(p)))
                 traceback.print_exc()
 
     def read_barcodes_in_document(self, doc):
         items = doc.items
-        for index, item, crop in izip(count(), items, doc.crops):
+        for index, item, crop in zip(count(), items, doc.crops):
             result = self.decode_barcodes(crop)
             if result:
                 strategy, barcodes = result
-                barcodes = u' '.join([b.data for b in barcodes])
+                barcodes = ' '.join([b.data for b in barcodes])
                 debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
 
                 # TODO LH This mapping to come from metadata config?

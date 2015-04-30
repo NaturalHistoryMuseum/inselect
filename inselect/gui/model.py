@@ -1,7 +1,7 @@
 import json
 
 from copy import deepcopy
-from itertools import izip
+
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
@@ -174,7 +174,7 @@ class Model(QAbstractItemModel):
         else:
             item = index.internalPointer()
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
-                return u'{0:03} {1}'.format(1+index.row(),
+                return '{0:03} {1}'.format(1+index.row(),
                                             item['metadata'].get('catalogNumber', ''))
             elif Qt.WhatsThisRole == role:
                 return 'Cropped object image'
@@ -205,7 +205,7 @@ class Model(QAbstractItemModel):
                     return True
         elif RotationRole == role:
             # A new rotation for index
-            if not isinstance(value, (int, long)) or 0 != value%90:
+            if not isinstance(value, int) or 0 != value%90:
                 raise ValueError('Value is not an integer multiple of 90')
             else:
                 current = self._data[index.row()]['rotation']
@@ -233,7 +233,7 @@ class Model(QAbstractItemModel):
                 new.update(value)
 
                 # Only fields that have a value
-                new = {k: v for k, v in new.iteritems() if '' != v}
+                new = {k: v for k, v in new.items() if '' != v}
 
                 # Update if only if changed
                 if new != self._data[index.row()]['metadata']:
@@ -265,7 +265,7 @@ class Model(QAbstractItemModel):
             # this will create the same dict instance repeated 'count' times,
             # not 'count' different dict instances
             new_rows = [None] * count
-            for i in xrange(0, count):
+            for i in range(0, count):
                 new_rows[i] = {"metadata": {},
                                "rect": QtCore.QRect(0, 0, 0, 0),
                                "rotation": 0}

@@ -184,9 +184,9 @@ class TestParseDegrees(unittest.TestCase):
         self.assertAlmostEqual(-41.380008333333336, parse_latitude('41:22:48.03S'))
         self.assertEqual(-41.38, parse_latitude('41 22\' 48" S'))
         self.assertEqual(-41.38, parse_latitude('41 22\' 48\'\' S'))
-        self.assertEqual(-41.38, parse_latitude(u' 41°  22\'  48"  S  '))
-        self.assertEqual(-41.38, parse_latitude(u'41°22\'48"S'))
-        self.assertEqual(-41.38, parse_latitude(u'41°22′48″S'))
+        self.assertEqual(-41.38, parse_latitude(' 41°  22\'  48"  S  '))
+        self.assertEqual(-41.38, parse_latitude('41°22\'48"S'))
+        self.assertEqual(-41.38, parse_latitude('41°22′48″S'))
 
     def test_arithmetic(self):
         self.assertIsNone(parse_latitude(None))

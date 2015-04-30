@@ -1,4 +1,4 @@
-from itertools import count, izip
+from itertools import count
 from pathlib import Path
 
 from PySide.QtGui import QIcon
@@ -59,8 +59,8 @@ class BarcodePlugin(Plugin):
         image_array = self.document.scanned.array
 
         items = self.document.items
-        for index, item, crop in izip(count(), items, self.document.crops):
-            msg = u'Reading barcodes in box {0} of {1}'.format(1 + index, len(items))
+        for index, item, crop in zip(count(), items, self.document.crops):
+            msg = 'Reading barcodes in box {0} of {1}'.format(1 + index, len(items))
             progress(msg)
             barcodes = self._decode_barcodes(engine, crop, progress)
             if barcodes:
@@ -82,5 +82,5 @@ class BarcodePlugin(Plugin):
             result = strategy(crop, engine)
             if result:
                 strategy, barcodes = result
-                return u' '.join([b.data for b in barcodes])
+                return ' '.join([b.data for b in barcodes])
         return None

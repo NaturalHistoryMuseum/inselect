@@ -88,7 +88,7 @@ class InselectDocument(object):
         """Returns the path of the thumbnail image for the given scanned image
         """
         scanned = Path(scanned)
-        return scanned.parent / u'{0}{1}'.format(scanned.stem, cls.THUMBNAIL_SUFFIX)
+        return scanned.parent / '{0}{1}'.format(scanned.stem, cls.THUMBNAIL_SUFFIX)
 
     @classmethod
     def path_is_thumbnail_file(cls, path):
@@ -148,12 +148,12 @@ class InselectDocument(object):
     def _preprocess_items(self, items):
         # Returns items with tuples of boxes replaced with Rect instances and
         # metadata items with no values removed
-        for i in xrange(0, len(items)):
+        for i in range(0, len(items)):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = Rect(l,t,w,h)
 
             fields = items[i].get('fields', {})
-            fields = {k: v for k, v in fields.iteritems() if '' != v}
+            fields = {k: v for k, v in fields.items() if '' != v}
             items[i]['fields'] = fields
         return items
 
@@ -164,9 +164,9 @@ class InselectDocument(object):
         # TODO LH Raise error if a thumbnail image is ingested
         scanned = Path(scanned)
         if not scanned.is_file():
-            raise InselectError(u'Image file [{0}] does not exist'.format(scanned))
+            raise InselectError('Image file [{0}] does not exist'.format(scanned))
         elif cls.path_is_thumbnail_file(scanned):
-            msg = u'Cannot create a document for thumbnail file [{0}]'
+            msg = 'Cannot create a document for thumbnail file [{0}]'
             raise InselectError(msg.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
@@ -176,7 +176,7 @@ class InselectDocument(object):
                                  })
 
             if doc.document_path.is_file():
-                msg = u'Document file [{0}] already exists'
+                msg = 'Document file [{0}] already exists'
                 raise InselectError(msg.format(doc.document_path))
             else:
                 doc.save()
@@ -218,10 +218,10 @@ class InselectDocument(object):
                 properties = doc.get('properties', {})
 
                 # Parse datetimes
-                for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
+                for dt in {'Saved on', 'Created on'}.intersection(list(properties.keys())):
                     properties[dt] = cls._parse_datetime(properties[dt])
 
-                msg = u'Loaded [{0}] items from [{1}]'
+                msg = 'Loaded [{0}] items from [{1}]'
                 debug_print(msg.format(len(doc['items']), path))
 
                 return cls(scanned_path=scanned, items=doc['items'],
@@ -230,11 +230,11 @@ class InselectDocument(object):
     def save(self):
         "Saves to self.document_path"
         path = self.document_path
-        debug_print(u'Saving [{0}] items to [{1}]'.format(len(self._items), path))
+        debug_print('Saving [{0}] items to [{1}]'.format(len(self._items), path))
 
         # Convert Rect instances to lists
         items = deepcopy(self._items)
-        for i in xrange(0, len(items)):
+        for i in range(0, len(items)):
             l,t,w,h = items[i]['rect']
             items[i]['rect'] = [l,t,w,h]
 
@@ -245,7 +245,7 @@ class InselectDocument(object):
         properties = deepcopy(self.properties)
 
         # Format datetimes
-        for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
+        for dt in {'Saved on', 'Created on'}.intersection(list(properties.keys())):
             properties[dt] = self._format_datetime(properties[dt])
 
         doc = { 'inselect version': self.FILE_VERSIONS[-1],
@@ -258,10 +258,10 @@ class InselectDocument(object):
         # http://stackoverflow.com/a/14870531/1773758
         # Specify separators to prevent trailing whitespace
         with path.open("w", newline='\n', encoding='utf8') as f:
-            f.write(unicode(json.dumps(doc, ensure_ascii=True, indent=4,
+            f.write(str(json.dumps(doc, ensure_ascii=True, indent=4,
                                        separators=(',', ': '), sort_keys=True)))
 
-        debug_print(u'Saved [{0}] items to [{1}]'.format(len(items), path))
+        debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 
     @property
     def crops(self):
@@ -272,7 +272,7 @@ class InselectDocument(object):
         "Saves images cropped from image to dir. dir must exist."
         boxes = [i['rect'] for i in self.items]
         template = '{0:03}' + image.path.suffix
-        paths = [dir / template.format(1+i) for i in xrange(0, len(self.items))]
+        paths = [dir / template.format(1+i) for i in range(0, len(self.items))]
         image.save_crops(boxes, paths, progress)
 
     def save_crops(self, progress=None):
@@ -319,7 +319,7 @@ class InselectDocument(object):
                     msg = 'width should be between [{0}] and [{1}]'
                     raise InselectError(msg.format(min, max))
                 else:
-                    msg = u'Creating [{0}] with width of [{1}] pixels'
+                    msg = 'Creating [{0}] with width of [{1}] pixels'
                     debug_print(msg.format(p, width))
 
                     img = self._scanned.array
@@ -330,7 +330,7 @@ class InselectDocument(object):
                     # TODO Copy EXIF tags?
                     res = cv2.imwrite(str(p), thumbnail)
                     if not res:
-                        msg = u'Unable to write thumbnail [{0}]'
+                        msg = 'Unable to write thumbnail [{0}]'
                         raise InselectError(msg.format(p))
 
             # Load it
@@ -341,7 +341,7 @@ class InselectDocument(object):
         """An iterable of metadata field names
         """
         # The union of fields among all items
-        return set(itertools.chain(*(i['fields'].keys() for i in self._items)))
+        return set(itertools.chain(*(list(i['fields'].keys()) for i in self._items)))
 
     def export_csv(self, path=None):
         """Exports metadata to a CSV file given in path, defaults to

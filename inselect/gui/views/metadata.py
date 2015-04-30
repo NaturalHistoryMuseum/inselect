@@ -17,7 +17,7 @@ from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
 # The value that is displayed for a field when more than one box is selected
 # and the items have more than one unique value for that field
-_MULTIPLE_FIELD_VALUES = u'*'
+_MULTIPLE_FIELD_VALUES = '*'
 
 
 class MetadataView(QAbstractItemView):
@@ -70,7 +70,7 @@ class MetadataView(QAbstractItemView):
         # TODO Combo should indicate multiple and unrecognised values
         # Put values into the controls
         metadata = [i.data(MetadataRole) for i in selected]
-        for field, control in self._form_container.controls.iteritems():
+        for field, control in self._form_container.controls.items():
             values = {m.get(field,'') for m in metadata}
             control.selection_changed(selected, values)
 
@@ -250,7 +250,7 @@ class FieldEdit(QLineEdit):
             self.multiple_values = False
         else:
             # No items selected
-            self.setText(u'')
+            self.setText('')
             self.multiple_values = False
 
         self.selected = selected
@@ -362,7 +362,7 @@ class CountryComboBox(FieldComboBox):
     # TODO How to set country and countryCode as user changes selection
 
     def __init__(self, parent=None):
-        display = u'{0} ({1})'
+        display = '{0} ({1})'
         codes = sorted(COUNTRIES.keys())
         values = ((display.format(code, COUNTRIES[code]), code) for code in codes)
         super(CountryComboBox, self).__init__('countryCode', values, parent)
@@ -373,7 +373,7 @@ class LanguageComboBox(FieldComboBox):
     dcterms:language field is updated.
     """
     def __init__(self, parent=None):
-        display = u'{0} ({1})'
+        display = '{0} ({1})'
         codes = sorted(LANGUAGES.keys())
         values = ((display.format(code, LANGUAGES[code]), code) for code in codes)
         super(LanguageComboBox, self).__init__('language', values, parent)

@@ -9,7 +9,7 @@ from PySide.QtGui import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 from inselect.gui.app import MainWindow
 
@@ -112,7 +112,7 @@ class TestFileOpen(MainWindowTest):
 
             # User should have been told about the new document
             self.assertTrue(mock_information.called)
-            expected = u'New Inselect document [test_segment] created in [{0}]'
+            expected = 'New Inselect document [test_segment] created in [{0}]'
             expected = expected.format(tempdir)
             self.assertTrue(expected in mock_information.call_args[0])
 
@@ -127,8 +127,8 @@ class TestFileOpen(MainWindowTest):
 
         # User should have been told about the error
         self.assertTrue(mock_critical.called)
-        expected = (u"An error occurred:\n"
-                    u"Image file [I do not exist.png] does not exist")
+        expected = ("An error occurred:\n"
+                    "Image file [I do not exist.png] does not exist")
         self.assertTrue(expected in mock_critical.call_args[0])
 
         self.assertFalse(self.window.model.is_modified)
@@ -139,8 +139,8 @@ class TestFileOpen(MainWindowTest):
         "Try to open a non-existant inselect file"
         self.assertRaises(IOError, self.window.open_file, 'I do not exist.inselect')
         self.assertTrue(mock_critical.called)
-        expected = (u"An error occurred:\n"
-                    u"[Errno 2] No such file or directory: 'I do not exist.inselect'")
+        expected = ("An error occurred:\n"
+                    "[Errno 2] No such file or directory: 'I do not exist.inselect'")
         self.assertTrue(expected in mock_critical.call_args[0])
 
         self.assertFalse(self.window.model.is_modified)
@@ -151,7 +151,7 @@ class TestFileOpen(MainWindowTest):
         "Try to open a non-existant file with an unrecognised extension"
         self.assertRaises(InselectError, self.window.open_file, 'I do not exist')
         self.assertTrue(mock_critical.called)
-        expected = u'An error occurred:\nUnknown file type [I do not exist]'
+        expected = 'An error occurred:\nUnknown file type [I do not exist]'
         self.assertTrue(expected in mock_critical.call_args[0])
 
         self.assertFalse(self.window.model.is_modified)

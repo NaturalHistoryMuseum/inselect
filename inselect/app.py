@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+
 
 import argparse
 import sys
@@ -38,13 +38,13 @@ def main():
 
     app = QApplication(sys.argv)
 
-    debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
+    debug_print('Settings stored in [{0}]'.format(QSettings().fileName()))
 
     if args.locale:
         debug_print('Will set locale to [{0}]'.format(args.locale))
         QLocale.setDefault(QLocale(args.locale))
 
-    debug_print(u'Locale is [{0}]'.format(QLocale().name()))
+    debug_print('Locale is [{0}]'.format(QLocale().name()))
 
     window = MainWindow(app)
     window.show_from_geometry_settings()

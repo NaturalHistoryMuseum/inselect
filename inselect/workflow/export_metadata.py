@@ -29,12 +29,12 @@ def export_csv(dir, overwrite_existing):
             doc = InselectDocument.load(p)
             csv_path = doc.document_path.with_suffix('.csv')
             if not overwrite_existing and csv_path.is_file():
-                print('CSV file [{0}] exists - skipping'.format(csv_path))
+                print(('CSV file [{0}] exists - skipping'.format(csv_path)))
             else:
-                print('Will write CSV for [{0}]'.format(p))
+                print(('Will write CSV for [{0}]'.format(p)))
                 doc.export_csv(csv_path)
         except Exception:
-            print('Error saving CSV from [{0}]'.format(p))
+            print(('Error saving CSV from [{0}]'.format(p)))
             traceback.print_exc()
 
 

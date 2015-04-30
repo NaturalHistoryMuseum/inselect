@@ -1,12 +1,12 @@
 import unittest
 
-from itertools import izip, count
+from itertools import count
 from mock import patch
 from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 from inselect.lib.unicode_csv import UnicodeDictReader
 
@@ -26,10 +26,10 @@ class TestExportCSV(MainWindowTest):
         # Check CSV contents
         with csv.open('rb') as f:
             res = UnicodeDictReader(f)
-            for index, item, row in izip(count(), doc.items, res):
+            for index, item, row in zip(count(), doc.items, res):
                 expected = item['fields']
                 expected.update({'Item' : str(1+index)})
-                actual = {k: v for k,v in row.items() if v}
+                actual = {k: v for k,v in list(row.items()) if v}
                 self.assertEqual(expected, actual)
 
         # Expect 4 rows
@@ -51,7 +51,7 @@ class TestExportCSV(MainWindowTest):
 
             # User should have been told about the export
             self.assertTrue(mock_information.called)
-            expected = u"Data for 5 boxes written to {0}"
+            expected = "Data for 5 boxes written to {0}"
             expected = expected.format(tempdir / 'test_segment.csv')
             self.assertTrue(expected in mock_information.call_args[0])
 
@@ -75,7 +75,7 @@ class TestExportCSV(MainWindowTest):
 
             # User should have been told about the export
             self.assertTrue(mock_information.called)
-            expected = u"Data for 5 boxes written to {0}"
+            expected = "Data for 5 boxes written to {0}"
             expected = expected.format(tempdir / 'test_segment.csv')
             self.assertTrue(expected in mock_information.call_args[0])
 

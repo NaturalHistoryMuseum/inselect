@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from itertools import izip
+
 from mock import Mock
 from pathlib import Path
 

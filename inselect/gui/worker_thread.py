@@ -76,7 +76,7 @@ class WorkerThread(QtCore.QThread):
         except Exception as e:
             debug_print('Error in WorkerThread.run')
             traceback.print_exc()
-            self.completed.emit(False, u'An error occurred:\n{0}'.format(e))
+            self.completed.emit(False, 'An error occurred:\n{0}'.format(e))
 
     def user_cancelled(self):
         """Slot for the cancel button on the dialog

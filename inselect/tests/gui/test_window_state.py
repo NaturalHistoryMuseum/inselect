@@ -2,7 +2,7 @@ import unittest
 
 from PySide.QtCore import QCoreApplication
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 
 class TestPersistWindowState(MainWindowTest):

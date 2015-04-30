@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from datetime import datetime
-from itertools import izip, count
+from itertools import count
 from pathlib import Path
 
 import numpy as np
@@ -143,7 +143,7 @@ class TestDocument(unittest.TestCase):
 
         # Check the contents of each crop
         boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-        for box, crop in izip(boxes, doc.crops):
+        for box, crop in zip(boxes, doc.crops):
             x0, y0, x1, y1 = box.coordinates
             self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] == crop))
 
@@ -160,7 +160,7 @@ class TestDocument(unittest.TestCase):
 
             # Check the contents of each file
             boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-            for box, path in izip(boxes, sorted(crops_dir.glob('*.png'))):
+            for box, path in zip(boxes, sorted(crops_dir.glob('*.png'))):
                 x0, y0, x1, y1 = box.coordinates
                 self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
                                        cv2.imread(str(path))))
@@ -260,10 +260,10 @@ class TestDocument(unittest.TestCase):
             # Check CSV contents
             with csv_fname.open('rb') as f:
                 res = UnicodeDictReader(f)
-                for index, item, row in izip(count(), doc.items, res):
+                for index, item, row in zip(count(), doc.items, res):
                     expected = item['fields']
                     expected.update({'Item' : str(1+index)})
-                    actual = {k: v for k,v in row.items() if v}
+                    actual = {k: v for k,v in list(row.items()) if v}
                     self.assertEqual(expected, actual)
         # Expect 4 rows
         self.assertEqual(index, 4)

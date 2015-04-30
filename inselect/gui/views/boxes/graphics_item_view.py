@@ -1,4 +1,4 @@
-from itertools import izip
+
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QRect, QRectF
@@ -48,7 +48,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
 
         # Build up new mapping
         r = [None] * model.rowCount()
-        for row in xrange(0, model.rowCount()):
+        for row in range(0, model.rowCount()):
             rect = self.model().index(row, 0).data(RectRole)
             r[row] = self.scene.add_box(rect)
 
@@ -76,7 +76,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         n = 1 + end - start
         new = [None] * n
         rect = QRect(0, 0, 0, 0)
-        for row in xrange(0, n):
+        for row in range(0, n):
             new[row] = self.scene.add_box(rect)
         self._rows[start:start] = new
 
@@ -85,7 +85,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """
         debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
 
-        for row in xrange(topLeft.row(), 1+bottomRight.row()):
+        for row in range(topLeft.row(), 1+bottomRight.row()):
             # new is a QRect - integer coordinates
             new = self.model().index(row, 0).data(RectRole)
 
@@ -116,7 +116,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         self.handling_selection_update = True
         try:
             # TODO Context for this
-            map(self.scene.removeItem, self._rows[start:end])
+            list(map(self.scene.removeItem, self._rows[start:end]))
         finally:
             self.handling_selection_update = False
 
@@ -219,7 +219,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """The user moved or resized items in the scene
         """
         debug_print('GraphicsItemView.item_rects_updated')
-        for index,item in izip(self.indexes_of_items(items), items):
+        for index,item in zip(self.indexes_of_items(items), items):
             # item.sceneBoundingRect() is the items rects in the correct
             # coordinates system
             debug_print('Row [{0}] updated'.format(index.row()))
@@ -243,6 +243,6 @@ class GraphicsItemView(QtGui.QAbstractItemView):
             else:
                 # Select the new box
                 self.scene.clearSelection()
-                item = self.items_of_rows([row]).next()
+                item = next(self.items_of_rows([row]))
                 item.setSelected(True)
                 item.update()

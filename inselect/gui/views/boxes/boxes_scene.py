@@ -1,4 +1,4 @@
-from itertools import ifilter
+
 
 from PySide import QtGui
 from PySide.QtCore import Qt
@@ -51,17 +51,17 @@ class BoxesScene(QtGui.QGraphicsScene):
         """The single QGraphicsPixmapItem within this scene, or None if there is
         no open document
         """
-        items = self.items()
+        items = list(self.items())
         if not items:
             return None
         else:
-            items = ifilter(lambda i: isinstance(i, QtGui.QGraphicsPixmapItem),
+            items = filter(lambda i: isinstance(i, QtGui.QGraphicsPixmapItem),
                               items)
-            pixmap = items.next()
+            pixmap = next(items)
 
             # There should be only one pixmap item
             try:
-                items.next()
+                next(items)
             except StopIteration:
                 return pixmap
             else:
@@ -84,7 +84,7 @@ class BoxesScene(QtGui.QGraphicsScene):
 
     def box_items(self):
         "Iterable containin just BoxItems"
-        return ifilter(lambda i: isinstance(i, BoxItem), self.items())
+        return filter(lambda i: isinstance(i, BoxItem), list(self.items()))
 
     def add_box(self, rect):
         """Notification from source that a box has been added.
@@ -114,7 +114,7 @@ class BoxesScene(QtGui.QGraphicsScene):
                     Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
                   }
 
-        if key in cursors.keys():
+        if key in list(cursors.keys()):
             event.accept()
             dx1, dy1, dx2, dy2 = cursors[key]
             mod = event.modifiers()

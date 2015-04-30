@@ -4,7 +4,7 @@ from mock import patch
 
 from PySide.QtGui import QMessageBox, QDialog
 
-from gui_test import MainWindowTest
+from .gui_test import MainWindowTest
 
 
 class TestHelpBoxes(MainWindowTest):

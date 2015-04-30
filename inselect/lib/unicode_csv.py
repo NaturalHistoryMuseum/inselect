@@ -2,7 +2,7 @@ import codecs, csv
 
 # TODO Convert to using io.StringIO
 
-from cStringIO import StringIO
+from io import StringIO
 
 class UTF8Recoder:
     """
@@ -14,7 +14,7 @@ class UTF8Recoder:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         return self.reader.next().encode("utf-8")
 
 class UnicodeReader:
@@ -27,9 +27,9 @@ class UnicodeReader:
         f = UTF8Recoder(f, encoding)
         self.reader = csv.reader(f, dialect=dialect, **kwds)
 
-    def next(self):
-        row = self.reader.next()
-        return [unicode(s, "utf-8") for s in row]
+    def __next__(self):
+        row = next(self.reader)
+        return [str(s, "utf-8") for s in row]
 
     def __iter__(self):
         return self
@@ -44,18 +44,18 @@ class UnicodeDictReader:
     def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
         f = UTF8Recoder(f, encoding)
         self.reader = csv.reader(f, dialect=dialect, **kwds)
-        self.header = self.reader.next()
+        self.header = next(self.reader)
  
-    def next(self):
-        row = self.reader.next()
-        vals = [unicode(s, "utf-8") for s in row]
+    def __next__(self):
+        row = next(self.reader)
+        vals = [str(s, "utf-8") for s in row]
         return dict((self.header[x], vals[x]) for x in range(len(self.header)))
  
     def __iter__(self):
         return self
 
 def _encode(v):
-    if isinstance(v, unicode):
+    if isinstance(v, str):
         return v.encode("utf-8")
     elif v is None:
         return ''
