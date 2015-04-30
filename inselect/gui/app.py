@@ -720,9 +720,9 @@ class MainWindow(QtGui.QMainWindow):
         # partial(self.tabs.setCurrentIndex, 0) but this causes a segfault when
         # the application exits on linux.
         self.boxes_view_action = QAction("&Boxes", self, checkable=True,
-            triggered=partial(self.show_tab, 0))
-        self.metadata_view_action = QAction("&Objects", self, checkable=True,
-            triggered=partial(self.show_tab, 1))
+            triggered=partial(self.show_tab, 0), shortcut='ctrl+B')
+        self.metadata_view_action = QAction("Ob&jects", self, checkable=True,
+            triggered=partial(self.show_tab, 1), shortcut='ctrl+j')
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
