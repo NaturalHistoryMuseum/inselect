@@ -18,7 +18,8 @@ import inselect
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
-from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES
+from inselect.lib.ingest import (ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES,
+                                 IMAGE_SUFFIXES_RE)
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, is_writable
 
@@ -176,7 +177,7 @@ class MainWindow(QtGui.QMainWindow):
             if InselectDocument.EXTENSION == path.suffix:
                 # An inselect document
                 document_path = path
-            elif path.suffix in IMAGE_SUFFIXES:
+            elif IMAGE_SUFFIXES_RE.match(path.suffix):
                 # Compute the path to the inselect document (which may or
                 # may not already exist) of the image file
                 doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')

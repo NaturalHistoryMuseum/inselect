@@ -1,5 +1,6 @@
 import shutil
 import unittest
+import tempfile
 
 from functools import partial
 from mock import patch
@@ -105,10 +106,14 @@ class TestFileOpen(MainWindowTest):
         # worker thread - I could not think of a way to test the complete
         # operation in a single test.
         # This test checks that new_document is called as expected.
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
-            self.window.open_file(tempdir / 'test_segment.png')
+        with temp_directory_with_files() as tempdir:
+            # Check that open_file accepts images with a file extension that is
+            # not all lower case.
+            shutil.copy(str(TESTDATA / 'test_segment.png'),
+                        str(tempdir / 'test_segment.Png'))
+            self.window.open_file(tempdir / 'test_segment.Png')
             self.assertTrue(mock_new_document.called)
-            self.assertEqual(tempdir / 'test_segment.png',
+            self.assertEqual(tempdir / 'test_segment.Png',
                              mock_new_document.call_args[0][0])
 
     @patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes)

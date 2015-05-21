@@ -17,7 +17,7 @@ import numpy
 import inselect
 import inselect.lib.utils
 
-from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS
+from inselect.lib.ingest import ingest_image, IMAGE_SUFFIXES_RE
 
 from inselect.lib.inselect_error import InselectError
 
@@ -36,8 +36,7 @@ def ingest_from_directory(inbox, docs):
         print('Create document directory [{0}]'.format(docs))
         docs.mkdir(parents=True)
 
-    # TODO LH Case insensitive matching
-    for source in apply(chain, [inbox.glob(p) for p in IMAGE_PATTERNS]):
+    for source in (p for p in inbox.iterdir() if IMAGE_SUFFIXES_RE.match(p.name)):
         print('Ingesting [{0}]'.format(source))
         try:
             ingest_image(source, docs)
