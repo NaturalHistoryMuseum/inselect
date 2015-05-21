@@ -57,3 +57,23 @@ class MainWindowTest(GUITest):
         w.running_operation[-1].completed.connect(receiver.completed)
         w.running_operation[-1].wait()
         receiver.wait_for_input()
+
+    def run_event_loop(self, timeout_ms=100):
+        """Runs the main window's event loop until timeout_ms have elapsed
+        """
+        class TimeoutReceiver(QtCore.QObject):
+            def __init__(self):
+                super(self.__class__, self).__init__()
+                self.eventLoop = QtCore.QEventLoop(self)
+
+            def timerEvent(self, event):
+                self.eventLoop.exit()
+
+            def wait_for_timeout(self):
+                self.eventLoop.exec_()
+
+        w = self.window
+        receiver = TimeoutReceiver()
+        timer = receiver.startTimer(timeout_ms)
+        receiver.wait_for_timeout()
+        receiver.killTimer(timer)
