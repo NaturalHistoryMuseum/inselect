@@ -179,8 +179,10 @@ class TestDocument(unittest.TestCase):
             doc.ensure_thumbnail(width=2048)
             doc = None
 
+            thumbnail = tempdir / 'test_segment_thumbnail.jpg'
+            self.assertTrue(thumbnail.is_file())
             self.assertRaises(InselectError, InselectDocument.new_from_scan,
-                              tempdir / 'test_segment_thumbnail.png')
+                              thumbnail)
 
     def test_new_from_scan_no_image(self):
         "Image does not exist"
@@ -196,6 +198,7 @@ class TestDocument(unittest.TestCase):
             self.assertTrue(doc.thumbnail is None)
             doc.ensure_thumbnail(width=2048)
             self.assertEqual(2048, doc.thumbnail.array.shape[1])
+            self.assertTrue((tempdir / 'test_segment_thumbnail.jpg').is_file())
 
     def test_ensure_thumbnail_silly_size(self):
         "Can't create thumbnail with a silly size"
@@ -230,6 +233,19 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(Path('x_thumbnail.jpg'),
                          InselectDocument.thumbnail_path_of_scanned('x.png'))
 
+    def test_path_is_thumbnail_file(self):
+        with temp_directory_with_files() as tempdir:
+            thumbnail = tempdir / 'xx_thumbnail.jpg'
+            thumbnail.open('w')       # File only needs to exist
+
+            # Thumbnail file exists but there is no corresponding .inselect doc
+            self.assertFalse(InselectDocument.path_is_thumbnail_file(thumbnail))
+
+            doc = tempdir / 'xx.inselect'
+            doc.open('w')       # File only needs to exist
+
+            # Thumbnail file and corresponding .inselect file both exist
+            self.assertTrue(InselectDocument.path_is_thumbnail_file(thumbnail))
 
 if __name__=='__main__':
     unittest.main()

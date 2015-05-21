@@ -151,7 +151,7 @@ class Model(QAbstractItemModel):
         """QAbstractItemModel virtual
         """
         if self.hasIndex(row, column, parent):
-            return self.createIndex(row, column, self._data[row])
+            return self.createIndex(row, column)
         else:
             return QModelIndex()
 
@@ -176,8 +176,10 @@ class Model(QAbstractItemModel):
         if PixmapRole == role:
             # This role applies to the document as a whole
             return self._pixmap
-        elif index.isValid():
-            item = index.internalPointer()
+        elif not index.isValid():
+            return None
+        else:
+            item = self._data[index.row()]
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 return self.DISPLAY_TEMPLATE.format(1 + index.row(),
                      metadata_library().current.format_label(item))

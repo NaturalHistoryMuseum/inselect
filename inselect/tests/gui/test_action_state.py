@@ -101,7 +101,7 @@ class TestActionState(MainWindowTest):
         self.assertFalse(w.rotate_counter_clockwise_action.isEnabled())
 
     def test_boxes_view_active(self):
-        "Checked state of biew actions reflects the active view"
+        "Checked state of view actions reflects the active view"
         w = self.window
 
         w.show_tab(0)

@@ -6,3 +6,4 @@ pathlib>=1.0
 Pillow>=2.7.0
 python-dateutil>=2.3
 pytz>=2014.4
+coveralls>=0.4.1

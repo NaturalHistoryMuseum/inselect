@@ -19,9 +19,10 @@ import inselect
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
-from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES
+from inselect.lib.ingest import (ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES,
+                                 IMAGE_SUFFIXES_RE)
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import debug_print
+from inselect.lib.utils import debug_print, is_writable
 
 import icons        # Register our icon resources with QT
 
@@ -179,7 +180,7 @@ class MainWindow(QtGui.QMainWindow):
             if InselectDocument.EXTENSION == path.suffix:
                 # An inselect document
                 document_path = path
-            elif path.suffix in IMAGE_SUFFIXES:
+            elif IMAGE_SUFFIXES_RE.match(path.suffix):
                 # Compute the path to the inselect document (which may or
                 # may not already exist) of the image file
                 doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
@@ -261,6 +262,12 @@ class MainWindow(QtGui.QMainWindow):
         self.info_widget.set_document(self.document)
 
         self.sync_ui()
+
+        if not is_writable(path):
+            msg = (u'The file [{0}] is read-only.\n\n'
+                   u'You will not be able to save any changes that you make.')
+            msg = msg.format(path.name)
+            QMessageBox.warning(self, "Document is read-only", msg)
 
     @report_to_user
     def save_document(self):
@@ -360,7 +367,8 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def save_screengrab(self):
-        """Saves a screenshot to an image file
+        """Prompts the user for the image file path to which to a screenshot
+        will be saved.
         """
         debug_print('MainWindow,save_screengrab')
 
@@ -379,10 +387,31 @@ class MainWindow(QtGui.QMainWindow):
 
         filter = 'Images ({0})'.format(' '.join(extensions))
 
+        if self.document_path:
+            # Default name is the name of this document with '_screengrab' appended
+            default_fname = u'{0}_screengrab'.format(self.document_path.stem)
+        else:
+            default_fname = u'inselect_screengrab'
+
+        # Default suffix is jpg, if available
+        for e in ('.jpg', '.jpeg', '.png'):
+            if '*{0}'.format(e) in extensions:
+                default_extension = e
+                break
+        else:
+            # Use the first available extension
+            default_extension = extensions[0][1:]
+
+        default_fname = Path(default_fname).with_suffix(default_extension)
+
         # Default folder is the user's documents folder
-        folder = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        default_dir = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+
+        debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
+        debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
         path, selected_filter = QtGui.QFileDialog.getSaveFileName(
-                self, "Save image file of boxes view", folder,
+                self, "Save image file of boxes view",
+                unicode(Path(default_dir) / default_fname),
                 filter=filter)
 
         if path:
@@ -751,9 +780,9 @@ class MainWindow(QtGui.QMainWindow):
         # partial(self.tabs.setCurrentIndex, 0) but this causes a segfault when
         # the application exits on linux.
         self.boxes_view_action = QAction("&Boxes", self, checkable=True,
-            triggered=partial(self.show_tab, 0))
-        self.metadata_view_action = QAction("&Objects", self, checkable=True,
-            triggered=partial(self.show_tab, 1))
+            triggered=partial(self.show_tab, 0), shortcut='ctrl+B')
+        self.metadata_view_action = QAction("Ob&jects", self, checkable=True,
+            triggered=partial(self.show_tab, 1), shortcut='ctrl+j')
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d

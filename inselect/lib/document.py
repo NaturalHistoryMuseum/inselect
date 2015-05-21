@@ -37,7 +37,10 @@ class InselectDocument(object):
 
     FILE_VERSIONS = (1,2,)
     EXTENSION = '.inselect'
-    THUMBNAIL_SUFFIX = '_thumbnail'
+    THUMBNAIL_SUFFIX = '_thumbnail.jpg'
+
+    # Matches filenames that are thumbnail images
+    LOOKS_LIKE_THUMBNAIL = re.compile('.+{0}'.format(THUMBNAIL_SUFFIX))
 
     # Format for serializing datetime objects.
     # Conforms to http://www.ietf.org/rfc/rfc3339.txt
@@ -84,7 +87,15 @@ class InselectDocument(object):
         """Returns the path of the thumbnail image for the given scanned image
         """
         scanned = Path(scanned)
-        return scanned.parent / (scanned.stem + cls.THUMBNAIL_SUFFIX + '.jpg')
+        return scanned.parent / u'{0}{1}'.format(scanned.stem, cls.THUMBNAIL_SUFFIX)
+
+    @classmethod
+    def path_is_thumbnail_file(cls, path):
+        """Returns True if path is a thumbnail file for an existing
+        InselectDocument
+        """
+        doc = path.parent / path.name.replace(cls.THUMBNAIL_SUFFIX, cls.EXTENSION)
+        return cls.LOOKS_LIKE_THUMBNAIL.match(str(path)) and doc.is_file()
 
     def copy(self):
         """Returns a new instance of InselectDocument that is a copy of this
@@ -153,6 +164,9 @@ class InselectDocument(object):
         scanned = Path(scanned)
         if not scanned.is_file():
             raise InselectError(u'Image file [{0}] does not exist'.format(scanned))
+        elif cls.path_is_thumbnail_file(scanned):
+            msg = u'Cannot create a document for thumbnail file [{0}]'
+            raise InselectError(msg.format(scanned))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
             doc = cls(scanned_path=scanned, items=[],
@@ -178,10 +192,6 @@ class InselectDocument(object):
         if not re.match('^{[ (\n)|(\r\n)]*"', path.open('rb').read(20)):
             raise InselectError('Not an inselect document')
         else:
-            # Tips from SO about reading and writing utf-8 encoded files with
-            # sorted keys
-            # http://stackoverflow.com/a/18337754/1773758
-            # http://stackoverflow.com/a/20776329/1773758
             doc = json.load(path.open(encoding='utf8'))
             v = doc.get('inselect version')
 
@@ -272,8 +282,6 @@ class InselectDocument(object):
 
             # File might have been created after this instance
             if not p.is_file():
-                msg = u'Creating [{0}] with width of [{1}] pixels'
-                debug_print(msg.format(p, width))
                 # TODO LH Sensible limits?
                 # TODO LH What if self._scanned.width<width?
                 min, max = 512, 8192
@@ -281,6 +289,9 @@ class InselectDocument(object):
                     msg = 'width should be between [{0}] and [{1}]'
                     raise InselectError(msg.format(min, max))
                 else:
+                    msg = u'Creating [{0}] with width of [{1}] pixels'
+                    debug_print(msg.format(p, width))
+
                     img = self._scanned.array
                     factor  = float(width)/img.shape[1]
                     debug_print('Resizing to [{0}] pixels wide'.format(width))
