@@ -193,7 +193,7 @@ class InselectDocument(object):
         if not re.match('^{[ (\n)|(\r\n)]*"', path.open('rb').read(20)):
             raise InselectError('Not an inselect document')
         else:
-            doc = json.load(path.open())
+            doc = json.load(path.open(encoding='utf8'))
             v = doc.get('inselect version')
             if not v:
                 raise InselectError('Not an inselect document')
@@ -254,11 +254,13 @@ class InselectDocument(object):
                 'properties': properties,
               }
 
-        # Tip from SO about writing utf-8 encoded files
-        # http://stackoverflow.com/a/14870531/1773758
+        # Tips from SO about reading and writing utf-8 encoded files with sorted
+        # keys
+        # http://stackoverflow.com/a/18337754/1773758
+        # http://stackoverflow.com/a/20776329/1773758
         # Specify separators to prevent trailing whitespace
         with path.open("w", newline='\n', encoding='utf8') as f:
-            f.write(unicode(json.dumps(doc, ensure_ascii=True, indent=4,
+            f.write(unicode(json.dumps(doc, ensure_ascii=False, indent=4,
                                        separators=(',', ': '), sort_keys=True)))
 
         debug_print(u'Saved [{0}] items to [{1}]'.format(len(items), path))
