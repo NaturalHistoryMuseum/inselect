@@ -135,30 +135,6 @@ class CropDelegate(QAbstractItemDelegate):
 
     def sizeHint(self, option, index):
         return self.box_rect.size()
- 
-    def closeEditor(self, editor, hint):
-        """QAbstractItemDelegate signal
-        """
-        debug_print('CropDelegate.closeEditor')
-        return super(CropDelegate, self).closeEditor(editor, hint)
-
-    def commitData(self, editor):
-        """QAbstractItemDelegate signal
-        """
-        debug_print('CropDelegate.commitData')
-        return super(CropDelegate, self).commitData(editor)
-
-    def createEditor(self, parent, option, index):
-        """QAbstractItemDelegate virtual
-        """
-        debug_print('CropDelegate.createEditor')
-        return super(CropDelegate, self).createEditor(parent, option, index)
-
-    def setEditorData(self, editor, index):
-        """QAbstractItemDelegate virtual
-        """
-        debug_print('CropDelegate.setEditorData')
-        return super(CropDelegate, self).setEditorData(event, editor, index)
 
 
 class ObjectView(QListView):
