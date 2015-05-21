@@ -64,7 +64,9 @@ setup_data = {
             ('{site_packages}/numpy', 'numpy'),
         ],
          'extra_packages': [],
-        'excludes': ['Tkinter', 'ttk', 'Tkconstants', 'tcl']
+        'excludes': ['Tkinter', 'ttk', 'Tkconstants', 'tcl',
+                     'future.moves'    # Errors from urllib otherwise
+                    ]
     }
 }
 
