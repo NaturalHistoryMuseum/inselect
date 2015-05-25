@@ -16,22 +16,14 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
     DRAW_INNER = False
 
-    if True:
-        # Blue unselected, red selected
-        UNSELECTED = Qt.blue
-        SELECTED =   Qt.red
-        RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
+    # Blue unselected, red selected
+    UNSELECTED = Qt.blue
+    SELECTED =   Qt.red
+    RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
 
-        INNER =         Qt.black
-        INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
-    else:
-        # Light outer, dark inner
-        UNSELECTED = Qt.lightGray
-        SELECTED =   Qt.white
-        RESIZING =   QColor(0xff, 0xff, 0xff, 0xa0)
+    INNER =         Qt.black
+    INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
 
-        INNER =         Qt.black
-        INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
 
     def __init__(self, x, y, w, h, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
