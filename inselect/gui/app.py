@@ -928,15 +928,6 @@ class MainWindow(QtGui.QMainWindow):
             self.move(s.value("mainwindow/pos", self.pos()))
             self.resize(s.value("mainwindow/size", self.size()))
         self.show()
-        # if read_bool("mainwindow/maximized", self.isMaximized()):
-        #     debug_print('Will show maximized')
-        #     self.showMaximized()
-        # elif read_bool("mainwindow/full_screen", self.isMaximized()):
-        #     debug_print('Will show full screen')
-        #     self.showFullScreen()
-        # else:
-        #     debug_print('Will show normally')
-        #     self.show()
 
     def sync_ui(self):
         """Synchronise the user interface with the application state
