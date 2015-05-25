@@ -18,8 +18,7 @@ import inselect
 
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
-from inselect.lib.ingest import (ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES,
-                                 IMAGE_SUFFIXES_RE)
+from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, is_writable
 
@@ -880,8 +879,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         urls = event.mimeData().urls() if event.mimeData() else None
         path = Path(urls[0].toLocalFile()) if urls and 1 == len(urls) else None
-        if (path and
-            path.suffix in chain([InselectDocument.EXTENSION], IMAGE_SUFFIXES)):
+        if path and IMAGE_SUFFIXES_RE.match(path.suffix):
             return urls[0].toLocalFile()
         else:
             return None
