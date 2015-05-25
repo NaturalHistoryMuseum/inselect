@@ -17,9 +17,8 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-
 class TestModelModified(GUITest):
-    """Test the modified state of the model
+    """Tests the modified state of the model
     """
     def _new_mock_modified_changed(self, model):
         "Returns a mock function connected to model's modified_changed signal"
@@ -41,10 +40,7 @@ class TestModelModified(GUITest):
         m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
-        m.setData(m.index(0, 0), -90, RotationRole)
-
-        # Rotation stored 0 <= v < 360
-        self.assertEqual(270, m.data(m.index(0, 0), RotationRole))
+        m.setData(m.index(0, 0), 90, RotationRole)
         mock_modified_changed.assert_called_once_with()
         self.assertTrue(m.is_modified)
 
@@ -55,18 +51,16 @@ class TestModelModified(GUITest):
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), 0, RotationRole)
-        self.assertEqual(0, m.data(m.index(0, 0), RotationRole))
         self.assertFalse(mock_modified_changed.called)
         self.assertFalse(m.is_modified)
 
     def test_set_rect_modifies(self):
-        "Alter  box's rect"
+        "Alter box's rect"
         m = Model()
         m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), QRect(0, 0, 1, 1), RectRole)
-        self.assertEqual(QRect(0, 0, 1, 1), m.data(m.index(0, 0), RectRole))
         mock_modified_changed.assert_called_once_with()
         self.assertTrue(m.is_modified)
 

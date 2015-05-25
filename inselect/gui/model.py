@@ -176,8 +176,6 @@ class Model(QAbstractItemModel):
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 return u'{0:03} {1}'.format(1+index.row(),
                                             item['metadata'].get('catalogNumber', ''))
-            elif Qt.WhatsThisRole == role:
-                return 'Cropped object image'
             elif RectRole == role:
                 return item['rect']
             elif RotationRole == role:
