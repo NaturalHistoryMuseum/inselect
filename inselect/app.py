@@ -3,8 +3,8 @@ from __future__ import print_function, division
 import argparse
 import sys
 
+from PySide import QtGui
 from PySide.QtCore import QSettings, QLocale, QCoreApplication
-from PySide.QtGui import QApplication
 
 import inselect
 
@@ -21,7 +21,7 @@ QCoreApplication.setApplicationVersion(inselect.__version__)
 QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(description='Runs the inselect user-interface')
     parser.add_argument("file", help='The inselect document to open', nargs='?')
     parser.add_argument('-d', '--debug', action='store_true',
@@ -30,26 +30,29 @@ def main():
                         help='Use LOCALE; intended for testing purposes only')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
-    args = parser.parse_args()
+    parsed = parser.parse_args(args[1:])
 
     # TODO LH A command-line switch to clear all QSettings
 
-    inselect.lib.utils.DEBUG_PRINT = args.debug
+    inselect.lib.utils.DEBUG_PRINT = parsed.debug
 
-    app = QApplication(sys.argv)
+    # Only one instance of QApplication can be created per process. The single
+    # instance is stored in QtGui.qApp. When test plans are being run it is
+    # likely that the QApplication will have been created by a unittest.
+    app = QtGui.qApp if QtGui.qApp else QtGui.QApplication(args)
 
     debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
 
-    if args.locale:
-        debug_print('Will set locale to [{0}]'.format(args.locale))
-        QLocale.setDefault(QLocale(args.locale))
+    if parsed.locale:
+        debug_print('Will set locale to [{0}]'.format(parsed.locale))
+        QLocale.setDefault(QLocale(parsed.locale))
 
     debug_print(u'Locale is [{0}]'.format(QLocale().name()))
 
     window = MainWindow(app)
     window.show_from_geometry_settings()
 
-    if args.file:
-        window.open_file(args.file)
+    if parsed.file:
+        window.open_file(parsed.file)
 
     sys.exit(app.exec_())

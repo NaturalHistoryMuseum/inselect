@@ -4,7 +4,6 @@ import os
 import sys
 
 from functools import partial
-from itertools import chain, izip
 from pathlib import Path
 
 import numpy as np
@@ -19,8 +18,7 @@ import inselect
 from inselect.lib import utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
-from inselect.lib.ingest import (ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES,
-                                 IMAGE_SUFFIXES_RE)
+from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, is_writable
 
@@ -919,8 +917,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         urls = event.mimeData().urls() if event.mimeData() else None
         path = Path(urls[0].toLocalFile()) if urls and 1 == len(urls) else None
-        if (path and
-            path.suffix in chain([InselectDocument.EXTENSION], IMAGE_SUFFIXES)):
+        if path and IMAGE_SUFFIXES_RE.match(path.suffix):
             return urls[0].toLocalFile()
         else:
             return None
@@ -969,15 +966,6 @@ class MainWindow(QtGui.QMainWindow):
             self.move(s.value("mainwindow/pos", self.pos()))
             self.resize(s.value("mainwindow/size", self.size()))
         self.show()
-        # if read_bool("mainwindow/maximized", self.isMaximized()):
-        #     debug_print('Will show maximized')
-        #     self.showMaximized()
-        # elif read_bool("mainwindow/full_screen", self.isMaximized()):
-        #     debug_print('Will show full screen')
-        #     self.showFullScreen()
-        # else:
-        #     debug_print('Will show normally')
-        #     self.show()
 
     def sync_ui(self):
         """Synchronise the user interface with the application state

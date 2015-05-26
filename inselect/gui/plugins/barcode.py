@@ -12,7 +12,8 @@ from .plugin import Plugin
 try:
     import gouda
     from gouda.engines import InliteEngine, LibDMTXEngine
-    from gouda.strategies import roi, resize
+    from gouda.strategies.roi.roi import roi
+    from gouda.strategies.resize import resize
 
     import inselect.lib.utils
     import gouda.util
