@@ -20,7 +20,8 @@ from inselect.lib.inselect_error import InselectError
 
 try:
     import gouda
-    from gouda.strategies import roi, resize
+    from gouda.strategies.roi.roi import roi
+    from gouda.strategies.resize import resize
     from gouda.engines import (AccusoftEngine, InliteEngine, LibDMTXEngine,
                                SoftekEngine)
 except ImportError:
