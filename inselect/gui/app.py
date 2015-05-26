@@ -4,7 +4,6 @@ import os
 import sys
 
 from functools import partial
-from itertools import chain, izip
 from pathlib import Path
 
 import numpy as np
