@@ -25,8 +25,6 @@ except ImportError:
     win32api = None
 
 
-from inselect.lib.inselect_error import InselectError
-
 DEBUG_PRINT = False
 
 

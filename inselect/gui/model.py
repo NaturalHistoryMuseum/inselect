@@ -1,7 +1,4 @@
-import json
-
 from copy import deepcopy
-from itertools import izip
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect

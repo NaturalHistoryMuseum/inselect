@@ -1,6 +1,4 @@
 import cv2
-import json
-import os
 import sys
 
 from functools import partial
@@ -8,27 +6,25 @@ from pathlib import Path
 
 import numpy as np
 
-from PySide import QtCore, QtGui
+from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
 from PySide.QtGui import (QMenu, QAction, QMessageBox, QIcon, QDesktopServices,
                           QVBoxLayout, QWidget)
 
-import inselect
+import inselect.gui.icons        # Register our icon resources with QT
 
-from inselect.lib import utils
+from inselect import __version__ as inselect_version
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, is_writable
-
-import icons        # Register our icon resources with QT
 
 from .info_widget import InfoWidget
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
-from .roles import RotationRole, RectRole
+from .roles import RotationRole
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
@@ -518,7 +514,7 @@ class MainWindow(QtGui.QMainWindow):
                <strong>Stefan van der Walt</strong>: Application development
                and segmentation algorithm
            </p>
-        """.format(version=inselect.__version__)
+        """.format(version=inselect_version)
         QMessageBox.about(self, 'Inselect', text)
 
     def run_in_worker(self, operation, name, complete_fn=None):

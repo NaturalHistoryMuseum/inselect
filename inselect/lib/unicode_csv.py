@@ -1,4 +1,5 @@
-import codecs, csv
+import codecs
+import csv
 
 # TODO Convert to using io.StringIO
 

@@ -1,5 +1,3 @@
-from functools import partial
-
 from PySide.QtGui import (QAbstractItemView, QSizePolicy, QScrollArea,
                           QWidget, QGroupBox, QLabel, QLineEdit, QComboBox,
                           QFormLayout, QVBoxLayout)
@@ -8,7 +6,6 @@ from PySide.QtCore import Qt
 from inselect.lib.countries import COUNTRIES
 from inselect.lib.dwc import DWC_TERMS
 from inselect.lib.languages import LANGUAGES
-from inselect.lib.unicode_csv import UnicodeDictReader
 from inselect.lib.utils import debug_print
 
 from inselect.gui.roles import MetadataRole

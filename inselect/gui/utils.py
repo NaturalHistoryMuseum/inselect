@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from functools import wraps
 from itertools import groupby
-from operator import itemgetter
 
 import cv2
 import numpy as np
