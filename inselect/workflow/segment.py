@@ -15,7 +15,6 @@ import inselect.lib.utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment import segment_document
 from inselect.lib.utils import debug_print
-from inselect.lib.rect import Rect
 
 
 # TODO Recursive option

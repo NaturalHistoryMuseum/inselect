@@ -3,11 +3,8 @@
 """
 
 import argparse
-import re
-import stat
 import traceback
 
-from itertools import chain
 from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking

@@ -1,8 +1,6 @@
 import humanize
 
-from PySide.QtCore import QLocale
-from PySide.QtGui import (QWidget, QFormLayout, QLabel, QSizePolicy, QGroupBox,
-                          QVBoxLayout)
+from PySide.QtGui import QWidget, QFormLayout, QLabel, QGroupBox, QVBoxLayout
 
 from inselect.lib.utils import format_dt_display
 

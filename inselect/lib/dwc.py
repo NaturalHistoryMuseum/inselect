@@ -10,11 +10,9 @@ from itertools import chain, ifilter
 from pathlib import Path
 
 from .dwc_terms import DWC_TERMS
-from .parse import (parse_latitude, parse_float,
-                    parse_int_gt0, parse_float_gt0,
+from .parse import (parse_latitude, parse_int_gt0, parse_float_gt0,
                     parse_four_digit_int, parse_one_or_two_digit_int,
-                    parse_latitude, parse_longitude,
-                   )
+                    parse_latitude, parse_longitude)
 from .utils import duplicated, unique_everseen
 
 # TODO Check against term types and date-time reg ex int

@@ -8,7 +8,7 @@ import numpy as np
 
 from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import (QMenu, QAction, QMessageBox, QIcon, QDesktopServices,
+from PySide.QtGui import (QMenu, QAction, QMessageBox, QDesktopServices,
                           QVBoxLayout, QWidget)
 
 import inselect.gui.icons        # Register our icon resources with QT
