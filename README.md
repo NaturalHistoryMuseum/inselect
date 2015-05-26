@@ -1,11 +1,11 @@
 # Inselect
 
-[ ![Travis status](https://travis-ci.org/NaturalHistoryMuseum/inselect.svg?branch=master) ](https://travis-ci.org/NaturalHistoryMuseum/inselect)
+[![Travis status](https://travis-ci.org/NaturalHistoryMuseum/inselect.svg?branch=master)](https://travis-ci.org/NaturalHistoryMuseum/inselect)
 [![Coverage Status](https://coveralls.io/repos/NaturalHistoryMuseum/inselect/badge.svg?branch=master)](https://coveralls.io/r/NaturalHistoryMuseum/inselect?branch=master)
 
 A tool for the semi-automated segmentation and annotation of scanned images of museum objects.
 
-You can download the latest release of Inselect for Windows, for Mac and the Python source from our [Project page](http://naturalhistorymuseum.github.io/inselect).
+You can [download installers](https://github.com/NaturalHistoryMuseum/inselect/releases) for Windows and Mac OS X.
 
 ## Windows development environment
 
