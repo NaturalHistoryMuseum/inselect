@@ -75,7 +75,7 @@ def parse_four_digit_int(value):
     """Returns an int or None. Value should be a string of four digits or
     None.
     """
-    match = re.match('^[0-9]{4}$', value)
+    match = re.match(r'^\s*[0-9]{4}\s*$', value)
     if match:
         return int(match.group(0))
     else:
@@ -87,7 +87,7 @@ def parse_one_or_two_digit_int(value):
     """Returns an int or None. Value should be a string of one or two
     digits or None.
     """
-    match = re.match('^[0-9]{1,2}$', value)
+    match = re.match(r'^\s*[0-9]{1,2}\s*$', value)
     if match:
         return int(match.group(0))
     else:
@@ -190,8 +190,8 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
         raise ValueError(msg.format(seconds))
 
     # Assemble 
-    degrees += minutes/60.0 if minutes else 0.0
-    degrees += seconds/3600.0 if seconds else 0.0
+    degrees += minutes / 60.0 if minutes else 0.0
+    degrees += seconds / 3600.0 if seconds else 0.0
 
     degrees *= -1.0 if negate else 1.0
 

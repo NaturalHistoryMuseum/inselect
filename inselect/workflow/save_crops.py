@@ -64,5 +64,5 @@ def main():
     save_crops(args.dir, args.overwrite, library().get(args.template))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

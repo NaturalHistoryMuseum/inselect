@@ -54,5 +54,5 @@ def main():
 
     export_csv(args.dir, args.overwrite)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

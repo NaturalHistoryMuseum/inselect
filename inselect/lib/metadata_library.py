@@ -1,6 +1,5 @@
 import importlib
 import pkgutil
-import sys
 
 from collections import OrderedDict
 

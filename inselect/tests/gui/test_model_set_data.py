@@ -94,9 +94,10 @@ class TestModelData(GUITest):
         m = Model()
         m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
 
-        self.assertEqual('0001 1', m.data(m.index(0, 0), Qt.DisplayRole))
-        self.assertEqual('0003 3', m.data(m.index(2, 0), Qt.DisplayRole))
-        self.assertEqual('0004 ',  m.data(m.index(3, 0), Qt.DisplayRole))
+        # First four characters only - remainder depend upon current template
+        self.assertEqual('0001', m.data(m.index(0, 0), Qt.DisplayRole)[:4])
+        self.assertEqual('0003', m.data(m.index(2, 0), Qt.DisplayRole)[:4])
+        self.assertEqual('0004', m.data(m.index(3, 0), Qt.DisplayRole)[:4])
 
 
 if __name__=='__main__':

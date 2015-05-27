@@ -1,5 +1,3 @@
-import math
-
 from PySide.QtGui import QGraphicsItem
 from PySide.QtCore import Qt, QRectF
 

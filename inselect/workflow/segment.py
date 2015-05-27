@@ -15,7 +15,6 @@ import inselect.lib.utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment import segment_document
 from inselect.lib.utils import debug_print
-from inselect.lib.rect import Rect
 
 
 # TODO Recursive option
@@ -52,5 +51,5 @@ def main():
 
     segment(args.dir)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

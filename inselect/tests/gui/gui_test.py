@@ -6,7 +6,7 @@ from mock import patch
 from PySide import QtCore, QtGui
 from PySide.QtGui import QMessageBox
 
-from inselect.gui.app import MainWindow
+from inselect.gui.main_window import MainWindow
 
 
 class GUITest(unittest.TestCase):

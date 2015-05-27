@@ -9,7 +9,7 @@ from PySide.QtCore import QSettings, QLocale, QCoreApplication
 import inselect
 
 from inselect.lib.utils import debug_print
-from inselect.gui.app import MainWindow
+from inselect.gui.main_window import MainWindow
 
 # The QSettings default constructor uses the application's organizationName
 # and applicationName properties.

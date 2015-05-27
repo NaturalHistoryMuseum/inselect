@@ -1,5 +1,3 @@
-import re
-from functools import partial
 from itertools import izip, repeat
 
 from PySide import QtGui

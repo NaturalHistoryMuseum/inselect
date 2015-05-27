@@ -6,7 +6,7 @@ import re
 from functools import partial
 
 from inselect.lib.metadata import MetadataTemplate
-from inselect.lib.parse import parse_matches_re, parse_int_gt0
+from inselect.lib.parse import parse_matches_re
 
 
 template = MetadataTemplate(

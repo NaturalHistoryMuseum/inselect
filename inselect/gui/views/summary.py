@@ -1,4 +1,3 @@
-from PySide.QtCore import Qt
 from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print

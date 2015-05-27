@@ -1,7 +1,7 @@
 from itertools import izip
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt, QRect, QRectF
+from PySide.QtCore import QRect
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print

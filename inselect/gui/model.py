@@ -1,12 +1,8 @@
-import json
-
 from copy import deepcopy
-from itertools import izip
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
 
-from inselect.lib.metadata import MetadataTemplate
 from inselect.lib.utils import debug_print
 
 from .metadata_library import metadata_library
@@ -31,15 +27,17 @@ class Model(QAbstractItemModel):
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
         self._modified = False
-        self._clear_model_data()
+        self._data = []             # A list of dicts
+        self._image_array = None    # np.nd_array, for segmentation
+        self._pixmap = None         # Instance of QPixmap
 
     def _clear_model_data(self):
         """Clear data structures
         """
         self.set_modified(False)
-        self._data = [] # A list of dicts
-        self._image_array = None    # np.nd_array, for segmentation
-        self._pixmap = None    # Instance of QPixmap
+        self._data = []
+        self._image_array = None
+        self._pixmap = None
 
     def clear(self):
         """Empty data

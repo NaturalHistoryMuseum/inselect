@@ -3,11 +3,8 @@
 """
 
 import argparse
-import re
-import stat
 import traceback
 
-from itertools import chain
 from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
@@ -63,5 +60,5 @@ def main():
     ingest_from_directory(args.inbox, args.docs)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

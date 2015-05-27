@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from functools import wraps
 from itertools import groupby
-from operator import itemgetter
 
 import cv2
 import numpy as np
@@ -40,7 +39,7 @@ def contiguous(values):
     (25, 4)
     """
     # Taken from http://stackoverflow.com/a/2361991
-    for k, g in groupby(enumerate(values), lambda (i,x):i-x):
+    for k, g in groupby(enumerate(values), lambda (i, x):i-x):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1

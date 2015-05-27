@@ -1,11 +1,7 @@
-from pathlib import Path
-
 import numpy as np
 
 from PySide.QtGui import QIcon, QMessageBox
 
-from inselect.gui import icons
-from inselect.lib.inselect_error import InselectError
 from inselect.lib.segment import segment_grabcut
 from inselect.lib.utils import debug_print
 

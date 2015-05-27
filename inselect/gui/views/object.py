@@ -1,8 +1,7 @@
-from PySide.QtCore import QRect, QSize, QPoint, Qt, QCoreApplication
+from PySide.QtCore import QRect, QSize, QPoint, Qt
 from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
                           QAbstractItemView, QAbstractItemDelegate,
-                          QStyleOptionButton, QItemSelectionModel,
-                          QColor, QFont)
+                          QItemSelectionModel, QColor, QFont)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import COLOURS

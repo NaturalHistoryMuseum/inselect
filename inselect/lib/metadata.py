@@ -2,12 +2,10 @@
 """
 from __future__ import print_function
 
-import json
-import re
 
 from collections import Counter, namedtuple, OrderedDict
 from functools import partial
-from itertools import chain, count, ifilter, izip
+from itertools import count, ifilter, izip
 from pathlib import Path
 
 from .utils import debug_print, duplicated, FormatDefault

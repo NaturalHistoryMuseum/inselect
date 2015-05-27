@@ -13,7 +13,7 @@ from inselect.lib.utils import make_readonly
 
 from gui_test import MainWindowTest
 
-from inselect.gui.app import MainWindow
+from inselect.gui.main_window import MainWindow
 
 from inselect.tests.utils import temp_directory_with_files
 
