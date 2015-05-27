@@ -697,9 +697,9 @@ class MainWindow(QtGui.QMainWindow):
         self.select_none_action = QAction("Select &None", self,
             shortcut="ctrl+D", triggered=self.select_none)
         self.next_box_action = QAction("Next box", self,
-            shortcut="N", triggered=partial(self.select_next_prev, next=True))
+            shortcut="ctrl+N", triggered=partial(self.select_next_prev, next=True))
         self.previous_box_action = QAction("Previous box", self,
-            shortcut="P", triggered=partial(self.select_next_prev, next=False))
+            shortcut="ctrl+P", triggered=partial(self.select_next_prev, next=False))
 
         self.delete_action = QAction("&Delete selected", self,
             shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
@@ -712,9 +712,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.rotate_clockwise_action = QAction(
             "Rotate clockwise", self,
-            shortcut="R", triggered=partial(self.rotate90, clockwise=True))
+            shortcut="ctrl+R", triggered=partial(self.rotate90, clockwise=True))
         self.rotate_counter_clockwise_action = QAction(
-            "Rotate counter-clockwise", self, shortcut="L",
+            "Rotate counter-clockwise", self, shortcut="ctrl+L",
             triggered=partial(self.rotate90, clockwise=False))
 
         # Plugins
@@ -772,9 +772,9 @@ class MainWindow(QtGui.QMainWindow):
             statusTip="Display plugin image", checkable=True)
 
         self.show_object_grid_action = QAction('Show grid', self,
-            shortcut='g', triggered=self.show_grid)
+            shortcut='ctrl+g', triggered=self.show_grid)
         self.show_object_expanded_action = QAction('Show expanded', self,
-            shortcut='e', triggered=self.show_expanded)
+            shortcut='ctrl+e', triggered=self.show_expanded)
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
