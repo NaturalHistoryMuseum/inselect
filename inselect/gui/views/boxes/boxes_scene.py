@@ -108,10 +108,10 @@ class BoxesScene(QtGui.QGraphicsScene):
         key = event.key()
 
         # Mapping from cursor key to adjustment (dx1, dy1, dx2, dy2)
-        cursors = { Qt.Key_Up:    ( 0.0,-1.0, 0.0,-1.0),
-                    Qt.Key_Right: ( 1.0, 0.0, 1.0, 0.0),
-                    Qt.Key_Down:  ( 0.0, 1.0, 0.0, 1.0),
-                    Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
+        cursors = {Qt.Key_Up:    ( 0.0,-1.0, 0.0,-1.0),
+                   Qt.Key_Right: ( 1.0, 0.0, 1.0, 0.0),
+                   Qt.Key_Down:  ( 0.0, 1.0, 0.0, 1.0),
+                   Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
                   }
 
         if key in cursors.keys():

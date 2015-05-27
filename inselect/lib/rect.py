@@ -26,21 +26,21 @@ class Rect(collections.namedtuple('Rect', ['left', 'top', 'width', 'height'])):
     @property
     def bottomright(self):
         "Point(x, y)"
-        return Point(self.left+self.width, self.top+self.height)
+        return Point(self.left + self.width, self.top + self.height)
 
     @property
     def centre(self):
         "Point(x, y)"
-        return Point(self.left+self.width/2, self.top+self.height/2)
+        return Point(self.left + self.width / 2, self.top + self.height / 2)
 
     def __eq__(self, other):
         if isinstance(other, Rect):
-            return (self.left==other.left and
-                    self.top==other.top and
-                    self.width==other.width and
-                    self.height==other.height)
+            return (self.left == other.left and
+                    self.top == other.top and
+                    self.width == other.width and
+                    self.height == other.height)
         else:
             raise NotImplementedError()
 
     def __ne__(self, other):
-      return not self==other
+        return not self == other

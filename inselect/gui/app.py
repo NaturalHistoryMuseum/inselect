@@ -212,6 +212,7 @@ class MainWindow(QtGui.QMainWindow):
             class NewDoc(object):
                 def __init__(self, image):
                     self.image = image
+                    self.document_path = None
 
                 def __call__(self, progress):
                     progress('Creating thumbnail of scanned image')
@@ -265,7 +266,6 @@ class MainWindow(QtGui.QMainWindow):
         """Saves the document
         """
         debug_print('MainWindow.save_document')
-        items = []
 
         self.model.to_document(self.document)
         self.document.save()

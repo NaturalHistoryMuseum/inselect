@@ -60,5 +60,5 @@ def main():
     ingest_from_directory(args.inbox, args.docs)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

@@ -32,12 +32,12 @@ except ImportError:
 def _datamatrix_engine():
     """Returns callable that is the preferred database engine
     """
-    engines = [ (InliteEngine, partial(InliteEngine, datamatrix=True)),
-                (AccusoftEngine, partial(AccusoftEngine, datamatrix=True)),
-                (SoftekEngine, partial(SoftekEngine, datamatrix=True)),
-                (LibDMTXEngine, LibDMTXEngine),
+    engines = [(InliteEngine, partial(InliteEngine, datamatrix=True)),
+               (AccusoftEngine, partial(AccusoftEngine, datamatrix=True)),
+               (SoftekEngine, partial(SoftekEngine, datamatrix=True)),
+               (LibDMTXEngine, LibDMTXEngine),
               ]
-    engines = [f for e,f in engines if e.available()]
+    engines = [f for e, f in engines if e.available()]
     return engines[0] if engines else None
 
 DATAMATRIX_ENGINE = _datamatrix_engine()
@@ -109,5 +109,5 @@ def main():
     BarcodeReader(args.debug_barcodes).process_dir(Path(args.dir))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()

@@ -235,8 +235,8 @@ class InselectDocument(object):
         # Convert Rect instances to lists
         items = deepcopy(self._items)
         for i in xrange(0, len(items)):
-            l,t,w,h = items[i]['rect']
-            items[i]['rect'] = [l,t,w,h]
+            l, t, w, h = items[i]['rect']
+            items[i]['rect'] = [l, t, w, h]
 
         self.properties.update({'Saved by': user_name(),
                                 'Saved on': datetime.now(pytz.timezone("UTC")),
@@ -325,9 +325,9 @@ class InselectDocument(object):
                     debug_print(msg.format(p, width))
 
                     img = self._scanned.array
-                    factor  = float(width)/img.shape[1]
+                    factor = float(width)/img.shape[1]
                     debug_print('Resizing to [{0}] pixels wide'.format(width))
-                    thumbnail = cv2.resize(img, (0,0), fx=factor, fy=factor)
+                    thumbnail = cv2.resize(img, (0, 0), fx=factor, fy=factor)
                     debug_print('Writing to [{0}]'.format(p))
                     # TODO Copy EXIF tags?
                     res = cv2.imwrite(str(p), thumbnail)
@@ -359,7 +359,7 @@ class InselectDocument(object):
         with path.open('wb') as f:
             w = UnicodeWriter(f)
             w.writerow(['Item',] + fields)
-            for index,item in enumerate(self._items):
-                w.writerow([1+index] + [item['fields'].get(f) for f in fields])
+            for index, item in enumerate(self._items):
+                w.writerow([1+index] + [item['fields'].get(field) for field in fields])
 
         return path

@@ -57,9 +57,9 @@ def rmtree_readonly(path):
             # ensure parent directory is writeable too
             pardir = os.path.abspath(os.path.join(path, os.path.pardir))
             if not os.access(pardir, os.W_OK):
-                os.chmod(pardir, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO)
+                os.chmod(pardir, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
-            os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) # 0777
+            os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
 
             func(path)
         else:

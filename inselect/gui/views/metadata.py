@@ -68,7 +68,7 @@ class MetadataView(QAbstractItemView):
         # Put values into the controls
         metadata = [i.data(MetadataRole) for i in selected]
         for field, control in self._form_container.controls.iteritems():
-            values = {m.get(field,'') for m in metadata}
+            values = {m.get(field, '') for m in metadata}
             control.selection_changed(selected, values)
 
 
