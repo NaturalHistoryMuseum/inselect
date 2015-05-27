@@ -9,7 +9,7 @@ from PySide.QtCore import QLocale
 from PySide.QtGui import QApplication
 
 from inselect.app import main
-from inselect.gui.app import MainWindow
+from inselect.gui.main_window import MainWindow
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 

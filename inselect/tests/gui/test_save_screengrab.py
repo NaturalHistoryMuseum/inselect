@@ -11,8 +11,6 @@ from PySide.QtGui import QFileDialog
 
 from gui_test import MainWindowTest
 
-from inselect.gui.app import MainWindow
-
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
