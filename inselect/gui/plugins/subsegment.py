@@ -9,29 +9,21 @@ from .plugin import Plugin
 
 
 class SubsegmentPlugin(Plugin):
+    NAME = 'Subsegment box'
+    DESCRIPTION = ('Will subsegment and replace the selected box using seed '
+                   'points.')
+
     def __init__(self, document, parent):
+        super(SubsegmentPlugin, self).__init__()
         self.rects = self.display = None
         self.document = document
         self.parent = parent
 
     @classmethod
-    def name(cls):
-        """Name of the plugin
-        """
-        return 'Subsegment box'
-
-    @classmethod
-    def description(cls):
-        """A description of the effect of running this plugin.
-        """
-        return ('Will subsegment and replace the selected box using seed '
-                'points.')
-
-    @classmethod
     def icon(cls):
         return QIcon(':/data/subsegment_icon.png')
 
-    def proceed(self):
+    def can_be_run(self):
         # TODO LH Fix this horrible, horrible, horrible, horrible, horrible hack
         selected = self.parent.view_object.selectedIndexes()
         items_of_indexes = self.parent.view_graphics_item.items_of_indexes
@@ -49,8 +41,6 @@ class SubsegmentPlugin(Plugin):
             return True
 
     def __call__(self, progress):
-        """
-        """
         debug_print('SubsegmentPlugin.__call__')
 
         if self.document.thumbnail:

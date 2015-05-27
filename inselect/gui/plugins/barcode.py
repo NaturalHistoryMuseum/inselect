@@ -17,34 +17,23 @@ except ImportError:
 
 
 class BarcodePlugin(Plugin):
+    NAME = 'Read barcodes'
+    DESCRIPTION = ("Will load the full-resolution scanned image and will set "
+                   "each box's 'catalogNumber' metadata field with value(s) of "
+                   "any barcodes.")
 
     def __init__(self, document, parent):
+        super(BarcodePlugin, self).__init__()
         if not gouda:
             raise InselectError('Barcode decoding is not available')
         else:
             self.document = document
 
     @classmethod
-    def name(cls):
-        """Name of the plugin
-        """
-        return 'Read barcodes'
-
-    @classmethod
-    def description(cls):
-        """A description of the effect of running this plugin.
-        """
-        return ("Will load the full-resolution scanned image and will set each "
-                "box's 'catalogNumber' metadata field with value(s) of "
-                "any barcodes.")
-
-    @classmethod
     def icon(cls):
-        return QIcon(":/data/barcode_icon.png")
+        return QIcon(':/data/barcode_icon.png')
 
     def __call__(self, progress):
-        """
-        """
         debug_print('BarcodePlugin.__call__')
 
         if InliteEngine.available():

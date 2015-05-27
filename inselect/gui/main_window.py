@@ -99,8 +99,9 @@ class MainWindow(QtGui.QMainWindow):
         self.view_summary.setSelectionModel(sm)
 
         # Plugins
-        self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
-        self.plugin_actions = len(self.plugins) * [None]    # QActions
+        self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
+        # QActions. Populated in self.create_actions()
+        self.plugin_actions = len(self.plugins) * [None]
         self.plugin_image = None
         self.plugin_image_visible = False
 
@@ -569,9 +570,9 @@ class MainWindow(QtGui.QMainWindow):
 
             # Create the plugin
             operation = plugin(self.document, self)
-            if operation.proceed():
+            if operation.can_be_run():
                 self.run_in_worker(operation,
-                                   operation.name(),
+                                   plugin.NAME,
                                    self.plugin_finished)
             else:
                 pass
@@ -721,15 +722,14 @@ class MainWindow(QtGui.QMainWindow):
         # Plugin shortcuts start at F5
         shortcut_offset = 5
         for index, plugin in enumerate(self.plugins):
-            action = QAction(plugin.name(), self,
+            action = QAction(plugin.NAME, self,
                              triggered=partial(self.run_plugin, index))
             shortcut_fkey = index + shortcut_offset
             if shortcut_fkey < 13:
                 # Keyboards typically have 12 function keys
                 action.setShortcut('f{0}'.format(shortcut_fkey))
-            icon = plugin.icon()
-            if icon:
-                action.setIcon(icon)
+            if hasattr(plugin, 'icon'):
+                action.setIcon(plugin.icon())
             self.plugin_actions[index] = action
 
         # View menu
@@ -783,7 +783,7 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
-        for action in [a for a in self.plugin_actions if a.icon()]:
+        for action in filter(lambda a: a.icon(), self.plugin_actions):
             self.toolbar.addAction(action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
