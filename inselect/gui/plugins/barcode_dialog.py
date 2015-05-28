@@ -113,10 +113,6 @@ class BarcodeDialog(QDialog):
         self._buttons.accepted.disconnect()
         self._buttons.rejected.disconnect()
 
-    #     self._radio_zbar.disconnect()
-    #     self._radio_libdmtx.disconnect()
-    #     self._radio_inlite.disconnect()
-
         super(BarcodeDialog, self).done(r)
 
     def accept(self):
