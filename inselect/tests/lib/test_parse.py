@@ -44,7 +44,7 @@ class TestParse(unittest.TestCase):
         self.assertEqual(2001, parse_float_ge0(' 2001   '))
         self.assertEqual(2001.0, parse_float_ge0(' 2001   '))
 
-        self.assertRaises(ValueError, parse_float_gt0,'-10')
+        self.assertRaises(ValueError, parse_float_ge0,'-10')
 
     def test_parse_date(self):
         self.assertEqual(date(2012,8,1), parse_date('2012-08-01'))
@@ -70,6 +70,10 @@ class TestParse(unittest.TestCase):
         # February in a non-leap year
         self.assertRaises(ValueError,
                           parse_sparse_date, '2011', '2', '29')
+
+        # Two-digit year
+        self.assertRaises(ValueError,
+                          parse_sparse_date, '11', '2', '29')
 
     def test_parse_four_digit_int(self):
         self.assertEqual(2001, parse_four_digit_int('2001'))

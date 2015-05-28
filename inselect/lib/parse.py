@@ -64,12 +64,9 @@ def parse_sparse_date(year, month, day):
     year = parse_four_digit_int(year)
     month = parse_one_or_two_digit_int(month)
     day = parse_one_or_two_digit_int(day)
-    if year:
-        return SparseDate(year,
-                          month if month else None,
-                          day if day else None)
-    else:
-        raise ValueError(u'Invalid values [{0}] [{1}] [{2}]'.format(value))
+    return SparseDate(year,
+                      month if month else None,
+                      day if day else None)
 
 def parse_four_digit_int(value):
     """Returns an int or None. Value should be a string of four digits or
