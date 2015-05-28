@@ -27,7 +27,7 @@ class BarcodeDialog(QDialog):
         self._radio_libdmtx = self._create_libdmtx(settings)
         self._radio_zbar = self._create_zbar(settings)
         (self._radio_inlite, self._inlite_1d, self._inlite_datamatrix,
-         self._inlite_pdf471, self._inlite_qr) = self._create_inlite(settings)
+         self._inlite_pdf417, self._inlite_qr) = self._create_inlite(settings)
 
         self._buttons = QDialogButtonBox(QDialogButtonBox.Ok |
                                          QDialogButtonBox.Cancel)
@@ -81,8 +81,8 @@ class BarcodeDialog(QDialog):
         radio_1d.setChecked('1d' == format)
         radio_datamatrix = QRadioButton('DataMatrix')
         radio_datamatrix.setChecked('datamatrix' == format)
-        radio_pdf471 = QRadioButton('PDF 471')
-        radio_pdf471.setChecked('pdf471' == format)
+        radio_pdf417 = QRadioButton('PDF 417')
+        radio_pdf417.setChecked('pdf417' == format)
         radio_qr = QRadioButton('QR Codes')
         radio_qr.setChecked('qrcode' == format)
 
@@ -90,7 +90,7 @@ class BarcodeDialog(QDialog):
         layout.addWidget(prompt)
         layout.addWidget(radio_1d)
         layout.addWidget(radio_datamatrix)
-        layout.addWidget(radio_pdf471)
+        layout.addWidget(radio_pdf417)
         layout.addWidget(radio_qr)
 
         prompt = QLabel('A wide range of barcodes')
@@ -102,7 +102,7 @@ class BarcodeDialog(QDialog):
 
         self._layout.addWidget(group)
 
-        return radio, radio_1d, radio_datamatrix, radio_pdf471, radio_qr
+        return radio, radio_1d, radio_datamatrix, radio_pdf417, radio_qr
 
     def done(self, r):
         """QDialog virtual
@@ -137,8 +137,8 @@ class BarcodeDialog(QDialog):
             format = '1d'
         elif self._inlite_datamatrix.isChecked():
             format = 'datamatrix'
-        elif self._inlite_pdf471.isChecked():
-            format = 'pdf471'
+        elif self._inlite_pdf417.isChecked():
+            format = 'pdf417'
         else:
             format = 'qrcode'
 
