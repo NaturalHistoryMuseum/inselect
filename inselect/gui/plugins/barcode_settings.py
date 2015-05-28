@@ -13,15 +13,15 @@ except ImportError:
 
 def inlite_available():
     "Returns True if the Inlite engine is available"
-    return InliteEngine and InliteEngine.available()
+    return InliteEngine is not None and InliteEngine.available()
 
 def libdmtx_available():
     "Returns True if the libdmtx engine is available"
-    return LibDMTXEngine and LibDMTXEngine.available()
+    return LibDMTXEngine is not None and LibDMTXEngine.available()
 
 def zbar_available():
     "Returns True if the zbar engine is available"
-    return ZbarEngine and ZbarEngine.available()
+    return ZbarEngine is not None and ZbarEngine.available()
 
 def current_settings():
     """Returns a dict of the current settings:
