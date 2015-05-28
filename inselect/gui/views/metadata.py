@@ -268,20 +268,28 @@ class FieldEdit(QLineEdit):
         """True if this field contains either a valid value or
         _MULTIPLE_FIELD_VALUES
         """
-        value = self.text()
-        if (not self._parser or
-            (self.multiple_values and _MULTIPLE_FIELD_VALUES == value)):
-            # Either no validation for this field or more than one values among
-            # selected items
+        if not self.selected:
+            # No boxes selected
             return True
         else:
-            try:
-                self._parser(value)
-            except ValueError:
-                # Invalid value
-                return False
+            value = self.text()
+            if (not self._parser or
+                (self.multiple_values and _MULTIPLE_FIELD_VALUES == value)):
+                # Either no validation for this field or more than one values
+                # among selected items
+                return True
+            elif value:
+                # One or more boxes selected and a single value among the
+                # selection
+                try:
+                    self._parser(value)
+                except ValueError:
+                    # Invalid value
+                    return False
+                else:
+                    # Valid value
+                    return True
             else:
-                # Valid value
                 return True
 
 
