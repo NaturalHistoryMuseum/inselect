@@ -54,6 +54,7 @@ class TestBarcodeDialog(MainWindowTest):
     @patch.object(QSettings, 'value')
     def test_dialog_options_altered_inlite_1d(self, mock_value, mock_setValue):
         "User chooses Inlite 1D"
+        side_effect = {}.get
         mock_value.side_effect = side_effect
         dlg = BarcodeDialog()
         dlg._radio_inlite.setChecked(True)
