@@ -13,7 +13,7 @@ except ImportError:
 
 def inlite_available():
     "Returns True if the Inlite engine is available"
-    return True or (InliteEngine and InliteEngine.available())
+    return InliteEngine and InliteEngine.available()
 
 def libdmtx_available():
     "Returns True if the libdmtx engine is available"

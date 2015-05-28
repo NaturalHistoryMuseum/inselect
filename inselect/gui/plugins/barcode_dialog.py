@@ -1,12 +1,20 @@
 from PySide.QtCore import Qt
 from PySide.QtGui import (QDialog, QRadioButton, QVBoxLayout, QLabel, QWidget,
-                          QDialogButtonBox)
+                          QDialogButtonBox, QFrame)
 
 from inselect.lib.utils import debug_print
 
 from .barcode_settings import (current_settings, update_settings,
                                inlite_available, libdmtx_available,
                                zbar_available)
+
+
+class HorizontalLine(QFrame):
+    """A horizontal line
+    """
+    def __init__(self, parent=None):
+        super(HorizontalLine, self).__init__(parent)
+        self.setFrameShape(QFrame.HLine)
 
 
 class BarcodeDialog(QDialog):
@@ -16,8 +24,8 @@ class BarcodeDialog(QDialog):
         settings = current_settings()
 
         self._layout = QVBoxLayout()
-        self._radio_zbar = self._create_zbar(settings)
         self._radio_libdmtx = self._create_libdmtx(settings)
+        self._radio_zbar = self._create_zbar(settings)
         (self._radio_inlite, self._inlite_1d, self._inlite_datamatrix,
          self._inlite_pdf471, self._inlite_qr) = self._create_inlite(settings)
 
@@ -43,6 +51,7 @@ class BarcodeDialog(QDialog):
         radio.toggled.connect(prompt.setEnabled)
         self._layout.addWidget(prompt)
 
+        self._layout.addWidget(HorizontalLine())
         return radio
 
     def _create_libdmtx(self, settings):
@@ -56,6 +65,7 @@ class BarcodeDialog(QDialog):
         radio.toggled.connect(prompt.setEnabled)
         self._layout.addWidget(prompt)
 
+        self._layout.addWidget(HorizontalLine())
         return radio
 
     def _create_inlite(self, settings):
