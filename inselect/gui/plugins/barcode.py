@@ -1,21 +1,19 @@
 from itertools import count, izip
 
-from PySide.QtCore import QSettings
 from PySide.QtGui import QIcon
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
 from .plugin import Plugin
+from .barcode_dialog import BarcodeDialog
+from .barcode_settings import load_engine
 
 try:
-    import gouda
-    from gouda.engines import InliteEngine, LibDMTXEngine, ZbarEngine
     from gouda.strategies.roi.roi import roi
     from gouda.strategies.resize import resize
 except ImportError:
-    gouda = None
-
+    roi = resize = None
 
 
 class BarcodePlugin(Plugin):
@@ -26,7 +24,7 @@ class BarcodePlugin(Plugin):
 
     def __init__(self, document, parent):
         super(BarcodePlugin, self).__init__()
-        if not gouda:
+        if not roi and not resize:
             raise InselectError('Barcode decoding is not available')
         else:
             self.document = document
@@ -38,7 +36,7 @@ class BarcodePlugin(Plugin):
     def __call__(self, progress):
         debug_print('BarcodePlugin.__call__')
 
-        engine = _load_engine()
+        engine = load_engine()
 
         progress('Loading full-res image')
         image_array = self.document.scanned.array
@@ -70,18 +68,7 @@ class BarcodePlugin(Plugin):
                 return u' '.join([b.data for b in barcodes])
         return None
 
-
-def _load_engine():
-    """Returns the user's choice of barcode reading engine
-    """
-    s = QSettings()
-    engine = s.value("barcode/engine", "libdmtx")
-    if 'libdmtx' == engine:
-        return LibDMTXEngine()
-    elif 'zbar' == engine:
-        return ZbarEngine()
-    elif 'inlite' == engine:
-        format = s.value("barcode/format", "datamatrix")
-        return InliteEngine(format)
-    else:
-        raise ValueError('Unrecognised barcode reader [{0}]'.format(engine))
+    @classmethod
+    def config(self, parent):
+        dlg = BarcodeDialog(parent)
+        dlg.exec_()

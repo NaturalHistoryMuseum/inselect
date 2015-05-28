@@ -102,6 +102,8 @@ class MainWindow(QtGui.QMainWindow):
         self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
         # QActions. Populated in self.create_actions()
         self.plugin_actions = len(self.plugins) * [None]
+        # QActions. Populated in self.create_actions()
+        self.plugin_config_ui_actions = len(self.plugins) * [None]
         self.plugin_image = None
         self.plugin_image_visible = False
 
@@ -577,6 +579,16 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 pass
 
+    @report_to_user
+    def show_plugin_config(self, plugin_number):
+        debug_print("MainWindow.show_plugin_config")
+
+        if (plugin_number < 0 or plugin_number > len(self.plugins) or
+            self.plugin_config_ui_actions[plugin_number] is None):
+            raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
+        else:
+            self.plugins[plugin_number].config(self)
+
     def plugin_finished(self, operation):
         """Called when a plugin has finished running in a worker thread
         """
@@ -731,6 +743,11 @@ class MainWindow(QtGui.QMainWindow):
             if hasattr(plugin, 'icon'):
                 action.setIcon(plugin.icon())
             self.plugin_actions[index] = action
+            if hasattr(plugin, 'config'):
+                ui_action = QAction(u'Configure {0}'.format(plugin.NAME), self,
+                              triggered=partial(self.show_plugin_config, index))
+                ui_action.setEnabled(True)
+                self.plugin_config_ui_actions[index] = ui_action
 
         # View menu
         # The obvious approach is to set the trigger to
@@ -814,6 +831,8 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addAction(self.rotate_counter_clockwise_action)
         self.editMenu.addSeparator()
         for action in self.plugin_actions:
+            self.editMenu.addAction(action)
+        for action in (a for a in self.plugin_config_ui_actions if a):
             self.editMenu.addAction(action)
 
         self.viewMenu = QMenu("&View", self)
