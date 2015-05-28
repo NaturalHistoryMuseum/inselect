@@ -1,33 +1,21 @@
 class Plugin(object):
     """Base class for plugins.
+
+    The __init__ method of derived classes should accept two arguments:
+        document - an instance of InselectDocument
+        parent - a QMainWindow
+
+    Derived classes should contain
+        NAME - a string
+        DESCRIPTION - a string
+
+    Derived classes can contain
+        icon() - a classmethod that returns a QIcon
     """
+
     # TODO LH Config UI and settings
 
-    def __init__(self, document, parent):
-        """document - an instance of InselectDocument
-        parent - a QMainWindow
-        """
-        raise NotImplementedError('name')
-
-    @classmethod
-    def name(cls):
-        """Name of the plugin
-        """
-        raise NotImplementedError('name')
-
-    @classmethod
-    def description(cls):
-        """A description of the effect of running this plugin.
-        """
-        return None
-
-    @classmethod
-    def icon(cls):
-        """A PySide.QtGui.QIcon or None
-        """
-        return None
-
-    def proceed(self):
+    def can_be_run(self):
         """If False is returned, the plugin is not run. If True is returned,
         the plugin is run in its own thread.
         """

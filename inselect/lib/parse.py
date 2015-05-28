@@ -64,12 +64,9 @@ def parse_sparse_date(year, month, day):
     year = parse_four_digit_int(year)
     month = parse_one_or_two_digit_int(month)
     day = parse_one_or_two_digit_int(day)
-    if year:
-        return SparseDate(year,
-                          month if month else None,
-                          day if day else None)
-    else:
-        raise ValueError(u'Invalid values [{0}] [{1}] [{2}]'.format(value))
+    return SparseDate(year,
+                      month if month else None,
+                      day if day else None)
 
 def parse_four_digit_int(value):
     """Returns an int or None. Value should be a string of four digits or
@@ -188,22 +185,22 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
     elif seconds and not 0.0<=seconds<60.0:
         msg = u'Bad seconds [{0}]. Require a number between 0 and 60'
         raise ValueError(msg.format(seconds))
-
-    # Assemble 
-    degrees += minutes / 60.0 if minutes else 0.0
-    degrees += seconds / 3600.0 if seconds else 0.0
-
-    degrees *= -1.0 if negate else 1.0
-
-    # Check bounds
-    if not is_latitude and not -180 <= degrees <= 180:
-        msg = u'Longitude [{0}] is outside of the range -180 to 180'
-        raise ValueError(msg.format(degrees))
-    elif is_latitude and not -90 <= degrees <= 90:
-        msg = u'Computed latitude [{0}] is outside of the range -90 to 90'
-        raise ValueError(msg.format(degrees))
     else:
-        return degrees
+        # Compute the floating-point degrees of arc
+        degrees += minutes / 60.0 if minutes else 0.0
+        degrees += seconds / 3600.0 if seconds else 0.0
+
+        degrees *= -1.0 if negate else 1.0
+
+        # Check bounds
+        if not is_latitude and not -180 <= degrees <= 180:
+            msg = u'Longitude [{0}] is outside of the range -180 to 180'
+            raise ValueError(msg.format(degrees))
+        elif is_latitude and not -90 <= degrees <= 90:
+            msg = u'Computed latitude [{0}] is outside of the range -90 to 90'
+            raise ValueError(msg.format(degrees))
+        else:
+            return degrees
 
 def parse_matches_re(re, error_message, v):
     """Raises ValueError(error_message) if v does not match re

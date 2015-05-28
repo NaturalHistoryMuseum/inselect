@@ -7,29 +7,21 @@ from .plugin import Plugin
 
 
 class SegmentPlugin(Plugin):
+    NAME = 'Segment image'
+    DESCRIPTION = ('Will segment the image, replacing all existing boxes and '
+                   'metadata.')
+
     def __init__(self, document, parent):
+        super(SegmentPlugin, self).__init__()
         self.rects = self.display = None
         self.document = document
         self.parent = parent
 
     @classmethod
-    def name(cls):
-        """Name of the plugin
-        """
-        return 'Segment image'
-
-    @classmethod
-    def description(cls):
-        """A description of the effect of running this plugin.
-        """
-        return ('Will segment the image, replacing all existing boxes and '
-                'metadata.')
-
-    @classmethod
     def icon(cls):
         return QIcon(':/data/segment_icon.png')
 
-    def proceed(self):
+    def can_be_run(self):
         if self.document.items:
             msg = ('Segmenting will cause all boxes and metadata to be '
                    'replaced.\n\nContinue and replace all existing '
@@ -41,8 +33,6 @@ class SegmentPlugin(Plugin):
             return True
 
     def __call__(self, progress):
-        """
-        """
         debug_print('SegmentPlugin.__call__')
         doc, display = segment_document(self.document, callback=progress)
 

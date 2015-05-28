@@ -102,8 +102,11 @@ class MainWindow(QtGui.QMainWindow):
         self.view_summary.setSelectionModel(sm)
 
         # Plugins
-        self.plugins = [SegmentPlugin, SubsegmentPlugin, BarcodePlugin]
-        self.plugin_actions = len(self.plugins) * [None]    # QActions
+        self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
+        # QActions. Populated in self.create_actions()
+        self.plugin_actions = len(self.plugins) * [None]
+        # QActions. Populated in self.create_actions()
+        self.plugin_config_ui_actions = len(self.plugins) * [None]
         self.plugin_image = None
         self.plugin_image_visible = False
 
@@ -606,12 +609,22 @@ class MainWindow(QtGui.QMainWindow):
 
             # Create the plugin
             operation = plugin(self.document, self)
-            if operation.proceed():
+            if operation.can_be_run():
                 self.run_in_worker(operation,
-                                   operation.name(),
+                                   plugin.NAME,
                                    self.plugin_finished)
             else:
                 pass
+
+    @report_to_user
+    def show_plugin_config(self, plugin_number):
+        debug_print("MainWindow.show_plugin_config")
+
+        if (plugin_number < 0 or plugin_number > len(self.plugins) or
+            self.plugin_config_ui_actions[plugin_number] is None):
+            raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
+        else:
+            self.plugins[plugin_number].config(self)
 
     def plugin_finished(self, operation):
         """Called when a plugin has finished running in a worker thread
@@ -758,16 +771,21 @@ class MainWindow(QtGui.QMainWindow):
         # Plugin shortcuts start at F5
         shortcut_offset = 5
         for index, plugin in enumerate(self.plugins):
-            action = QAction(plugin.name(), self,
+            action = QAction(plugin.NAME, self,
                              triggered=partial(self.run_plugin, index))
             shortcut_fkey = index + shortcut_offset
             if shortcut_fkey < 13:
                 # Keyboards typically have 12 function keys
                 action.setShortcut('f{0}'.format(shortcut_fkey))
-            icon = plugin.icon()
-            if icon:
-                action.setIcon(icon)
+            if hasattr(plugin, 'icon'):
+                action.setIcon(plugin.icon())
             self.plugin_actions[index] = action
+            if hasattr(plugin, 'config'):
+                ui_action = QAction(u'Configure {0}'.format(plugin.NAME), self,
+                              triggered=partial(self.show_plugin_config, index))
+                # Force menu items to appear on Mac
+                ui_action.setMenuRole(QAction.NoRole)
+                self.plugin_config_ui_actions[index] = ui_action
 
         # View menu
         # The obvious approach is to set the trigger to
@@ -820,7 +838,7 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
-        for action in [a for a in self.plugin_actions if a.icon()]:
+        for action in filter(lambda a: a.icon(), self.plugin_actions):
             self.toolbar.addAction(action)
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
@@ -853,6 +871,8 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addAction(self.rotate_counter_clockwise_action)
         self.editMenu.addSeparator()
         for action in self.plugin_actions:
+            self.editMenu.addAction(action)
+        for action in (a for a in self.plugin_config_ui_actions if a):
             self.editMenu.addAction(action)
 
         self.viewMenu = QMenu("&View", self)

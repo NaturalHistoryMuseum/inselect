@@ -6,58 +6,40 @@ from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
 from .plugin import Plugin
+from .barcode_dialog import BarcodeDialog
+from .barcode_settings import load_engine
 
 try:
-    import gouda
-    from gouda.engines import InliteEngine, LibDMTXEngine
     from gouda.strategies.roi.roi import roi
     from gouda.strategies.resize import resize
 
     import inselect.lib.utils
     import gouda.util
 except ImportError:
-    gouda = None
+    roi = resize = None
 
 
 class BarcodePlugin(Plugin):
+    NAME = 'Read barcodes'
+    DESCRIPTION = ("Will load the full-resolution scanned image and will set "
+                   "each box's 'catalogNumber' metadata field with value(s) of "
+                   "any barcodes.")
 
     def __init__(self, document, parent):
-        if not gouda:
+        super(BarcodePlugin, self).__init__()
+        if not roi and not resize:
             raise InselectError('Barcode decoding is not available')
         else:
             self.document = document
 
     @classmethod
-    def name(cls):
-        """Name of the plugin
-        """
-        return 'Read barcodes'
-
-    @classmethod
-    def description(cls):
-        """A description of the effect of running this plugin.
-        """
-        return ("Will load the full-resolution scanned image and will set each "
-                "box's 'catalogNumber' metadata field with value(s) of "
-                "any barcodes.")
-
-    @classmethod
     def icon(cls):
-        return QIcon(":/data/barcode_icon.png")
+        return QIcon(':/data/barcode_icon.png')
 
     def __call__(self, progress):
-        """
-        """
         debug_print('BarcodePlugin.__call__')
 
-        if InliteEngine.available():
-            debug_print('Using Inlite')
-            engine = InliteEngine(datamatrix=True)
-        elif LibDMTXEngine.available():
-            debug_print('Using LibDMTX')
-            engine = LibDMTXEngine()
-        else:
-            raise InselectError('No barcode decoding engine available')
+        engine = load_engine()
 
         gouda.util.DEBUG_PRINT = inselect.lib.utils.DEBUG_PRINT
 
@@ -90,3 +72,8 @@ class BarcodePlugin(Plugin):
                 strategy, barcodes = result
                 return u' '.join(sorted([b.data for b in barcodes]))
         return None
+
+    @classmethod
+    def config(self, parent):
+        dlg = BarcodeDialog(parent)
+        dlg.exec_()
