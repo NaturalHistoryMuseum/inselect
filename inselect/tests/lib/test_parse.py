@@ -67,12 +67,10 @@ class TestParse(unittest.TestCase):
                          tuple(parse_sparse_date('2012', '2', '29')))
 
         # February in a non-leap year
-        self.assertRaises(ValueError,
-                          parse_sparse_date, '2011', '2', '29')
+        self.assertRaises(ValueError, parse_sparse_date, '2011', '2', '29')
 
         # Two-digit year
-        self.assertRaises(ValueError,
-                          parse_sparse_date, '11', '2', '29')
+        self.assertRaises(ValueError, parse_sparse_date, '11', '2', '29')
 
     def test_parse_four_digit_int(self):
         self.assertEqual(2001, parse_four_digit_int('2001'))
@@ -125,8 +123,8 @@ class TestParseDegrees(unittest.TestCase):
         self.assertAlmostEqual(-179.99999999999721, parse_longitude('179 59 59.99999999 W'))
 
         # Zero degrees
-        self.assertEqual(0.5,                             parse_latitude('0 30 0 N'))
-        self.assertAlmostEqual(0.5083333333333333,        parse_latitude('0 30 30 N'))
+        self.assertEqual(0.5,                       parse_latitude('0 30 0 N'))
+        self.assertAlmostEqual(0.5083333333333333,  parse_latitude('0 30 30 N'))
 
         # All zeroes
         self.assertEqual(0, parse_latitude('0 0 0 N'))
