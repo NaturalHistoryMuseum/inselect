@@ -142,6 +142,7 @@ class BarcodeDialog(QDialog):
         # Necessary to avoid core dump on process exit
         self._buttons.accepted.disconnect()
         self._buttons.rejected.disconnect()
+        self._radio_inlite.toggled.disconnect()
 
         super(BarcodeDialog, self).done(r)
 
