@@ -18,12 +18,28 @@ class HorizontalLine(QFrame):
 
 
 class BarcodeDialog(QDialog):
+    STYLESHEET = """
+    QWidget {
+        margin-left: 30px;
+    }
+    """
+
     def __init__(self, parent=None):
         super(BarcodeDialog, self).__init__(parent)
 
         settings = current_settings()
 
         self._layout = QVBoxLayout()
+        prompt = QLabel(
+            'The "Read barcodes" command will set each box\'s "catalogNumber" '
+            'metadata field with value(s) of any barcodes.\n'
+            '\n'
+            'Use the controls below to indicate how barcodes should be read. '
+            'Some options might be unavailable.')
+        prompt.setWordWrap(True)
+        self._layout.addWidget(prompt)
+        self._layout.addWidget(HorizontalLine())
+
         self._radio_libdmtx = self._create_libdmtx(settings)
         self._radio_zbar = self._create_zbar(settings)
         (self._radio_inlite, self._inlite_1d, self._inlite_datamatrix,
@@ -41,49 +57,64 @@ class BarcodeDialog(QDialog):
         self.setWindowTitle('Read barcodes')
 
     def _create_zbar(self, settings):
-        radio = QRadioButton('The open-source zbar library')
+        radio = QRadioButton(
+            'My objects are labelled with either 1D barcodes or QR codes')
         radio.setChecked('zbar' == settings['engine'])
         radio.setEnabled(zbar_available())
         self._layout.addWidget(radio)
 
-        prompt = QLabel('1D and QR Code barcodes')
-        prompt.setEnabled(zbar_available() and 'zbar' == settings['engine'])
-        radio.toggled.connect(prompt.setEnabled)
+        prompt = QLabel('Barcodes will be decoded using the open-source '
+            '<a href="http://zbar.sourceforge.net/">ZBar</a> library')
+        prompt.setOpenExternalLinks(True)
+        prompt.setStyleSheet(self.STYLESHEET)
         self._layout.addWidget(prompt)
 
         self._layout.addWidget(HorizontalLine())
         return radio
 
     def _create_libdmtx(self, settings):
-        radio = QRadioButton('The open-source libdmtx library')
+        radio = QRadioButton('My objects are labelled with Data Matrix barcodes')
         radio.setChecked('libdmtx' == settings['engine'])
         radio.setEnabled(libdmtx_available())
         self._layout.addWidget(radio)
 
-        prompt = QLabel('DataMatrix barcodes')
-        prompt.setEnabled(libdmtx_available() and 'libdmtx' == settings['engine'])
-        radio.toggled.connect(prompt.setEnabled)
+        prompt = QLabel(
+            'Barcodes will be decoded using the open-source '
+            '<a href="http://www.libdmtx.org/">libdmtx</a> library')
+        prompt.setOpenExternalLinks(True)
+        prompt.setStyleSheet(self.STYLESHEET)
         self._layout.addWidget(prompt)
 
         self._layout.addWidget(HorizontalLine())
         return radio
 
     def _create_inlite(self, settings):
-        radio = QRadioButton('The commercial Inlite ClearImage library')
+        radio = QRadioButton(
+            'Either my objects are labelled with a barcode not listed above '
+            'or I would like the performance and reliability of a commerical '
+            'library')
         radio.setChecked('inlite' == settings['engine'])
         radio.setEnabled(inlite_available())
         self._layout.addWidget(radio)
 
-        prompt = QLabel('A wide range of barcodes')
+        prompt = QLabel(
+            'Only available on Windows. '
+            'Visit <a href="http://www.inliteresearch.com/">Inlite Research</a> '
+            'to download and install the Inlite Research\'s ClearImage library.')
+        prompt.setWordWrap(True)
+        prompt.setOpenExternalLinks(True)
+        prompt.setStyleSheet(self.STYLESHEET)
+        self._layout.addWidget(prompt)
 
+        prompt = QLabel('My objects are labelled with:')
         format = settings['inlite-format']
-        radio_1d = QRadioButton('1D')
+        radio_1d = QRadioButton('1D barcodes')
         radio_1d.setChecked('1d' == format)
-        radio_datamatrix = QRadioButton('DataMatrix')
+        radio_datamatrix = QRadioButton('Data Matrix barcodes')
         radio_datamatrix.setChecked('datamatrix' == format)
-        radio_pdf417 = QRadioButton('PDF 417')
+        radio_pdf417 = QRadioButton('PDF 417 barcodes')
         radio_pdf417.setChecked('pdf417' == format)
-        radio_qr = QRadioButton('QR Codes')
+        radio_qr = QRadioButton('QR codes')
         radio_qr.setChecked('qrcode' == format)
 
         layout = QVBoxLayout()
@@ -93,10 +124,9 @@ class BarcodeDialog(QDialog):
         layout.addWidget(radio_pdf417)
         layout.addWidget(radio_qr)
 
-        prompt = QLabel('A wide range of barcodes')
-
         group = QWidget()
         group.setLayout(layout)
+        group.setStyleSheet(self.STYLESHEET)
         radio.toggled.connect(group.setEnabled)
         group.setEnabled(inlite_available() and 'inlite' == settings['engine'])
 
