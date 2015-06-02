@@ -91,7 +91,7 @@ class BarcodeDialog(QDialog):
     def _create_inlite(self, settings):
         radio = QRadioButton(
             'Either my objects are labelled with a barcode not listed above '
-            'or I would like the performance and reliability of a commerical '
+            'or I would like the performance and reliability of a commercial '
             'library')
         radio.setChecked('inlite' == settings['engine'])
         radio.setEnabled(inlite_available())
