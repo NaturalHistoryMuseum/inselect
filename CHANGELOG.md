@@ -1,12 +1,21 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
-Version 0.1.8
+Version 0.1
 -------------
-- Open-source Data Matrix barcode decoding on Linux and Mac OS X (#88) (@quicklizard)
 - Work on metadata templates and associated validation (#116) (@quicklizard)
+- Fixed #159 - Unable to open jpegs with uppercase filename extension (@quicklizard)
+- Fixed #157 - ingest workflow tool should ignore _thumbnail images (@quicklizard)
+- Fixed #151 - 'Save screen grab' should suggest a filename (@quicklizard)
+- Fixed #150 - Support .bmp (@quicklizard)
+- Fixed #129 - Warn when a read-only document is opened (@quicklizard)
 - Fixed #121 - A menu option to save the boxes view to an image file (@quicklizard)
 - Fixed #120 - Show information about the scanned image (@quicklizard)
 - Fixed #117 - Bounding boxes can be created and moved outside of the image (@quicklizard)
+- Fixed #113 - A shortcut for navigating between the Boxes and Metadata views (@quicklizard)
+- Fixed #94 - Hard-coded keyboard shortcuts in help text (@quicklizard)
+- Fixed #88 - Open-source Data Matrix, 1D barcode, and QR code decoding on all OSes (@quicklizard)
+- Fixed #82 - CMD+backspace on OS X should delete selected boxes (@quicklizard)
+
 
 Version 0.1.7
 -------------
