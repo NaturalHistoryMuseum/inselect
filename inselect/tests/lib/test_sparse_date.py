@@ -6,50 +6,51 @@ from inselect.lib.sparse_date import SparseDate
 
 
 class TestSparseDate(unittest.TestCase):
-    def test_SparseDate(self):
+    def test_init(self):
         self.assertRaises(ValueError, SparseDate, None, None, None)
         self.assertEqual( (2012,1,1), tuple(SparseDate(2012, 1, 1)))
         self.assertEqual( (2012,12,31), tuple(SparseDate(2012, 12, 31)))
 
-        # As a bool
+    def test_as_bool(self):
         self.assertTrue(SparseDate(2012, None, None))
         self.assertTrue(SparseDate(2012, 1, None))
         self.assertTrue(SparseDate(2012, 1, 2))
 
-        # Resolution
+    def test_resolution(self):
         self.assertEqual( 'day', SparseDate(2012, 2, 29).resolution)
         self.assertEqual( 'month', SparseDate(2012, 2, None).resolution)
         self.assertEqual( 'year', SparseDate(2012, None, None).resolution)
 
+    def test_illegal_dates(self):
         # February in a leap year
         self.assertEqual( (2012,2,29), tuple(SparseDate(2012, 2, 29)))
 
         # February in a non-leap year
         self.assertRaises(ValueError, SparseDate, 2011, 2, 29)
 
-        # 0 should be treated as None
-        self.assertEqual( (2012,None,None), tuple(SparseDate(2012, None, None)))
-        self.assertEqual( (2012,1,None), tuple(SparseDate(2012, 1, None)))
-        self.assertEqual( (2012,None,None), tuple(SparseDate(2012, 0, 0)))
-        self.assertEqual( (2012,1,None), tuple(SparseDate(2012, 1, 0)))
+    def test_zero(self):
+        # Zero year, month or day
+        self.assertRaises(ValueError, SparseDate, 0000, None, None)
+        self.assertRaises(ValueError, SparseDate, 2000, 0, None)
+        self.assertRaises(ValueError, SparseDate, 2000, 1, 0)
 
-        # Invalid month
+    def test_invalid_month(self):
         self.assertRaises(ValueError, SparseDate, 2012, 0, 1)
         self.assertRaises(ValueError, SparseDate, 2012, -1, 1)
         self.assertRaises(ValueError, SparseDate, 2012, 13, 1)
 
-        # Invalid day
+    def test_invalid_day(self):
         self.assertRaises(ValueError, SparseDate, 2012, 1, -1)
         self.assertRaises(ValueError, SparseDate, 2012, 1, 32)
 
-         # Year not given
+    def test_missing_year(self):
         self.assertRaises(ValueError, SparseDate, None, 1, None)
         self.assertRaises(ValueError, SparseDate, None, 1, 1)
 
-        # Day given but not month
+    def test_missing_month(self):
         self.assertRaises(ValueError, SparseDate, 2012, None, 1)
 
-        # Non-integer values
+    def test_noninteger_values(self):
         self.assertRaises(ValueError, SparseDate, 2012.0, None, None)
         self.assertRaises(ValueError, SparseDate, 2012, 1.0, None)
         self.assertRaises(ValueError, SparseDate, 2012, 1, 1.0)

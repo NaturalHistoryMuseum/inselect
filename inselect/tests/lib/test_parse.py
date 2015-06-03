@@ -49,6 +49,7 @@ class TestParse(unittest.TestCase):
         self.assertEqual(date(2012,8,1), parse_date('2012-08-01'))
         self.assertEqual(date(2012,8,1), parse_date('2012-8-1'))
 
+        # Missing components
         self.assertRaises(ValueError, parse_date, '12-8-1')
         self.assertRaises(ValueError, parse_date, '12--1')
         self.assertRaises(ValueError, parse_date, '12-8-')
@@ -57,20 +58,28 @@ class TestParse(unittest.TestCase):
     def test_parse_sparse_date(self):
         # sparse_date delegates to assemble_sparse_date(), which has a more
         # comprehensive test plan.
-        self.assertEqual( (2012,1,1),
-                          tuple(parse_sparse_date('2012', '1', '1')))
-        self.assertEqual( (2012,12,31),
-                          tuple(parse_sparse_date('2012', '12', '31')))
+        self.assertEqual((2012,1,1),
+                         tuple(parse_sparse_date('2012-1-1')))
+        self.assertEqual((2012,12,31),
+                         tuple(parse_sparse_date('2012-12-31')))
 
         # February in a leap year
-        self.assertEqual( (2012,2,29),
-                         tuple(parse_sparse_date('2012', '2', '29')))
+        self.assertEqual((2012,2,29),
+                         tuple(parse_sparse_date('2012-2-29')))
 
         # February in a non-leap year
-        self.assertRaises(ValueError, parse_sparse_date, '2011', '2', '29')
+        self.assertRaises(ValueError, parse_sparse_date, '2011-2-29')
 
         # Two-digit year
-        self.assertRaises(ValueError, parse_sparse_date, '11', '2', '29')
+        self.assertRaises(ValueError, parse_sparse_date, '11-2-29')
+
+        # Missing components
+        self.assertRaises(ValueError, parse_sparse_date, '')
+        self.assertRaises(ValueError, parse_sparse_date, '2000-')
+        self.assertRaises(ValueError, parse_sparse_date, '2000-1-')
+        self.assertRaises(ValueError, parse_sparse_date, '2000-10-')
+        self.assertRaises(ValueError, parse_sparse_date, '2000--1')
+        self.assertRaises(ValueError, parse_sparse_date, '2000--10')
 
     def test_parse_four_digit_int(self):
         self.assertEqual(2001, parse_four_digit_int('2001'))
