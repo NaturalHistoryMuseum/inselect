@@ -15,6 +15,12 @@ Next public release
 - Fixed #88 - Open-source Data Matrix, 1D barcode, and QR code decoding on all OSes (@quicklizard)
 - Fixed #82 - CMD+backspace on OS X should delete selected boxes (@quicklizard)
 
+Version 0.1.12
+-------------
+*Natural History Museum internal release*
+- Fixed #161 - Free text metadata template (@quicklizard)
+- Fixed #160 - Missing Macrosiphum locations (@quicklizard)
+
 Version 0.1.11
 -------------
 *Natural History Museum internal release*
