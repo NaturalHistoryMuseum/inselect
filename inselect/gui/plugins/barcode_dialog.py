@@ -100,7 +100,7 @@ class BarcodeDialog(QDialog):
         prompt = QLabel(
             'Only available on Windows. '
             'Visit <a href="http://www.inliteresearch.com/">Inlite Research</a> '
-            'to download and install the Inlite Research\'s ClearImage library.')
+            'to download and install Inlite Research\'s ClearImage library.')
         prompt.setWordWrap(True)
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)
