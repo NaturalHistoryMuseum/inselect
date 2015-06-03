@@ -5,14 +5,35 @@ from datetime import date
 
 from .sparse_date import SparseDate
 
+# Private regular expressions
 
-DATE_YMD_RE = re.compile(r'^\s*([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})\s*$')
-DEGREES_RE = re.compile(ur'^\s*'
-                        ur'(?P<degrees>-?\d+(?:\.\d+)?)\s*[\sd°:]?\s*'
-                        ur"(?:(?:(?P<minutes>\d+(?:\.\d+)?)\s*[\s'′:]?\s*)?"
-                        ur"(?:(?P<seconds>\d+(?:\.\d+)?)\s*(?:(?:[\s\"″])|(?:''))?\s*)?)?"
-                        ur'(?P<direction>[NnSsEeWw]?)'
-                        ur'\s*$', flags=re.UNICODE)
+_TWO_DIGITS_RE = re.compile(r'^\s*[0-9]{1,2}\s*$')
+_FOUR_DIGITS_RE = re.compile(r'^\s*[0-9]{4}\s*$')
+
+# YYYY-M[M]-D[D]
+_DATE_YMD_RE = re.compile(r'^\s*([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})\s*$')
+
+# One of
+#   YYYY
+#   YYYY-M[M]
+#   YYYY-M[M]-D[D]
+_SPARSEDATE_RE = re.compile(
+    r'^\s*'
+    r'([0-9]{4})'
+    r'(?:-([0-9]{1,2})(?:-([0-9]{1,2}))?)?'
+    r'\s*$'
+)
+
+# Degrees latitude or longitude. Re strings are unicode in order to match
+# degrees symbol (°)
+_DEGREES_RE = re.compile(
+    ur'^\s*'
+    ur'(?P<degrees>-?\d+(?:\.\d+)?)\s*[\sd°:]?\s*'
+    ur"(?:(?:(?P<minutes>\d+(?:\.\d+)?)\s*[\s'′:]?\s*)?"
+    ur"(?:(?P<seconds>\d+(?:\.\d+)?)\s*(?:(?:[\s\"″])|(?:''))?\s*)?)?"
+    ur'(?P<direction>[NnSsEeWw]?)'
+    ur'\s*$', flags=re.UNICODE
+)
 
 def parse_int_gt0(value):
     """Returns an int that is greater than zero
@@ -56,23 +77,30 @@ def parse_float_ge0(value):
     else:
         return value
 
-def parse_sparse_date(year, month, day):
+def parse_sparse_date(value):
     """Returns a SparseDate.
-    Year should be a string of four digits or None. month and day should be
-    strings of one or two digits or None.
+    value should be in one of the forms:
+        YYYY
+        YYYY-M[M]
+        YYYY-M[M]-D[D]
     """
-    year = parse_four_digit_int(year)
-    month = parse_one_or_two_digit_int(month)
-    day = parse_one_or_two_digit_int(day)
-    return SparseDate(year,
-                      month if month else None,
-                      day if day else None)
+    match = _SPARSEDATE_RE.match(value)
+    if match:
+        year, month, day = match.groups()
+        year = int(year)
+        month = int(month) if month else None
+        day = int(day) if day else None
+        return SparseDate(year, month, day)
+    else:
+        msg = (u'Badly formatted value [{0}]: require a sparse date in the '
+               u"form 'YYYY', 'YYYY-M[M]' or 'YYYY-M[M]-D[D]'")
+        raise ValueError(msg.format(value))
 
 def parse_four_digit_int(value):
     """Returns an int or None. Value should be a string of four digits or
     None.
     """
-    match = re.match(r'^\s*[0-9]{4}\s*$', value)
+    match = _FOUR_DIGITS_RE.match(value)
     if match:
         return int(match.group(0))
     else:
@@ -84,7 +112,7 @@ def parse_one_or_two_digit_int(value):
     """Returns an int or None. Value should be a string of one or two
     digits or None.
     """
-    match = re.match(r'^\s*[0-9]{1,2}\s*$', value)
+    match = _TWO_DIGITS_RE.match(value)
     if match:
         return int(match.group(0))
     else:
@@ -94,9 +122,9 @@ def parse_one_or_two_digit_int(value):
 
 def parse_date(value):
     """Returns a datetime.date. Value should be a string in the form
-    YYYY-[M]M-[D]D.
+    YYYY-M[M]-D[D].
     """
-    match = DATE_YMD_RE.match(value)
+    match = _DATE_YMD_RE.match(value)
     if match:
         year, month, day = match.groups()
         return date(int(year), int(month), int(day))
@@ -115,7 +143,7 @@ def parse_degrees(value, is_latitude):
     """value should be a string. is_latitude should be either True or False
     Returns a floating-point degrees.
     """
-    match = DEGREES_RE.match(value)
+    match = _DEGREES_RE.match(value)
     if match:
         deg, min, sec, dir = match.groups()
         deg = float(deg)
@@ -202,19 +230,19 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
         else:
             return degrees
 
-def parse_matches_re(re, error_message, v):
+def parse_matches_re(re, error_message, value):
     """Raises ValueError(error_message) if v does not match re
     """
-    res = re.match(v)
+    res = re.match(value)
     if not res:
-        raise ValueError(error_message.format(v))
+        raise ValueError(error_message.format(value))
     else:
-        return v
+        return value
 
-def parse_in_choices(choices, v):
+def parse_in_choices(choices, value):
     """If v not in choices, raise ValueError(error_message)
     """
-    if v not in choices:
-        raise ValueError(u'Invalid value [{0}]: not in choices'.format(v))
+    if value not in choices:
+        raise ValueError(u'Invalid value [{0}]: not in choices'.format(value))
     else:
-        return v
+        return value

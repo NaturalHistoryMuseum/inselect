@@ -22,12 +22,12 @@ class SparseDate(object):
         if not year:
             raise ValueError('Year missing')
         else:
-            if day and not month:
+            if day is not None and month is None:
                 raise ValueError('Day was given but year was not')
 
             if not isinstance(year, int):
                 raise ValueError('Year should be an integer')
-            elif month:
+            elif month is not None:
                 if not isinstance(month, int):
                     raise ValueError('Month should be an integer')
 
@@ -36,7 +36,7 @@ class SparseDate(object):
                     msg = 'Bad month [{0}]: require a number between 1 and 12'
                     raise ValueError(msg.format(month))
 
-                if day:
+                if day is not None:
                     if not isinstance(day, int):
                         raise ValueError('Day should be an integer')
 
