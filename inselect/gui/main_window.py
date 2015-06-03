@@ -781,7 +781,7 @@ class MainWindow(QtGui.QMainWindow):
                 action.setIcon(plugin.icon())
             self.plugin_actions[index] = action
             if hasattr(plugin, 'config'):
-                ui_action = QAction(u'Configure {0}'.format(plugin.NAME), self,
+                ui_action = QAction(u"Configure '{0}'".format(plugin.NAME), self,
                               triggered=partial(self.show_plugin_config, index))
                 # Force menu items to appear on Mac
                 ui_action.setMenuRole(QAction.NoRole)

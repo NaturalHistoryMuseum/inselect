@@ -31,7 +31,7 @@ class BarcodeDialog(QDialog):
 
         self._layout = QVBoxLayout()
         prompt = QLabel(
-            'The "Read barcodes" command will set each box\'s "catalogNumber" '
+            'The "Read barcodes" command will set each box\'s "Catalog number" '
             'metadata field with value(s) of any barcodes.\n'
             '\n'
             'Use the controls below to indicate how barcodes should be read. '
