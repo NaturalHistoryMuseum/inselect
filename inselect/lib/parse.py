@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
+import inspect
 import re
+import sys
 
 from datetime import date
+from itertools import ifilter
 
 from .sparse_date import SparseDate
 
-# Private regular expressions
 
+# A dict {name: parse function}. Populated at the bottom of this file.
+PARSERS = {}
+
+# Private regular expressions used by parse functions
 _TWO_DIGITS_RE = re.compile(r'^\s*[0-9]{1,2}\s*$')
 _FOUR_DIGITS_RE = re.compile(r'^\s*[0-9]{4}\s*$')
 
@@ -29,14 +35,27 @@ _SPARSEDATE_RE = re.compile(
 _DEGREES_RE = re.compile(
     ur'^\s*'
     ur'(?P<degrees>-?\d+(?:\.\d+)?)\s*[\sd°:]?\s*'
-    ur"(?:(?:(?P<minutes>\d+(?:\.\d+)?)\s*[\s'′:]?\s*)?"
-    ur"(?:(?P<seconds>\d+(?:\.\d+)?)\s*(?:(?:[\s\"″])|(?:''))?\s*)?)?"
+    ur'(?:(?:(?P<minutes>\d+(?:\.\d+)?)\s*[\s\'′:]?\s*)?'
+    ur'(?:(?P<seconds>\d+(?:\.\d+)?)\s*(?:(?:[\s"″])|(?:\'\'))?\s*)?)?'
     ur'(?P<direction>[NnSsEeWw]?)'
     ur'\s*$', flags=re.UNICODE
 )
 
+def parse_int(value):
+    """Returns value converted to an int. Raises a ValueError if value cannot
+    be converted to an int.
+    """
+    return int(value)
+
+def parse_float(value):
+    """Returns value converted to a float. Raises a ValueError if value cannot
+    be converted to a float.
+    """
+    return float(value)
+
 def parse_int_gt0(value):
-    """Returns an int that is greater than zero
+    """Returns value converted to an int. Raises a ValueError if value cannot
+    be converted to an int that is greater than zero.
     """
     value = int(value)
     if value <= 0:
@@ -46,7 +65,8 @@ def parse_int_gt0(value):
         return value
 
 def parse_int_ge0(value):
-    """Returns an int that is greater than or equal to zero
+    """Returns value converted to an int. Raises a ValueError if value cannot
+    be converted to an int that is greater than or equal to zero.
     """
     value = int(value)
     if value < 0:
@@ -57,7 +77,8 @@ def parse_int_ge0(value):
         return value
 
 def parse_float_gt0(value):
-    """Returns a float that is greater than zero
+    """Returns value converted to a float. Raises a ValueError if value cannot
+    be converted to a float that is greater than zero.
     """
     value = float(value)
     if value <= 0:
@@ -67,7 +88,8 @@ def parse_float_gt0(value):
         return value
 
 def parse_float_ge0(value):
-    """Returns a float that is greater than or equal to zero
+    """Returns value converted to a float. Raises a ValueError if value cannot
+    be converted to a float that is greater than or equal to zero.
     """
     value = float(value)
     if value < 0:
@@ -78,8 +100,8 @@ def parse_float_ge0(value):
         return value
 
 def parse_sparse_date(value):
-    """Returns a SparseDate.
-    value should be in one of the forms:
+    """Returns a SparseDate. A ValueError is raised if value is not a string
+    in one of the forms:
         YYYY
         YYYY-M[M]
         YYYY-M[M]-D[D]
@@ -97,8 +119,8 @@ def parse_sparse_date(value):
         raise ValueError(msg.format(value))
 
 def parse_four_digit_int(value):
-    """Returns an int or None. Value should be a string of four digits or
-    None.
+    """Returns value converted to an int. Raises a ValueError if value is not a
+    string with exactly four digits.
     """
     match = _FOUR_DIGITS_RE.match(value)
     if match:
@@ -109,8 +131,8 @@ def parse_four_digit_int(value):
         raise ValueError(msg.format(value))
 
 def parse_one_or_two_digit_int(value):
-    """Returns an int or None. Value should be a string of one or two
-    digits or None.
+    """Returns value converted to an int. Raises a ValueError if value is not
+    a string with either one or two digits.
     """
     match = _TWO_DIGITS_RE.match(value)
     if match:
@@ -121,8 +143,8 @@ def parse_one_or_two_digit_int(value):
         raise ValueError(msg.format(value))
 
 def parse_date(value):
-    """Returns a datetime.date. Value should be a string in the form
-    YYYY-M[M]-D[D].
+    """Returns a datetime.date. Raises a ValueError if value is not a string
+    in the form YYYY-M[M]-D[D].
     """
     match = _DATE_YMD_RE.match(value)
     if match:
@@ -134,14 +156,20 @@ def parse_date(value):
         raise ValueError(msg.format(value))
 
 def parse_latitude(value):
-    return parse_degrees(value, True)
+    """Returns a float. Raises a ValueError if value is not a string that
+    represents a latitude.
+    """
+    return _parse_degrees(value, True)
 
 def parse_longitude(value):
-    return parse_degrees(value, False)
+    """Returns a float. Raises a ValueError if value is not a string that
+    represents a longitude.
+    """
+    return _parse_degrees(value, False)
 
-def parse_degrees(value, is_latitude):
-    """value should be a string. is_latitude should be either True or False
-    Returns a floating-point degrees.
+def _parse_degrees(value, is_latitude):
+    """Returns a float. Raises a ValueError if value is not a string that
+    represents an angle in degrees. is_latitude should be either True or False.
     """
     match = _DEGREES_RE.match(value)
     if match:
@@ -150,28 +178,28 @@ def parse_degrees(value, is_latitude):
         min = float(min) if min else None
         sec = float(sec) if sec else None
         dir = dir if dir else None
-        return assemble_dms(deg, min, sec, dir, is_latitude)
+        return _assemble_dms(deg, min, sec, dir, is_latitude)
     else:
-        msg = u'Badly formatted d:m:s value [{0}]'
+        msg = u'Badly formatted DD MM SS value [{0}]'
         raise ValueError(msg.format(value))
 
-def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
+def _assemble_dms(degrees, minutes, seconds, direction, is_latitude):
     """Returns a floating-point value of degrees of arc, computed from
     (degrees + minutes/60 + seconds/3600) x direction.
 
-    degrees, minutes and seconds should be strings, ints, floats or None; if all
-    are None, None is returned.
+    degrees should be a float.
+    minutes and seconds should be floats or None.
 
     is_latitude should be a bool.
 
     A ValueError is raised if any of the following is True:
-        degrees < 0.0 and direction:
-        minutes and not direction:
-        seconds and minutes is None:
+        degrees < 0.0 and direction
+        minutes and not direction
+        seconds and minutes is None
         is_latitude is True and direction is None or is not in ('N', 'n', 'S', 's')
         is_latitude is False and direction is None or is not in ('E', 'e', 'W', 'w')
-        minutes and not 0.0<=minutes<60.0:
-        seconds and not 0.0<=seconds<60.0:
+        minutes and not 0.0<=minutes<60.0
+        seconds and not 0.0<=seconds<60.0
         is_latitude is True and for computed value, v, not   -90.0 <= v <=  90.0
         is_latitude is False and for computed value, v, not -180.0 <= v <= 180.0
     """
@@ -190,10 +218,6 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
     else:
         # No direction given
         negate = False
-
-    degrees = float(degrees)
-    minutes = None if minutes is None else float(minutes)
-    seconds = None if seconds is None else float(seconds)
 
     # Checks
     if degrees < 0.0 and direction:
@@ -230,19 +254,22 @@ def assemble_dms(degrees, minutes, seconds, direction, is_latitude):
         else:
             return degrees
 
-def parse_matches_re(re, error_message, value):
-    """Raises ValueError(error_message) if v does not match re
+def parse_matches_regex(regex, value, error_message=u'Unmatched value [{0}]'):
+    """Raises ValueError(error_message) if value does not match regex.
     """
-    res = re.match(value)
+    res = regex.match(value)
     if not res:
         raise ValueError(error_message.format(value))
     else:
         return value
 
 def parse_in_choices(choices, value):
-    """If v not in choices, raise ValueError(error_message)
+    """Raise ValueError(error_message) if value is not in choices
     """
     if value not in choices:
         raise ValueError(u'Invalid value [{0}]: not in choices'.format(value))
     else:
         return value
+
+PARSERS = inspect.getmembers(sys.modules[__name__], inspect.isfunction)
+PARSERS = dict(ifilter(lambda v: re.match(r'^parse_.+$', v[0]), PARSERS))

@@ -3,17 +3,22 @@ import re
 import unittest
 
 from datetime import date
-from functools import partial
 
-from inselect.lib.parse import (parse_latitude,  parse_int_gt0, parse_float_gt0,
+from inselect.lib.parse import (parse_latitude, parse_int,
+                                parse_int_gt0, parse_float, parse_float_gt0,
                                 parse_int_ge0, parse_float_ge0,
                                 parse_four_digit_int, parse_one_or_two_digit_int,
                                 parse_date, parse_sparse_date, parse_latitude,
-                                parse_longitude, assemble_dms, parse_matches_re,
-                                parse_in_choices)
+                                parse_longitude, parse_matches_regex,
+                                parse_in_choices, _assemble_dms)
 
 
 class TestParse(unittest.TestCase):
+    def test_parse_int(self):
+        self.assertEqual(1, parse_int('1'))
+        self.assertEqual(-1000, parse_int('-1000'))
+        self.assertRaises(ValueError, parse_int, 'x')
+
     def test_parse_int_gt0(self):
         self.assertEqual(1, parse_int_gt0('1'))
         self.assertEqual(1000, parse_int_gt0('1000'))
@@ -27,6 +32,11 @@ class TestParse(unittest.TestCase):
         self.assertEqual(1000, parse_int_ge0('1000'))
         self.assertRaises(ValueError, parse_int_ge0, '1.5')
         self.assertRaises(ValueError, parse_int_ge0,'-10')
+
+    def test_parse_float(self):
+        self.assertEqual(1.0, parse_float('1.0'))
+        self.assertEqual(-1000.0, parse_float('-1000'))
+        self.assertRaises(ValueError, parse_float, 'x')
 
     def test_parse_float_gt0(self):
         self.assertEqual(1.0, parse_float_gt0('1'))
@@ -101,14 +111,18 @@ class TestParse(unittest.TestCase):
 class TestParseDegrees(unittest.TestCase):
     def test_units_and_separators(self):
         self.assertEqual(-41.38, parse_latitude('-41.38'))
+        self.assertEqual(-41.38, parse_latitude(u'-41.38°'))
+        self.assertEqual(-41.38, parse_latitude(u'41.38° S'))
         self.assertEqual(-41.38, parse_latitude('41 22.8S'))
         self.assertEqual(-41.38, parse_latitude('41 22 48S'))
+        self.assertAlmostEqual(-41.36666666666667, parse_latitude('41:22:00S'))
         self.assertAlmostEqual(-41.380008333333336, parse_latitude('41:22:48.03S'))
         self.assertEqual(-41.38, parse_latitude('41 22\' 48" S'))
         self.assertEqual(-41.38, parse_latitude('41 22\' 48\'\' S'))
         self.assertEqual(-41.38, parse_latitude(u' 41°  22\'  48"  S  '))
         self.assertEqual(-41.38, parse_latitude(u'41°22\'48"S'))
         self.assertEqual(-41.38, parse_latitude(u'41°22′48″S'))
+        self.assertEqual(-41,    parse_latitude(u'41°00′00″S'))
 
     def test_arithmetic(self):
         self.assertEqual( 1, parse_latitude('1'))
@@ -183,17 +197,28 @@ class TestParseDegrees(unittest.TestCase):
         self.assertRaises(ValueError, parse_latitude, '30 1.1 1 N')
 
     def test_assemble_dms_bad_direction(self):
-        # There is one route through assemble_dms() that it is impossible to
+        # There is one route through _assemble_dms() that it is impossible to
         # reach via parse_latitude or parse_longitude
-        self.assertRaises(ValueError, assemble_dms, 1, 1, 1, 'x', True)
+        self.assertRaises(ValueError, _assemble_dms, 1, 1, 1, 'x', True)
 
-    def test_parse_matches_re(self):
-        f = partial(parse_matches_re, re.compile('^[0-9]{5,10}$'),
-                    'Invalid value [{0}]: must be between 5 and 10 digits')
-        self.assertEqual('12345', f('12345'))
-        self.assertEqual('1234567890', f('1234567890'))
-        self.assertRaises(ValueError, f, '')
-        self.assertRaises(ValueError, f, '123456789101')
+    def test_parse_matches_regex(self):
+        regex = re.compile('^[0-9]{5,10}$')
+        self.assertEqual('12345', parse_matches_regex(regex, '12345'))
+        self.assertEqual('1234567890', parse_matches_regex(regex, '1234567890'))
+        self.assertRaises(ValueError, parse_matches_regex, regex, '')
+        self.assertRaises(ValueError, parse_matches_regex, regex, '123456789101')
+
+    def test_parse_matches_regex_custom_error_msg(self):
+        regex = re.compile('^[0-9]{5,10}$')
+
+        msg = 'A silly value'
+        self.assertRaisesRegexp(ValueError, msg,
+                                parse_matches_regex, regex, '123456789101', msg)
+
+        msg = 'A silly value [{0}]'
+        expected_msg = 'A silly value \\[123456789101\\]'
+        self.assertRaisesRegexp(ValueError, expected_msg,
+                                parse_matches_regex, regex, '123456789101', msg)
 
     def test_parse_in_choices(self):
         self.assertEqual('1', parse_in_choices(('1', '2', '3'), '1'))
