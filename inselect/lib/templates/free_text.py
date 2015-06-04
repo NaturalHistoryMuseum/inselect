@@ -6,10 +6,10 @@ import re
 from functools import partial
 
 from inselect.lib.metadata import MetadataTemplate
-from inselect.lib.parse import parse_matches_re
+from inselect.lib.parse import parse_matches_regex
 
 
-_DIGITS = partial(parse_matches_re, re.compile('^[0-9]+$'),
+_DIGITS = partial(parse_matches_regex, re.compile('^[0-9]+$'),
                   'Invalid value [{0}]: should contain only digits')
 
 template = MetadataTemplate(
@@ -23,7 +23,7 @@ template = MetadataTemplate(
             "Label": "Catalog number",
             "URI": "http://rs.tdwg.org/dwc/terms/catalogNumber",
             "Mandatory": True,
-            "Parser": partial(parse_matches_re, re.compile('^[0-9]{9}$'),
+            "Parser": partial(parse_matches_regex, re.compile('^[0-9]{9}$'),
                         'Invalid value [{0}]: should contain nine digits'),
         },
         {
