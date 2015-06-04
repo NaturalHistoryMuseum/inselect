@@ -128,7 +128,7 @@ def user_name():
             except pywintypes.error:
                 return ''
     elif pwd:
-        # Strip trailing commans seen on Linux
+        # Strip trailing commas seen on Linux
         return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
     else:
         return ''
