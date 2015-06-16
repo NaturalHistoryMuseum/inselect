@@ -4,8 +4,9 @@ import shutil
 from itertools import izip, count
 from pathlib import Path
 
+import unicodecsv
+
 from inselect.lib.document import InselectDocument
-from inselect.lib.unicode_csv import UnicodeDictReader
 
 from inselect.workflow.export_metadata import export_csv
 
@@ -31,7 +32,7 @@ class TestExportCSV(unittest.TestCase):
             # Check CSV contents
             doc = InselectDocument.load(tempdir / 'test_segment.inselect')
             with csv.open('rb') as f:
-                res = UnicodeDictReader(f)
+                res = unicodecsv.DictReader(f, encoding='utf-8')
                 for index, item, row in izip(count(), doc.items, res):
                     expected = item['fields']
                     expected.update({'Item' : str(1+index)})

@@ -10,10 +10,10 @@ from datetime import datetime
 from pathlib import Path
 
 import cv2
+import unicodecsv
 
 from .image import InselectImage
 from .inselect_error import InselectError
-from .unicode_csv import UnicodeWriter
 from .utils import debug_print, user_name
 from .rect import Rect
 
@@ -357,7 +357,7 @@ class InselectDocument(object):
         # TODO fields in order given by dca terms
         fields = sorted(self.metadata_fields)
         with path.open('wb') as f:
-            w = UnicodeWriter(f)
+            w = unicodecsv.writer(f, encoding='utf-8')
             w.writerow(['Item',] + fields)
             for index, item in enumerate(self._items):
                 w.writerow([1+index] + [item['fields'].get(field) for field in fields])

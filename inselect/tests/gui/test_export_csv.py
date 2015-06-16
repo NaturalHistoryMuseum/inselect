@@ -4,11 +4,11 @@ from itertools import izip, count
 from mock import patch
 from pathlib import Path
 
+import unicodecsv
+
 from PySide.QtGui import QMessageBox
 
 from gui_test import MainWindowTest
-
-from inselect.lib.unicode_csv import UnicodeDictReader
 
 from inselect.tests.utils import temp_directory_with_files
 
@@ -25,7 +25,7 @@ class TestExportCSV(MainWindowTest):
 
         # Check CSV contents
         with csv.open('rb') as f:
-            res = UnicodeDictReader(f)
+            res = w = unicodecsv.DictReader(f, encoding='utf-8')
             for index, item, row in izip(count(), doc.items, res):
                 expected = item['fields']
                 expected.update({'Item' : str(1+index)})

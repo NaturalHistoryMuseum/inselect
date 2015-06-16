@@ -14,11 +14,11 @@ from pathlib import Path
 import numpy as np
 
 import cv2
+import unicodecsv
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.rect import Rect
-from inselect.lib.unicode_csv import UnicodeDictReader
 from inselect.lib.utils import make_readonly
 
 from inselect.tests.utils import temp_directory_with_files
@@ -259,7 +259,7 @@ class TestDocument(unittest.TestCase):
 
             # Check CSV contents
             with csv_fname.open('rb') as f:
-                res = UnicodeDictReader(f)
+                res = w = unicodecsv.DictReader(f, encoding='utf-8')
                 for index, item, row in izip(count(), doc.items, res):
                     expected = item['fields']
                     expected.update({'Item' : str(1+index)})
