@@ -9,27 +9,51 @@ import numpy as np
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
-from inselect.lib.metadata import MetadataTemplate
+from inselect.lib.user_template import UserTemplate
+from inselect.lib.templates.dwc import DWC
 from inselect.lib.unicode_csv import UnicodeReader, UnicodeDictReader
 
 from inselect.tests.utils import temp_directory_with_files
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
-class TestDocumentExportNoTemplate(unittest.TestCase):
+
+class TestDocumentExportWithTemplate(unittest.TestCase):
+    TEMPLATE = UserTemplate({
+        'Name': 'Test',
+        'Cropped file suffix': '.png',
+        'Object label': u'{ItemNumber:02}_{scientificName-value}',
+        'Fields': [
+            {
+                'Name': 'catalogNumber',
+            },
+            {
+                'Name': 'scientificName',
+                'Choices with data': [(u'A',         1),
+                                      (u'B',         2),
+                                      (u'Elsinoë',   3),
+                                      (u'D',         4),
+                                      (u'インセクト', 10),
+                                     ],
+            },
+        ]
+    })
+
     def test_save_crops(self):
         "Cropped object images are written correctly"
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
                                        TESTDATA / 'test_segment.png') as tempdir:
             doc = InselectDocument.load(tempdir / 'test_segment.inselect')
 
-            crops_dir = DocumentExport().save_crops(doc)
+            print('xx', list(self.TEMPLATE.field_names()))
+            crops_dir = DocumentExport(self.TEMPLATE).save_crops(doc)
+            print('zzz', self.TEMPLATE.metadata(1, {"scientificName": "A"}))
 
             self.assertTrue(crops_dir.is_dir())
             self.assertEqual(crops_dir, doc.crops_dir)
 
             cropped_fnames = sorted(crops_dir.glob('*.png'))
-            self.assertEqual(['0001.png', '0002.png', '0003.png', '0004.png', '0005.png'],
+            self.assertEqual(['01_1.png', '02_2.png', '03_10.png', '04_3.png', '05_4.png'],
                              [f.name for f in cropped_fnames])
 
             # Check the contents of each file
@@ -45,81 +69,22 @@ class TestDocumentExportNoTemplate(unittest.TestCase):
                                        TESTDATA / 'test_segment.png') as tempdir:
             doc = InselectDocument.load(tempdir / 'test_segment.inselect')
 
-            csv_path = DocumentExport().export_csv(doc)
-            self.assertEqual(csv_path, tempdir / 'test_segment.csv')
-
-            # Check CSV contents
-            with csv_path.open('rb') as f:
-                res = UnicodeDictReader(f)
-                for index, item, row in izip(count(), doc.items, res):
-                    expected = item['fields']
-                    expected.update({'Item': '{0}'.format(1+index),
-                                     'Cropped_image_name': '{0:04}.png'.format(1+index),
-                                    })
-                    actual = {k: v for k,v in row.items() if v}
-                    self.assertEqual(expected, actual)
-        # Expect 4 rows
-        self.assertEqual(index, 4)
-
-
-class TestDocumentExportWithTemplate(unittest.TestCase):
-    TEST = MetadataTemplate({
-        'Name': 'Test',
-        'Cropped file suffix': '.jpg',
-        'Object label': u'{scientificName-value}',
-        'Fields': [
-            {
-                'Name': 'catalogNumber',
-            },
-            {
-                'Name': 'scientificName',
-                'ChoicesWithData': [(u'A',        1),
-                                    (u'B',        2),
-                                    (u'Elsinoë',  3),
-                                    (u'D',        4),
-                                    (u'インセクト', 10),
-                                   ],
-            },
-        ]
-    })
-
-    def test_save_crops(self):
-        "Cropped object images are written correctly"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-
-            crops_dir = DocumentExport(self.TEST).save_crops(doc)
-
-            self.assertTrue(crops_dir.is_dir())
-            self.assertEqual(crops_dir, doc.crops_dir)
-
-            cropped_fnames = sorted(crops_dir.glob('*.jpg'))
-            self.assertEqual(['1.jpg', '10.jpg', '2.jpg', '3.jpg', '4.jpg'],
-                             [f.name for f in cropped_fnames])
-
-    def test_csv_export(self):
-        "CSV data are exported as expected"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-
-            csv_path = DocumentExport(self.TEST).export_csv(doc)
+            csv_path = DocumentExport(self.TEMPLATE).export_csv(doc)
             self.assertEqual(csv_path, tempdir / 'test_segment.csv')
 
             # Check CSV contents
 
             with csv_path.open('rb') as f:
                 reader = UnicodeReader(f)
-                headers = ['Item', 'Cropped_image_name', 'catalogNumber',
+                headers = ['Cropped_image_name', 'ItemNumber', 'catalogNumber',
                            'scientificName', 'scientificName-value']
                 self.assertEqual(headers, reader.next())
-                self.assertEqual([u'1', u'1.jpg', u'1', u'A', u'1'], reader.next())
-                self.assertEqual([u'2', u'2.jpg', u'2', u'B', u'2'], reader.next())
-                self.assertEqual([u'3', u'10.jpg', u'3', u'インセクト', u'10'],
+                self.assertEqual([u'01_1.png',  u'1', u'1', u'A', u'1'], reader.next())
+                self.assertEqual([u'02_2.png',  u'2', u'2', u'B', u'2'], reader.next())
+                self.assertEqual([u'03_10.png', u'3', u'3', u'インセクト', u'10'],
                                  reader.next())
-                self.assertEqual([u'4', u'3.jpg', u'', u'Elsinoë', u'3'], reader.next())
-                self.assertEqual([u'5', u'4.jpg', u'', u'D', u'4'], reader.next())
+                self.assertEqual([u'04_3.png',  u'4', u'', u'Elsinoë', u'3'], reader.next())
+                self.assertEqual([u'05_4.png',  u'5', u'', u'D', u'4'], reader.next())
                 self.assertIsNone(next(reader, None))
 
 

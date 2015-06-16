@@ -3,7 +3,8 @@ from itertools import izip, repeat
 from PySide import QtGui
 from PySide.QtGui import (QAbstractItemView, QSizePolicy, QScrollArea,
                           QWidget, QGroupBox, QLabel, QLineEdit, QComboBox,
-                          QFormLayout, QVBoxLayout)
+                          QFormLayout, QVBoxLayout, QPushButton, QHBoxLayout,
+                          QDesktopServices, QFileDialog)
 from PySide.QtCore import Qt
 
 from inselect.lib.countries import COUNTRIES
@@ -11,9 +12,9 @@ from inselect.lib.languages import LANGUAGES
 from inselect.lib.utils import debug_print
 
 from inselect.gui.colours import COLOURS
-from inselect.gui.metadata_library import metadata_library
 from inselect.gui.roles import MetadataRole
-from inselect.gui.utils import relayout_widget
+from inselect.gui.user_template_choice import user_template_choice
+from inselect.gui.utils import relayout_widget, report_to_user
 from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
 
@@ -30,9 +31,10 @@ class MetadataView(QAbstractItemView):
         # This view is never made visible
         super(MetadataView, self).__init__()
 
-        # List of metadata templates
-        self._templates = self._create_templates_list()
-        self._templates.activated.connect(self._template_changed)
+        user_template_choice().template_changed.connect(self.refresh_user_template)
+
+        self._template_label = QLabel()
+        self._template_label.setText(user_template_choice().current.name)
 
         # A container for the controls
         self._form_container = FormContainer()
@@ -52,45 +54,21 @@ class MetadataView(QAbstractItemView):
 
         # List of templates is fixed at the top - form can be scrolled
         layout = QVBoxLayout()
-        layout.addWidget(self._templates)
+        layout.addWidget(self._template_label)
         layout.addWidget(self._form_scroll)
 
         # Top-level container for the list of templates and form
         self.widget = QWidget(parent)
         self.widget.setLayout(layout)
 
-    def _create_templates_list(self):
-        """Returns a QComboBox populated with metadata template names
-        """
-        c = QComboBox()
-        select_index = 0
-        for index, template in enumerate(metadata_library().choices.values()):
-            c.addItem(template.name, index)
-            if metadata_library().current.name == template.name:
-                select_index = index
-        c.setCurrentIndex(select_index)
-        return c
-
-    def _template_changed(self):
-        """The user changed the template
-        """
-        debug_print('MetadataView._template_changed')
-
-        # Save the user's choice
-        metadata_library().set_current(self._templates.currentText())
-
-        # Recreate controls
+    def refresh_user_template(self):
+        "Refreshes the UI with the currently selected UserTemplate"
+        self._template_label.setText(user_template_choice().current.name)
         self._create_controls()
-
-        # Inform the model
-        # TODO Should be a signal
-        self.model().metadata_template_changed()
-
         self._populate_controls()
 
     def _populate_controls(self):
-        """Populates the controls with metadata values in the selection
-        """
+        "Populates the controls with metadata values in the selection"
         selected = self.selectionModel().selectedIndexes()
 
         if 0 == len(selected):
@@ -111,14 +89,11 @@ class MetadataView(QAbstractItemView):
                     control.set_value(selected, values.pop())
 
     def _create_controls(self):
-        """Creates controls for editing fields in the selected template
-        """
-        value = self._templates.itemData(self._templates.currentIndex())
-        self._form_container.controls_from_template(metadata_library().current)
+        "Creates controls for editing fields in the selected template"
+        self._form_container.controls_from_template(user_template_choice().current)
 
     def reset(self):
-        """QAbstractItemView virtual
-        """
+        "QAbstractItemView virtual"
         debug_print('MetadataView.reset')
         super(MetadataView, self).reset()
 
@@ -126,8 +101,7 @@ class MetadataView(QAbstractItemView):
         self._populate_controls()
 
     def selectionChanged(self, selected, deselected):
-        """QAbstractItemView slot
-        """
+        "QAbstractItemView slot"
         debug_print('MetadataView.selectionChanged')
 
         # If one of our controls has focus, update the model before refreshing
@@ -224,22 +198,21 @@ class FormContainer(QWidget):
 
         # Create controls and group boxes
         for field in template.fields:
-            if field.get('Group') != current_group or group_layout is None:
+            if field.group != current_group or group_layout is None:
                 # Either field belongs to a different group to the last item or
                 # this is the first field.
                 if group_layout:
                     self._close_group(main_layout, current_group, group_layout)
                 group_layout = self._new_group()
-                current_group = field.get('Group')
+                current_group = field.group
 
             # Create control for this field
             control = self._create_field_control(field, template)
-            label = field.get('Label', field['Name'])
             if 'URI' in field:
-                group_layout.addRow(URLLabel(field['URI'], label), control)
+                group_layout.addRow(URLLabel(field['URI'], field.label), control)
             else:
-                group_layout.addRow(QLabel(label), control)
-            controls[control] = field['Name']
+                group_layout.addRow(QLabel(field.label), control)
+            controls[control] = field.name
 
         self._close_group(main_layout, current_group, group_layout)
 
@@ -248,23 +221,23 @@ class FormContainer(QWidget):
     def _create_field_control(self, field, template):
         """Returns a QWidget for editing field, validated using template
         """
-        if 'countryCode' == field['Name']:
+        if 'countryCode' == field.name:
             return CountryComboBox(template)
-        elif 'language' == field['Name']:
+        elif 'language' == field.name:
             return LanguageComboBox(template)
-        elif 'Choices' in field:
-            combo = ChoicesFieldComboBox(field['Name'], template,
-                                         labels=field['Choices'])
+        elif field.choices:
+            combo = ChoicesFieldComboBox(field.name, template,
+                                         labels=field.choices)
             return combo
-        elif 'ChoicesWithData' in field:
-            choices = field['ChoicesWithData']
-            combo = ChoicesWithDataFieldComboBox(field['Name'], template,
+        elif field.choices_with_data:
+            choices = field.choices_with_data
+            combo = ChoicesWithDataFieldComboBox(field.name, template,
                                                  labels=choices.iterkeys(),
                                                  values=choices.itervalues())
             return combo
         else:
             # Not using Qt's very restrictive QValidator scheme
-            edit = FieldEdit(field['Name'], template)
+            edit = FieldEdit(field.name, template)
             return edit
 
 

@@ -4,30 +4,27 @@ import tempfile
 from itertools import chain, count, izip
 from pathlib import Path
 
-from .metadata import CollectVisitor
+from .user_template import CollectVisitor
 from .unicode_csv import UnicodeWriter
 from .utils import debug_print
 
 
 class DocumentExport(object):
-    def __init__(self, metadata_template=None):
-        self._template = metadata_template
+    def __init__(self, metadata_template):
+        if not metadata_template:
+            raise ValueError('Missing metadata_template')
+        else:
+            self._template = metadata_template
 
     def crop_fnames(self, document):
         "Generator function of instances of string"
-        if self._template:
-            fnames = (self._template.format_label(i) for i in document.items)
-        else:
-            fnames = ('{0:04}'.format(1+i) for i in xrange(0, document.n_items))
+        items = enumerate(document.items)
+        fnames = (self._template.format_label(1+index, box['fields']) for index, box in items)
+        suffix = self._template.cropped_file_suffix
 
-        # Use template suffix if given
-        if self._template and self._template.cropped_image_suffix:
-            suffix = self._template.cropped_image_suffix
-        else:
-            suffix = document.scanned.path.suffix
-
-        # Do not be tempted to use Path - fname might contain empty strings if
-        # the user has done something silly
+        # Do not be tempted to use Path because fname might contain empty
+        # strings if the user has done something silly, which will cause
+        # Path() to raise an exception
         return (u'{0}{1}'.format(fn, suffix) for fn in fnames)
 
     def crops_dir(self, document):
@@ -83,29 +80,23 @@ class DocumentExport(object):
         debug_print(u'DocumentExport.export_csv to [{0}]'.format(path))
 
         # Field names
-        if self._template:
-            fields = list(self._template.field_names())
+        fields = list(self._template.field_names())
 
-            # Append fields that are in the document and not the template
-            fields += sorted(f for f in document.metadata_fields if f not in fields)
-        else:
-            fields = sorted(document.metadata_fields)
+        # Append fields that are in the document and not the template
+        fields += sorted(f for f in document.metadata_fields if f not in fields)
 
         # Crop filenames
         crop_fnames = self.crop_fnames(document)
 
         # A function that returns a dict of metadata for a box
-        if self._template:
-            box_metadata = self._template.box_metadata
-        else:
-            box_metadata = lambda box: box['fields']
+        metadata = self._template.metadata
 
         with path.open('wb') as f:
             w = UnicodeWriter(f)
-            w.writerow(chain(['Item','Cropped_image_name'], fields))
+            w.writerow(chain(['Cropped_image_name'], fields))
             for index, fname, box in izip(count(), crop_fnames, document.items):
-                md = box_metadata(box)
-                w.writerow(chain([1+index, fname], (md.get(f) for f in fields)))
+                md = metadata(1+index, box['fields'])
+                w.writerow(chain([fname], (md.get(f) for f in fields)))
 
         return path
 
@@ -113,9 +104,6 @@ class DocumentExport(object):
         """Returns a list of validation problems or None, if no template is
         being used
         """
-        if self._template:
-            visitor = CollectVisitor()
-            self._template.visit_document(document, visitor)
-            return visitor.all_problems()
-        else:
-            return None
+        visitor = CollectVisitor()
+        self._template.visit_document(document, visitor)
+        return visitor.all_problems()

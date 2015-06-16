@@ -1,0 +1,4 @@
+InselectTemplateVersion: 1
+Name: Test user template spec
+Fields:
+    - Name: Record number

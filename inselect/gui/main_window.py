@@ -18,16 +18,17 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
+from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print, is_writable
 
 from .info_widget import InfoWidget
 from .format_validation_problems import format_validation_problems
-from .metadata_library import metadata_library
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole
+from .user_template_choice import user_template_choice
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
@@ -35,12 +36,16 @@ from .views.object import ObjectView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
+
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
-    FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
-                           InselectDocument.EXTENSION,
-                           u' '.join(IMAGE_PATTERNS))
+    DOCUMENT_FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
+           InselectDocument.EXTENSION,
+           u' '.join(IMAGE_PATTERNS))
+
+    TEMPLATE_FILE_FILTER = u'Inselect user templates (*{0})'.format(
+        UserTemplate.EXTENSION)
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -166,7 +171,7 @@ class MainWindow(QtGui.QMainWindow):
                 QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
 
             path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, self.FILE_FILTER)
+                self, "Open", folder, self.DOCUMENT_FILE_FILTER)
 
         # path will be None if user cancelled getOpenFileName
         if path:
@@ -279,15 +284,15 @@ class MainWindow(QtGui.QMainWindow):
         self.info_widget.set_document(self.document)
 
     @report_to_user
-    def save_crops(self, use_metadata_template=True):
+    def save_crops(self, user_template=None):
         """Saves cropped object images
         """
         debug_print('MainWindow.save_crops')
 
-        if use_metadata_template:
-            export = DocumentExport(metadata_library().current)
+        if user_template:
+            export = DocumentExport(user_template)
         else:
-            export = DocumentExport(None)
+            export = DocumentExport(user_template_choice().current)
 
         self.model.to_document(self.document)
 
@@ -326,13 +331,13 @@ class MainWindow(QtGui.QMainWindow):
             self.run_in_worker(save_crops, 'Save crops', completed)
 
     @report_to_user
-    def export_csv(self, use_metadata_template=True):
+    def export_csv(self, user_template=None):
         debug_print('MainWindow.export_csv')
 
-        if use_metadata_template:
-            export = DocumentExport(metadata_library().current)
+        if user_template:
+            export = DocumentExport(user_template)
         else:
-            export = DocumentExport(None)
+            export = DocumentExport(user_template_choice().current)
 
         self.model.to_document(self.document)
         path = export.csv_path(self.document)
@@ -767,6 +772,11 @@ class MainWindow(QtGui.QMainWindow):
             "Rotate counter-clockwise", self, shortcut="ctrl+L",
             triggered=partial(self.rotate90, clockwise=False))
 
+        self.default_user_template_action = QAction("Default template",
+            self, triggered=self.default_user_template)
+        self.choose_user_template_action = QAction("Choose template",
+            self, triggered=self.choose_user_template)
+
         # Plugins
         # Plugin shortcuts start at F5
         shortcut_offset = 5
@@ -870,6 +880,10 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addAction(self.rotate_clockwise_action)
         self.editMenu.addAction(self.rotate_counter_clockwise_action)
         self.editMenu.addSeparator()
+        self.editMenu.addAction(self.default_user_template_action)
+        self.editMenu.addAction(self.choose_user_template_action)
+
+        self.editMenu.addSeparator()
         for action in self.plugin_actions:
             self.editMenu.addAction(action)
         for action in (a for a in self.plugin_config_ui_actions if a):
@@ -926,6 +940,26 @@ class MainWindow(QtGui.QMainWindow):
                 self.setWindowFilePath(str(self.document_path))
         else:
             self.showFullScreen()
+
+    @report_to_user
+    def default_user_template(self):
+        "Selects the default user_template"
+        user_template_choice().select_default()
+
+    @report_to_user
+    def choose_user_template(self):
+        "Shows a 'choose template' file dialog"
+        debug_print('MetadataView._choose_template_clicked')
+
+        folder = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        folder = '/Users/lawh/Dropbox/Projects/Digitisation/InselectTemplates'
+
+        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
+            self, "Choose template", folder, self.TEMPLATE_FILE_FILTER)
+
+        if path:
+            # Save the user's choice
+            user_template_choice().load(path)
 
     def _accept_drag_drop(self, event):
         """If event refers to a single file that can opened, returns the path.

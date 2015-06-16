@@ -1,17 +1,10 @@
 """Template of Simple Darwin Core terms
 """
 
-import dateutil.parser
-
-from inselect.lib.metadata import MetadataTemplate
-from inselect.lib.parse import (parse_latitude, parse_int_gt0, parse_float_ge0,
-                                parse_float_gt0, parse_four_digit_int,
-                                parse_one_or_two_digit_int, parse_latitude,
-                                parse_longitude, parse_date
-                               )
+from inselect.lib.user_template import UserTemplate
 
 
-template = MetadataTemplate(
+DWC = UserTemplate(
 {
     'Name': 'Simple Darwin Core terms',
     'Fields': [
@@ -200,7 +193,7 @@ template = MetadataTemplate(
             "Name": "individualCount",
             "Label": "Individual count",
             "URI": "http://rs.tdwg.org/dwc/terms/individualCount",
-            "Parser": parse_int_gt0,
+            "Parser": "int_gt0",
         },
         {
             "Group": "Occurrence",
@@ -327,14 +320,14 @@ template = MetadataTemplate(
             "Name": "eventDate",
             "Label": "Event date",
             "URI": "http://rs.tdwg.org/dwc/terms/eventDate",
-            "Parser": parse_date,
+            "Parser": "date",
         },
         {
             "Group": "Event",
             "Name": "eventTime",
             "Label": "Event time",
             "URI": "http://rs.tdwg.org/dwc/terms/eventTime",
-            "Parser": dateutil.parser.parse,
+            # TODO Parser
         },
         {
             "Group": "Event",
@@ -353,21 +346,21 @@ template = MetadataTemplate(
             "Name": "year",
             "Label": "Year",
             "URI": "http://rs.tdwg.org/dwc/terms/year",
-            "Parser": parse_four_digit_int,
+            "Parser": "four_digit_int",
         },
         {
             "Group": "Event",
             "Name": "month",
             "Label": "Month",
             "URI": "http://rs.tdwg.org/dwc/terms/month",
-            "Parser": parse_one_or_two_digit_int,
+            "Parser": "one_or_two_digit_int",
         },
         {
             "Group": "Event",
             "Name": "day",
             "Label": "Day",
             "URI": "http://rs.tdwg.org/dwc/terms/day",
-            "Parser": parse_one_or_two_digit_int,
+            "Parser": "one_or_two_digit_int",
         },
         {
             "Group": "Event",
@@ -494,14 +487,14 @@ template = MetadataTemplate(
             "Name": "minimumElevationInMeters",
             "Label": "Minimum elevation in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/minimumElevationInMeters",
-            "Parser": parse_float_ge0,
+            "Parser": "float_ge0",
         },
         {
             "Group": "Location",
             "Name": "maximumElevationInMeters",
             "Label": "Maximum elevation in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/maximumElevationInMeters",
-            "Parser": parse_float_ge0,
+            "Parser": "float_ge0",
         },
         {
             "Group": "Location",
@@ -514,14 +507,14 @@ template = MetadataTemplate(
             "Name": "minimumDepthInMeters",
             "Label": "Minimum depth in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/minimumDepthInMeters",
-            "Parser": parse_float_ge0,
+            "Parser": "float_ge0",
         },
         {
             "Group": "Location",
             "Name": "maximumDepthInMeters",
             "Label": "Maximum depth in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/maximumDepthInMeters",
-            "Parser": parse_float_ge0,
+            "Parser": "float_ge0",
         },
         {
             "Group": "Location",
@@ -534,14 +527,14 @@ template = MetadataTemplate(
             "Name": "minimumDistanceAboveSurfaceInMeters",
             "Label": "Minimum distance above surface in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/minimumDistanceAboveSurfaceInMeters",
-            "Parser": parse_float_ge0,
+            "Parser": "float_ge0",
         },
         {
             "Group": "Location",
             "Name": "maximumDistanceAboveSurfaceInMeters",
             "Label": "Maximum distance above surface in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/maximumDistanceAboveSurfaceInMeters",
-            "Parser": parse_float_ge0,
+            "Parser": "float_ge0",
         },
         {
             "Group": "Location",
@@ -554,14 +547,14 @@ template = MetadataTemplate(
             "Name": "decimalLatitude",
             "Label": "Decimal latitude",
             "URI": "http://rs.tdwg.org/dwc/terms/decimalLatitude",
-            "Parser": parse_latitude,
+            "Parser": "latitude",
         },
         {
             "Group": "Location",
             "Name": "decimalLongitude",
             "Label": "Decimal longitude",
             "URI": "http://rs.tdwg.org/dwc/terms/decimalLongitude",
-            "Parser": parse_longitude,
+            "Parser": "longitude",
         },
         {
             "Group": "Location",
@@ -574,14 +567,14 @@ template = MetadataTemplate(
             "Name": "coordinateUncertaintyInMeters",
             "Label": "Coordinate uncertainty in meters",
             "URI": "http://rs.tdwg.org/dwc/terms/coordinateUncertaintyInMeters",
-            "Parser": parse_float_gt0,
+            "Parser": "float_gt0",
         },
         {
             "Group": "Location",
             "Name": "coordinatePrecision",
             "Label": "Coordinate precision",
             "URI": "http://rs.tdwg.org/dwc/terms/coordinatePrecision",
-            "Parser": parse_float_gt0,
+            "Parser": "float_gt0",
         },
         {
             "Group": "Location",
@@ -648,7 +641,7 @@ template = MetadataTemplate(
             "Name": "georeferencedDate",
             "Label": "Georeferenced date",
             "URI": "http://rs.tdwg.org/dwc/terms/georeferencedDate",
-            "Parser" : dateutil.parser.parse,
+            "Parser" : "date",
         },
         {
             "Group": "Location",
@@ -799,7 +792,7 @@ template = MetadataTemplate(
             "Name": "dateIdentified",
             "Label": "Date identified",
             "URI": "http://rs.tdwg.org/dwc/terms/dateIdentified",
-            "Parser" : dateutil.parser.parse,
+            "Parser" : "date",
         },
         {
             "Group": "Identification",
@@ -902,7 +895,7 @@ template = MetadataTemplate(
             "Name": "namePublishedInYear",
             "Label": "Name published in year",
             "URI": "http://rs.tdwg.org/dwc/terms/namePublishedInYear",
-            "Parser": parse_four_digit_int,
+            "Parser": "four_digit_int",
         },
         {
             "Group": "Taxon",

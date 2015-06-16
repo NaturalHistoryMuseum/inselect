@@ -16,6 +16,7 @@ import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
+from inselect.lib.templates.dwc import DWC
 from inselect.lib.utils import debug_print
 
 
@@ -24,7 +25,8 @@ from inselect.lib.utils import debug_print
 
 def export_csv(dir, overwrite_existing):
     dir = Path(dir)
-    export = DocumentExport()
+    # TODO Template name as argument
+    export = DocumentExport(DWC)
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         try:
             debug_print('Loading [{0}]'.format(p))

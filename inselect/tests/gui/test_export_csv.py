@@ -9,6 +9,7 @@ from PySide.QtGui import QMessageBox
 from gui_test import MainWindowTest
 
 from inselect.lib.unicode_csv import UnicodeDictReader
+from inselect.lib.templates.dwc import DWC
 
 from inselect.tests.utils import temp_directory_with_files
 
@@ -28,8 +29,8 @@ class TestExportCSV(MainWindowTest):
             res = UnicodeDictReader(f)
             for index, item, row in izip(count(), doc.items, res):
                 expected = item['fields']
-                expected.update({'Item': '{0}'.format(1+index),
-                                 'Cropped_image_name': '{0:04}.png'.format(1+index),
+                expected.update({'ItemNumber': '{0}'.format(1+index),
+                                 'Cropped_image_name': '{0:04}.jpg'.format(1+index),
                                 })
                 actual = {k: v for k,v in row.items() if v}
                 self.assertEqual(expected, actual)
@@ -48,7 +49,7 @@ class TestExportCSV(MainWindowTest):
 
             # Load document and export CSV file
             w.open_document(tempdir / 'test_segment.inselect')
-            w.export_csv(use_metadata_template=False)
+            w.export_csv(user_template=DWC)
             self._test_csv()
 
             # User should have been told about the export
@@ -72,7 +73,7 @@ class TestExportCSV(MainWindowTest):
 
             # Load document and export CSV file
             w.open_document(tempdir / 'test_segment.inselect')
-            w.export_csv(use_metadata_template=False)
+            w.export_csv(user_template=DWC)
             self._test_csv()
 
             # User should have been told about the export
@@ -101,7 +102,7 @@ class TestExportCSV(MainWindowTest):
 
             # Load document and export CSV file
             w.open_document(tempdir / 'test_segment.inselect')
-            w.export_csv(use_metadata_template=False)
+            w.export_csv(user_template=DWC)
 
             # File should not have been altered
             self.assertEqual('', (tempdir / 'test_segment.csv').open().read())
