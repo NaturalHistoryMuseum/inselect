@@ -1,6 +1,9 @@
 """Functions for formatting metadata validation problems
 """
 
+# These functions in gui rather than lib to allow for translations using Qt's
+# tr()
+
 from itertools import chain
 
 def format_missing_mandatory(missing_mandatory):

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import unicodecsv
 
-from .user_template import CollectVisitor
+from .validate_document import validate_document
 from .utils import debug_print
 
 
@@ -102,9 +102,7 @@ class DocumentExport(object):
         return path
 
     def validation_problems(self, document):
-        """Returns a list of validation problems or None, if no template is
-        being used
+        """Validates the document against the user template and returns any
+        validation problems
         """
-        visitor = CollectVisitor()
-        self._template.visit_document(document, visitor)
-        return visitor.all_problems()
+        validate_document(document, self._template)
