@@ -108,4 +108,4 @@ class ResizeHandle(QGraphicsItem):
     def paint(self, painter, option, widget):
         """QGraphicsItem virtual
         """
-        painter.fillRect(self.boundingRect(), self.parentItem().colour)
+        painter.fillRect(self.boundingRect(), self.parentItem().colours[0])

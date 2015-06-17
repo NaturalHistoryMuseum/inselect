@@ -15,16 +15,20 @@ import inselect.gui.icons        # Register our icon resources with QT
 
 from inselect import __version__ as inselect_version
 from inselect.lib.document import InselectDocument
+from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
+from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print, is_writable
 
 from .info_widget import InfoWidget
+from .format_validation_problems import format_validation_problems
 from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .roles import RotationRole
+from .user_template_choice import user_template_choice
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
@@ -32,12 +36,16 @@ from .views.object import ObjectView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
+
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
-    FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
-                           InselectDocument.EXTENSION,
-                           u' '.join(IMAGE_PATTERNS))
+    DOCUMENT_FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
+           InselectDocument.EXTENSION,
+           u' '.join(IMAGE_PATTERNS))
+
+    TEMPLATE_FILE_FILTER = u'Inselect user templates (*{0})'.format(
+        UserTemplate.EXTENSION)
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -163,7 +171,7 @@ class MainWindow(QtGui.QMainWindow):
                 QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
 
             path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
-                self, "Open", folder, self.FILE_FILTER)
+                self, "Open", folder, self.DOCUMENT_FILE_FILTER)
 
         # path will be None if user cancelled getOpenFileName
         if path:
@@ -276,16 +284,35 @@ class MainWindow(QtGui.QMainWindow):
         self.info_widget.set_document(self.document)
 
     @report_to_user
-    def save_crops(self):
+    def save_crops(self, user_template=None):
         """Saves cropped object images
         """
         debug_print('MainWindow.save_crops')
-        res = QMessageBox.Yes
-        existing_crops = self.document.crops_dir.is_dir()
 
-        if existing_crops:
-            msg = 'Overwrite the existing cropped object images?'
-            res = QMessageBox.question(self, 'Write cropped object images?',
+        if user_template:
+            export = DocumentExport(user_template)
+        else:
+            export = DocumentExport(user_template_choice().current)
+
+        self.model.to_document(self.document)
+
+        crops_dir = export.crops_dir(self.document)
+
+        res = QMessageBox.Yes
+        if crops_dir.is_dir():
+            msg = 'Overwrite the existing object images?'
+            res = QMessageBox.question(self, 'Save object images?',
+                msg, QMessageBox.No, QMessageBox.Yes)
+
+        validation = export.validation_problems(self.document)
+        if QMessageBox.Yes == res and validation and validation.any_problems:
+            msg = ('The document contains one or more validation problems:\n'
+                   '\n'
+                   '{0}\n'
+                   '\n'
+                   'Would you like to save the object images?')
+            msg = msg.format('\n'.join(format_validation_problems(validation)))
+            res = QMessageBox.question(self, 'Save object images?',
                 msg, QMessageBox.No, QMessageBox.Yes)
 
         if QMessageBox.Yes == res:
@@ -294,21 +321,26 @@ class MainWindow(QtGui.QMainWindow):
                 self.document.scanned.array
 
                 progress('Saving crops')
-                self.document.save_crops(progress)
+                export.save_crops(self.document, progress)
 
             def completed(operation):
                 QMessageBox.information(self, "Crops saved", msg)
 
-            self.model.to_document(self.document)
             msg = "{0} crops saved in {1}"
-            msg = msg.format(self.document.n_items, self.document.crops_dir)
+            msg = msg.format(self.document.n_items, crops_dir)
             self.run_in_worker(save_crops, 'Save crops', completed)
 
     @report_to_user
-    def export_csv(self):
+    def export_csv(self, user_template=None):
         debug_print('MainWindow.export_csv')
 
-        path = self.document.document_path.with_suffix('.csv')
+        if user_template:
+            export = DocumentExport(user_template)
+        else:
+            export = DocumentExport(user_template_choice().current)
+
+        self.model.to_document(self.document)
+        path = export.csv_path(self.document)
 
         res = QMessageBox.Yes
         existing_csv = path.is_file()
@@ -318,9 +350,19 @@ class MainWindow(QtGui.QMainWindow):
             res = QMessageBox.question(self, 'Export CSV file?',
                 msg, QMessageBox.No, QMessageBox.Yes)
 
+        validation = export.validation_problems(self.document)
+        if QMessageBox.Yes == res and validation and validation.any_problems:
+            msg = ('The document contains one or more validation problems:\n'
+                   '\n'
+                   '{0}\n'
+                   '\n'
+                   'Would you like to export to a CSV file?')
+            msg = msg.format('\n'.join(format_validation_problems(validation)))
+            res = QMessageBox.question(self, 'Export CSV file?',
+                msg, QMessageBox.No, QMessageBox.Yes)
+
         if QMessageBox.Yes == res:
-            self.model.to_document(self.document)
-            self.document.export_csv(path)
+            export.export_csv(self.document)
             msg = "Data for {0} boxes written to {1}"
             msg = msg.format(self.document.n_items, path)
             QMessageBox.information(self, "CSV saved", msg)
@@ -730,6 +772,11 @@ class MainWindow(QtGui.QMainWindow):
             "Rotate counter-clockwise", self, shortcut="ctrl+L",
             triggered=partial(self.rotate90, clockwise=False))
 
+        self.default_user_template_action = QAction("Default template",
+            self, triggered=self.default_user_template)
+        self.choose_user_template_action = QAction("Choose template",
+            self, triggered=self.choose_user_template)
+
         # Plugins
         # Plugin shortcuts start at F5
         shortcut_offset = 5
@@ -790,9 +837,9 @@ class MainWindow(QtGui.QMainWindow):
             statusTip="Display plugin image", checkable=True)
 
         self.show_object_grid_action = QAction('Show grid', self,
-            shortcut='ctrl+g', triggered=self.show_grid)
+            shortcut='ctrl+G', triggered=self.show_grid)
         self.show_object_expanded_action = QAction('Show expanded', self,
-            shortcut='ctrl+e', triggered=self.show_expanded)
+            shortcut='ctrl+E', triggered=self.show_expanded)
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
@@ -813,10 +860,12 @@ class MainWindow(QtGui.QMainWindow):
         self.fileMenu = QMenu("&File", self)
         self.fileMenu.addAction(self.open_action)
         self.fileMenu.addAction(self.save_action)
+        self.fileMenu.addAction(self.close_action)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.save_crops_action)
         self.fileMenu.addAction(self.export_csv_action)
+        self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.save_screengrab_action)
-        self.fileMenu.addAction(self.close_action)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exit_action)
 
@@ -830,6 +879,10 @@ class MainWindow(QtGui.QMainWindow):
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.rotate_clockwise_action)
         self.editMenu.addAction(self.rotate_counter_clockwise_action)
+        self.editMenu.addSeparator()
+        self.editMenu.addAction(self.default_user_template_action)
+        self.editMenu.addAction(self.choose_user_template_action)
+
         self.editMenu.addSeparator()
         for action in self.plugin_actions:
             self.editMenu.addAction(action)
@@ -887,6 +940,26 @@ class MainWindow(QtGui.QMainWindow):
                 self.setWindowFilePath(str(self.document_path))
         else:
             self.showFullScreen()
+
+    @report_to_user
+    def default_user_template(self):
+        "Selects the default user_template"
+        user_template_choice().select_default()
+
+    @report_to_user
+    def choose_user_template(self):
+        "Shows a 'choose template' file dialog"
+        debug_print('MetadataView._choose_template_clicked')
+
+        folder = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        folder = '/Users/lawh/Dropbox/Projects/Digitisation/InselectTemplates'
+
+        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
+            self, "Choose template", folder, self.TEMPLATE_FILE_FILTER)
+
+        if path:
+            # Save the user's choice
+            user_template_choice().load(path)
 
     def _accept_drag_drop(self, event):
         """If event refers to a single file that can opened, returns the path.

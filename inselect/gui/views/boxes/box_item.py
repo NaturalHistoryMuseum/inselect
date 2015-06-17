@@ -1,10 +1,11 @@
 from itertools import chain
 
 from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from PySide.QtCore import Qt, QRect, QRectF
 from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
+from inselect.gui.colours import COLOURS
 from inselect.gui.utils import painter_state
 
 from .resize_handle import ResizeHandle
@@ -14,18 +15,17 @@ class BoxItem(QtGui.QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    DRAW_INNER = False
+    SELECTED = QColor(COLOURS['Selected'])
+    VALID = QColor(COLOURS['Valid'])
+    INVALID = QColor(COLOURS['Invalid'])
 
-    # Blue unselected, red selected
-    UNSELECTED = Qt.blue
-    SELECTED =   Qt.red
-    RESIZING =   QColor(0xff, 0x00, 0x00, 0x50)
+    RESIZING = QColor(SELECTED)
+    RESIZING.setAlpha(0x50)
 
-    INNER =         Qt.black
-    INNER_RESIZE =  QColor(0x00, 0x00, 0x00, 0x30)
+    INVALID_FILL = QColor(INVALID)
+    INVALID_FILL.setAlpha(0x50)
 
-
-    def __init__(self, x, y, w, h, parent=None, scene=None):
+    def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
         self.setFlags(QGraphicsItem.ItemIsFocusable |
                       QGraphicsItem.ItemIsSelectable |
@@ -34,6 +34,9 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         self.setCursor(Qt.OpenHandCursor)
         self.setAcceptHoverEvents(True)
+
+        # True if the box has valid metadata
+        self._isvalid = isvalid
 
         # Sub-segmentation seed points - QPointF objects in item coordinates
         self._seeds = []
@@ -54,14 +57,16 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # QAbstractGraphicsItems with a larger zorder
 
         # TODO LH Get pixmap without tight coupling to scene
-        painter.drawPixmap(self.boundingRect(),
-                           self.scene().pixmap,
-                           self.sceneBoundingRect())
+        if not self.has_mouse():
+            painter.drawPixmap(self.boundingRect(),
+                               self.scene().pixmap,
+                               self.sceneBoundingRect())
 
         with painter_state(painter):
             # Zero thickness indicates a cosmetic pen, which is drawn with the
             # same thickness regardless of the view's scale factor
-            painter.setPen(QPen(self.colour, 0, Qt.SolidLine))
+            outline_colour, fill_colour = self.colours
+            painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
             r = self.boundingRect()
             painter.drawRect(r)
 
@@ -72,10 +77,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
                 for point in self._seeds:
                     painter.drawEllipse(point, 5, 5)
 
-            if self.DRAW_INNER:
-                painter.setPen(QPen(self.inner_colour, 1, Qt.SolidLine))
-                r.adjust(1, 1, -1, -1)
-                painter.drawRect(r)
+            if fill_colour:
+                painter.fillRect(r, fill_colour)
 
     def has_mouse(self):
         """True if self or self._handles has grabbed the mouse
@@ -83,24 +86,26 @@ class BoxItem(QtGui.QGraphicsRectItem):
         return self.scene().mouseGrabberItem() in chain([self], self._handles)
 
     @property
-    def colour(self):
-        """QColor to use for drawing the box's border
-        """
-        # TODO LH Transparency on resize better handled by setOpacity()?
-        if self.has_mouse():
-            return self.RESIZING
-        else:
-            return self.SELECTED if self.isSelected() else self.UNSELECTED
-
-    @property
-    def inner_colour(self):
-        """QColor to use for drawing the rectangle within the box's border
+    def colours(self):
+        """Tuple of two QColors to use for the box's border and fill
+        respectively
         """
         if self.has_mouse():
-            return self.INNER_RESIZE
+            outline = self.RESIZING
+        if self.isSelected():
+            outline = self.SELECTED
+        elif self._isvalid:
+            outline = self.VALID
         else:
-            return self.INNER
+            outline = self.INVALID
 
+        if not self._isvalid and not self.has_mouse():
+            # Fill only if invalid and not resizing
+            fill = self.INVALID_FILL
+        else:
+            fill = None
+
+        return outline, fill
 
     def update(self, rect=QtCore.QRectF()):
         """QGraphicsRectItem function
@@ -188,6 +193,29 @@ class BoxItem(QtGui.QGraphicsRectItem):
             # Item has gained or lost selection
             self._set_z_index()
         return super(BoxItem, self).itemChange(change, value)
+
+    def set_rect(self, new_rect):
+        """Sets a new QRect in integer coordinates
+        """
+
+        # Cumbersome conversion to ints
+        current = self.sceneBoundingRect()
+        current = QRect(current.left(), current.top(),
+                        current.width(), current.height())
+        if current!=new_rect:
+            msg = 'Update rect for [{0}] from [{1}] to [{2}]'
+            debug_print(msg.format(self, current, new_rect))
+            self.prepareGeometryChange()
+
+            # setrect() expects floating point rect
+            self.setRect(QRectF(new_rect))
+
+    def set_isvalid(self, isvalid):
+        """Sets a new 'is valid'
+        """
+        if isvalid != self._isvalid:
+            self._isvalid = isvalid
+            self.update()
 
     def _set_z_index(self):
         """Updates the Z-index of the box

@@ -53,7 +53,6 @@ class TestParse(unittest.TestCase):
         self.assertEqual(1.0, parse_float_ge0('1.0'))
         self.assertEqual(2001, parse_float_ge0(' 2001   '))
         self.assertEqual(2001.0, parse_float_ge0(' 2001   '))
-
         self.assertRaises(ValueError, parse_float_ge0,'-10')
 
     def test_parse_date(self):

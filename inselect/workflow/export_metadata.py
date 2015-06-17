@@ -15,6 +15,8 @@ import inselect
 import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
+from inselect.lib.document_export import DocumentExport
+from inselect.lib.templates.dwc import DWC
 from inselect.lib.utils import debug_print
 
 
@@ -23,16 +25,18 @@ from inselect.lib.utils import debug_print
 
 def export_csv(dir, overwrite_existing):
     dir = Path(dir)
+    # TODO Template name as argument
+    export = DocumentExport(DWC)
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         try:
             debug_print('Loading [{0}]'.format(p))
             doc = InselectDocument.load(p)
-            csv_path = doc.document_path.with_suffix('.csv')
+            csv_path = export.csv_path(doc)
             if not overwrite_existing and csv_path.is_file():
                 print('CSV file [{0}] exists - skipping'.format(csv_path))
             else:
                 print('Will write CSV for [{0}]'.format(p))
-                doc.export_csv(csv_path)
+                export.export_csv(doc)
         except Exception:
             print('Error saving CSV from [{0}]'.format(p))
             traceback.print_exc()

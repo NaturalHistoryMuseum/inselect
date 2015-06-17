@@ -12,6 +12,9 @@ from .barcode_settings import load_engine
 try:
     from gouda.strategies.roi.roi import roi
     from gouda.strategies.resize import resize
+
+    import inselect.lib.utils
+    import gouda.util
 except ImportError:
     roi = resize = None
 
@@ -37,6 +40,8 @@ class BarcodePlugin(Plugin):
         debug_print('BarcodePlugin.__call__')
 
         engine = load_engine()
+
+        gouda.util.DEBUG_PRINT = inselect.lib.utils.DEBUG_PRINT
 
         progress('Loading full-res image')
         image_array = self.document.scanned.array
@@ -65,7 +70,7 @@ class BarcodePlugin(Plugin):
             result = strategy(crop, engine)
             if result:
                 strategy, barcodes = result
-                return u' '.join([b.data for b in barcodes])
+                return u' '.join(sorted([b.data for b in barcodes]))
         return None
 
     @classmethod

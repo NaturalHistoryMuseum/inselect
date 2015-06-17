@@ -69,13 +69,13 @@ class TestModelData(GUITest):
 
         i = m.index(0, 0)
         expected = {"catalogNumber": "1",
-                    "scientificName": "ABC",
+                    "scientificName": "A",
                    }
         self.assertEqual(expected, m.data(i, MetadataRole))
 
         m.setData(i, {'catalogNumber' : '1234'}, MetadataRole)
         expected = {"catalogNumber": "1234",
-                    "scientificName": "ABC",
+                    "scientificName": "A",
                    }
         self.assertEqual(expected, m.data(i, MetadataRole))
 
@@ -94,9 +94,10 @@ class TestModelData(GUITest):
         m = Model()
         m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
 
-        self.assertEqual('001 1', m.data(m.index(0, 0), Qt.DisplayRole))
-        self.assertEqual('003 3', m.data(m.index(2, 0), Qt.DisplayRole))
-        self.assertEqual('004 ',  m.data(m.index(3, 0), Qt.DisplayRole))
+        # First four characters only - remainder depend upon current template
+        self.assertEqual('0001', m.data(m.index(0, 0), Qt.DisplayRole)[:4])
+        self.assertEqual('0003', m.data(m.index(2, 0), Qt.DisplayRole)[:4])
+        self.assertEqual('0004', m.data(m.index(3, 0), Qt.DisplayRole)[:4])
 
 
 if __name__=='__main__':

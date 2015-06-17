@@ -74,7 +74,7 @@ class TestModelData(GUITest):
 
         m.removeRows(0, 1)
         self.assertEqual(4, m.rowCount())
-        expected = {"catalogNumber": "2", "scientificName": "ABC"}
+        expected = {"catalogNumber": "2", "scientificName": "B"}
         self.assertEqual(expected, m.data(m.index(0, 0), MetadataRole))
 
 

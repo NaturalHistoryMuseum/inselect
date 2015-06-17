@@ -1,11 +1,14 @@
 from copy import deepcopy
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect
+from PySide import QtGui
+from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect, Signal
 
 from inselect.lib.utils import debug_print
+
+from .roles import (RectRole, PixmapRole, RotationRole, MetadataRole,
+                    MetadataValidRole)
+from .user_template_choice import user_template_choice
 from .utils import qimage_of_bgr
-from .roles import RectRole, PixmapRole, RotationRole, MetadataRole
 
 
 class Model(QAbstractItemModel):
@@ -16,7 +19,9 @@ class Model(QAbstractItemModel):
     # TODO LH Plugins should operate on Model, not InselectDocument
 
     # Emitted when modified status changes
-    modified_changed = QtCore.Signal()
+    modified_changed = Signal()
+
+    DISPLAY_TEMPLATE = '{0:04} {1}'
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
@@ -24,6 +29,8 @@ class Model(QAbstractItemModel):
         self._data = []             # A list of dicts
         self._image_array = None    # np.nd_array, for segmentation
         self._pixmap = None         # Instance of QPixmap
+
+        user_template_choice().template_changed.connect(self.user_template_changed)
 
     def _clear_model_data(self):
         """Clear data structures
@@ -70,11 +77,11 @@ class Model(QAbstractItemModel):
         data = [None] * len(items)
         for index, item in enumerate(items):
             rect = item['rect']
-            rect = QtCore.QRect(rect[0]*image_width,
-                                rect[1]*image_height,
-                                rect[2]*image_width,
-                                rect[3]*image_height)
-            data[index] = {"metadata": item.get('fields', {}),
+            rect = QRect(rect[0]*image_width,
+                         rect[1]*image_height,
+                         rect[2]*image_width,
+                         rect[3]*image_height)
+            data[index] = {"fields": item.get('fields', {}),
                            "rect": rect,
                            "rotation": item.get('rotation', 0),
                           }
@@ -129,7 +136,7 @@ class Model(QAbstractItemModel):
                                    rect.top()/h,
                                    rect.width()/w,
                                    rect.height()/h),
-                          'fields': box['metadata'],
+                          'fields': box['fields'],
                           'rotation': box['rotation'],
                         })
         document.set_items(items)
@@ -173,14 +180,20 @@ class Model(QAbstractItemModel):
         else:
             item = self._data[index.row()]
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
-                return u'{0:03} {1}'.format(1+index.row(),
-                                            item['metadata'].get('catalogNumber', ''))
+                template = user_template_choice().current
+                return self.DISPLAY_TEMPLATE.format(1 + index.row(),
+                    template.format_label(1 + index.row(), item['fields']))
+            elif Qt.WhatsThisRole == role:
+                return 'Cropped object image'
             elif RectRole == role:
                 return item['rect']
             elif RotationRole == role:
                 return item['rotation']
             elif MetadataRole == role:
-                return item['metadata']
+                return item['fields']
+            elif MetadataValidRole == role:
+                template = user_template_choice().current
+                return template.validate_metadata(item['fields'])
 
     def setData(self, index, value, role):
         """QAbstractItemModel virtual
@@ -226,15 +239,15 @@ class Model(QAbstractItemModel):
                 msg = 'Model.setData for [{0}] update [{1}]'
                 debug_print(msg.format(index.row(), value))
 
-                new = deepcopy(self._data[index.row()]['metadata'])
+                new = deepcopy(self._data[index.row()]['fields'])
                 new.update(value)
 
                 # Only fields that have a value
                 new = {k: v for k, v in new.iteritems() if '' != v}
 
                 # Update if only if changed
-                if new != self._data[index.row()]['metadata']:
-                    self._data[index.row()]['metadata'] = new
+                if new != self._data[index.row()]['fields']:
+                    self._data[index.row()]['fields'] = new
                     self.dataChanged.emit(index, index)
                     self.set_modified(True)
                 return True
@@ -263,8 +276,8 @@ class Model(QAbstractItemModel):
             # not 'count' different dict instances
             new_rows = [None] * count
             for i in xrange(0, count):
-                new_rows[i] = {"metadata": {},
-                               "rect": QtCore.QRect(0, 0, 0, 0),
+                new_rows[i] = {"fields": {},
+                               "rect": QRect(0, 0, 0, 0),
                                "rotation": 0}
 
             self._data[row:row] = new_rows
@@ -290,3 +303,12 @@ class Model(QAbstractItemModel):
             self.endRemoveRows()
 
             return True
+
+    def user_template_changed(self):
+        """Informs the model that the user's choice of metadata template has
+        changed. Informs all views.
+        """
+        debug_print('Model.user_template_changed')
+        if self._data:
+            self.dataChanged.emit(self.index(0, 0),
+                                  self.index(self.rowCount()-1, 0))

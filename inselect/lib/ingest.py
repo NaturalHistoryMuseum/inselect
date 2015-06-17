@@ -37,6 +37,7 @@ def ingest_image(source, dest_dir):
         # Raises if the document already exists
         doc = InselectDocument.new_from_scan(dest)
 
+        # TODO Resolution to come from template
         doc.ensure_thumbnail()
 
         # Make images read-only

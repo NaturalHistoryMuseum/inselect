@@ -7,6 +7,11 @@ from inselect.lib.utils import format_dt_display
 from .toggle_widget_label import ToggleWidgetLabel
 
 
+class BoldLabel(QLabel):
+    """A label in a bold font
+    """
+    pass
+
 class InfoWidget(QGroupBox):
     """Shows information about the document and the scanned image
     """
@@ -17,6 +22,10 @@ class InfoWidget(QGroupBox):
         font-weight: bold;
         color: black;
     }
+
+    BoldLabel {
+        font-weight: bold;
+    }
     """
 
     def __init__(self, parent=None):
@@ -26,7 +35,7 @@ class InfoWidget(QGroupBox):
 
         layout = QFormLayout()
 
-        layout.addRow(QLabel('Document'))
+        layout.addRow(BoldLabel('Document'))
 
         self._document_path = QLabel()
         layout.addRow('Name', self._document_path)
@@ -43,7 +52,7 @@ class InfoWidget(QGroupBox):
         self._last_saved_on = QLabel()
         layout.addRow('Last saved on', self._last_saved_on)
 
-        layout.addRow(QLabel('Scanned image'))
+        layout.addRow(BoldLabel('Scanned image'))
         self._scanned_path = QLabel()
         layout.addRow('Name', self._scanned_path)
 
