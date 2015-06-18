@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.14
+-------------
+- Added #165 - User templates to support thumbnail width pixels (@quicklizard)
+
 Version 0.1.13
 -------------
 - Work on #156 - User-defined project templates (@quicklizard)
