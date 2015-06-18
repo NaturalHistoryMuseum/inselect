@@ -37,6 +37,10 @@ class InselectDocument(object):
 
     FILE_VERSIONS = (1,2,)
     EXTENSION = '.inselect'
+
+    THUMBNAIL_MIN_WIDTH =  1024
+    THUMBNAIL_MAX_WIDTH = 16384
+    THUMBNAIL_DEFAULT_WIDTH = 4096
     THUMBNAIL_SUFFIX = '_thumbnail.jpg'
 
     # Matches filenames that are thumbnail images
@@ -45,6 +49,7 @@ class InselectDocument(object):
     # Format for serializing datetime objects.
     # Conforms to http://www.ietf.org/rfc/rfc3339.txt
     DT_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
 
     @classmethod
     def _format_datetime(cls, v):
@@ -277,17 +282,14 @@ class InselectDocument(object):
         rotation = (i.get('rotation', 0) for i in self._items)
         image.save_crops(boxes, crop_paths, rotation, progress)
 
-    def ensure_thumbnail(self, width=4096):
+    def ensure_thumbnail(self, width=THUMBNAIL_DEFAULT_WIDTH):
         "Create thumbnail image, if it does not already exist"
         if self._thumbnail is None:
             p = self.thumbnail_path_of_scanned(self._scanned.path)
 
             # File might have been created after this instance
             if not p.is_file():
-                # TODO LH Sensible limits?
-                # TODO LH What if self._scanned.width<width?
-                min, max = 512, 8192
-                if not min<width<max:
+                if not self.THUMBNAIL_MIN_WIDTH <= width <= self.THUMBNAIL_MAX_WIDTH:
                     msg = 'width should be between [{0}] and [{1}]'
                     raise InselectError(msg.format(min, max))
                 else:

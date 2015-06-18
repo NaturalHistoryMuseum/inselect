@@ -17,7 +17,8 @@ IMAGE_SUFFIXES_RE.pattern
 IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
 
 
-def ingest_image(source, dest_dir):
+def ingest_image(source, dest_dir,
+        thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH):
     """Copies the image in the path source to the directory in the path
     dest_dir. Creates an returns a new instance of InselectDocument for the
     copied image.
@@ -37,8 +38,7 @@ def ingest_image(source, dest_dir):
         # Raises if the document already exists
         doc = InselectDocument.new_from_scan(dest)
 
-        # TODO Resolution to come from template
-        doc.ensure_thumbnail()
+        doc.ensure_thumbnail(thumbnail_width_pixels)
 
         # Make images read-only
         debug_print('Making image files read-only')

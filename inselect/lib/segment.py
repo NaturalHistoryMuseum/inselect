@@ -28,7 +28,7 @@ def segment_document(doc, resize=None, *args, **kwargs):
 
     # Make smaller images larger
     height, width = img.array.shape[:2]
-    if resize is None and width < SEGMENTATION_PREFERRED_WIDTH:
+    if resize is None and width != SEGMENTATION_PREFERRED_WIDTH:
         # Resize, maintaining aspect ratio
         # segment_edges() expects a tuple (height, width)
         factor  = float(SEGMENTATION_PREFERRED_WIDTH) / width

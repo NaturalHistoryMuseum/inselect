@@ -62,6 +62,16 @@ class InfoWidget(QGroupBox):
         self._scanned_dimensions = QLabel()
         layout.addRow('Dimensions', self._scanned_dimensions)
 
+        layout.addRow(BoldLabel('Thumbnail image'))
+        self._thumbnail_path = QLabel()
+        layout.addRow('Name', self._thumbnail_path)
+
+        self._thumbnail_size = QLabel()
+        layout.addRow('Size', self._thumbnail_size)
+
+        self._thumbnail_dimensions = QLabel()
+        layout.addRow('Dimensions', self._thumbnail_dimensions)
+
         labels_widget = QWidget()
         labels_widget.setLayout(layout)
         labels_widget.setVisible(False)
@@ -76,7 +86,8 @@ class InfoWidget(QGroupBox):
         #self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
     def set_document(self, document):
-        """Set s a new document
+        """Updates controls to reflect the document. Clears controls if
+        document is None.
         """
         if document:
             self._document_path.setText(document.document_path.name)
@@ -97,6 +108,16 @@ class InfoWidget(QGroupBox):
 
             dim = '{0:,} x {1:,}'
             self._scanned_dimensions.setText(dim.format(*document.scanned.dimensions))
+
+            # Thumbnail might not be present
+            if document.thumbnail:
+                self._thumbnail_path.setText(document.thumbnail.path.name)
+                self._thumbnail_size.setText(humanize.naturalsize(document.thumbnail.size_bytes))
+                self._thumbnail_dimensions.setText(dim.format(*document.thumbnail.dimensions))
+            else:
+                self._thumbnail_path.setText('')
+                self._thumbnail_size.setText('')
+                self._thumbnail_dimensions.setText('')
         else:
             self._document_path.setText('')
             self._created_by.setText('')
@@ -106,3 +127,6 @@ class InfoWidget(QGroupBox):
             self._scanned_path.setText('')
             self._scanned_size.setText('')
             self._scanned_dimensions.setText('')
+            self._thumbnail_path.setText('')
+            self._thumbnail_size.setText('')
+            self._thumbnail_dimensions.setText('')

@@ -220,6 +220,7 @@ class MainWindow(QtGui.QMainWindow):
             raise InselectError(u'Image file [{0}] does not exist'.format(path))
         else:
             # Callable for worker thread
+            thumbnail_width = user_template_choice().current.thumbnail_width_pixels
             class NewDoc(object):
                 def __init__(self, image):
                     self.image = image
@@ -227,7 +228,8 @@ class MainWindow(QtGui.QMainWindow):
 
                 def __call__(self, progress):
                     progress('Creating thumbnail of scanned image')
-                    doc = ingest_image(self.image, self.image.parent)
+                    doc = ingest_image(self.image, self.image.parent,
+                                       thumbnail_width)
                     self.document_path = doc.document_path
 
 

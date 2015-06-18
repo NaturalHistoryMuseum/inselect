@@ -8,6 +8,7 @@ from schematics.types import (StringType, DecimalType, BooleanType, BaseType,
                               URLType)
 from schematics.types.compound import ListType, DictType
 
+from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import IMAGE_SUFFIXES
 from inselect.lib.user_template import PARSERS, UserTemplate
 from inselect.lib.utils import debug_print, duplicated
@@ -37,8 +38,11 @@ class UniqueListType(ListType):
 class UserTemplateModel(Model):
     name = StringType(required=True, serialized_name='Name')
     object_label = StringType(serialized_name='Object label')
-    thumbnail_width_pixels = DecimalType(default=4096, min_value=1024,
-        max_value=16384, serialized_name='Thumbnail width pixels')
+    thumbnail_width_pixels = DecimalType(
+        default=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
+        min_value=InselectDocument.THUMBNAIL_MIN_WIDTH,
+        max_value=InselectDocument.THUMBNAIL_MAX_WIDTH,
+        serialized_name='Thumbnail width pixels')
     cropped_file_suffix = StringType(default='.jpg',
         choices=IMAGE_SUFFIXES, serialized_name='Cropped file suffix')
 
