@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from itertools import izip
+from itertools import izip, repeat
 from mock import Mock
 from pathlib import Path
 
@@ -173,10 +173,55 @@ class TestImage(unittest.TestCase):
             progress = Mock(return_value=None)
             i.save_crops([Rect(0, 0, 1, 1)],
                          [Path(temp) / 'whole.png'],
-                         progress)
+                         progress=progress)
             progress.assert_called_once_with('Writing crop 1')
         finally:
             shutil.rmtree(temp)
+
+    def test_save_crops_all_rotated90(self):
+        "All crops are saved with 90 degrees of clockwise rotation"
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        temp = tempfile.mkdtemp()
+        try:
+            i.save_crops(repeat(Rect(0, 0, 1, 1), 4),
+                         (Path(temp) / '{0}.png'.format(n) for n in xrange(0, 4)),
+                         rotation=90)
+            crop = cv2.imread(str(Path(temp) / '0.png'))
+            self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 1) == crop))
+            crop = cv2.imread(str(Path(temp) / '1.png'))
+            self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 1) == crop))
+            crop = cv2.imread(str(Path(temp) / '2.png'))
+            self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 1) == crop))
+            crop = cv2.imread(str(Path(temp) / '3.png'))
+            self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 1) == crop))
+        finally:
+            shutil.rmtree(temp)
+
+    def test_save_crops_all_rotated(self):
+        "Crops are saved with different rotations"
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        temp = tempfile.mkdtemp()
+        try:
+            i.save_crops(repeat(Rect(0, 0, 1, 1), 4),
+                         (Path(temp) / '{0}.png'.format(n) for n in xrange(0, 4)),
+                         rotation=[0, 90, 180, -90])
+            crop = cv2.imread(str(Path(temp) / '0.png'))
+            self.assertTrue(np.all(i.array == crop))
+            crop = cv2.imread(str(Path(temp) / '1.png'))
+            self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 1) == crop))
+            crop = cv2.imread(str(Path(temp) / '2.png'))
+            self.assertTrue(np.all(cv2.flip(i.array, -1) == crop))
+            crop = cv2.imread(str(Path(temp) / '3.png'))
+            self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 0) == crop))
+        finally:
+            shutil.rmtree(temp)
+
+    def test_crops_bad_rotation(self):
+        "Generate crops with an illegal rotation"
+        i = InselectImage(TESTDATA / 'test_segment.png')
+        # Need to use context manager because i.crops is a generator function
+        with self.assertRaises(ValueError):
+            list(i.crops([Rect(0, 0, 1, 1)], -1))
 
     @unittest.skipIf(sys.platform.startswith("win"),
                      "Read-only directories not available on Windows")

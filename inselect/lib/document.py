@@ -268,12 +268,14 @@ class InselectDocument(object):
     @property
     def crops(self):
         "Iterate over cropped object image arrays"
-        return self._scanned.crops(i['rect'] for i in self._items)
+        return self._scanned.crops((i['rect'] for i in self._items),
+                                   (i.get('rotation', 0) for i in self._items))
 
     def save_crops_from_image(self, image, crop_paths, progress=None):
         "Saves images cropped from image to dir. dir must exist."
         boxes = (i['rect'] for i in self._items)
-        image.save_crops(boxes, crop_paths, progress)
+        rotation = (i.get('rotation', 0) for i in self._items)
+        image.save_crops(boxes, crop_paths, rotation, progress)
 
     def ensure_thumbnail(self, width=4096):
         "Create thumbnail image, if it does not already exist"

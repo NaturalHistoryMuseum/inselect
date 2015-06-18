@@ -1,6 +1,6 @@
 import warnings
 
-from itertools import izip, count, chain
+from itertools import izip, count, chain, repeat
 from pathlib import Path
 
 import cv2
@@ -68,19 +68,28 @@ class InselectImage(object):
             yield Rect(float(left)/w, float(top)/h, float(width)/w,
                        float(height)/h)
 
-    def crops(self, normalised):
-        """Generator function that yields cropped images.
+    def crops(self, normalised, rotation=None):
+        """Generator function that yields cropped images
+        Rotation should be None, an int or an iterable. If not None, crops will
+        be rotated by that many clockwise degrees.
         """
+
+        if not rotation:
+            rotation = repeat(0)
+        elif isinstance(rotation, (int, long)):
+            rotation = repeat(rotation)
+
         h, w = self.array.shape[:2]
-        for box in self.from_normalised(normalised):
+        last_rotation = None
+        for box, rotate in izip(self.from_normalised(normalised), rotation):
             x0, y0, x1, y1 = box.coordinates
             x_in_bounds = [0 <= x0 <= w, 0 <= x1 <= w]
             y_in_bounds = [0 <= y0 <= h, 0 <= y1 <= h]
             if all(chain(x_in_bounds, y_in_bounds)):
                 # View
-                yield self.array[y0:y1, x0:x1]
+                crop = self.array[y0:y1, x0:x1]
             else:
-                # Create a new array, all zeroes (black)
+                # Box is out of bounds -create a new array, all zeroes (black)
                 crop_w, crop_h = x1-x0, y1-y0
                 crop = np.zeros((crop_h, crop_w, self.array.shape[2]),
                                 dtype=self.array.dtype)
@@ -91,13 +100,35 @@ class InselectImage(object):
                     dest_y, dest_x = max(0, 0-y0), max(0, 0-x0)
                     crop[dest_y:(dest_y+overlapping.shape[0]),
                          dest_x:(dest_x+overlapping.shape[1]),] = overlapping
-                yield crop
 
-    def save_crops(self, normalised, paths, progress=None):
-        "Saves crops given in normalised to paths."
+
+            if 0 != rotate % 90:
+                msg = 'Rotation is not a multiple of 90: [{0}]'
+                raise ValueError(msg.format(rotate))
+            else:
+                n_rotations = (rotate % 360) / 90
+                # n_rotations will be 0, 1, 2 or 3 = the number of 90 degree
+                # clockwise rotations
+                if 1 == n_rotations:
+                    # Rotate 90 clockwise
+                    crop = cv2.flip(cv2.transpose(crop), 1)
+                elif 2 == n_rotations:
+                    # Rotate 180 clockwise
+                    crop = cv2.flip(crop, -1)
+                elif 3 == n_rotations:
+                    # Rotate 90 counter-clockwise
+                    crop = cv2.flip(cv2.transpose(crop), 0)
+
+            yield crop
+
+    def save_crops(self, normalised, paths, rotation=None, progress=None):
+        """Saves crops given in normalised to paths.
+        Rotation should be the number of clockwise degrees by which the crops
+        should be rotated.
+        """
         # TODO Copy EXIF tags?
         # TODO Make read-only?
-        for index, crop, path in izip(count(), self.crops(normalised), paths):
+        for index, crop, path in izip(count(), self.crops(normalised, rotation), paths):
             if progress:
                 progress('Writing crop {0}'.format(1 + index))
             if not cv2.imwrite(str(path), crop):
