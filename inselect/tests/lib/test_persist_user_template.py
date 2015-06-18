@@ -3,7 +3,10 @@ import unittest
 from pathlib import Path
 
 from inselect.lib.persist_user_template import (user_template_from_specification,
-                                                InvalidSpecificationError)
+                                                InvalidSpecificationError,
+                                                load_user_template)
+
+TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 class TestValidateUserTemplate(unittest.TestCase):
@@ -160,6 +163,18 @@ class TestValidateUserTemplate(unittest.TestCase):
 
         self.assertEqual('1 problem:\nNo fields defined.', str(cm.exception))
         self.assertEqual(['No fields defined.'], cm.exception.problems)
+
+
+    def test_load_user_template(self):
+        "Load from a YAML file"
+        with (TESTDATA / 'test.inselect_template').open() as f:
+          doc = load_user_template(f)
+
+        self.assertEqual(doc.name, "Test user template spec")
+        self.assertEqual(doc.cropped_file_suffix, '.jpg')
+        self.assertEqual(doc.thumbnail_width_pixels, 4096)
+        self.assertEqual(1, len(doc.fields))
+        self.assertEqual('Record number', doc.fields[0].name)
 
 
 if __name__=='__main__':

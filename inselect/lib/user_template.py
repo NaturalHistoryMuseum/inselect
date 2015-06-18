@@ -136,7 +136,7 @@ class UserTemplate(object):
                 return False
             try:
                 parseable = self.parse_mapping.iteritems()
-                parseable = ((k, v) for k, v in parseable if k in metadata)
+                parseable = ((k, v) for k, v in parseable if metadata.get(k))
                 for field, parse_fn in parseable:
                     parse_fn(metadata[field])
             except ValueError:

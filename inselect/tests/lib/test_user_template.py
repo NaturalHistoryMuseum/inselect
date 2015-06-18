@@ -1,13 +1,10 @@
 import unittest
 
 from collections import OrderedDict
-from pathlib import Path
 
 from inselect.lib.user_template import UserTemplate
 
 from inselect.lib.parse import parse_int
-
-TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 class TestUserTemplate(unittest.TestCase):
@@ -93,7 +90,7 @@ class TestUserTemplate(unittest.TestCase):
                 'Fields': [{'Name': 'First', 'Parser': 'int'}],
                }
         t = UserTemplate(spec)
-        self.assertFalse(t.validate_field('First', ''))
+        self.assertTrue(t.validate_field('First', ''))
         self.assertFalse(t.validate_field('First', 'x'))
         self.assertTrue(t.validate_field('First', '123'))
 
@@ -102,7 +99,7 @@ class TestUserTemplate(unittest.TestCase):
                 'Fields': [{'Name': 'First', 'Regex parser': '^[0-9]{9}$'}],
                }
         t = UserTemplate(spec)
-        self.assertFalse(t.validate_field('First', ''))
+        self.assertTrue(t.validate_field('First', ''))
         self.assertFalse(t.validate_field('First', '12345678'))
         self.assertTrue(t.validate_field('First', '123456789'))
 
@@ -111,7 +108,7 @@ class TestUserTemplate(unittest.TestCase):
                 'Fields': [{'Name': 'First', 'Parser': 'int_gt0'}],
                }
         t = UserTemplate(spec)
-        self.assertFalse(t.validate_metadata({'First': ''}))
+        self.assertTrue(t.validate_metadata({'First': ''}))
         self.assertFalse(t.validate_metadata({'First': 'xyz'}))
         self.assertFalse(t.validate_metadata({'First': '0'}))
         self.assertTrue(t.validate_metadata({'First': '1'}))
@@ -124,17 +121,6 @@ class TestUserTemplate(unittest.TestCase):
         self.assertFalse(t.validate_metadata({'First': ''}))
         self.assertTrue(t.validate_metadata({'First': ' '}))
         self.assertTrue(t.validate_metadata({'First': 'xyz'}))
-
-    def test_load_yaml(self):
-        "Load from a yaml file"
-        with (TESTDATA / 'test.inselect_template').open() as f:
-          doc = UserTemplate.from_yaml(f)
-
-        self.assertEqual(doc.name, "Test user template spec")
-        self.assertEqual(doc.cropped_file_suffix, '.jpg')
-        self.assertEqual(doc.thumbnail_width_pixels, 4096)
-        self.assertEqual(1, len(doc.fields))
-        self.assertEqual('Record number', doc.fields[0].name)
 
 
 if __name__=='__main__':
