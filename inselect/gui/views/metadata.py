@@ -208,8 +208,8 @@ class FormContainer(QWidget):
 
             # Create control for this field
             control = self._create_field_control(field, template)
-            if 'URI' in field:
-                group_layout.addRow(URLLabel(field['URI'], field.label), control)
+            if field.uri:
+                group_layout.addRow(URLLabel(field.uri, field.label), control)
             else:
                 group_layout.addRow(QLabel(field.label), control)
             controls[control] = field.name
@@ -484,8 +484,8 @@ class FieldComboBox(QComboBox):
     def _index_of_data(self, data):
         """Returns the index of 'data' or -1 if data is not in the combo
         """
-        raise NotImplemented('_data_from_model')
 
+        raise NotImplemented('_data_from_model')
 
 
 class ChoicesFieldComboBox(FieldComboBox):
