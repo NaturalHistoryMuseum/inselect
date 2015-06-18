@@ -951,8 +951,8 @@ class MainWindow(QtGui.QMainWindow):
         "Shows a 'choose template' file dialog"
         debug_print('MetadataView._choose_template_clicked')
 
-        folder = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
-        folder = '/Users/lawh/Dropbox/Projects/Digitisation/InselectTemplates'
+        folder = QSettings().value('user_template_last_directory',
+                QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
 
         path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
             self, "Choose template", folder, self.TEMPLATE_FILE_FILTER)
@@ -960,6 +960,8 @@ class MainWindow(QtGui.QMainWindow):
         if path:
             # Save the user's choice
             user_template_choice().load(path)
+            QSettings().setValue('user_template_last_directory',
+                                 str(Path(path).parent))
 
     def _accept_drag_drop(self, event):
         """If event refers to a single file that can opened, returns the path.
