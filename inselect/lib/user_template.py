@@ -15,17 +15,16 @@ import yaml
 
 from inselect.lib import parse
 
-from .parse import parse_matches_regex
-from .ingest import IMAGE_SUFFIXES_RE, IMAGE_SUFFIXES
-from .utils import debug_print, duplicated, FormatDefault
+from inselect.lib.parse import parse_matches_regex
+from inselect.lib.ingest import IMAGE_SUFFIXES_RE, IMAGE_SUFFIXES
+from inselect.lib.utils import debug_print, duplicated, FormatDefault
 
 
-# Returns a dict {name: parse function}. Names are strings that the user
-# can give as 'Parser' for a field. Remove the leading 'parse_' from the names
-# and include only those functions that take a single argument called 'value'.
-_PARSERS = {k: v for k, v in parse.PARSERS.iteritems()}
-_PARSERS = {k: v for k, v in _PARSERS.iteritems() if ['value'] == inspect.getargspec(v).args}
-_PARSERS = {re.sub(r'^parse_', '', k): v for k, v in _PARSERS.iteritems()}
+# A dict {name: parse function}. Names are strings that the user
+# can give as 'Parser' for a field.
+# Remove the leading 'parse_' from the names.
+PARSERS = {k: v for k, v in parse.PARSERS.iteritems()}
+PARSERS = {re.sub(r'^parse_', '', k): v for k, v in PARSERS.iteritems()}
 
 
 # TODO Split code
@@ -178,7 +177,7 @@ def _validate_field_choices_with_data(fields, problems):
 
 def _validate_field_parsers(fields, problems):
     "Validates that 'Parser', where given, is in the list of parse functions"
-    for bad in ifilter(lambda f: 'Parser' in f and f['Parser'] not in _PARSERS, fields):
+    for bad in ifilter(lambda f: 'Parser' in f and f['Parser'] not in PARSERS, fields):
         msg = u'Unrecognised parser for [{0}]: [{1}]'
         problems.append(msg.format(bad['Name'], bad['Parser']))
  
@@ -219,7 +218,7 @@ class UserTemplate(object):
 
             parse_fn = None
             if 'Parser' in field:
-                parse_fn = _PARSERS[field['Parser']]
+                parse_fn = PARSERS[field['Parser']]
             elif 'Regex parser' in field:
                 regex = field['Regex parser']
                 parse_fn = partial(parse_matches_regex, re.compile(regex))
@@ -340,6 +339,6 @@ class UserTemplate(object):
 if '__main__' == __name__:
     print('Values that can be used in the "Parse" section of a field '
           'specification')
-    for n in sorted(_PARSERS.keys()):
+    for n in sorted(PARSERS.keys()):
         print(n)
-        print(_PARSERS[n].__doc__)
+        print(PARSERS[n].__doc__)

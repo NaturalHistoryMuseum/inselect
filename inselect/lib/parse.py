@@ -6,10 +6,12 @@ import sys
 from datetime import date
 from itertools import ifilter
 
-from .sparse_date import SparseDate
+from inselect.lib.sparse_date import SparseDate
 
 
 # A dict {name: parse function}. Populated at the bottom of this file.
+# All parse functions take a single argument called value. They raise a
+# ValueError if value cannot be parsed, otherwise they return a single value.
 PARSERS = {}
 
 # Private regular expressions used by parse functions
@@ -272,4 +274,6 @@ def parse_in_choices(choices, value):
         return value
 
 PARSERS = inspect.getmembers(sys.modules[__name__], inspect.isfunction)
-PARSERS = dict(ifilter(lambda v: re.match(r'^parse_.+$', v[0]), PARSERS))
+PARSERS = ifilter(lambda v: re.match(r'^parse_.+$', v[0]), PARSERS)
+PARSERS = ifilter(lambda v: ['value'] == inspect.getargspec(v[1]).args, PARSERS)
+PARSERS = dict(PARSERS)
