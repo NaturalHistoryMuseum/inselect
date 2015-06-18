@@ -1,7 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
-Next public release
+Version 0.1.13
 -------------
+- Work on #156 - User-defined project templates (@quicklizard)
+- Fixed #164 - Cropped images not saved with rotation (@quicklizard)
 - Fixed #159 - Unable to open jpegs with uppercase filename extension (@quicklizard)
 - Fixed #157 - ingest workflow tool should ignore _thumbnail images (@quicklizard)
 - Fixed #151 - 'Save screen grab' should suggest a filename (@quicklizard)
@@ -43,15 +45,15 @@ Version 0.1.10
 Version 0.1.9
 -------------
 *Natural History Museum internal release*
-- Work on open-source Data Matrix barcode decoding on Linux and Mac OS X (#88) (@quicklizard)
+- Work on #88 - Open-source Data Matrix barcode decoding on Linux and Mac OS X (@quicklizard)
 - Work on metadata templates and associated validation (#116) (@quicklizard)
 - Fixed #118 - Rotation arrows on the metadata view do not appear correctly on Windows (@quicklizard)
 
 Version 0.1.8
 -------------
 *Natural History Museum internal release*
-- Work on open-source Data Matrix barcode decoding on Linux and Mac OS X (#88) (@quicklizard)
-- Work on metadata templates and associated validation (#116) (@quicklizard)
+- Work on #88 - Open-source Data Matrix barcode decoding on Linux and Mac OS X (@quicklizard)
+- Work on #116 - Metadata templates and associated validation (@quicklizard)
 - Fixed #121 - A menu option to save the boxes view to an image file (@quicklizard)
 - Fixed #120 - Show information about the scanned image (@quicklizard)
 - Fixed #117 - Bounding boxes can be created and moved outside of the image (@quicklizard)
@@ -67,9 +69,9 @@ Version 0.1.7
 
 Version 0.1.6
 -------------
-- Workaround for broken barcode reading on Windows (#130) (@quicklizard)
-- Metadata fields are Simple Darwin Core terms (#116) (@quicklizard)
-- Improved test coverage (#84) (@quicklizard)
+- Workaround for #130 - Broken barcode reading on Windows (@quicklizard)
+- Work on #116 - Metadata fields are Simple Darwin Core terms (@quicklizard)
+- Work on #84 - Tests (@quicklizard)
 - Fixed #127 - .tif file extension not recognised (@quicklizard)
 - Fixed #125 - Display issue on Windows: After startup, Window title, frame and controls out of screen (@quicklizard)
 - Fixed #124 - "New" doesn't work if inselect document already exists (@quicklizard)
