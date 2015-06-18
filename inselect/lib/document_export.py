@@ -105,4 +105,4 @@ class DocumentExport(object):
         """Validates the document against the user template and returns any
         validation problems
         """
-        validate_document(document, self._template)
+        return validate_document(document, self._template)
