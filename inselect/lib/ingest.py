@@ -11,7 +11,6 @@ IMAGE_SUFFIXES = ('.bmp', '.jpeg', '.jpg', '.png', '.tif', '.tiff',)
 IMAGE_SUFFIXES_RE = '|'.join('{0}'.format(p[1:]) for p in IMAGE_SUFFIXES)
 IMAGE_SUFFIXES_RE = '^.*\\.({0})$'.format(IMAGE_SUFFIXES_RE)
 IMAGE_SUFFIXES_RE = re.compile(IMAGE_SUFFIXES_RE, re.IGNORECASE)
-IMAGE_SUFFIXES_RE.pattern
 
 # Patterns in the form *.bmp, *.jpeg etc
 IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
