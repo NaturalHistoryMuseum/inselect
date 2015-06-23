@@ -2,6 +2,7 @@ import cv2
 import sys
 
 from functools import partial
+from itertools import count, izip
 from pathlib import Path
 
 import numpy as np
@@ -27,6 +28,7 @@ from .model import Model
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
+from .recent_documents import RecentDocuments
 from .roles import RotationRole
 from .user_template_choice import user_template_choice
 from .utils import contiguous, report_to_user, qimage_of_bgr
@@ -249,6 +251,40 @@ class MainWindow(QtGui.QMainWindow):
         msg = msg.format(document_path.stem, document_path.parent)
         QMessageBox.information(self, "Document created", msg)
 
+    def _sync_recent_documents_actions(self):
+        "Synchronises the 'recent documents' actions"
+        debug_print('MainWindow._sync_recent_documents_actions')
+        recent = RecentDocuments().read_paths()
+        if not recent:
+            # No recent documents - a single disabled action with placeholder
+            # text
+            self.recent_doc_actions[0].setEnabled(False)
+            self.recent_doc_actions[0].setText('No recent documents')
+            self.recent_doc_actions[0].setVisible(True)
+            hide_actions_after = 1
+        elif len(recent) > len(self.recent_doc_actions):
+            msg = 'Unexpected number of recent documents [{0}]'
+            raise ValueError(msg.format(len(recent)))
+        else:
+            # Show as many actions as there are recent documents
+            for index, path, action in izip(count(), recent, self.recent_doc_actions):
+                action.setEnabled(True)
+                action.setText(path.stem)
+                action.setToolTip(str(path))
+                action.setVisible(True)
+            hide_actions_after = 1 + index
+
+        # Hide all actions after and including 'hide_actions_after'
+        for action in self.recent_doc_actions[hide_actions_after:]:
+            action.setVisible(False)
+            action.setText('')
+
+    @report_to_user
+    def open_recent(self, index):
+        debug_print('MainWindow._open_recent [{0}]'.format(index))
+        recent = RecentDocuments().read_paths()
+        self.open_file(recent[index])
+
     def open_document(self, path):
         """Opens the inselect document given by path
         """
@@ -265,6 +301,9 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('')
         self.setWindowFilePath(str(self.document_path))
         self.info_widget.set_document(self.document)
+
+        RecentDocuments().add_path(path)
+        self._sync_recent_documents_actions()
 
         self.sync_ui()
 
@@ -747,6 +786,12 @@ class MainWindow(QtGui.QMainWindow):
             self.exit_action.setShortcuts(['ctrl+q',
                                             self.exit_action.shortcut()])
 
+        self.recent_doc_actions = [None] * RecentDocuments.MAX_RECENT_DOCS
+        for index in xrange(RecentDocuments.MAX_RECENT_DOCS):
+            self.recent_doc_actions[index] = QAction('Recent document', self,
+                triggered=partial(self.open_recent, index))
+        self._sync_recent_documents_actions()
+
         # Edit menu
         self.select_all_action = QAction("Select &All", self,
             shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
@@ -861,6 +906,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self._file_menu = QMenu("&File", self)
         self._file_menu.addAction(self.open_action)
+        recent = self._file_menu.addMenu('Recent documents')
+        for action in self.recent_doc_actions:
+            recent.addAction(action)
         self._file_menu.addAction(self.save_action)
         self._file_menu.addAction(self.close_action)
         self._file_menu.addSeparator()
