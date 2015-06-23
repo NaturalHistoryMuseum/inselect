@@ -54,20 +54,20 @@ class InfoWidget(QGroupBox):
 
         layout.addRow(BoldLabel('Scanned image'))
         self._scanned_path = QLabel()
-        layout.addRow('Name', self._scanned_path)
+        layout.addRow('File', self._scanned_path)
 
         self._scanned_size = QLabel()
-        layout.addRow('Size', self._scanned_size)
+        layout.addRow('File size', self._scanned_size)
 
         self._scanned_dimensions = QLabel()
         layout.addRow('Dimensions', self._scanned_dimensions)
 
         layout.addRow(BoldLabel('Thumbnail image'))
         self._thumbnail_path = QLabel()
-        layout.addRow('Name', self._thumbnail_path)
+        layout.addRow('File', self._thumbnail_path)
 
         self._thumbnail_size = QLabel()
-        layout.addRow('Size', self._thumbnail_size)
+        layout.addRow('File size', self._thumbnail_size)
 
         self._thumbnail_dimensions = QLabel()
         layout.addRow('Dimensions', self._thumbnail_dimensions)
