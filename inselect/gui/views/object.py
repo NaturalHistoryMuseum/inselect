@@ -23,9 +23,6 @@ class CropDelegate(QAbstractItemDelegate):
     GREY = QBrush(Qt.gray)
     DARK_GREY = QBrush(Qt.darkGray)
 
-    # Size of the rotation controls
-    CONTROLS_SIZE = 23
-
     # Border around cropped image
     BORDER = 25
 
@@ -34,7 +31,7 @@ class CropDelegate(QAbstractItemDelegate):
         "QRect of the complete box"
         expanded = self.parent().expanded
         return self.parent().viewport().rect() if expanded else QRect(0, 0, 250, 250)
- 
+
     @property
     def title_rect(self):
         "Bounding QRect of the title"
@@ -161,7 +158,6 @@ class ObjectView(QListView):
         # Items are shown in a grid if False.
         # A single item is shown expanded if True.
         # When more than one item is selected, view changes to grid.
-
         self.expanded = False
 
         self.setItemDelegate(CropDelegate(self))
@@ -186,11 +182,16 @@ class ObjectView(QListView):
         super(ObjectView, self).selectionChanged(selected, deselected)
 
     def show_grid(self):
+        """Shows the list as a grid of squares
+        """
         debug_print('ObjectView.show_grid')
         self.expanded = False
         self._refresh()
 
     def show_expanded(self):
+        """Shows the first item of the selection expanded to fill the viewport.
+        If the selection is empty, the first item in the list is selected.
+        """
         debug_print('ObjectView.show_expanded')
         self.expanded = True
 
@@ -205,8 +206,9 @@ class ObjectView(QListView):
         self._refresh()
 
     def toggle_expanded(self, index):
-        """Toggles the expanded state and selects index
+        """Selects 'index' and toggles the expanded state
         """
+        debug_print('ObjectView.toggle_expanded')
         self.selectionModel().select(index, QItemSelectionModel.Select)
         if self.expanded:
             self.show_grid()
@@ -214,8 +216,22 @@ class ObjectView(QListView):
             self.show_expanded()
 
     def _refresh(self):
-        debug_print('ObjectView.toggle_display_size')
+        debug_print('ObjectView._refresh')
         self.scheduleDelayedItemsLayout()
         selected = self.selectionModel().selectedIndexes()
         if selected:
             self.scrollTo(selected[0])
+
+    def keyPressEvent(self, event):
+        """QAbstractItemView virtual
+        """
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            # This logic reimplemented from QAbstractItemView::keyPressEvent,
+            # in src/gui/itemviews/qabstractitemview.cpp - make 'Enter' and
+            # 'Return' keys toggle the 'Expanded' / 'Grid' state on Mac OS X
+            if self.state() != QListView.EditingState or self.hasFocus():
+                if self.currentIndex().isValid():
+                    self.activated.emit(self.currentIndex())
+                event.ignore()
+        else:
+            super(ObjectView, self).keyPressEvent(event)
