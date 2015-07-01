@@ -3,8 +3,7 @@ from itertools import izip, repeat
 from PySide import QtGui
 from PySide.QtGui import (QAbstractItemView, QSizePolicy, QScrollArea,
                           QWidget, QGroupBox, QLabel, QLineEdit, QComboBox,
-                          QFormLayout, QVBoxLayout, QPushButton, QHBoxLayout,
-                          QDesktopServices, QFileDialog)
+                          QFormLayout, QVBoxLayout)
 from PySide.QtCore import Qt
 
 from inselect.lib.countries import COUNTRIES
@@ -14,7 +13,7 @@ from inselect.lib.utils import debug_print
 from inselect.gui.colours import COLOURS
 from inselect.gui.roles import MetadataRole
 from inselect.gui.user_template_choice import user_template_choice
-from inselect.gui.utils import relayout_widget, report_to_user
+from inselect.gui.utils import relayout_widget
 from inselect.gui.toggle_widget_label import ToggleWidgetLabel
 
 

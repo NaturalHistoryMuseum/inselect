@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from PySide.QtCore import QObject, QSettings, Signal
 
 from inselect.lib.templates.dwc import DWC

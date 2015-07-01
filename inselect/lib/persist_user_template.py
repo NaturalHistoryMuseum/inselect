@@ -4,14 +4,13 @@ import yaml
 
 from schematics.exceptions import ValidationError
 from schematics.models import Model
-from schematics.types import (StringType, DecimalType, BooleanType, BaseType,
-                              URLType)
+from schematics.types import (StringType, DecimalType, BooleanType, URLType)
 from schematics.types.compound import ListType, DictType
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import IMAGE_SUFFIXES
 from inselect.lib.user_template import PARSERS, UserTemplate
-from inselect.lib.utils import debug_print, duplicated
+from inselect.lib.utils import duplicated
 
 
 # TODO UserTemplateModel to have contain
@@ -20,7 +19,7 @@ from inselect.lib.utils import debug_print, duplicated
 #      deserialized YAML
 # TODO Check for Field-value / 'Choices with data' collisions
 
-class UniqueListType(ListType):
+class _UniqueListType(ListType):
     "A ListType that guarantees values are unique and non-empty."
     def validate_non_empty(self, value):
         if not value:
@@ -35,7 +34,7 @@ class UniqueListType(ListType):
             raise ValidationError('Values must be unique.')
 
 
-class UserTemplateModel(Model):
+class _UserTemplateModel(Model):
     name = StringType(required=True, serialized_name='Name')
     object_label = StringType(serialized_name='Object label')
     thumbnail_width_pixels = DecimalType(
@@ -53,17 +52,23 @@ class UserTemplateModel(Model):
         return repr(self)
 
 
-class FieldModel(Model):
+class _FieldModel(Model):
     name = StringType(required=True, serialized_name='Name')
     label = StringType(serialized_name='Label')
     uri = URLType(serialized_name='URI')
     mandatory = BooleanType(default=False, serialized_name='Mandatory')
-    choices = UniqueListType(StringType, serialized_name='Choices')
+    choices = _UniqueListType(StringType, serialized_name='Choices')
     choices_with_data = DictType(StringType,
         serialized_name='Choices with data')
     parser = StringType(choices=list(sorted(PARSERS.iterkeys())),
         serialized_name='Parser')
     regex_parser = StringType(serialized_name='Regex parser')
+
+    def __repr__(self):
+        return "_FieldModel ['{0}']".format(self.name)
+
+    def __str__(self):
+        return repr(self)
 
     def validate_name(self, data, value):
         if value in UserTemplate.RESERVED_FIELD_NAMES:
@@ -127,30 +132,30 @@ def load_user_template(path):
     doc = _ordered_load(path, yaml.SafeLoader)
     return user_template_from_specification(doc)
 
-def user_template_from_specification(doc):
-    "Returns a new instance of UserTemplate from doc"
-    model = {k: v for k, v in doc.iteritems() if 'Fields' != k}
+def user_template_from_specification(spec):
+    "Returns a new instance of UserTemplate from spec"
+    model = {k: v for k, v in spec.iteritems() if 'Fields' != k}
 
     failures = []
     try:
-        UserTemplateModel(model).validate()
+        _UserTemplateModel(model).validate()
     except ValidationError, e:
         failures += _extract_validation_error(e)
 
-    fields = doc.get('Fields')
+    fields = spec.get('Fields')
     if not fields or not isinstance(fields, list):
         failures.append('No fields defined.')
     else:
         for field in fields:
             try:
-                FieldModel(field).validate()
+                _FieldModel(field).validate()
             except ValidationError, e:
                 failures += _extract_validation_error(e, prompt=field.get('Name'))
 
     if failures:
         raise InvalidSpecificationError(failures)
     else:
-        return UserTemplate(doc)
+        return UserTemplate(spec)
 
 
 class InvalidSpecificationError(Exception):

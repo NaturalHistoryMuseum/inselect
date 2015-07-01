@@ -8,7 +8,6 @@ from itertools import chain
 from pathlib import Path
 
 import cv2
-import unicodecsv
 
 from .image import InselectImage
 from .inselect_error import InselectError

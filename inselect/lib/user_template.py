@@ -2,14 +2,10 @@
 """
 from __future__ import print_function
  
-import inspect
-import json
 import re
-import sys
 
-from collections import Counter, namedtuple, OrderedDict
+from collections import namedtuple, OrderedDict
 from functools import partial
-from itertools import count, ifilter, izip
 
 from inselect.lib import parse
 

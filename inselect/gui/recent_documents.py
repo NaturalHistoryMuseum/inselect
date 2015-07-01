@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from PySide import QtGui
-from PySide.QtCore import QSettings, QLocale, QCoreApplication
+from PySide.QtCore import QSettings
 
 from inselect.lib.utils import debug_print
 

@@ -1,4 +1,3 @@
-from PySide.QtCore import Qt
 from PySide.QtGui import (QDialog, QRadioButton, QVBoxLayout, QLabel, QWidget,
                           QDialogButtonBox, QFrame)
 
