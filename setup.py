@@ -11,6 +11,9 @@ import inselect
 setup_data = {
     'name': 'inselect',
     'version': inselect.__version__,
+    'maintainer': 'Lawrence Hudson',
+    'maintainer_email': 'l.hudson@nhm.ac.uk',
+    'url': 'https://github.com/NaturalHistoryMuseum/syrup/',
     'description': inselect.__doc__,
     'packages': ['inselect','inselect.gui.plugins', 'inselect.gui.views',
                  'inselect.gui.views.boxes', 'inselect.lib',
@@ -80,10 +83,10 @@ def distutils_setup():
         name=setup_data['name'],
         version=setup_data['version'],
         packages=setup_data['packages'],
-        entry_points=setup_data['entry_points'],
-        install_requires=setup_data['install_requires'],
-        test_suite=setup_data['test_suite'],
         scripts=setup_data['scripts'],
+        maintainer=setup_data['maintainer'],
+        maintainer_email=setup_data['maintainer_email'],
+        url=setup_data['url'],
     )
 
 def cx_setup():
