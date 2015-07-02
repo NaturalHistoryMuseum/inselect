@@ -22,6 +22,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
     TEMPLATE = UserTemplate({
         'Name': 'Test',
         'Cropped file suffix': '.png',
+        'Thumbnail width pixels': 4096,
         'Object label': u'{ItemNumber:02}_{scientificName-value}',
         'Fields': [
             {

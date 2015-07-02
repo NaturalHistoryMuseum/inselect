@@ -4,7 +4,7 @@
 from inselect.lib.user_template import UserTemplate
 
 
-DWC = UserTemplate(
+DWC = UserTemplate.from_specification(
 {
     'Name': 'Simple Darwin Core terms',
     'Fields': [

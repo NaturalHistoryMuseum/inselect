@@ -1,12 +1,7 @@
 import unittest
 
-from pathlib import Path
-
-from inselect.lib.persist_user_template import (user_template_from_specification,
-                                                InvalidSpecificationError,
-                                                load_user_template)
-
-TESTDATA = Path(__file__).parent.parent / 'test_data'
+from inselect.lib.persist_user_template import (validated_specification,
+                                                InvalidSpecificationError)
 
 
 class TestValidateUserTemplate(unittest.TestCase):
@@ -17,7 +12,7 @@ class TestValidateUserTemplate(unittest.TestCase):
         validation problems
         """
         with self.assertRaises(InvalidSpecificationError) as invalid:
-            user_template_from_specification(specification)
+            validated_specification(specification)
         return invalid.exception.problems
 
     def test_no_name(self):
@@ -45,13 +40,13 @@ class TestValidateUserTemplate(unittest.TestCase):
         self.assertIn(expected, res)
 
     def test_no_fields(self):
-        self.assertIn('No fields defined.', self._invalid_specification({}))
+        self.assertIn('Fields: One or more fields must be defined.',
+                      self._invalid_specification({}))
 
     def test_illegal_field_name(self):
         res = self._invalid_specification({'Fields': [{'Name': 'ItemNumber'}]})
         self.assertIn("ItemNumber: Name: 'Name' should not be one of ['ItemNumber'].", res)
 
-    @unittest.skip('Check not implemented')
     def test_duplicated_field_names(self):
         spec = {'Fields': [
             {'Name': 'First'},
@@ -60,25 +55,25 @@ class TestValidateUserTemplate(unittest.TestCase):
             {'Name': 'Second'},
         ]}
         res = self._invalid_specification(spec)
-        self.assertIn('Duplicated field name [First]', res)
-        self.assertIn('Duplicated field name [Second]', res)
+        self.assertIn('Fields: Names must be unique', res)
 
-    @unittest.skip('Check not implemented')
     def test_duplicated_labels(self):
         spec = {'Fields': [
             {'Name': 'F1', 'Label': 'Tooth length'},
             {'Name': 'F2', 'Label': 'Tooth length'},
         ]}
         res = self._invalid_specification(spec)
-        self.assertIn('Duplicated label [Tooth length]', res)
+        self.assertIn('Fields: Labels must be unique', res)
 
     def test_choices_and_choices_with_data(self):
         "Both Choices and Choices with data given"
         spec = {'Fields': [
-            {'Name': 'F', 'Choices': [], 'Choices with data': {}},
+            {'Name': 'F', 'Choices': ['1', '2'],
+             'Choices with data': {'1': 1, '2': 2}
+            },
         ]}
         res = self._invalid_specification(spec)
-        expected = 'F: Choices: One or more values must be given.'
+        expected = "F: Choices: 'Choices' and 'Choices with data' are mutually exclusive."
         self.assertIn(expected, res)
 
     def test_duplicated_choices(self):
@@ -88,23 +83,6 @@ class TestValidateUserTemplate(unittest.TestCase):
         ]}
         res = self._invalid_specification(spec)
         expected = 'F: Choices: Values must be unique.'
-        self.assertIn(expected, res)
-
-    def test_empty_choices(self):
-        spec = {'Fields': [
-            {'Name': 'F', 'Choices': []},
-        ]}
-        res = self._invalid_specification(spec)
-        expected = 'F: Choices: One or more values must be given.'
-        self.assertIn(expected, res)
-
-    @unittest.skip('Check not implemented')
-    def test_empty_choices_with_data(self):
-        spec = {'Fields': [
-            {'Name': 'F', 'Choices with data': {}},
-        ]}
-        res = self._invalid_specification(spec)
-        expected = 'Empty "Choices with data" for [F]'
         self.assertIn(expected, res)
 
     @unittest.skip('Check not implemented')
@@ -150,31 +128,23 @@ class TestValidateUserTemplate(unittest.TestCase):
 
     def test_user_template_two_validation_errors(self):
         with self.assertRaises(InvalidSpecificationError) as cm:
-            user_template_from_specification({})
+            validated_specification({})
 
-        self.assertEqual('2 problems:\nName: This field is required.\nNo fields defined.',
-                         str(cm.exception))
-        self.assertEqual(['Name: This field is required.', 'No fields defined.'],
-                         cm.exception.problems)
+        expected = ('2 problems:\nFields: One or more fields must be defined.\n'
+                    'Name: This field is required.')
+        self.assertEqual(expected, str(cm.exception))
+        expected = ['Fields: One or more fields must be defined.',
+                    'Name: This field is required.']
+        self.assertEqual(expected, cm.exception.problems)
 
     def test_user_template_one_validation_error(self):
         with self.assertRaises(InvalidSpecificationError) as cm:
-            user_template_from_specification({'Name': 'T1'})
+            validated_specification({'Name': 'T1'})
 
-        self.assertEqual('1 problem:\nNo fields defined.', str(cm.exception))
-        self.assertEqual(['No fields defined.'], cm.exception.problems)
-
-
-    def test_load_user_template(self):
-        "Load from a YAML file"
-        with (TESTDATA / 'test.inselect_template').open() as f:
-          doc = load_user_template(f)
-
-        self.assertEqual(doc.name, "Test user template spec")
-        self.assertEqual(doc.cropped_file_suffix, '.jpg')
-        self.assertEqual(doc.thumbnail_width_pixels, 4096)
-        self.assertEqual(1, len(doc.fields))
-        self.assertEqual('Record number', doc.fields[0].name)
+        self.assertEqual('1 problem:\nFields: One or more fields must be defined.',
+                         str(cm.exception))
+        self.assertEqual(['Fields: One or more fields must be defined.'],
+                         cm.exception.problems)
 
 
 if __name__=='__main__':

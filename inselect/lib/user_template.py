@@ -1,24 +1,13 @@
 """User-defined templates
 """
-from __future__ import print_function
- 
 import re
 
 from collections import namedtuple, OrderedDict
 from functools import partial
 
-from inselect.lib import parse
-
+import persist_user_template
 from inselect.lib.parse import parse_matches_regex
-from inselect.lib.ingest import IMAGE_SUFFIXES_RE, IMAGE_SUFFIXES
 from inselect.lib.utils import debug_print, FormatDefault
-
-
-# A dict {name: parse function}. Names are strings that the user
-# can give as 'Parser' for a field.
-# Remove the leading 'parse_' from the names.
-PARSERS = {k: v for k, v in parse.PARSERS.iteritems()}
-PARSERS = {re.sub(r'^parse_', '', k): v for k, v in PARSERS.iteritems()}
 
 
 _Field = namedtuple('_Field', ('name', 'label', 'group', 'uri', 'mandatory',
@@ -26,34 +15,33 @@ _Field = namedtuple('_Field', ('name', 'label', 'group', 'uri', 'mandatory',
 
 class UserTemplate(object):
     """A user-defined project template
+
+    Clients should probaby create instances using one of the classmethods
+    from_file or from_specification.
     """
 
     EXTENSION = '.inselect_template'
 
-    # Fields synthensized by the metadata() method
-    RESERVED_FIELD_NAMES = ['ItemNumber']
-
     def __init__(self, spec):
         self.name = spec['Name']
-        self.description = spec.get('Description', '')
-        self.cropped_file_suffix = spec.get('Cropped file suffix', '.jpg')
-        self.thumbnail_width_pixels = spec.get('Thumbnail width pixels', 4096)
+        self.cropped_file_suffix = spec['Cropped file suffix']
+        self.thumbnail_width_pixels = spec['Thumbnail width pixels']
 
         # A method that returns labels from metadata dicts
         self._format_label = partial(FormatDefault(default='').format,
-                                     spec.get('Object label', '{ItemNumber:04}'))
+                                     spec['Object label'])
 
         # A list of instance of _Field
         fields = []
         for field in spec['Fields']:
             choices_with_data = None
-            if 'Choices with data' in field:
+            if field.get('Choices with data'):
                 choices_with_data = OrderedDict(field['Choices with data'])
 
             parse_fn = None
-            if 'Parser' in field:
-                parse_fn = PARSERS[field['Parser']]
-            elif 'Regex parser' in field:
+            if field.get('Parser'):
+                parse_fn = persist_user_template.PARSERS[field['Parser']]
+            elif field.get('Regex parser'):
                 regex = field['Regex parser']
                 parse_fn = partial(parse_matches_regex, re.compile(regex))
 
@@ -88,9 +76,20 @@ class UserTemplate(object):
         msg = 'UserTemplate [{0}] with {1} fields'
         return msg.format(self.name, len(self.fields))
 
+    @classmethod
+    def from_file(cls, path):
+        "Returns a new instance of UserTemplate using the YAML document in path"
+        spec = persist_user_template.load_specification_from_file(path)
+        return cls.from_specification(spec)
+
+    @classmethod
+    def from_specification(cls, spec):
+        "Returns a new instance of UserTemplate from spec"
+        return cls(persist_user_template.validated_specification(spec))
+
     def field_names(self):
         "Generator function of field names and names of synthesized fields"
-        for name in self.RESERVED_FIELD_NAMES:
+        for name in persist_user_template.RESERVED_FIELD_NAMES:
             yield name
 
         for field in self.fields:
@@ -163,10 +162,3 @@ class UserTemplate(object):
         else:
             return True
  
-
-if '__main__' == __name__:
-    print('Values that can be used in the "Parse" section of a field '
-          'specification')
-    for n in sorted(PARSERS.keys()):
-        print(n)
-        print(PARSERS[n].__doc__)

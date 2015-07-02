@@ -1,7 +1,7 @@
 from PySide.QtCore import QObject, QSettings, Signal
 
 from inselect.lib.templates.dwc import DWC
-from inselect.lib.persist_user_template import load_user_template
+from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print
 
 
@@ -26,8 +26,7 @@ class UserTemplateChoice(QObject):
     def _load(sef, path):
         "Loads the UserTemplate in path"
         debug_print('UserTemplateChoice._load [{0}]'.format(path))
-        with open(path) as f:
-            return load_user_template(f)
+        return UserTemplate.from_file(path)
 
     def load(self, path):
         "Loads the UserTemplate in path"
