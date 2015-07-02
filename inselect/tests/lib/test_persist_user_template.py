@@ -69,7 +69,7 @@ class TestValidateUserTemplate(unittest.TestCase):
         "Both Choices and Choices with data given"
         spec = {'Fields': [
             {'Name': 'F', 'Choices': ['1', '2'],
-             'Choices with data': {'1': 1, '2': 2}
+             'Choices with data': [('1', 1), ('2', 2)]
             },
         ]}
         res = self._invalid_specification(spec)

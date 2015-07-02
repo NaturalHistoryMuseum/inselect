@@ -38,6 +38,8 @@ class UserTemplate(object):
             if field.get('Choices with data'):
                 choices_with_data = OrderedDict(field['Choices with data'])
 
+            # A parse function - either one of the parsers in defined in
+            # persist_user_template.PARSERS, a regular expression or None
             parse_fn = None
             if field.get('Parser'):
                 parse_fn = persist_user_template.PARSERS[field['Parser']]
@@ -45,8 +47,11 @@ class UserTemplate(object):
                 regex = field['Regex parser']
                 parse_fn = partial(parse_matches_regex, re.compile(regex))
 
+            # Display label defaults to the field name
+            label = field.get('Label')
+            label = label if label else field['Name']
             fields.append(_Field(name=field['Name'],
-                                 label=field.get('Label', field['Name']),
+                                 label=label,
                                  group=field.get('Group'),
                                  uri=field.get('URI'),
                                  mandatory=field.get('Mandatory', False),

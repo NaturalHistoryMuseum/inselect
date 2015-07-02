@@ -120,8 +120,10 @@ class TestUserTemplate(unittest.TestCase):
         self.assertEqual(doc.name, "Test user template")
         self.assertEqual(doc.cropped_file_suffix, '.jpg')
         self.assertEqual(doc.thumbnail_width_pixels, 4096)
-        self.assertEqual(1, len(doc.fields))
-        self.assertEqual('Record number', doc.fields[0].name)
+        self.assertEqual(3, len(doc.fields))
+        self.assertEqual('catalogNumber', doc.fields[0].name)
+        self.assertEqual('Location', doc.fields[1].name)
+        self.assertEqual('Taxonomy', doc.fields[2].name)
 
 
 if __name__=='__main__':

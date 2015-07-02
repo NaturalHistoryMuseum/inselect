@@ -1,3 +1,21 @@
 Name: Test user template
 Fields:
-    - Name: Record number
+    - Name: catalogNumber
+      Label: Catalog number
+      URI: http://rs.tdwg.org/dwc/terms/catalogNumber
+      Mandatory: true
+      Regex parser: '^[0-9]{9}$'
+    - Name: Location
+      Mandatory: true
+      Choices with data:
+            Drawer X: NA
+            Drawer 1: 123
+            Drawer 2: 456
+            Drawer 3: 789
+    - Name: Taxonomy
+      Mandatory: true
+      Choices:
+            - Plesiosauria
+            - Attenborosaurus
+            - Elasmosaurus
+            - Styxosaurus

@@ -7,7 +7,8 @@ import yaml
 from schematics.exceptions import ValidationError
 from schematics.models import Model
 from schematics.types import StringType, DecimalType, BooleanType, URLType
-from schematics.types.compound import ListType, DictType, ModelType
+from schematics.types.compound import (ListType, DictType, ModelType, MultiType,
+                                       BaseType)
 
 from inselect.lib import parse
 from inselect.lib.document import InselectDocument
@@ -38,6 +39,77 @@ class _UniqueListType(ListType):
             raise ValidationError('Values must be unique.')
 
 
+class OrderedDictType(MultiType):
+    "Field that holds an OrderedDict. Copied from schematics/types/compound.py"
+    def __init__(self, field, coerce_key=None, **kwargs):
+        if not isinstance(field, BaseType):
+            compound_field = kwargs.pop('compound_field', None)
+            field = self.init_compound_field(field, compound_field, **kwargs)
+
+        self.coerce_key = coerce_key or unicode
+        self.field = field
+
+        validators = [self.validate_items] + kwargs.pop("validators", [])
+
+        super(OrderedDictType, self).__init__(validators=validators, **kwargs)
+
+    @property
+    def model_class(self):
+        return self.field.model_class
+
+    def to_native(self, value, safe=False, context=None):
+        if isinstance(value, list):
+            # Expect a list of tuples
+            value = OrderedDict(value)
+        if not isinstance(value, OrderedDict):
+            raise ValidationError(u'Only OrderedDict may be used in a OrderedDictType')
+        else:
+            return OrderedDict((self.coerce_key(k), self.field.to_native(v, context))
+                    for k, v in value.iteritems())
+
+    def validate_items(self, items):
+        errors = {}
+        for key, value in items.iteritems():
+            try:
+                self.field.validate(value)
+            except ValidationError as exc:
+                errors[key] = exc
+
+        if errors:
+            raise ValidationError(errors)
+
+    def export_loop(self, dict_instance, field_converter,
+                    role=None, print_none=False):
+        """Loops over each item in the model and applies either the field
+        transform or the multitype transform.  Essentially functions the same
+        as `transforms.export_loop`.
+        """
+        data = OrderedDict()
+
+        for key, value in dict_instance.iteritems():
+            if hasattr(self.field, 'export_loop'):
+                shaped = self.field.export_loop(value, field_converter,
+                                                role=role)
+                feels_empty = shaped and len(shaped) == 0
+            else:
+                shaped = field_converter(self.field, value)
+                feels_empty = shaped is None
+
+            if feels_empty and self.field.allow_none():
+                data[key] = shaped
+            elif shaped is not None:
+                data[key] = shaped
+            elif print_none:
+                data[key] = shaped
+
+        if len(data) > 0:
+            return data
+        elif len(data) == 0 and self.allow_none():
+            return data
+        elif print_none:
+            return data
+
+
 class _FieldModel(Model):
     name = StringType(required=True, serialized_name='Name')
     label = StringType(serialized_name='Label')
@@ -45,7 +117,7 @@ class _FieldModel(Model):
     uri = URLType(serialized_name='URI')
     mandatory = BooleanType(default=False, serialized_name='Mandatory')
     choices = _UniqueListType(StringType, serialized_name='Choices')
-    choices_with_data = DictType(StringType,
+    choices_with_data = OrderedDictType(StringType,
         serialized_name='Choices with data')
     parser = StringType(choices=list(sorted(PARSERS.iterkeys())),
         serialized_name='Parser')

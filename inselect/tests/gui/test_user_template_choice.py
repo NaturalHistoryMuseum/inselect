@@ -22,8 +22,6 @@ class TestUserTemplateChoice(MainWindowTest):
         t = user_template_choice()
         t.select_default()
         self.assertEqual('Simple Darwin Core terms', t.current.name)
-        self.assertEqual('Simple Darwin Core terms',
-                         self.window.view_metadata._template_label.text())  
 
     @patch.object(QSettings, 'setValue')
     def test_select_non_default(self, mock_value):
@@ -31,8 +29,6 @@ class TestUserTemplateChoice(MainWindowTest):
         t = user_template_choice()
         t.load(TESTDATA / 'test.inselect_template')
         self.assertEqual('Test user template', t.current.name)
-        self.assertEqual('Test user template',
-                         self.window.view_metadata._template_label.text())  
 
 if __name__=='__main__':
     unittest.main()
