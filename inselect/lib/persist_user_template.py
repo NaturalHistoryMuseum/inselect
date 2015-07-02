@@ -180,12 +180,6 @@ def validated_specification(spec):
     if failures:
         raise InvalidSpecificationError(failures)
     else:
-        # from pprint import pprint
-        # print('A')
-        # pprint(spec)
-        # print('B')
-        # pprint(model.to_native())
-        # print(repr(model.thumbnail_width_pixels))
         return model.to_native()
 
 
