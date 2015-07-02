@@ -77,9 +77,11 @@ class UserTemplate(object):
         return msg.format(self.name, len(self.fields))
 
     @classmethod
-    def from_file(cls, path):
-        "Returns a new instance of UserTemplate using the YAML document in path"
-        spec = persist_user_template.load_specification_from_file(path)
+    def from_file(cls, stream):
+        """Returns a new instance of UserTemplate using the YAML document in
+        stream
+        """
+        spec = persist_user_template.load_specification_from_file(stream)
         return cls.from_specification(spec)
 
     @classmethod
@@ -119,7 +121,7 @@ class UserTemplate(object):
         """Returns True if the dict metadata validates against this template;
         False if not
         """
-        if False:
+        if True:
             # DRY
             for field, value in metadata.iteritems():
                 if not self.validate_field(field, value):
