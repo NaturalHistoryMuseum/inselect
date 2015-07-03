@@ -22,12 +22,10 @@ class GUITest(unittest.TestCase):
 class MainWindowTest(GUITest):
     """Base class for tests that require a MainWindow.
     """
-    @classmethod
     def setUp(self):
         assert not hasattr(self, 'window')
         self.window = MainWindow(QtGui.qApp)
 
-    @classmethod
     def tearDown(self):
         self.window.close()
         delattr(self, 'window')
