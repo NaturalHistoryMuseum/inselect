@@ -9,4 +9,5 @@ pytz>=2014.4
 coveralls>=0.4.1
 unicodecsv>=0.11.0
 PyYAML>=3.11
-schematics>=1.0.4
+schematics>=1.1.0
+psutil>=3.0.1
