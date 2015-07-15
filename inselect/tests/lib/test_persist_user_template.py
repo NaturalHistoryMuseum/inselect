@@ -36,7 +36,7 @@ class TestValidateUserTemplate(unittest.TestCase):
     def test_invalid_thumbnail_width(self):
         spec = {'Thumbnail width pixels' : 10,}
         res = self._invalid_specification(spec)
-        expected = 'Thumbnail width pixels: Value should be greater than 1024'
+        expected = 'Thumbnail width pixels: Value should be greater than 1024.'
         self.assertIn(expected, res)
 
     def test_no_fields(self):
