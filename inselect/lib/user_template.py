@@ -126,25 +126,17 @@ class UserTemplate(object):
         """Returns True if the dict metadata validates against this template;
         False if not
         """
-        if True:
-            # DRY
-            for field, value in metadata.iteritems():
-                if not self.validate_field(field, value):
-                    return False
-            return True
+        if any(not metadata.get(f) for f in self.mandatory):
+            return False
+        try:
+            parseable = self.parse_mapping.iteritems()
+            parseable = ((k, v) for k, v in parseable if metadata.get(k))
+            for field, parse_fn in parseable:
+                parse_fn(metadata[field])
+        except ValueError:
+            return False
         else:
-            # Performs better?
-            if any(not metadata.get(f) for f in self.mandatory):
-                return False
-            try:
-                parseable = self.parse_mapping.iteritems()
-                parseable = ((k, v) for k, v in parseable if metadata.get(k))
-                for field, parse_fn in parseable:
-                    parse_fn(metadata[field])
-            except ValueError:
-                return False
-            else:
-                return True
+            return True
 
     def validate_field(self, field, value):
         """Returns True if field/value validates against this template; False if
