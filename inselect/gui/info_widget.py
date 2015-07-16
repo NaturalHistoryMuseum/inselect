@@ -104,7 +104,8 @@ class InfoWidget(QGroupBox):
             self._last_saved_on.setText(format_dt_display(dt) if dt else '')
 
             self._scanned_path.setText(document.scanned.path.name)
-            self._scanned_size.setText(humanize.naturalsize(document.scanned.size_bytes))
+            fsize = humanize.naturalsize(document.scanned.size_bytes, binary=True)
+            self._scanned_size.setText(fsize)
 
             dim = '{0:,} x {1:,}'
             self._scanned_dimensions.setText(dim.format(*document.scanned.dimensions))
@@ -112,7 +113,8 @@ class InfoWidget(QGroupBox):
             # Thumbnail might not be present
             if document.thumbnail:
                 self._thumbnail_path.setText(document.thumbnail.path.name)
-                self._thumbnail_size.setText(humanize.naturalsize(document.thumbnail.size_bytes))
+                fsize = humanize.naturalsize(document.thumbnail.size_bytes, binary=True)
+                self._thumbnail_size.setText(fsize)
                 self._thumbnail_dimensions.setText(dim.format(*document.thumbnail.dimensions))
             else:
                 self._thumbnail_path.setText('')
