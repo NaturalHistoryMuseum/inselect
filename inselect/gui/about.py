@@ -8,7 +8,6 @@ import humanize
 import numpy as np
 import platform
 import psutil
-import scipy
 import PySide
 import PySide.QtCore
 
@@ -32,7 +31,6 @@ def _environment():
     versions = [('Machine', _machine_summary()),
                 ('Python', '{0} ({1})'.format(platform.python_version(), python_bit_depth)),
                 ('Numpy', np.version.version),
-                ('Scipy', scipy.version.version),
                 ('OpenCV', cv2.__version__),
                 ('PySide', PySide.__version__),
                 ('Qt', PySide.QtCore.__version__),  # Version compiled against
