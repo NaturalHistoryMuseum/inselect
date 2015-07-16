@@ -2,7 +2,9 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.15
 -------------
+- Added #167 - Richer information in about box (@quicklizard)
 - Added #126 - Recent documents (@quicklizard)
+- Fixed #168 - Information panel shows incorrect file sizes (@quicklizard)
 - Fixed #166 - Enter does not toggle Objects view between 'grid' and 'expanded' on Mac OS X (@quicklizard)
 
 Version 0.1.14
