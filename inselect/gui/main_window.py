@@ -14,7 +14,6 @@ from PySide.QtGui import (QMenu, QAction, QMessageBox, QDesktopServices,
 
 import inselect.gui.icons        # Register our icon resources with QT
 
-from inselect import __version__ as inselect_version
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
@@ -22,6 +21,7 @@ from inselect.lib.inselect_error import InselectError
 from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print, is_writable
 
+from .about import show_about_box
 from .info_widget import InfoWidget
 from .format_validation_problems import format_validation_problems
 from .model import Model
@@ -413,7 +413,7 @@ class MainWindow(QtGui.QMainWindow):
         """Prompts the user for the image file path to which to a screenshot
         will be saved.
         """
-        debug_print('MainWindow,save_screengrab')
+        debug_print('MainWindow.save_screengrab')
 
         # Do not use OpenCV to write the image because the conversion from Qt's
         # QPixmap to a numpy array is non-trivial
@@ -584,24 +584,7 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def about(self):
-        text = u"""<h1>Inselect {version}</h1>
-           <h2>Contributors</h2>
-           <p>
-               <strong>Alice Heaton</strong>: Application development
-           </p>
-           <p>
-               <strong>Lawrence Hudson</strong>: Application development
-           </p>
-           <p>
-               <strong>Pieter Holtzhausen</strong>: Application development
-               and segmentation algorithm
-           </p>
-           <p>
-               <strong>Stefan van der Walt</strong>: Application development
-               and segmentation algorithm
-           </p>
-        """.format(version=inselect_version)
-        QMessageBox.about(self, 'Inselect', text)
+        show_about_box(self)
 
     def run_in_worker(self, operation, name, complete_fn=None):
         """Runs the callable operation in a worker thread. The callable

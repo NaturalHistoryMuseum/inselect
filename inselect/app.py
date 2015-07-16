@@ -9,12 +9,10 @@ import inselect
 from inselect.lib.utils import debug_print
 from inselect.gui.main_window import MainWindow
 
-# The QSettings default constructor uses the application's organizationName
-# and applicationName properties.
+# Values used by several importantn parts of Qt's machinery including the GUI
+# and QSettings.
 QCoreApplication.setOrganizationName('NHM')
-QCoreApplication.setApplicationName('inselect')
-
-# No obvious benefit to also setting these but neither is there any obvious harm
+QCoreApplication.setApplicationName('Inselect')
 QCoreApplication.setApplicationVersion(inselect.__version__)
 QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
