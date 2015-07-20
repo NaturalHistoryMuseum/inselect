@@ -687,6 +687,8 @@ class MainWindow(QtGui.QMainWindow):
     def delete_selected(self):
         """Deletes the selected boxes
         """
+        debug_print('MainWindow.delete_selected')
+
         # Delete contiguous blocks of rows
         selected = self.view_object.selectionModel().selectedIndexes()
         selected = sorted([i.row() for i in selected])
@@ -696,6 +698,11 @@ class MainWindow(QtGui.QMainWindow):
         # from crummy GraphicsItemView
         for row, count in reversed(list(contiguous(selected))):
             self.model.removeRows(row, count)
+
+        # Prevent object view from scrolling to the top of the view. The natural
+        # place to do this is within ObjectView but I was unable to get that
+        # solution to work.
+        self.view_object.scrollTo(self.view_object.currentIndex())
 
     @report_to_user
     def select_next_prev(self, next):
