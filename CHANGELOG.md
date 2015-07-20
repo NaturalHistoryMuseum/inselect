@@ -6,6 +6,7 @@ Version 0.1.15
 - Added #126 - Recent documents (@quicklizard)
 - Fixed #168 - Information panel shows incorrect file sizes (@quicklizard)
 - Fixed #166 - Enter does not toggle Objects view between 'grid' and 'expanded' on Mac OS X (@quicklizard)
+- Fixed #134 - Delete box should not scroll Metadata view (@quicklizard)
 
 Version 0.1.14
 -------------
