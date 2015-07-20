@@ -71,8 +71,8 @@ def show_about_box(parent=None):
     text = u"""<h1>{application} {version}</h1>
 
        <p>
-         Segmentation, validation and annotation of scanned images of museum
-         objects. Please use our
+         Segmentation, validation and annotation of images of museum objects.
+         Please use our
          <a href="https://github.com/NaturalHistoryMuseum/inselect">
            issues page
          </a>
@@ -80,7 +80,10 @@ def show_about_box(parent=None):
        </p>
 
        Inselect is Copyright (c) 2014-2015, The Trustees of the Natural History
-       Museum, London and licensed under the Modified BSD License.
+       Museum, London and licensed under the
+       <a href="https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md">
+         Modified BSD License
+       </a>.
 
        <h2>Contributors</h2>
        <p>
