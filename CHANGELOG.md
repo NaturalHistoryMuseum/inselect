@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.16
+-------------
+
+
 Version 0.1.15
 -------------
 - Added #167 - Richer information in about box (@quicklizard)
