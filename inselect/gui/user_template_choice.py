@@ -35,7 +35,7 @@ class UserTemplateChoice(QObject):
         "Loads the UserTemplate in path"
         debug_print('UserTemplateChoice.load [{0}]'.format(path))
         self._current = self._load(path)
-        QSettings().setValue(self.KEY, path)
+        QSettings().setValue(self.KEY, str(path))
         self.template_changed.emit()
 
     def select_default(self):
