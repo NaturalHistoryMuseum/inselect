@@ -2,7 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.16
 -------------
-
+- Fixed #169 - Better formatting of validation problems (@quicklizard99)
 
 Version 0.1.15
 -------------
