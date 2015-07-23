@@ -58,7 +58,7 @@ class CollectProblemsVisitor(object):
         self._missing_mandatory.append(MissingMandatory(index, label, field))
 
     def failed_parse(self, index, label, field):
-        self._failed_parse.append(FailedParse(field, index, label))
+        self._failed_parse.append(FailedParse(index, label, field))
 
     def missing_label(self, index):
         self._missing_label.append(index)

@@ -18,12 +18,13 @@ class RecentDocuments(object):
         n_recent = settings.beginReadArray(self.KEY)
         try:
             n_recent = min(n_recent, self.MAX_RECENT_DOCS)
-            recent = [None] * n_recent
-            debug_print('Reading {0} recent documents path'.format(n_recent))
+            recent = []
+            debug_print('Reading {0} recent document paths'.format(n_recent))
             for index in xrange(n_recent):
                 settings.setArrayIndex(index)
                 path = settings.value("path")
-                recent[index] = self._resolved_if_possible(Path(path))
+                if path:
+                    recent.append(self._resolved_if_possible(Path(path)))
         finally:
             settings.endArray()
 
