@@ -324,6 +324,38 @@ class MainWindow(QtGui.QMainWindow):
         self.model.set_modified(False)
         self.info_widget.set_document(self.document)
 
+    def _prompt_validation_problems(self, problems, title, question):
+        """Prompts the user with the question and the list of validation
+        problems. Returns the result of QMessageBox.exec_().
+        """
+        box = QMessageBox(QMessageBox.Question, title, '', QMessageBox.No | QMessageBox.Yes)
+        box.setDefaultButton(QtGui.QMessageBox.No)
+
+        SHOW_AT_MOST = 5
+        report_problems = problems[:SHOW_AT_MOST]
+        if SHOW_AT_MOST <= len(problems):
+            msg = ('The document contains {n_problems} validation problems. '
+                   'The first {show_at_most} are shown below. Click "Show '
+                   'details" to see all of them.\n'
+                   '\n'
+                   '{problems}\n'
+                   '\n'
+               '{question}')
+            box.setDetailedText('\n'.join(problems))
+        else:
+            msg = ('The document contains {n_problems} validation problems:\n'
+                   '\n'
+                   '{problems}\n'
+                   '\n'
+                   '{question}')
+
+        box.setText(msg.format(n_problems=len(problems),
+                               show_at_most=SHOW_AT_MOST,
+                               problems='\n'.join(report_problems),
+                               question=question))
+
+        return box.exec_()
+
     @report_to_user
     def save_crops(self, user_template=None):
         """Saves cropped object images
@@ -347,14 +379,10 @@ class MainWindow(QtGui.QMainWindow):
 
         validation = export.validation_problems(self.document)
         if QMessageBox.Yes == res and validation and validation.any_problems:
-            msg = ('The document contains one or more validation problems:\n'
-                   '\n'
-                   '{0}\n'
-                   '\n'
-                   'Would you like to save the object images?')
-            msg = msg.format('\n'.join(format_validation_problems(validation)))
-            res = QMessageBox.question(self, 'Save object images?',
-                msg, QMessageBox.No, QMessageBox.Yes)
+            res = self._prompt_validation_problems(
+                list(format_validation_problems(validation)),
+                'Save object images?',
+                'Would you like to save the object images?')
 
         if QMessageBox.Yes == res:
             def save_crops(progress):
@@ -393,14 +421,10 @@ class MainWindow(QtGui.QMainWindow):
 
         validation = export.validation_problems(self.document)
         if QMessageBox.Yes == res and validation and validation.any_problems:
-            msg = ('The document contains one or more validation problems:\n'
-                   '\n'
-                   '{0}\n'
-                   '\n'
-                   'Would you like to export to a CSV file?')
-            msg = msg.format('\n'.join(format_validation_problems(validation)))
-            res = QMessageBox.question(self, 'Export CSV file?',
-                msg, QMessageBox.No, QMessageBox.Yes)
+            res = self._prompt_validation_problems(
+                list(format_validation_problems(validation)),
+                'Export CSV file?',
+                'Would you like to export a CSV file?')
 
         if QMessageBox.Yes == res:
             export.export_csv(self.document)
