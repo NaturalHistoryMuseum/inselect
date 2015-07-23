@@ -27,7 +27,7 @@ class TestMetadataValidation(MainWindowTest):
         """
         w = self.window
 
-        # This document has 17 validation problems with this template
+        # This document has 15 validation problems with this template
         w.open_document(TESTDATA / 'test_segment.inselect')
         with (TESTDATA / 'test.inselect_template').open() as infile:
             template = UserTemplate.from_file(infile)
@@ -39,7 +39,7 @@ class TestMetadataValidation(MainWindowTest):
 
         # Should have been called
         self.assertEqual(1, mock_settext.call_count)
-        self.assertIn('The document contains 17 validation problems',
+        self.assertIn('The document contains 15 validation problems',
                        mock_settext.call_args[0][0])
 
         # Detailed text should not have been given
