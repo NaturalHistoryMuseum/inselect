@@ -328,7 +328,8 @@ class MainWindow(QtGui.QMainWindow):
         """Prompts the user with the question and the list of validation
         problems. Returns the result of QMessageBox.exec_().
         """
-        box = QMessageBox(QMessageBox.Question, title, '', QMessageBox.No | QMessageBox.Yes)
+        box = QMessageBox(QMessageBox.Question, title, '',
+                          QMessageBox.No | QMessageBox.Yes)
         box.setDefaultButton(QtGui.QMessageBox.No)
 
         SHOW_AT_MOST = 5
