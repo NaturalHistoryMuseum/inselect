@@ -1,4 +1,4 @@
-"""Segmentation, validation and annotation of scanned images of museum objects
+"""Segmentation, validation and annotation of images of museum specimens
 """
 __version__ = '0.1.16'
 # distutils/version.py and win32/lib/win32versionstamp.py have different
