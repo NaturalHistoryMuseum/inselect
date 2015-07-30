@@ -17,7 +17,8 @@ IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
 
 
 def ingest_image(source, dest_dir,
-        thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH):
+        thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
+        default_metadata_items=None):
     """Copies the image in the path source to the directory in the path
     dest_dir. Creates an returns a new instance of InselectDocument for the
     copied image.
@@ -38,6 +39,10 @@ def ingest_image(source, dest_dir,
         doc = InselectDocument.new_from_scan(dest)
 
         doc.ensure_thumbnail(thumbnail_width_pixels)
+
+        if default_metadata_items:
+            doc.set_items(default_metadata_items)
+            doc.save()
 
         # Make images read-only
         debug_print('Making image files read-only')

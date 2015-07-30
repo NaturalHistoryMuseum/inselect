@@ -46,6 +46,8 @@ class MainWindow(QtGui.QMainWindow):
            InselectDocument.EXTENSION,
            u' '.join(IMAGE_PATTERNS))
 
+    IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
+
     TEMPLATE_FILE_FILTER = u'Inselect user templates (*{0})'.format(
         UserTemplate.EXTENSION)
 
@@ -211,7 +213,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 raise InselectError('Unknown file type [{0}]'.format(path))
 
-    def new_document(self, path):
+    def new_document(self, path, default_metadata_items=None):
         """Creates and opens a new inselect document for the scanned image
         given in path
         """
@@ -224,18 +226,20 @@ class MainWindow(QtGui.QMainWindow):
             # Callable for worker thread
             thumbnail_width = user_template_choice().current.thumbnail_width_pixels
             class NewDoc(object):
-                def __init__(self, image):
+                def __init__(self, image, default_metadata_items):
                     self.image = image
+                    self.default_metadata_items = default_metadata_items
                     self.document_path = None
 
                 def __call__(self, progress):
                     progress('Creating thumbnail of scanned image')
                     doc = ingest_image(self.image, self.image.parent,
-                                       thumbnail_width)
+                                       thumbnail_width,
+                                       self.default_metadata_items)
                     self.document_path = doc.document_path
 
-
-            self.run_in_worker(NewDoc(path), 'New document',
+            self.run_in_worker(NewDoc(path, default_metadata_items),
+                               'New document',
                                self.new_document_finished)
 
     def new_document_finished(self, operation):
@@ -780,6 +784,8 @@ class MainWindow(QtGui.QMainWindow):
         self.open_action = QAction("&Open...", self,
             shortcut=QtGui.QKeySequence.Open, triggered=self.open_file,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
+        self.copy_to_new_document_action = QAction("Copy to new document", self,
+            triggered=self.copy_to_new_document)
         self.save_action = QAction("&Save", self,
             shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
@@ -924,6 +930,7 @@ class MainWindow(QtGui.QMainWindow):
         recent = self._file_menu.addMenu('Recent documents')
         for action in self.recent_doc_actions:
             recent.addAction(action)
+        self._file_menu.addAction(self.copy_to_new_document_action)
         self._file_menu.addAction(self.save_action)
         self._file_menu.addAction(self.close_action)
         self._file_menu.addSeparator()
@@ -1028,6 +1035,33 @@ class MainWindow(QtGui.QMainWindow):
             QSettings().setValue('user_template_last_directory',
                                  str(Path(path).parent))
 
+    @report_to_user
+    def copy_to_new_document(self):
+        """Prompts the user to choose an image, creates an inselect document
+        for the selected image, copies metadata from the currently open
+        document to the new document and finally opens the new document
+        """
+        debug_print('MetadataView.copy_to_new_document')
+
+        folder = QSettings().value('working_directory',
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
+
+        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
+            self, "Open", folder, self.IMAGE_FILE_FILTER)
+
+        # path will be None if user cancelled getOpenFileName
+        if path:
+            path = Path(path)
+
+            # Take a copy of the metadata
+            items = self.document.items
+
+            if not self.close_document():
+                # User does not want to close the existing document
+                pass
+            else:
+                self.new_document(path, default_metadata_items=items)
+
     def _accept_drag_drop(self, event):
         """If event refers to a single file that can opened, returns the path.
         Returns None otherwise.
@@ -1094,6 +1128,7 @@ class MainWindow(QtGui.QMainWindow):
         has_selection = len(self.view_object.selectedIndexes())>0
 
         # File
+        self.copy_to_new_document_action.setEnabled(document)
         self.save_action.setEnabled(document)
         self.save_crops_action.setEnabled(has_rows)
         self.export_csv_action.setEnabled(has_rows)
