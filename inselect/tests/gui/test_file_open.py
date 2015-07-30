@@ -112,9 +112,7 @@ class TestFileOpen(MainWindowTest):
             shutil.copy(str(TESTDATA / 'test_segment.png'),
                         str(tempdir / 'test_segment.Png'))
             self.window.open_file(tempdir / 'test_segment.Png')
-            self.assertTrue(mock_new_document.called)
-            self.assertEqual(tempdir / 'test_segment.Png',
-                             mock_new_document.call_args[0][0])
+            mock_new_document.assert_called_once_with(tempdir / 'test_segment.Png')
 
     @patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes)
     def test_new_document_thread(self, mock_information):
