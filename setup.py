@@ -13,7 +13,7 @@ setup_data = {
     'version': inselect.__version__,
     'maintainer': 'Lawrence Hudson',
     'maintainer_email': 'l.hudson@nhm.ac.uk',
-    'url': 'https://github.com/NaturalHistoryMuseum/syrup/',
+    'url': 'https://github.com/NaturalHistoryMuseum/inselect/',
     'description': inselect.__doc__,
     'packages': ['inselect','inselect.gui.plugins', 'inselect.gui.views',
                  'inselect.gui.views.boxes', 'inselect.lib',

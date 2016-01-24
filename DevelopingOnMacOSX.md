@@ -1,132 +1,90 @@
 # Mac OS X development environment
 
-# Install git
-
-Download and run the [latest Mac OS X build of git](http://git-scm.com/download/mac).
-Chose:
-
-    * Use git from command prompt
-    * Checkout as-is, commit as-is
-
-Configure git:
-
-```
-git config --global user.name "<Your name>"
-git config --global user.email <Your email address>
-```
-
-# Install a sensible text editor
-
-I use [Sublime Text](http://www.sublimetext.com/).
-
-**Whatever you use, set your editor to use Unix line endings and to insert
-spaces in place of TABs**.
-
 # Compilers and homebrew
 
 * Install the XCode command line tools from the app store.
 * Install [homebrew](http://brew.sh/).
-* Install UPX:
+* Install dependencies `UPX` and `zbar`:
 
 ```
-brew install upx
+brew install upx zbar
 ```
 
-# Code repos
-
-Start a command prompt and run
+# Install Miniconda
 
 ```
-cd C:\Users\<your Windows username>\
-mkdir projects
-cd projects
-git clone https://<your git username>@github.com/NaturalHistoryMuseum/inselect.git
-git clone https://<your git username>@github.com/NaturalHistoryMuseum/gouda.git
+wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -O /tmp/Miniconda-latest-MacOSX-x86_64.sh
+bash /tmp/Miniconda-latest-MacOSX-x86_64.sh -b -p $HOME/miniconda
+rm /tmp/Miniconda-latest-MacOSX-x86_64.sh
+
+export PATH=$PATH:~/miniconda/bin
+conda update --yes conda
 ```
 
-# Paths
-
-Append to `~/.bashrc`:
-
+# Inselect env
 ```
-PYTHONPATH=/Users/lawh/projects/inselect;/Users/lawh/projects/gouda
+conda create --yes --name inselect pillow pyside
 ```
 
-## Install dependencies and useful tools
+# OpenCV
+`numpy` is pinned by opencv installation
 
 ```
-cd ~/projects
-pip install nose Markdown
-pip install cx_Freeze
-conda install -c https://conda.binstar.org/jjhelmus opencv
-conda install pyside
-conda install Pillow
-pip install pyinstaller
-pip install -r inselect\requirements.txt
-pip install -r gouda\requirements.txt
+conda install --yes -c https://conda.binstar.org/jjhelmus opencv
 ```
 
-## Install Barcode readers
+# Dependencies
+
+```
+cd ~/projects/inselect
+pip install -r requirements.txt
+```
 
 ## LibDMTX barcode reading library
 
-* Get source
+* Get source for the library and the wrappers
 
-```
-git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/libdmtx
-git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/dmtx-wrappers
-git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/dmtx-utils
-```
+    ```
+    cd ~/projects
+    git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/libdmtx
+    git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/dmtx-wrappers
+    ```
 
-* Build core library
+* Build library
 
-```
-cd libdmtx
-git checkout v0.7.4
-./autogen.sh
-./configure
-make
-make install
-```
+    ```
+    cd libdmtx
+    git checkout v0.7.4
+    ./autogen.sh
+    ./configure
+    make
+    ```
 
 * Build Python library
 
-```
-cd ../dmtx-wrappers/
-./autogen.sh
-./configure
-make
-```
+    ```
+    cd ../dmtx-wrappers/
+    ./autogen.sh
+    ./configure
+    make
+    ```
 
 * Install Python library
 
-```
-cd python
-python setup.py install
-```
+    ```
+    cd python
+    python setup.py install
+    ```
 
 * Test
 
-```
-python -c "import pydmtx; print(pydmtx)"
-```
-
-## ZBar barcode reading library
-The `conda install` build of zbar on my Mac resulted in a segfault on `import zbar`.
-I compiled zbar-0.10.tar.bz2 from [source](http://zbar.sourceforge.net/download.html)
-and then ran `pip install zbar`.
-Test
-
-```
-python -c "import zbar; print(zbar)"
-```
+    ```
+    python -c "import pydmtx; print(pydmtx)"
+    ```
 
 # Unit tests
 
 ```
-cd ~/projects/gouda/
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=gouda
-
 cd ~/projects/inselect/
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
 ```

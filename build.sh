@@ -27,7 +27,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     pyinstaller --onefile --icon=data/inselect.icns inselect/workflow/ingest.py
     pyinstaller --onefile --icon=data/inselect.icns inselect/workflow/save_crops.py
     pyinstaller --onefile --icon=data/inselect.icns inselect/workflow/segment.py
-    ./bin/plist.py dist/inselect.app/Contents/Info.plist
+    python -m bin.plist dist/inselect.app/Contents/Info.plist
     install -c -m 644 data/Plecoptera_Accession_Drawer_4.jpg dist/
     install -c -m 644 data/Plecoptera_Accession_Drawer_4.inselect dist/
     rm dist/inselect
