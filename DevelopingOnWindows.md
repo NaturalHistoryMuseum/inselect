@@ -135,13 +135,3 @@ build.sh
 
 Installer will be in `dist`.
 
-
-# http://comments.gmane.org/gmane.comp.python.cx-freeze.user/331
-# http://timgolden.me.uk/pywin32-docs/html/com/win32com/HTML/QuickStartClientCom.html#StaticDispatch
-# http://timgolden.me.uk/pywin32-docs/html/com/win32com/HTML/GeneratedSupport.html
-http://comments.gmane.org/gmane.comp.python.cx-freeze.user/331
-https://bitbucket.org/anthony_tuininga/cx_freeze/issues/44/win32com-relies-on-modules-with-non
-```
-FOR /F %a IN ('python -c "import win32com.client; print(win32com.client.__path__[0])"') DO python %a\makepy.py -o ClearImageClient-32.py "ClearImage.ClearImage"
-FOR /F %a IN ('python -c "import win32com.client; print(win32com.client.__path__[0])"') DO python %a\makepy.py -o ClearImageClient-64.py "ClearImage.ClearImage"
-```
