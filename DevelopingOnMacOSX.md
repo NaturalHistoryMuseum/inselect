@@ -82,9 +82,20 @@ pip install -r requirements.txt
     python -c "import pydmtx; print(pydmtx)"
     ```
 
-# Unit tests
+## Test barcode reading libraries
+
+Inselect has optional barcode reading capabilities. The dependent libraries
+should have been installed.
 
 ```
-cd ~/projects/inselect/
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
+python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
+python -c "from gouda.engines import InliteEngine; print(InliteEngine.available())"
 ```
+
+## Build
+
+```
+build.sh
+```
+
+Installer will be in `dist`.
