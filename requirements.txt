@@ -18,4 +18,9 @@ coveralls>=0.4.1
 mock>=1.0.1
 nose>=1.3.4
 pyinstaller>=3.0 ; sys_platform == 'darwin'
-cx_Freeze>=4.3.4 ; sys_platform == 'win32'
+
+# cx_Freeze 4.3.2 introduced a bug that prevents python win32com wrappers
+# generated using makepy.py from being frozen.
+# https://bitbucket.org/anthony_tuininga/cx_freeze/issue/44/win32com-relies-on-modules-with-non
+# This bug has been fixed but not yet released.
+https://bitbucket.org/anthony_tuininga/cx_freeze/get/aebc9c32615c.zip ; sys_platform == 'win32'

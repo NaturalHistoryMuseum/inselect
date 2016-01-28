@@ -67,7 +67,7 @@ setup_data = {
         'include_files': [
             ('{site_packages}/numpy', 'numpy'),
         ],
-        'extra_packages': [],
+        'extra_packages': ['win32com.gen_py'],
         'excludes': ['Tkinter', 'ttk', 'Tkconstants', 'tcl',
                      'future.moves'    # Errors from urllib otherwise
                     ]
@@ -112,7 +112,6 @@ def cx_setup():
                 'packages': setup_data['packages'] + setup_data['win32']['extra_packages'],
                 'excludes': setup_data['win32']['excludes'],
                 'include_files': include_files,
-                'icon': 'data/inselect.ico'
             },
             'bdist_msi': {
                 'upgrade_code': '{fe2ed61d-cd5e-45bb-9d16-146f725e522f}'

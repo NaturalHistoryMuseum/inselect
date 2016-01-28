@@ -11,4 +11,5 @@ echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
 
 echo Building MSI
+python -m bin.com_clients
 python setup.py bdist_msi
