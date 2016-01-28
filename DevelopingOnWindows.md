@@ -26,12 +26,10 @@ follows:
 ```
 conda update --yes conda
 conda create --yes --name inselect pillow pyside pywin32 numpy
-cd C:\Users\<your Windows username>\projects\
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements.win64
-
-pip install --upgrade pip
-python %ANACONDA%\Scripts\pywin32_postinstall.py -install
+FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\Scripts\pywin32_postinstall.py -install
 ```
 
 ## Install OpenCV
@@ -58,17 +56,18 @@ Inselect has optional barcode reading capabilities. The dependent libraries
 should have been installed.
 
 ```
-python -c "import gouda; print(gouda.engines.DMTXEngine.available)"
-python -c "import gouda; print(gouda.engines.ZBarEngine.available)"
-python -c "import gouda; print(gouda.engines.InliteEngine.available)"
+python -c "from gouda.engines import LibDMTXEngine; print(LibDMTXEngine.available())"
+python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
+python -c "from gouda.engines import InliteEngine; print(InliteEngine.available())"
 ```
 
-# Unit tests
+## Build
 
 ```
-cd C:\Users\<your Windows username>\projects\inselect
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
+build.sh
 ```
+
+Installer will be in `dist`.
 
 # Install Miniconda 32 bit
 * Download and run [Miniconda-latest-Windows-x86.exe](https://repo.continuum.io/miniconda/)
@@ -87,25 +86,15 @@ follows:
     * Layout: Buffer size, Width: 140
     * Layout: Window size, Width: 140
 
-* Start and Miniconda32 prompt and run
-
-```
-conda update --all
-conda update --all
-conda update conda
-conda update anaconda
-pip install --upgrade pip
-python %ANACONDA%\Scripts\pywin32_postinstall.py -install
-```
-
 ## Inselect environment
 
 ```
 conda update --yes conda
 conda create --yes --name inselect pillow pyside pywin32 numpy
-cd C:\Users\<your Windows username>\projects\
-pip install -r inselect\requirements.txt
-pip install -r inselect\requirements.win32
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip install -r requirements.win64
+FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\Scripts\pywin32_postinstall.py -install
 ```
 
 ## Install OpenCV
@@ -133,14 +122,26 @@ Inselect has optional barcode reading capabilities. The dependent libraries
 should have been installed.
 
 ```
-python -c "import gouda; print(gouda.engines.DMTXEngine.available)"
-python -c "import gouda; print(gouda.engines.ZBarEngine.available)"
-python -c "import gouda; print(gouda.engines.InliteEngine.available)"
+python -c "from gouda.engines import LibDMTXEngine; print(LibDMTXEngine.available())"
+python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
+python -c "from gouda.engines import InliteEngine; print(InliteEngine.available())"
 ```
 
-# Unit tests
+## Build
 
 ```
-cd C:\Users\<your Windows username>\projects\inselect
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
+build.sh
+```
+
+Installer will be in `dist`.
+
+
+# http://comments.gmane.org/gmane.comp.python.cx-freeze.user/331
+# http://timgolden.me.uk/pywin32-docs/html/com/win32com/HTML/QuickStartClientCom.html#StaticDispatch
+# http://timgolden.me.uk/pywin32-docs/html/com/win32com/HTML/GeneratedSupport.html
+http://comments.gmane.org/gmane.comp.python.cx-freeze.user/331
+https://bitbucket.org/anthony_tuininga/cx_freeze/issues/44/win32com-relies-on-modules-with-non
+```
+FOR /F %a IN ('python -c "import win32com.client; print(win32com.client.__path__[0])"') DO python %a\makepy.py -o ClearImageClient-32.py "ClearImage.ClearImage"
+FOR /F %a IN ('python -c "import win32com.client; print(win32com.client.__path__[0])"') DO python %a\makepy.py -o ClearImageClient-64.py "ClearImage.ClearImage"
 ```
