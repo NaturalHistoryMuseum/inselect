@@ -8,7 +8,7 @@ del *spec
 rmdir /Q /S dist build 
 
 echo Tests
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
+nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
 echo Building MSI
 python -m bin.com_clients

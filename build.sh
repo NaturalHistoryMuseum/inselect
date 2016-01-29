@@ -12,7 +12,7 @@ find . -name __pycache__ -print0 | xargs -0 rm -rf
 rm -rf *spec dist build cover inselect-$VERSION.dmg
 
 echo Tests
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect
+nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect  inselect
 
 echo Source build
 ./setup.py sdist

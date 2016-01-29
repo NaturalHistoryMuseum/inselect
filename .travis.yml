@@ -18,7 +18,7 @@ install:
   - "sh -e /etc/init.d/xvfb start"
 
 script:
-  - nosetests --with-coverage --cover-inclusive --cover-tests --cover-package=inselect
+  - nosetests --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
 
 after_success:
   - coveralls
