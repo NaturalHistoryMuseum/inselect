@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.18
+-------------
+- Fixed #130 - Barcode reading broken in compiled Inselect on Windows (@quicklizard99)
+
 Version 0.1.17
 -------------
 - Added #171 - Processing double-sided objects (@quicklizard99)
