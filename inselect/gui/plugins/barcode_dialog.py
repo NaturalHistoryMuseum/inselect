@@ -63,7 +63,7 @@ class BarcodeDialog(QDialog):
         self._layout.addWidget(radio)
 
         prompt = QLabel('Barcodes will be decoded using the open-source '
-            '<a href="http://zbar.sourceforge.net/">ZBar</a> library')
+                        '<a href="http://zbar.sourceforge.net/">ZBar</a> library')
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)
         self._layout.addWidget(prompt)
@@ -99,7 +99,8 @@ class BarcodeDialog(QDialog):
         prompt = QLabel(
             'Only available on Windows. '
             'Visit <a href="http://www.inliteresearch.com/">Inlite Research</a> '
-            'to download and install Inlite Research\'s ClearImage library.')
+            'to download and install Inlite Research\'s ClearImage library.'
+        )
         prompt.setWordWrap(True)
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)

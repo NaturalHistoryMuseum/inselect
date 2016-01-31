@@ -64,8 +64,10 @@ class OrderedDictType(MultiType):
         if not isinstance(value, OrderedDict):
             raise ValidationError(u'Only OrderedDict may be used in a OrderedDictType')
         else:
-            return OrderedDict((self.coerce_key(k), self.field.to_native(v, context))
-                    for k, v in value.iteritems())
+            return OrderedDict(
+                (self.coerce_key(k), self.field.to_native(v, context))
+                for k, v in value.iteritems()
+            )
 
     def validate_items(self, items):
         errors = {}
@@ -117,10 +119,14 @@ class _FieldModel(Model):
     uri = URLType(serialized_name='URI')
     mandatory = BooleanType(default=False, serialized_name='Mandatory')
     choices = _UniqueListType(StringType, serialized_name='Choices')
-    choices_with_data = OrderedDictType(StringType,
-        serialized_name='Choices with data')
-    parser = StringType(choices=list(sorted(PARSERS.iterkeys())),
-        serialized_name='Parser')
+    choices_with_data = OrderedDictType(
+        StringType,
+        serialized_name='Choices with data'
+    )
+    parser = StringType(
+        choices=list(sorted(PARSERS.iterkeys())),
+        serialized_name='Parser'
+    )
     regex_parser = StringType(serialized_name='Regex parser')
 
     def __repr__(self):
@@ -152,10 +158,12 @@ def _validate_fields_not_empty(fields):
     if not fields:
         raise ValidationError("One or more fields must be defined.")
 
+
 def _validate_field_names_unique(fields):
     "Field names must be unique"
     if any(duplicated(f.name for f in fields)):
         raise ValidationError("Names must be unique")
+
 
 def _validate_field_labels_unique(fields):
     "Field labels must be unique"
@@ -166,19 +174,20 @@ def _validate_field_labels_unique(fields):
 class _UserTemplateModel(Model):
     name = StringType(required=True, serialized_name='Name')
     object_label = StringType(serialized_name='Object label',
-        default='{ItemNumber:04}')
+                              default='{ItemNumber:04}')
     thumbnail_width_pixels = DecimalType(
         default=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
         min_value=InselectDocument.THUMBNAIL_MIN_WIDTH,
         max_value=InselectDocument.THUMBNAIL_MAX_WIDTH,
         serialized_name='Thumbnail width pixels')
     cropped_file_suffix = StringType(default='.jpg',
-        choices=IMAGE_SUFFIXES, serialized_name='Cropped file suffix')
+                                     choices=IMAGE_SUFFIXES,
+                                     serialized_name='Cropped file suffix')
     fields = ListType(ModelType(_FieldModel),
-        serialized_name='Fields',
-        validators=[_validate_fields_not_empty,
-                    _validate_field_names_unique,
-                    _validate_field_labels_unique])
+                      serialized_name='Fields',
+                      validators=[_validate_fields_not_empty,
+                                  _validate_field_names_unique,
+                                  _validate_field_labels_unique])
 
     def __repr__(self):
         return "_UserTemplateModel ['{0}']".format(self.name)
@@ -193,11 +202,11 @@ def _ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     # See http://stackoverflow.com/a/21912744/1773758
     class OrderedLoader(Loader):
         pass
- 
+
     def construct_mapping(loader, node):
         loader.flatten_mapping(node)
         return object_pairs_hook(loader.construct_pairs(node))
- 
+
     OrderedLoader.add_constructor(
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
         construct_mapping)
@@ -226,9 +235,11 @@ def _extract_validation_error(e, prompt=None):
     else:
         return messages
 
+
 def load_specification_from_file(path):
     "Load and returns the specification in the YAML document at path"
     return _ordered_load(path, yaml.SafeLoader)
+
 
 def validated_specification(spec):
     "Returns a validated template specification"

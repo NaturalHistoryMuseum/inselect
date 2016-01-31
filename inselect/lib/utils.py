@@ -33,10 +33,12 @@ def debug_print(*args, **kwargs):
     if DEBUG_PRINT:
         print(*args, **kwargs)
 
+
 def is_writable(path):
     """Returns True is path is writable
     """
     return bool(Path(path).stat()[stat.ST_MODE] & stat.S_IWUSR)
+
 
 def make_readonly(path):
     """Alters path to be read-only and return the original mode
@@ -45,6 +47,7 @@ def make_readonly(path):
     mode = path.stat()[stat.ST_MODE]
     path.chmod(mode ^ (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
     return mode
+
 
 def rmtree_readonly(path):
     """Like shutil.rmtree() but removes read-only files on Windows
@@ -68,6 +71,7 @@ def rmtree_readonly(path):
 
     shutil.rmtree(str(path), ignore_errors=False, onerror=handle_remove_readonly)
 
+
 def unique_everseen(iterable, key=None):
     "List unique elements, preserving order. Remember all elements ever seen."
     # Taken from https://docs.python.org/2/library/itertools.html
@@ -86,10 +90,12 @@ def unique_everseen(iterable, key=None):
                 seen_add(k)
                 yield element
 
+
 def duplicated(v):
     """Returns values within v that appear more than once
     """
     return [x for x, y in Counter(v).items() if y > 1]
+
 
 class FormatDefault(string.Formatter):
     """A string formatter than returns a default value for missing keys
@@ -103,7 +109,7 @@ class FormatDefault(string.Formatter):
 
     """
     def __init__(self, default=''):
-        self.default=default
+        self.default = default
 
     def get_value(self, key, args, kwds):
         # key will be either an integer or a string. If it is an integer, it
@@ -132,6 +138,7 @@ def user_name():
         return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
     else:
         return ''
+
 
 def format_dt_display(dt):
     """Returns a local-time string representation of the datetime instance dt

@@ -80,7 +80,7 @@ class TestModelModified(GUITest):
         m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
-        m.setData(m.index(0, 0), {'catalogNumber' : None}, MetadataRole)
+        m.setData(m.index(0, 0), {'catalogNumber': None}, MetadataRole)
         mock_modified_changed.assert_called_once_with()
         self.assertTrue(m.is_modified)
 
@@ -104,5 +104,5 @@ class TestModelModified(GUITest):
             self.assertFalse(m.is_modified)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

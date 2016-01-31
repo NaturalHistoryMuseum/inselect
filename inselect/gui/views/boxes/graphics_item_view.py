@@ -212,7 +212,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """The user moved or resized items in the scene
         """
         debug_print('GraphicsItemView.item_rects_updated')
-        for index,item in izip(self.indexes_of_items(items), items):
+        for index, item in izip(self.indexes_of_items(items), items):
             # item.sceneBoundingRect() is the items rects in the correct
             # coordinates system
             debug_print('Row [{0}] updated'.format(index.row()))

@@ -98,9 +98,8 @@ class InselectImage(object):
                     overlapping = self.array[max(y0, 0):min(y1, h),
                                              max(x0, 0):min(x1, w)]
                     dest_y, dest_x = max(0, 0-y0), max(0, 0-x0)
-                    crop[dest_y:(dest_y+overlapping.shape[0]),
-                         dest_x:(dest_x+overlapping.shape[1]),] = overlapping
-
+                    crop[dest_y:(dest_y + overlapping.shape[0]),
+                         dest_x:(dest_x + overlapping.shape[1])] = overlapping
 
             if 0 != rotate % 90:
                 msg = 'Rotation is not a multiple of 90: [{0}]'

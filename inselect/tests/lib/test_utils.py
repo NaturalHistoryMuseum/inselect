@@ -1,13 +1,9 @@
-import shutil
-import stat
 import tempfile
 import unittest
 
 from pathlib import Path
 
-from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import make_readonly, rmtree_readonly, is_writable
-from inselect.lib.rect import Rect
 
 
 class TestFileReadWrite(unittest.TestCase):
@@ -43,5 +39,5 @@ class TestRMTreeReadOnly(unittest.TestCase):
             self.assertFalse(path.is_dir())
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

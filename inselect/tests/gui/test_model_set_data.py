@@ -68,15 +68,17 @@ class TestModelData(GUITest):
         m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
 
         i = m.index(0, 0)
-        expected = {"catalogNumber": "1",
-                    "scientificName": "A",
-                   }
+        expected = {
+            "catalogNumber": "1",
+            "scientificName": "A",
+        }
         self.assertEqual(expected, m.data(i, MetadataRole))
 
-        m.setData(i, {'catalogNumber' : '1234'}, MetadataRole)
-        expected = {"catalogNumber": "1234",
-                    "scientificName": "A",
-                   }
+        m.setData(i, {'catalogNumber': '1234'}, MetadataRole)
+        expected = {
+            "catalogNumber": "1234",
+            "scientificName": "A",
+        }
         self.assertEqual(expected, m.data(i, MetadataRole))
 
     def test_set_invalid_index(self):
@@ -100,5 +102,5 @@ class TestModelData(GUITest):
         self.assertEqual('0004', m.data(m.index(3, 0), Qt.DisplayRole)[:4])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

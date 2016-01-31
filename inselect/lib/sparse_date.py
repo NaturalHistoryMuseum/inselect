@@ -7,10 +7,11 @@ from .inselect_error import InselectError
 class SparseDate(object):
     """ A date where each component is optional. """
 
-    _LEVELS = {'year' : 0,
-               'month': 1,
-               'day':   2,
-             }
+    _LEVELS = {
+        'year':  0,
+        'month': 1,
+        'day':   2,
+    }
 
     def __init__(self, year, month, day):
         """Each component is optional.
@@ -32,7 +33,7 @@ class SparseDate(object):
                     raise ValueError('Month should be an integer')
 
                 # Check month and day ranges
-                if not 0<month<13:
+                if not 0 < month < 13:
                     msg = 'Bad month [{0}]: require a number between 1 and 12'
                     raise ValueError(msg.format(month))
 
@@ -41,7 +42,7 @@ class SparseDate(object):
                         raise ValueError('Day should be an integer')
 
                     days_in_month = calendar.monthrange(year, month)[1]
-                    if day is not None and not 0<day<=days_in_month:
+                    if day is not None and not 0 < day <= days_in_month:
                         msg = 'Bad day [{0}]: require a number between 1 and {1}'
                         raise ValueError(msg.format(day, days_in_month))
 
@@ -66,7 +67,7 @@ class SparseDate(object):
         return '{0}-{1}-{2}'.format(self._year, self._month, self._day)
 
     def __iter__(self):
-        return iter( (self._year, self._month, self._day) )
+        return iter((self._year, self._month, self._day))
 
     def as_date(self):
         """Returns a datetime.date, if resolution is 'day'. Raises a
@@ -116,14 +117,14 @@ class SparseDate(object):
     def _downsample_to_level(self, to):
         " Returns self downsampled. 'to' should a value of self._LEVELS "
         current = self._LEVELS[self.resolution]
-        if to>current:
+        if to > current:
             msg = 'Cannot increase resolution from [{0}] to [{1}]'
             raise ValueError(msg.format(current, to))
-        elif 0==to:
+        elif 0 == to:
             return SparseDate(self._year, None, None)
-        elif 1==to:
+        elif 1 == to:
             return SparseDate(self._year, self._month, None)
-        elif 2==to:
+        elif 2 == to:
             return SparseDate(self._year, self._month, self._day)
 
     def _pre_compare(self, other):

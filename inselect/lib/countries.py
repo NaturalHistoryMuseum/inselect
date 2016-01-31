@@ -1,4 +1,4 @@
-# Mapping from two-letter country codes to international English names, 
+# Mapping from two-letter country codes to international English names,
 # taken from CLDR (Unicode Common Locale Data Repository) 26.0.1 json files,
 COUNTRIES = {u'AC': u'Ascension Island',
              u'AD': u'Andorra',

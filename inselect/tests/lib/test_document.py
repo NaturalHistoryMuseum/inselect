@@ -1,14 +1,12 @@
 # -*- coding: UTF-8 -*-
-import json
 import os
 import pytz
-import stat
 import sys
 import tempfile
 import unittest
 
 from datetime import datetime
-from itertools import izip, count
+from itertools import izip
 from pathlib import Path
 
 import numpy as np
@@ -39,10 +37,10 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(TESTDATA / 'test_segment_crops', doc.crops_dir)
         self.assertEqual('Lawrence Hudson', doc.properties['Created by'])
         self.assertEqual("2015-03-14T09:19:47",
-                    doc.properties['Created on'].strftime('%Y-%m-%dT%H:%M:%S'))
+                         doc.properties['Created on'].strftime('%Y-%m-%dT%H:%M:%S'))
         self.assertEqual('Lawrence Hudson', doc.properties['Saved by'])
         self.assertEqual("2015-03-14T09:19:47",
-                    doc.properties['Saved on'].strftime('%Y-%m-%dT%H:%M:%S'))
+                         doc.properties['Saved on'].strftime('%Y-%m-%dT%H:%M:%S'))
 
         # Check read-only properties
         with self.assertRaises(AttributeError):
@@ -107,12 +105,12 @@ class TestDocument(unittest.TestCase):
 
     def test_save(self):
         "Save document"
-        source = TESTDATA / 'test_segment.inselect'
-        temp = tempfile.mkdtemp()
         with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
                                        TESTDATA / 'test_segment.png') as tempdir:
-            items = [ {'fields': {'type' : u'インセクト'},
-                       'rect': Rect(0.1, 0.2, 0.5, 0.5) }, ]
+            items = [{
+                'fields': {'type': u'インセクト'},
+                'rect': Rect(0.1, 0.2, 0.5, 0.5),
+            }]
 
             doc_temp = tempdir / 'test_segment.inselect'
             d = InselectDocument.load(doc_temp)
@@ -151,7 +149,7 @@ class TestDocument(unittest.TestCase):
         path = TESTDATA / 'test_segment.inselect'
         doc = InselectDocument.load(path)
 
-        items = [ {'fields': {}, 'rect': Rect(0, 0, 0.5, 0.5)}, ]
+        items = [{'fields': {}, 'rect': Rect(0, 0, 0.5, 0.5)}]
         doc.set_items(items)
         self.assertEqual(items, doc.items)
 
@@ -247,5 +245,5 @@ class TestDocument(unittest.TestCase):
             # Thumbnail file and corresponding .inselect file both exist
             self.assertTrue(InselectDocument.path_is_thumbnail_file(thumbnail))
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

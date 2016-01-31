@@ -20,21 +20,21 @@ class TestValidateUserTemplate(unittest.TestCase):
                       self._invalid_specification({}))
 
     def test_invalid_cropped_file_suffix(self):
-        spec = {'Cropped file suffix' : 'I am not a valid file suffix',}
+        spec = {'Cropped file suffix': 'I am not a valid file suffix'}
         res = self._invalid_specification(spec)
         expected = ("Cropped file suffix: Value must be one of ('.bmp', "
                     "'.jpeg', '.jpg', '.png', '.tif', '.tiff').")
         self.assertIn(expected, res)
 
     def test_unrecognised_cropped_file_suffix(self):
-        spec = {'Cropped file suffix' : '.txt',}
+        spec = {'Cropped file suffix': '.txt'}
         res = self._invalid_specification(spec)
         expected = ("Cropped file suffix: Value must be one of ('.bmp', "
                     "'.jpeg', '.jpg', '.png', '.tif', '.tiff').")
         self.assertIn(expected, res)
 
     def test_invalid_thumbnail_width(self):
-        spec = {'Thumbnail width pixels' : 10,}
+        spec = {'Thumbnail width pixels': 10}
         res = self._invalid_specification(spec)
         expected = 'Thumbnail width pixels: Value should be greater than 1024.'
         self.assertIn(expected, res)
@@ -67,11 +67,10 @@ class TestValidateUserTemplate(unittest.TestCase):
 
     def test_choices_and_choices_with_data(self):
         "Both Choices and Choices with data given"
-        spec = {'Fields': [
-            {'Name': 'F', 'Choices': ['1', '2'],
-             'Choices with data': [('1', 1), ('2', 2)]
-            },
-        ]}
+        spec = {'Fields': [{
+            'Name': 'F', 'Choices': ['1', '2'],
+            'Choices with data': [('1', 1), ('2', 2)],
+        }]}
         res = self._invalid_specification(spec)
         expected = "F: Choices: 'Choices' and 'Choices with data' are mutually exclusive."
         self.assertIn(expected, res)
@@ -113,9 +112,9 @@ class TestValidateUserTemplate(unittest.TestCase):
         ]}
         res = self._invalid_specification(spec)
         expected = ("F1: Parser: Value must be one of ['date', 'float', "
-            "'float_ge0', 'float_gt0', 'four_digit_int', 'int', 'int_ge0', "
-            "'int_gt0', 'latitude', 'longitude', 'one_or_two_digit_int', "
-            "'sparse_date'].")
+                    "'float_ge0', 'float_gt0', 'four_digit_int', 'int', 'int_ge0', "
+                    "'int_gt0', 'latitude', 'longitude', 'one_or_two_digit_int', "
+                    "'sparse_date'].")
         self.assertIn(expected, res)
 
     def test_parser_and_parserregex(self):
@@ -147,5 +146,5 @@ class TestValidateUserTemplate(unittest.TestCase):
                          cm.exception.problems)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

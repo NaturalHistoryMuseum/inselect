@@ -67,6 +67,5 @@ class TestSaveScreengrab(MainWindowTest):
             shutil.rmtree(temp)
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

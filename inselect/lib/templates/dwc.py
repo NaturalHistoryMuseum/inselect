@@ -4,8 +4,7 @@
 from inselect.lib.user_template import UserTemplate
 
 
-DWC = UserTemplate.from_specification(
-{
+DWC = UserTemplate.from_specification({
     'Name': 'Simple Darwin Core terms',
     'Fields': [
         {
@@ -641,7 +640,7 @@ DWC = UserTemplate.from_specification(
             "Name": "georeferencedDate",
             "Label": "Georeferenced date",
             "URI": "http://rs.tdwg.org/dwc/terms/georeferencedDate",
-            "Parser" : "date",
+            "Parser": "date",
         },
         {
             "Group": "Location",
@@ -792,7 +791,7 @@ DWC = UserTemplate.from_specification(
             "Name": "dateIdentified",
             "Label": "Date identified",
             "URI": "http://rs.tdwg.org/dwc/terms/dateIdentified",
-            "Parser" : "date",
+            "Parser": "date",
         },
         {
             "Group": "Identification",

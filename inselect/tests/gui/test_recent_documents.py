@@ -89,5 +89,5 @@ class TestRecentDocuments(MainWindowTest):
         self.assertEqual([p], RecentDocuments().read_paths())
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

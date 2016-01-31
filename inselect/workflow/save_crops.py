@@ -9,7 +9,7 @@ from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
 # TODO LH find a better solution
-import numpy
+import numpy    # noqa
 
 import inselect
 import inselect.lib.utils
@@ -48,10 +48,11 @@ def save_crops(dir, overwrite_existing):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Writes cropped object images from Inselect documents')
+        description='Writes cropped object images from Inselect documents'
+    )
     parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('-o', '--overwrite', action='store_true',
-        help='Overwrite existing crops directories')
+                        help='Overwrite existing crops directories')
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)

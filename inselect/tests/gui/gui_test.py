@@ -1,10 +1,6 @@
 import unittest
 
-from functools import partial
-from mock import patch
-
 from PySide import QtCore, QtGui
-from PySide.QtGui import QMessageBox
 
 from inselect.gui.main_window import MainWindow
 
@@ -17,7 +13,7 @@ class GUITest(unittest.TestCase):
         # Only one QApplication can be constructed
         if not QtGui.qApp:
             QtGui.QApplication([])
-  
+
 
 class MainWindowTest(GUITest):
     """Base class for tests that require a MainWindow.
@@ -70,7 +66,6 @@ class MainWindowTest(GUITest):
             def wait_for_timeout(self):
                 self.eventLoop.exec_()
 
-        w = self.window
         receiver = TimeoutReceiver()
         timer = receiver.startTimer(timeout_ms)
         receiver.wait_for_timeout()

@@ -301,8 +301,8 @@ class FieldEdit(QLineEdit):
             self.setModified(False)
             value = self.text()
             if (not self.multiple_values or
-                (self.multiple_values and _MULTIPLE_FIELD_VALUES != value)):
-                new = {self._field : value}
+                    (self.multiple_values and _MULTIPLE_FIELD_VALUES != value)):
+                new = {self._field: value}
                 for i in self.selected:
                     i.model().setData(i, new, MetadataRole)
             self.sync_background()
@@ -460,7 +460,7 @@ class FieldComboBox(QComboBox):
         debug_print('ChoicesWithDataFieldComboBox.update_model', self._field)
         if not self.is_multiple:
             # Update the selected items with the user's choice
-            new = {self._field : self._data_for_model()}
+            new = {self._field: self._data_for_model()}
             for i in self.selected:
                 i.model().setData(i, new, MetadataRole)
             self.sync_background()

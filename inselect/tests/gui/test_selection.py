@@ -1,9 +1,6 @@
 import unittest
 
-from mock import patch
 from pathlib import Path
-
-from PySide.QtGui import QMessageBox
 
 from gui_test import MainWindowTest
 
@@ -71,6 +68,5 @@ class TestSelection(MainWindowTest):
         self.assertEqual(0, sm.selectedIndexes()[0].row())
 
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

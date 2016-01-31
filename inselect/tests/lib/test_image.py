@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-from itertools import izip, repeat
+from itertools import repeat
 from mock import Mock
 from pathlib import Path
 
@@ -62,7 +62,7 @@ class TestImage(unittest.TestCase):
     def test_from_normalised(self):
         "Crops from normalised coordinates are as expected"
         i = InselectImage(TESTDATA / 'test_segment.png')
-        h,w = i.array.shape[:2]
+        h, w = i.array.shape[:2]
         boxes = [Rect(0, 0, 1, 1), Rect(0, 0.2, 0.1, 0.8)]
         self.assertEqual([Rect(0, 0, 459, 437), Rect(0, 87, 45, 349)],
                          list(i.from_normalised(boxes)))
@@ -97,7 +97,7 @@ class TestImage(unittest.TestCase):
             self.assertEqual(i.array.shape, crop.shape)
 
             # Crop should have the same pixels as the image
-            self.assertTrue(np.all(i.array==crop))
+            self.assertTrue(np.all(i.array == crop))
         finally:
             shutil.rmtree(temp)
 
@@ -117,7 +117,7 @@ class TestImage(unittest.TestCase):
 
             # Crop should have these pixels
             expected = i.array[87:218, 45:228]
-            self.assertTrue(np.all(expected==InselectImage(p).array))
+            self.assertTrue(np.all(expected == InselectImage(p).array))
         finally:
             shutil.rmtree(temp)
 
@@ -136,13 +136,13 @@ class TestImage(unittest.TestCase):
             self.assertEqual((131, 183, 3), crop.shape)
 
             # Non-intersecting regions should be all zeroes
-            self.assertTrue(np.all(0==crop[0:43, 0:45]))
-            self.assertTrue(np.all(0==crop[0:43,]))
-            self.assertTrue(np.all(0==crop[:,0:45]))
+            self.assertTrue(np.all(0 == crop[0:43, 0:45]))
+            self.assertTrue(np.all(0 == crop[0:43, ]))
+            self.assertTrue(np.all(0 == crop[:, 0:45]))
 
-            expected = i.array[0:88, 0:138,]
+            expected = i.array[0:88, 0:138, ]
 
-            self.assertTrue(np.all(expected == crop[43:, 45:,]))
+            self.assertTrue(np.all(expected == crop[43:, 45:, ]))
         finally:
             shutil.rmtree(temp)
 
@@ -241,15 +241,15 @@ class TestImage(unittest.TestCase):
 
     def test_size_bytes(self):
         i = InselectImage(TESTDATA / 'test_segment.png')
-        self.assertEqual( 24197, i.size_bytes)
+        self.assertEqual(24197, i.size_bytes)
 
         # Load the array and check again - different code path
         i.array
-        self.assertEqual( 24197, i.size_bytes)
+        self.assertEqual(24197, i.size_bytes)
 
     def test_dimensions(self):
         i = InselectImage(TESTDATA / 'test_segment.png')
-        self.assertEqual( (459, 437), i.dimensions)
+        self.assertEqual((459, 437), i.dimensions)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

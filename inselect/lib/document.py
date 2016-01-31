@@ -34,10 +34,10 @@ class InselectDocument(object):
     or load.
     """
 
-    FILE_VERSIONS = (1,2,)
+    FILE_VERSIONS = (1, 2,)
     EXTENSION = '.inselect'
 
-    THUMBNAIL_MIN_WIDTH =  1024
+    THUMBNAIL_MIN_WIDTH = 1024
     THUMBNAIL_MAX_WIDTH = 16384
     THUMBNAIL_DEFAULT_WIDTH = 4096
     THUMBNAIL_SUFFIX = '_thumbnail.jpg'
@@ -48,7 +48,6 @@ class InselectDocument(object):
     # Format for serializing datetime objects.
     # Conforms to http://www.ietf.org/rfc/rfc3339.txt
     DT_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-
 
     @classmethod
     def _format_datetime(cls, v):
@@ -152,8 +151,8 @@ class InselectDocument(object):
         # Returns items with tuples of boxes replaced with Rect instances and
         # metadata items with no values removed
         for i in xrange(0, len(items)):
-            l,t,w,h = items[i]['rect']
-            items[i]['rect'] = Rect(l,t,w,h)
+            l, t, w, h = items[i]['rect']
+            items[i]['rect'] = Rect(l, t, w, h)
 
             fields = items[i].get('fields', {})
             fields = {k: v for k, v in fields.iteritems() if '' != v}
@@ -176,7 +175,7 @@ class InselectDocument(object):
             doc = cls(scanned_path=scanned, items=[],
                       properties={'Created by': user_name(),
                                   'Created on': datetime.now(pytz.timezone("UTC")),
-                                 })
+                                  })
 
             if doc.document_path.is_file():
                 msg = u'Document file [{0}] already exists'
@@ -201,7 +200,7 @@ class InselectDocument(object):
 
             if not v:
                 raise InselectError('Not an inselect document')
-            elif not v in cls.FILE_VERSIONS:
+            elif v not in cls.FILE_VERSIONS:
                 raise InselectError('Unsupported version [{0}]'.format(v))
             else:
                 if 1 == v:
@@ -243,8 +242,7 @@ class InselectDocument(object):
             items[i]['rect'] = [l, t, w, h]
 
         self.properties.update({'Saved by': user_name(),
-                                'Saved on': datetime.now(pytz.timezone("UTC")),
-                               })
+                                'Saved on': datetime.now(pytz.timezone("UTC"))})
 
         properties = deepcopy(self.properties)
 
@@ -252,11 +250,12 @@ class InselectDocument(object):
         for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
             properties[dt] = self._format_datetime(properties[dt])
 
-        doc = { 'inselect version': self.FILE_VERSIONS[-1],
-                'scanned extension': self._scanned.path.suffix,
-                'items' : items,
-                'properties': properties,
-              }
+        doc = {
+            'inselect version': self.FILE_VERSIONS[-1],
+            'scanned extension': self._scanned.path.suffix,
+            'items': items,
+            'properties': properties,
+        }
 
         # Tips from SO about reading and writing utf-8 encoded files with sorted
         # keys

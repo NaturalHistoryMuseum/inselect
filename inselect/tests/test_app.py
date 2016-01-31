@@ -1,10 +1,8 @@
-import sys
 import unittest
 
 from mock import patch
 from pathlib import Path
 
-from PySide import QtGui
 from PySide.QtCore import QLocale
 from PySide.QtGui import QApplication
 
@@ -50,5 +48,5 @@ class TestApp(unittest.TestCase):
         mock_set_default.assert_called_once_with(locale)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

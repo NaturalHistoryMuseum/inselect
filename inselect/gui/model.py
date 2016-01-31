@@ -81,10 +81,11 @@ class Model(QAbstractItemModel):
                          rect[1]*image_height,
                          rect[2]*image_width,
                          rect[3]*image_height)
-            data[index] = {"fields": item.get('fields', {}),
-                           "rect": rect,
-                           "rotation": item.get('rotation', 0),
-                          }
+            data[index] = {
+                "fields": item.get('fields', {}),
+                "rect": rect,
+                "rotation": item.get('rotation', 0),
+            }
         return data
 
     def set_new_boxes(self, items):
@@ -132,13 +133,14 @@ class Model(QAbstractItemModel):
         for box in self._data:
             # TODO LH Better to use InselectImage to convert to normalised?
             rect = box['rect']
-            items.append({'rect': (rect.left()/w,
-                                   rect.top()/h,
-                                   rect.width()/w,
-                                   rect.height()/h),
-                          'fields': box['fields'],
-                          'rotation': box['rotation'],
-                        })
+            items.append({
+                'rect': (rect.left() / w,
+                         rect.top() / h,
+                         rect.width() / w,
+                         rect.height() / h),
+                'fields': box['fields'],
+                'rotation': box['rotation'],
+            })
         document.set_items(items)
 
     def flags(self, index):
@@ -181,8 +183,10 @@ class Model(QAbstractItemModel):
             item = self._data[index.row()]
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 template = user_template_choice().current
-                return self.DISPLAY_TEMPLATE.format(1 + index.row(),
-                    template.format_label(1 + index.row(), item['fields']))
+                return self.DISPLAY_TEMPLATE.format(
+                    1 + index.row(),
+                    template.format_label(1 + index.row(), item['fields'])
+                )
             elif Qt.WhatsThisRole == role:
                 return 'Cropped object image'
             elif RectRole == role:
@@ -215,7 +219,7 @@ class Model(QAbstractItemModel):
                     return True
         elif RotationRole == role:
             # A new rotation for index
-            if not isinstance(value, (int, long)) or 0 != value%90:
+            if not isinstance(value, (int, long)) or 0 != value % 90:
                 raise ValueError('Value is not an integer multiple of 90')
             else:
                 current = self._data[index.row()]['rotation']

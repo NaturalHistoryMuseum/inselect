@@ -2,7 +2,7 @@ import unittest
 
 from pathlib import Path
 
-from PySide.QtCore import Qt, QRect
+from PySide.QtCore import QRect
 
 from gui_test import GUITest
 
@@ -78,5 +78,5 @@ class TestModelData(GUITest):
         self.assertEqual(expected, m.data(m.index(0, 0), MetadataRole))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

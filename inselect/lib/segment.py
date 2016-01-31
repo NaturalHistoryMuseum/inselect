@@ -13,6 +13,7 @@ USE_OPENCV_WATERSHED = True
 
 SEGMENTATION_PREFERRED_WIDTH = 4096
 
+
 def segment_document(doc, resize=None, *args, **kwargs):
     """Returns doc with items replaced by the result of calling segment_edges().
     The caller is responsible for saving doc.
@@ -31,11 +32,11 @@ def segment_document(doc, resize=None, *args, **kwargs):
     if resize is None and width != SEGMENTATION_PREFERRED_WIDTH:
         # Resize, maintaining aspect ratio
         # segment_edges() expects a tuple (height, width)
-        factor  = float(SEGMENTATION_PREFERRED_WIDTH) / width
-        resize = (int(height * factor),SEGMENTATION_PREFERRED_WIDTH)
+        factor = float(SEGMENTATION_PREFERRED_WIDTH) / width
+        resize = (int(height * factor), SEGMENTATION_PREFERRED_WIDTH)
 
         msg = 'Resizing [{0}] from [{1}] to preferred size of [{2}]'
-        debug_print(msg.format(doc, (height,width), resize))
+        debug_print(msg.format(doc, (height, width), resize))
     else:
         # Images of the preferred size or larger do not need resizing
         debug_print('Image is of the preferred size or larger')
@@ -195,6 +196,7 @@ def remove_lines(image):
         if w > image.shape[1] / 4 and h < linewidth:
             cv2.drawContours(mask, [contour], -1, 255, -1)
     return mask
+
 
 # Values passed to segment_edges() before iss102 reorganisation
 # variance_threshold=100, resize=(5000, 5000), size_filter=1, line_filter=1

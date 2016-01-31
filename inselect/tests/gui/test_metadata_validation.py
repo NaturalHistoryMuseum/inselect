@@ -3,13 +3,11 @@ import unittest
 from mock import patch
 from pathlib import Path
 
-from PySide.QtCore import QSettings
 from PySide.QtGui import QMessageBox
 
 from gui_test import MainWindowTest
 
 from inselect.gui.roles import MetadataRole
-from inselect.gui.user_template_choice import user_template_choice
 from inselect.lib.user_template import UserTemplate
 
 
@@ -40,7 +38,7 @@ class TestMetadataValidation(MainWindowTest):
         # Should have been called
         self.assertEqual(1, mock_settext.call_count)
         self.assertIn('The document contains 15 validation problems',
-                       mock_settext.call_args[0][0])
+                      mock_settext.call_args[0][0])
 
         # Detailed text should not have been given
         self.assertEqual(1, mock_setdetailed.call_count)
@@ -57,10 +55,9 @@ class TestMetadataValidation(MainWindowTest):
 
         w.open_document(TESTDATA / 'test_segment.inselect')
 
-        template = UserTemplate(
-        {
+        template = UserTemplate({
             'Name': 'T1',
-            'Fields': [{'Name': 'F1'},],
+            'Fields': [{'Name': 'F1'}],
             'Cropped file suffix': '.jph',
             'Thumbnail width pixels': 5000,
             'Object label': '{catalogNumber}',
@@ -69,7 +66,7 @@ class TestMetadataValidation(MainWindowTest):
         # Set the catalogNumber for each box to the same value, creating a
         # single validation problem
         for index in (w.model.index(row, 0) for row in xrange(5)):
-            w.model.setData(index, {'catalogNumber' : '1234'}, MetadataRole)
+            w.model.setData(index, {'catalogNumber': '1234'}, MetadataRole)
 
         w.export_csv(user_template=template)
 
@@ -80,11 +77,11 @@ class TestMetadataValidation(MainWindowTest):
         # Should have been called
         self.assertEqual(1, mock_settext.call_count)
         self.assertIn('The document contains 1 validation problems',
-                       mock_settext.call_args[0][0])
+                      mock_settext.call_args[0][0])
 
         # Detailed text should not have been given
         self.assertEqual(0, mock_setdetailed.call_count)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

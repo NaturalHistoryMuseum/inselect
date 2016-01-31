@@ -2,6 +2,7 @@ from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print
 
+
 class SummaryView(QAbstractItemView):
     """View that provides a summary of the model
     """
@@ -40,7 +41,7 @@ class SummaryView(QAbstractItemView):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.setModel', model, model.rowCount(),
-              model.columnCount())
+                    model.columnCount())
         super(SummaryView, self).setModel(model)
 
     def dataChanged(self, topLeft, bottomRight):

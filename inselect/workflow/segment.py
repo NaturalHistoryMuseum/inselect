@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
 # TODO LH find a better solution
-import numpy
+import numpy    # noqa
 
 import inselect.lib.utils
 
@@ -38,6 +38,7 @@ def segment(dir):
                 print('Segmented [{0}]'.format(doc))
         else:
             print('Skipping [{0}] as it already contains items'.format(p))
+
 
 def main():
     parser = argparse.ArgumentParser(description='Segments Inselect documents')

@@ -23,10 +23,12 @@ def qimage_of_bgr(bgr):
     qt_image.bgr_array = bgr
     return qt_image
 
+
 def unite_rects(rects):
     """Returns united rect
     """
     return reduce(lambda x, y: x.united(y), rects)
+
 
 def contiguous(values):
     """yields tuples (value, count) of contiguous blocks of integers in values
@@ -39,11 +41,12 @@ def contiguous(values):
     (25, 4)
     """
     # Taken from http://stackoverflow.com/a/2361991
-    for k, g in groupby(enumerate(values), lambda (i, x):i-x):
+    for k, g in groupby(enumerate(values), lambda (i, x): i-x):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1
         yield lower, count
+
 
 @contextmanager
 def painter_state(painter):
@@ -55,6 +58,7 @@ def painter_state(painter):
     finally:
         painter.restore()
 
+
 def report_to_user(f):
     """Decorator that reports exceptions to the user
     """
@@ -65,9 +69,10 @@ def report_to_user(f):
         except Exception as e:
             parent = self if isinstance(self, QtGui.QWidget) else None
             QtGui.QMessageBox.critical(parent, u'An error occurred',
-                u'An error occurred:\n{0}'.format(e))
+                                       u'An error occurred:\n{0}'.format(e))
             raise
     return wrapper
+
 
 def relayout_widget(widget, new_layout):
     """Replaces widget's existing layout with new_layout

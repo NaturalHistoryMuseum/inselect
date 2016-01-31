@@ -35,8 +35,10 @@ class DocumentExport(object):
         "Saves images cropped from document.scanned to document.crops_dir"
         # TODO LH Test that cancel of export leaves existing crops dir.
         # Create temp dir alongside scan
-        tempdir = tempfile.mkdtemp(dir=str(document.scanned.path.parent),
-            prefix=document.scanned.path.stem + '_temp_crops')
+        tempdir = tempfile.mkdtemp(
+            dir=str(document.scanned.path.parent),
+            prefix=document.scanned.path.stem + '_temp_crops'
+        )
         tempdir = Path(tempdir)
         debug_print(u'Saving crops to to temp dir [{0}]'.format(tempdir))
 

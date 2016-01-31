@@ -3,6 +3,7 @@ from PySide.QtCore import Qt, QRectF
 
 from inselect.lib.utils import debug_print
 
+
 class ResizeHandle(QGraphicsItem):
     """A resize handle
     """

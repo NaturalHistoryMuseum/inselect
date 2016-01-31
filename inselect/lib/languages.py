@@ -1,4 +1,4 @@
-# Mapping from two-letter language codes to international English names, 
+# Mapping from two-letter language codes to international English names,
 # taken from CLDR (Unicode Common Locale Data Repository) 26.0.1 json files,
 LANGUAGES = {u'aa': u'Afar',
              u'ab': u'Abkhazian',
@@ -184,4 +184,3 @@ LANGUAGES = {u'aa': u'Afar',
              u'za': u'Zhuang',
              u'zh': u'Chinese',
              u'zu': u'Zulu'}
-
