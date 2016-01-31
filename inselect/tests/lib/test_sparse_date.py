@@ -131,8 +131,6 @@ class TestSparseDate(unittest.TestCase):
             a == ''
         with self.assertRaises(NotImplementedError):
             a == 1
-        with self.assertRaises(NotImplementedError):
-            a is None
 
     def test_range(self):
         self.assertEqual(SparseDate(2012, 1, 1), SparseDate(2012, None, None).earliest())
