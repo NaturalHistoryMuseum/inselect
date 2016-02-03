@@ -17,10 +17,10 @@ https://github.com/NaturalHistoryMuseum/zbar-python-patched/archive/v0.10.tar.gz
 coveralls>=0.4.1
 mock>=1.0.1
 nose>=1.3.4
-pyinstaller>=3.0 ; sys_platform == 'darwin'
+pyinstaller==3.1.1 ; sys_platform == 'darwin'
 
 # cx_Freeze 4.3.2 introduced a bug that prevents python win32com wrappers
 # generated using makepy.py from being frozen.
 # https://bitbucket.org/anthony_tuininga/cx_freeze/issue/44/win32com-relies-on-modules-with-non
-# This bug has been fixed but not yet released.
+# This bug has been fixed but the fix has not yet been released.
 https://bitbucket.org/anthony_tuininga/cx_freeze/get/aebc9c32615c.zip ; sys_platform == 'win32'

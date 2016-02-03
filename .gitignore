@@ -8,7 +8,8 @@ dist/
 htmlcov
 cover
 MANIFEST
-*.spec
+*spec
+!inselect.spec
 *tar.gz
 *dmg
 .directory

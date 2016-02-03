@@ -17,13 +17,22 @@ wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -O /t
 bash /tmp/Miniconda-latest-MacOSX-x86_64.sh -b -p $HOME/miniconda
 rm /tmp/Miniconda-latest-MacOSX-x86_64.sh
 
-export PATH=$PATH:~/miniconda/bin
+export PATH=~/miniconda/bin:$PATH
 conda update --yes conda
 ```
 
 # Inselect env
+
 ```
 conda create --yes --name inselect pillow pyside
+source activate inselect
+```
+
+# Dependencies
+
+```
+cd ~/projects/inselect
+pip install -r requirements.txt
 ```
 
 # OpenCV
@@ -33,11 +42,12 @@ conda create --yes --name inselect pillow pyside
 conda install --yes -c https://conda.binstar.org/jjhelmus opencv
 ```
 
-# Dependencies
+# setuptools
+A [bug in PyInstaller 3.1.1](https://github.com/pyinstaller/pyinstaller/issues/1773)
+means that we need to use setupools 19.2:
 
 ```
-cd ~/projects/inselect
-pip install -r requirements.txt
+conda install setuptools=19.2
 ```
 
 ## LibDMTX barcode reading library
@@ -89,13 +99,14 @@ should have been installed.
 
 ```
 python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
-python -c "from gouda.engines import InliteEngine; print(InliteEngine.available())"
+python -c "from gouda.engines import LibDMTXEngine; print(LibDMTXEngine.available())"
 ```
 
 ## Build
 
 ```
-build.sh
+cd ~/projects/inselect
+./build.sh
 ```
 
 Installer will be in `dist`.
