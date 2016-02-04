@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Post-process
 """
+from __future__ import print_function
+
 import argparse
 import traceback
 
@@ -20,10 +22,11 @@ from inselect.lib.inselect_error import InselectError
 
 try:
     import gouda
-    from gouda.strategies.roi.roi import roi
-    from gouda.strategies.resize import resize
+
     from gouda.engines import (AccusoftEngine, InliteEngine, LibDMTXEngine,
                                SoftekEngine)
+    from gouda.strategies.resize import resize
+    from gouda.strategies.roi.roi import roi
 except ImportError:
     gouda = None
 

@@ -25,7 +25,7 @@ class TestExportCSV(MainWindowTest):
 
         # Check CSV contents
         with csv.open('rb') as f:
-            res = w = unicodecsv.DictReader(f, encoding='utf-8')
+            res = unicodecsv.DictReader(f, encoding='utf-8')
             for index, item, row in izip(count(), doc.items, res):
                 expected = item['fields']
                 expected.update({

@@ -633,6 +633,7 @@ class MainWindow(QtGui.QMainWindow):
                                   self)
             worker.completed.connect(self.worker_finished)
 
+            # TODO Make this a namedtuple
             self.running_operation = (operation, name, complete_fn, worker)
             worker.start()
 

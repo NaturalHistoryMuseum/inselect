@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Ingests scanned images
 """
+from __future__ import print_function
 
 import argparse
 import traceback

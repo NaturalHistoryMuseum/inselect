@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Segment documents
 """
+from __future__ import print_function
+
 import argparse
 import traceback
 

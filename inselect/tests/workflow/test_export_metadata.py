@@ -1,5 +1,4 @@
 import unittest
-import shutil
 
 from itertools import izip, count
 from pathlib import Path

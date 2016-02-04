@@ -7,8 +7,7 @@ import yaml
 from schematics.exceptions import ValidationError
 from schematics.models import Model
 from schematics.types import StringType, DecimalType, BooleanType, URLType
-from schematics.types.compound import (ListType, DictType, ModelType, MultiType,
-                                       BaseType)
+from schematics.types.compound import (ListType, ModelType, MultiType, BaseType)
 
 from inselect.lib import parse
 from inselect.lib.document import InselectDocument
@@ -228,7 +227,7 @@ def _extract_validation_error(e, prompt=None):
             else:
                 messages.append(field, field_messages)
     else:
-        message = e.messages
+        messages = e.messages
 
     if prompt:
         return [msg.format(prompt, m) for m in messages]

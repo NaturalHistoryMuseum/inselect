@@ -2,8 +2,6 @@ import unittest
 
 from pathlib import Path
 
-from PySide import QtGui
-
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.views.metadata import FieldEdit, FieldComboBox
 

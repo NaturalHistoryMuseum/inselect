@@ -80,7 +80,6 @@ class InselectImage(object):
             rotation = repeat(rotation)
 
         h, w = self.array.shape[:2]
-        last_rotation = None
         for box, rotate in izip(self.from_normalised(normalised), rotation):
             x0, y0, x1, y1 = box.coordinates
             x_in_bounds = [0 <= x0 <= w, 0 <= x1 <= w]
