@@ -26,6 +26,7 @@ follows:
 ```
 conda update --yes conda
 conda create --yes --name inselect pillow pyside pywin32 numpy
+activate inselect
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements.win64
@@ -49,6 +50,7 @@ FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\
 
 ### Inlite barcode reading library
 Download and install the [Inlite ClearImage SDK](http://www.inliteresearch.com/).
+Run the 'Inlite Control Center' application to get an evaluation key.
 
 ## Test barcode reading libraries
 
@@ -91,6 +93,7 @@ follows:
 ```
 conda update --yes conda
 conda create --yes --name inselect pillow pyside pywin32 numpy
+activate inselect
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements.win64
@@ -114,7 +117,8 @@ FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\
 
 ### Inlite barcode reading library
 If you have not already done so for the 64-bit environment, download and install
-the [Inlite ClearImage SDK](http://www.inliteresearch.com/).
+the [Inlite ClearImage SDK](http://www.inliteresearch.com/) and run the
+'Inlite Control Center' application to get an evaluation key.
 
 ## Test barcode reading libraries
 

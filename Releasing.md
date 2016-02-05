@@ -26,37 +26,17 @@ git pull
 ./build.sh
 ```
 
-* Build the Windows 64-bit Installer; start an Anaconda64 prompt:
+* Build the Windows 64-bit Installer; start a Miniconda64 prompt:
 
 ```
 cd c:\Users\<you Windows username>\projects\inselect
+git pull
 build.bat
 ```
 
 * Archive `dist\inselect-0.1.18-amd64.msi`
 
-* A [bug with `cx_Freeze`](https://github.com/NaturalHistoryMuseum/inselect/issues/130)
-  means that we must maintain a patched `library.zip` for
-  each Windows build, to be made available to any users who use the Inlight
-  ClearImage barcode reading SDK.
-
-    * Open `build\exe.win-amd64-2.7\library.zip` in Explorer
-
-    * Navigate to `win32com\gen_py`
-
-    * Open `C:\Users\Lawrence\Anaconda64\Lib\site-packages\win32com\gen_py` in
-      explorer
-
-    * Copy `F2BCF178-0B27-11D4-B5F5-9CC767000000x0x1x0` and `dicts.dat` to
-    `library.zip\win32com\gen_py`
-
-    * Close `build\exe.win-amd64-2.7\library.zip`
-
-    * Archive `build\exe.win-amd64-2.7\library.zip` alongside the installer, in
-      a folder called `Issue130Fix-64`
-
-
-* Build the Windows 32-bit Installer; start an Anaconda32 prompt:
+* Build the Windows 32-bit Installer; start an Miniconda32 prompt:
 
 ```
 cd c:\Users\<you Windows username>\projects\inselect
@@ -65,26 +45,6 @@ build.bat
 ```
 
 * Archive `dist\inselect-0.1.18-win32.msi`
-
-* A [bug with `cx_Freeze`](https://github.com/NaturalHistoryMuseum/inselect/issues/130)
-  means that we must maintain a patched `library.zip` for
-  each Windows build, to be made available to any users who use the Inlight
-  ClearImage barcode reading SDK.
-
-    * Open `build\exe.win32-2.7\library.zip` in Explorer
-
-    * Navigate to `win32com\gen_py`
-
-    * Open `C:\Users\Lawrence\Anaconda32\Lib\site-packages\win32com\gen_py` in
-      explorer
-
-    * Copy `F2BCF178-0B27-11D4-B5F5-9CC767000000x0x1x0` and `dicts.dat` to
-    `library.zip\win32com\gen_py`
-
-    * Close `build\exe.win32-2.7\library.zip`
-
-    * Archive `build\exe.win32-2.7\library.zip` alongside the installer, in
-      a folder called `Issue130Fix-32`
 
 * Tag
 
