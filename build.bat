@@ -4,7 +4,6 @@ echo Building Inselect
 
 echo Clean
 del /S *pyc
-del *spec
 rmdir /Q /S dist build 
 
 echo Tests
