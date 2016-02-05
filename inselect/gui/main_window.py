@@ -1,18 +1,16 @@
-import cv2
 import sys
 
 from functools import partial
 from itertools import count, izip
 from pathlib import Path
 
-import numpy as np
-
 from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
 from PySide.QtGui import (QMenu, QAction, QMessageBox, QDesktopServices,
                           QVBoxLayout, QWidget)
 
-import inselect.gui.icons        # Register our icon resources with QT
+# This import is to register our icon resources with QT
+import inselect.gui.icons  # noqa
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
@@ -43,8 +41,9 @@ class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
     DOCUMENT_FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
-           InselectDocument.EXTENSION,
-           u' '.join(IMAGE_PATTERNS))
+        InselectDocument.EXTENSION,
+        u' '.join(IMAGE_PATTERNS)
+    )
 
     IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
 
@@ -171,8 +170,10 @@ class MainWindow(QtGui.QMainWindow):
         debug_print(u'MainWindow.open_file [{0}]'.format(path))
 
         if not path:
-            folder = QSettings().value('working_directory',
-                QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
+            folder = QSettings().value(
+                'working_directory',
+                QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+            )
 
             path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
                 self, "Open", folder, self.DOCUMENT_FILE_FILTER)
@@ -225,6 +226,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             # Callable for worker thread
             thumbnail_width = user_template_choice().current.thumbnail_width_pixels
+
             class NewDoc(object):
                 def __init__(self, image, default_metadata_items):
                     self.image = image
@@ -345,7 +347,7 @@ class MainWindow(QtGui.QMainWindow):
                    '\n'
                    '{problems}\n'
                    '\n'
-               '{question}')
+                   '{question}')
             box.setDetailedText('\n'.join(problems))
         else:
             msg = ('The document contains {n_problems} validation problems:\n'
@@ -380,7 +382,7 @@ class MainWindow(QtGui.QMainWindow):
         if crops_dir.is_dir():
             msg = 'Overwrite the existing object images?'
             res = QMessageBox.question(self, 'Save object images?',
-                msg, QMessageBox.No, QMessageBox.Yes)
+                                       msg, QMessageBox.No, QMessageBox.Yes)
 
         validation = export.validation_problems(self.document)
         if QMessageBox.Yes == res and validation and validation.any_problems:
@@ -422,7 +424,7 @@ class MainWindow(QtGui.QMainWindow):
         if existing_csv:
             msg = 'Overwrite the existing CSV file?'
             res = QMessageBox.question(self, 'Export CSV file?',
-                msg, QMessageBox.No, QMessageBox.Yes)
+                                       msg, QMessageBox.No, QMessageBox.Yes)
 
         validation = export.validation_problems(self.document)
         if QMessageBox.Yes == res and validation and validation.any_problems:
@@ -482,9 +484,10 @@ class MainWindow(QtGui.QMainWindow):
         debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
         debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
         path, selected_filter = QtGui.QFileDialog.getSaveFileName(
-                self, "Save image file of boxes view",
-                unicode(Path(default_dir) / default_fname),
-                filter=filter)
+            self, "Save image file of boxes view",
+            unicode(Path(default_dir) / default_fname),
+            filter=filter
+        )
 
         if path:
             pm = QtGui.QPixmap.grabWidget(self)
@@ -515,9 +518,9 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.close_document', document_to_open)
         # Must make sure that files exist before calling resolve
-        if (self.document_path and self.document_path.is_file() and 
-            document_to_open and document_to_open.is_file() and
-            self.document_path.resolve() == document_to_open.resolve()):
+        if (self.document_path and self.document_path.is_file() and
+                document_to_open and document_to_open.is_file() and
+                self.document_path.resolve() == document_to_open.resolve()):
             if self.model.is_modified:
                 # Ask the user if they work like to revert
                 msg = (u'The document [{0}] is already open and has been '
@@ -526,7 +529,7 @@ class MainWindow(QtGui.QMainWindow):
                 msg = msg.format(self.document_path.stem)
                 res = QMessageBox.question(self, u'Discard changes?', msg,
                                            (QMessageBox.Yes | QMessageBox.No),
-                                            QMessageBox.No)
+                                           QMessageBox.No)
                 close = QMessageBox.Yes == res
             else:
                 # Let the user know that the document is already open and
@@ -538,11 +541,12 @@ class MainWindow(QtGui.QMainWindow):
                 close = False
         elif self.model.is_modified:
             # Ask the user if they work like to save before closing
-            res = QMessageBox.question(self, 'Save document?',
+            res = QMessageBox.question(
+                self, 'Save document?',
                 'Save the document before closing?',
-                (QMessageBox.Yes | QMessageBox.No |
-                 QMessageBox.Cancel),
-                QMessageBox.Yes)
+                (QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel),
+                QMessageBox.Yes
+            )
 
             if QMessageBox.Yes == res:
                 self.save_document()
@@ -629,6 +633,7 @@ class MainWindow(QtGui.QMainWindow):
                                   self)
             worker.completed.connect(self.worker_finished)
 
+            # TODO Make this a namedtuple
             self.running_operation = (operation, name, complete_fn, worker)
             worker.start()
 
@@ -644,9 +649,11 @@ class MainWindow(QtGui.QMainWindow):
             QMessageBox.information(self, 'Cancelled',
                                     "'{0} cancelled'".format(name))
         elif error_message:
-            QMessageBox.information(self,
-                    "An error occurred running '{0}'".format(name),
-                    error_message + '\n\nExisting data has not been altered')
+            QMessageBox.information(
+                self,
+                "An error occurred running '{0}'".format(name),
+                error_message + '\n\nExisting data has not been altered'
+            )
         else:
             if complete_fn:
                 complete_fn(operation)
@@ -679,7 +686,7 @@ class MainWindow(QtGui.QMainWindow):
         debug_print("MainWindow.show_plugin_config")
 
         if (plugin_number < 0 or plugin_number > len(self.plugins) or
-            self.plugin_config_ui_actions[plugin_number] is None):
+                self.plugin_config_ui_actions[plugin_number] is None):
             raise ValueError('Unexpected plugin [{0}]'.format(plugin_number))
         else:
             self.plugins[plugin_number].config(self)
@@ -725,8 +732,8 @@ class MainWindow(QtGui.QMainWindow):
         # Remove blocks in reverse order so that row indices are not invalidated
         # TODO LH We shouldn't need to remove blocks in reverse order - stems
         # from crummy GraphicsItemView
-        for row, count in reversed(list(contiguous(selected))):
-            self.model.removeRows(row, count)
+        for first, n_rows in reversed(list(contiguous(selected))):
+            self.model.removeRows(first, n_rows)
 
         # Prevent object view from scrolling to the top of the view. The natural
         # place to do this is within ObjectView but I was unable to get that
@@ -773,7 +780,7 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def toggle_plugin_image(self):
-        """Action method to switch between display of the last plugin's 
+        """Action method to switch between display of the last plugin's
         information image (if any) and the actual image.
         """
         self.plugin_image_visible = not self.plugin_image_visible
@@ -781,51 +788,81 @@ class MainWindow(QtGui.QMainWindow):
 
     def create_actions(self):
         # File menu
-        self.open_action = QAction("&Open...", self,
+        self.open_action = QAction(
+            "&Open...", self,
             shortcut=QtGui.QKeySequence.Open, triggered=self.open_file,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton))
-        self.copy_to_new_document_action = QAction("Copy to new document", self,
-            triggered=self.copy_to_new_document)
-        self.save_action = QAction("&Save", self,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton)
+        )
+        self.copy_to_new_document_action = QAction(
+            "Copy to new document", self,
+            triggered=self.copy_to_new_document
+        )
+        self.save_action = QAction(
+            "&Save", self,
             shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton))
-        self.save_crops_action = QAction("&Save crops", self,
-            triggered=self.save_crops)
-        self.export_csv_action = QAction("&Export CSV", self,
-            triggered=self.export_csv)
-        self.save_screengrab_action = QAction("Save screen grab", self,
-            triggered=self.save_screengrab)
-        self.close_action = QAction("&Close", self,
-            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document)
-        self.exit_action = QAction("E&xit", self,
-            shortcut=QtGui.QKeySequence.Quit, triggered=self.close)
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogSaveButton)
+        )
+        self.save_crops_action = QAction(
+            "&Save crops", self,
+            triggered=self.save_crops
+        )
+        self.export_csv_action = QAction(
+            "&Export CSV", self,
+            triggered=self.export_csv
+        )
+        self.save_screengrab_action = QAction(
+            "Save screen grab", self,
+            triggered=self.save_screengrab
+        )
+        self.close_action = QAction(
+            "&Close", self,
+            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document
+        )
+        self.exit_action = QAction(
+            "E&xit", self,
+            shortcut=QtGui.QKeySequence.Quit, triggered=self.close
+        )
 
         if 'win32' == sys.platform:
             # Support ctrl+w and ctrl+q on Windows
             self.close_action.setShortcuts(['ctrl+w',
                                             self.close_action.shortcut()])
             self.exit_action.setShortcuts(['ctrl+q',
-                                            self.exit_action.shortcut()])
+                                           self.exit_action.shortcut()])
 
         self.recent_doc_actions = [None] * RecentDocuments.MAX_RECENT_DOCS
         for index in xrange(RecentDocuments.MAX_RECENT_DOCS):
-            self.recent_doc_actions[index] = QAction('Recent document', self,
-                triggered=partial(self.open_recent, index))
+            self.recent_doc_actions[index] = QAction(
+                'Recent document', self,
+                triggered=partial(self.open_recent, index)
+            )
         self._sync_recent_documents_actions()
 
         # Edit menu
-        self.select_all_action = QAction("Select &All", self,
-            shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all)
+        self.select_all_action = QAction(
+            "Select &All", self,
+            shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all
+        )
         # QT does not provide a 'select none' key sequence
-        self.select_none_action = QAction("Select &None", self,
-            shortcut="ctrl+D", triggered=self.select_none)
-        self.next_box_action = QAction("Next box", self,
-            shortcut="ctrl+N", triggered=partial(self.select_next_prev, next=True))
-        self.previous_box_action = QAction("Previous box", self,
-            shortcut="ctrl+P", triggered=partial(self.select_next_prev, next=False))
+        self.select_none_action = QAction(
+            "Select &None", self,
+            shortcut="ctrl+D", triggered=self.select_none
+        )
+        self.next_box_action = QAction(
+            "Next box", self, shortcut="ctrl+N",
+            triggered=partial(self.select_next_prev, next=True)
+        )
+        self.previous_box_action = QAction(
+            "Previous box", self,
+            shortcut="ctrl+P",
+            triggered=partial(self.select_next_prev, next=False)
+        )
 
-        self.delete_action = QAction("&Delete selected", self,
-            shortcut=QtGui.QKeySequence.Delete, triggered=self.delete_selected)
+        self.delete_action = QAction(
+            "&Delete selected", self,
+            shortcut=QtGui.QKeySequence.Delete,
+            triggered=self.delete_selected
+        )
         # CMD + backspace is the Mac OS X shortcut for delete. Some Mac
         # keyboards have a Delete key, so this standard shortcut is also
         # included.
@@ -834,16 +871,20 @@ class MainWindow(QtGui.QMainWindow):
                                              self.delete_action.shortcut()])
 
         self.rotate_clockwise_action = QAction(
-            "Rotate clockwise", self,
-            shortcut="ctrl+R", triggered=partial(self.rotate90, clockwise=True))
+            "Rotate clockwise", self, shortcut="ctrl+R",
+            triggered=partial(self.rotate90, clockwise=True)
+        )
         self.rotate_counter_clockwise_action = QAction(
             "Rotate counter-clockwise", self, shortcut="ctrl+L",
-            triggered=partial(self.rotate90, clockwise=False))
+            triggered=partial(self.rotate90, clockwise=False)
+        )
 
-        self.default_user_template_action = QAction("Default template",
-            self, triggered=self.default_user_template)
-        self.choose_user_template_action = QAction("Choose template",
-            self, triggered=self.choose_user_template)
+        self.default_user_template_action = QAction(
+            "Default template", self, triggered=self.default_user_template
+        )
+        self.choose_user_template_action = QAction(
+            "Choose template", self, triggered=self.choose_user_template
+        )
 
         # Plugins
         # Plugin shortcuts start at F5
@@ -859,8 +900,10 @@ class MainWindow(QtGui.QMainWindow):
                 action.setIcon(plugin.icon())
             self.plugin_actions[index] = action
             if hasattr(plugin, 'config'):
-                ui_action = QAction(u"Configure '{0}'".format(plugin.NAME), self,
-                              triggered=partial(self.show_plugin_config, index))
+                ui_action = QAction(
+                    u"Configure '{0}'".format(plugin.NAME), self,
+                    triggered=partial(self.show_plugin_config, index)
+                )
                 # Force menu items to appear on Mac
                 ui_action.setMenuRole(QAction.NoRole)
                 self.plugin_config_ui_actions[index] = ui_action
@@ -869,10 +912,14 @@ class MainWindow(QtGui.QMainWindow):
         # The obvious approach is to set the trigger to
         # partial(self.tabs.setCurrentIndex, 0) but this causes a segfault when
         # the application exits on linux.
-        self.boxes_view_action = QAction("&Boxes", self, checkable=True,
-            triggered=partial(self.show_tab, 0), shortcut='ctrl+B')
-        self.metadata_view_action = QAction("Ob&jects", self, checkable=True,
-            triggered=partial(self.show_tab, 1), shortcut='ctrl+j')
+        self.boxes_view_action = QAction(
+            "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
+            shortcut='ctrl+B'
+        )
+        self.metadata_view_action = QAction(
+            "Ob&jects", self, checkable=True,
+            triggered=partial(self.show_tab, 1), shortcut='ctrl+j'
+        )
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
@@ -883,31 +930,44 @@ class MainWindow(QtGui.QMainWindow):
                 KeySequenceFullScreen = 'f11'
         else:
             KeySequenceFullScreen = QtGui.QKeySequence.FullScreen
-        self.full_screen_action = QAction("&Full screen", self,
-            shortcut=KeySequenceFullScreen, triggered=self.toggle_full_screen)
+        self.full_screen_action = QAction(
+            "&Full screen", self, shortcut=KeySequenceFullScreen,
+            triggered=self.toggle_full_screen
+        )
 
-        self.zoom_in_action = QAction("Zoom &In", self,
-            shortcut=QtGui.QKeySequence.ZoomIn, triggered=self.zoom_in,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowUp))
-        self.zoom_out_action = QAction("Zoom &Out", self,
-            shortcut=QtGui.QKeySequence.ZoomOut, triggered=self.zoom_out,
-            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown))
-        self.toogle_zoom_action = QAction("&Toogle Zoom", self,
-            shortcut='Z', triggered=self.toggle_zoom)
-        self.zoom_home_action = QAction("Fit To Window", self,
+        self.zoom_in_action = QAction(
+            "Zoom &In", self, shortcut=QtGui.QKeySequence.ZoomIn,
+            triggered=self.zoom_in,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowUp)
+        )
+        self.zoom_out_action = QAction(
+            "Zoom &Out", self, shortcut=QtGui.QKeySequence.ZoomOut,
+            triggered=self.zoom_out,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown)
+        )
+        self.toogle_zoom_action = QAction(
+            "&Toogle Zoom", self, shortcut='Z', triggered=self.toggle_zoom
+        )
+        self.zoom_home_action = QAction(
+            "Fit To Window", self,
             shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
-            triggered=self.zoom_home)
+            triggered=self.zoom_home
+        )
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the 'toggle plugin image' action?
         self.toggle_plugin_image_action = QAction(
             "&Display plugin image", self, shortcut="f3",
             triggered=self.toggle_plugin_image,
-            statusTip="Display plugin image", checkable=True)
+            statusTip="Display plugin image", checkable=True
+        )
 
-        self.show_object_grid_action = QAction('Show grid', self,
-            shortcut='ctrl+G', triggered=self.show_grid)
-        self.show_object_expanded_action = QAction('Show expanded', self,
-            shortcut='ctrl+E', triggered=self.show_expanded)
+        self.show_object_grid_action = QAction(
+            'Show grid', self, shortcut='ctrl+G', triggered=self.show_grid
+        )
+        self.show_object_expanded_action = QAction(
+            'Show expanded', self,
+            shortcut='ctrl+E', triggered=self.show_expanded
+        )
 
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
@@ -1023,8 +1083,10 @@ class MainWindow(QtGui.QMainWindow):
         "Shows a 'choose template' file dialog"
         debug_print('MetadataView._choose_template_clicked')
 
-        folder = QSettings().value('user_template_last_directory',
-                QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
+        folder = QSettings().value(
+            'user_template_last_directory',
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        )
 
         path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
             self, "Choose template", folder, self.TEMPLATE_FILE_FILTER)
@@ -1043,8 +1105,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MetadataView.copy_to_new_document')
 
-        folder = QSettings().value('working_directory',
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation))
+        folder = QSettings().value(
+            'working_directory',
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        )
 
         path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
             self, "Open", folder, self.IMAGE_FILE_FILTER)
@@ -1122,10 +1186,10 @@ class MainWindow(QtGui.QMainWindow):
         """Synchronise the user interface with the application state
         """
         document = self.document is not None
-        has_rows = self.model.rowCount()>0 if self.model else False
+        has_rows = self.model.rowCount() > 0 if self.model else False
         boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
         objects_view_visible = self.view_object == self.tabs.currentWidget()
-        has_selection = len(self.view_object.selectedIndexes())>0
+        has_selection = len(self.view_object.selectedIndexes()) > 0
 
         # File
         self.copy_to_new_document_action.setEnabled(document)

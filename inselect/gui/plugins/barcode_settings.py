@@ -1,5 +1,6 @@
 from PySide.QtCore import QSettings
 
+from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
 try:
@@ -15,13 +16,16 @@ def inlite_available():
     "Returns True if the Inlite engine is available"
     return InliteEngine is not None and InliteEngine.available()
 
+
 def libdmtx_available():
     "Returns True if the libdmtx engine is available"
     return LibDMTXEngine is not None and LibDMTXEngine.available()
 
+
 def zbar_available():
     "Returns True if the zbar engine is available"
     return ZbarEngine is not None and ZbarEngine.available()
+
 
 def current_settings():
     """Returns a dict of the current settings:
@@ -31,9 +35,11 @@ def current_settings():
     }
     """
     s = QSettings()
-    return {'engine': s.value('barcode/engine', 'libdmtx'),
-            'inlite-format': s.value('barcode/inlite-format', 'datamatrix')
-           }
+    return {
+        'engine': s.value('barcode/engine', 'libdmtx'),
+        'inlite-format': s.value('barcode/inlite-format', 'datamatrix')
+    }
+
 
 def update_settings(new_settings):
     """Updates settings. new_settings should be a dict:
@@ -46,6 +52,7 @@ def update_settings(new_settings):
     s = QSettings()
     s.setValue('barcode/engine', new_settings['engine'])
     s.setValue('barcode/inlite-format', new_settings['inlite-format'])
+
 
 def load_engine():
     """Returns an instance of the user's choice of barcode reading engine

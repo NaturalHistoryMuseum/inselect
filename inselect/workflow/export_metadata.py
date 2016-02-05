@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Exports metadata
 """
+from __future__ import print_function
 
 import argparse
 import traceback
@@ -9,7 +10,7 @@ from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
 # TODO LH find a better solution
-import numpy
+import numpy    # noqa
 
 import inselect
 import inselect.lib.utils
@@ -46,7 +47,7 @@ def main():
     parser = argparse.ArgumentParser(description='Exports metadata from Inselect documents')
     parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('-o', '--overwrite', action='store_true',
-        help='Overwrite existing metadata files')
+                        help='Overwrite existing metadata files')
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)

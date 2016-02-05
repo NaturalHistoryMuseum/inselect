@@ -12,6 +12,7 @@ class BoldLabel(QLabel):
     """
     pass
 
+
 class InfoWidget(QGroupBox):
     """Shows information about the document and the scanned image
     """
@@ -83,7 +84,7 @@ class InfoWidget(QGroupBox):
 
         self.setLayout(vlayout)
 
-        #self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        # self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
     def set_document(self, document):
         """Updates controls to reflect the document. Clears controls if

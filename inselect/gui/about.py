@@ -1,12 +1,10 @@
 """About box
 """
 import platform
-import sys
 
 import cv2
 import humanize
 import numpy as np
-import platform
 import psutil
 import PySide
 import PySide.QtCore
@@ -28,15 +26,17 @@ def _environment():
     else:
         python_bit_depth = ''
 
-    versions = [('Machine', _machine_summary()),
-                ('Python', '{0} ({1})'.format(platform.python_version(), python_bit_depth)),
-                ('Numpy', np.version.version),
-                ('OpenCV', cv2.__version__),
-                ('PySide', PySide.__version__),
-                ('Qt', PySide.QtCore.__version__),  # Version compiled against
-               ]
+    versions = [
+        ('Machine', _machine_summary()),
+        ('Python', '{0} ({1})'.format(platform.python_version(), python_bit_depth)),
+        ('Numpy', np.version.version),
+        ('OpenCV', cv2.__version__),
+        ('PySide', PySide.__version__),
+        ('Qt', PySide.QtCore.__version__),  # Version compiled against
+    ]
 
     return '\n'.join(['<p>{0}: {1}</p>'.format(i, v) for i, v in versions])
+
 
 def _machine_summary():
     """Returns a formatted string containing summary information about the
@@ -64,6 +64,7 @@ def _machine_summary():
     ram = humanize.filesize.naturalsize(psutil.virtual_memory().total, binary=True)
 
     return '{os}, {ram} RAM'.format(os=os, ram=ram)
+
 
 def show_about_box(parent=None):
     """Shows a model about box
@@ -108,7 +109,6 @@ def show_about_box(parent=None):
     # TODO LH Button to copy to clipboard
     text = text.format(application=QtGui.qApp.applicationName(),
                        version=QtGui.qApp.applicationVersion(),
-                       environment=_environment(),
-                      )
+                       environment=_environment())
     QMessageBox.about(parent, 'About {0}'.format(QtGui.qApp.applicationName()),
                       text)

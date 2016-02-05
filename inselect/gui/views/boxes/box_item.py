@@ -202,7 +202,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         current = self.sceneBoundingRect()
         current = QRect(current.left(), current.top(),
                         current.width(), current.height())
-        if current!=new_rect:
+        if current != new_rect:
             msg = 'Update rect for [{0}] from [{1}] to [{2}]'
             debug_print(msg.format(self, current, new_rect))
             self.prepareGeometryChange()
@@ -235,13 +235,13 @@ class BoxItem(QtGui.QGraphicsRectItem):
             # Newly created items have zero width and height
             pass
         self.setZValue(z)
- 
+
     def adjust_rect(self, dx1, dy1, dx2, dy2):
         """Adjusts rect
         """
         r = self.rect()
         r.adjust(dx1, dy1, dx2, dy2)
-        if r.width()>1.0 and r.height()>1.0:
+        if r.width() > 1.0 and r.height() > 1.0:
             self.prepareGeometryChange()
             self.setRect(r)
 

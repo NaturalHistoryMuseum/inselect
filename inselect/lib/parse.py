@@ -43,17 +43,20 @@ _DEGREES_RE = re.compile(
     ur'\s*$', flags=re.UNICODE
 )
 
+
 def parse_int(value):
     """Returns value converted to an int. Raises a ValueError if value cannot
     be converted to an int.
     """
     return int(value)
 
+
 def parse_float(value):
     """Returns value converted to a float. Raises a ValueError if value cannot
     be converted to a float.
     """
     return float(value)
+
 
 def parse_int_gt0(value):
     """Returns value converted to an int. Raises a ValueError if value cannot
@@ -65,6 +68,7 @@ def parse_int_gt0(value):
         raise ValueError(msg.format(value))
     else:
         return value
+
 
 def parse_int_ge0(value):
     """Returns value converted to an int. Raises a ValueError if value cannot
@@ -78,6 +82,7 @@ def parse_int_ge0(value):
     else:
         return value
 
+
 def parse_float_gt0(value):
     """Returns value converted to a float. Raises a ValueError if value cannot
     be converted to a float that is greater than zero.
@@ -88,6 +93,7 @@ def parse_float_gt0(value):
         raise ValueError(msg.format(value))
     else:
         return value
+
 
 def parse_float_ge0(value):
     """Returns value converted to a float. Raises a ValueError if value cannot
@@ -100,6 +106,7 @@ def parse_float_ge0(value):
         raise ValueError(msg.format(value))
     else:
         return value
+
 
 def parse_sparse_date(value):
     """Returns a SparseDate. A ValueError is raised if value is not a string
@@ -120,6 +127,7 @@ def parse_sparse_date(value):
                u"form 'YYYY', 'YYYY-M[M]' or 'YYYY-M[M]-D[D]'")
         raise ValueError(msg.format(value))
 
+
 def parse_four_digit_int(value):
     """Returns value converted to an int. Raises a ValueError if value is not a
     string with exactly four digits.
@@ -132,6 +140,7 @@ def parse_four_digit_int(value):
                u'whole number')
         raise ValueError(msg.format(value))
 
+
 def parse_one_or_two_digit_int(value):
     """Returns value converted to an int. Raises a ValueError if value is not
     a string with either one or two digits.
@@ -143,6 +152,7 @@ def parse_one_or_two_digit_int(value):
         msg = (u'Badly formatted value [{0}]: require a one or two digit '
                u'whole number')
         raise ValueError(msg.format(value))
+
 
 def parse_date(value):
     """Returns a datetime.date. Raises a ValueError if value is not a string
@@ -157,17 +167,20 @@ def parse_date(value):
                u'in the form YYYY-MM-DD')
         raise ValueError(msg.format(value))
 
+
 def parse_latitude(value):
     """Returns a float. Raises a ValueError if value is not a string that
     represents a latitude.
     """
     return _parse_degrees(value, True)
 
+
 def parse_longitude(value):
     """Returns a float. Raises a ValueError if value is not a string that
     represents a longitude.
     """
     return _parse_degrees(value, False)
+
 
 def _parse_degrees(value, is_latitude):
     """Returns a float. Raises a ValueError if value is not a string that
@@ -184,6 +197,7 @@ def _parse_degrees(value, is_latitude):
     else:
         msg = u'Badly formatted DD MM SS value [{0}]'
         raise ValueError(msg.format(value))
+
 
 def _assemble_dms(degrees, minutes, seconds, direction, is_latitude):
     """Returns a floating-point value of degrees of arc, computed from
@@ -233,10 +247,10 @@ def _assemble_dms(degrees, minutes, seconds, direction, is_latitude):
     elif minutes and not float(minutes).is_integer() and seconds:
         msg = u'Both seconds [{0}] and fractional minutes [{1}] given'
         raise ValueError(msg.format(seconds, minutes))
-    elif minutes and not 0.0<=minutes<60.0:
+    elif minutes and not 0.0 <= minutes < 60.0:
         msg = u'Bad minutes [{0}]. Require a number between 0 and 60'
         raise ValueError(msg.format(minutes))
-    elif seconds and not 0.0<=seconds<60.0:
+    elif seconds and not 0.0 <= seconds < 60.0:
         msg = u'Bad seconds [{0}]. Require a number between 0 and 60'
         raise ValueError(msg.format(seconds))
     else:
@@ -256,6 +270,7 @@ def _assemble_dms(degrees, minutes, seconds, direction, is_latitude):
         else:
             return degrees
 
+
 def parse_matches_regex(regex, value, error_message=u'Unmatched value [{0}]'):
     """Raises ValueError(error_message) if value does not match regex.
     """
@@ -264,6 +279,7 @@ def parse_matches_regex(regex, value, error_message=u'Unmatched value [{0}]'):
         raise ValueError(error_message.format(value))
     else:
         return value
+
 
 def parse_in_choices(choices, value):
     """Raise ValueError(error_message) if value is not in choices

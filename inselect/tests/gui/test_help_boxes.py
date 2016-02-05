@@ -2,7 +2,7 @@ import unittest
 
 from mock import patch
 
-from PySide.QtGui import QMessageBox, QDialog
+from PySide.QtGui import QMessageBox
 
 from gui_test import MainWindowTest
 
@@ -16,5 +16,5 @@ class TestHelpBoxes(MainWindowTest):
         self.window.about()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

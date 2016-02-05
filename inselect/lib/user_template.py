@@ -13,6 +13,7 @@ from inselect.lib.utils import debug_print, FormatDefault
 _Field = namedtuple('_Field', ('name', 'label', 'group', 'uri', 'mandatory',
                                'choices', 'choices_with_data', 'parse_fn'))
 
+
 class UserTemplate(object):
     """A user-defined project template
 
@@ -62,13 +63,13 @@ class UserTemplate(object):
         self.fields = fields
 
         # Map from field name to a instance of _Field
-        self.fields_mapping = {f.name : f for f in fields}
+        self.fields_mapping = {f.name: f for f in fields}
 
         # Map from field name to field
-        self.choices_with_data_mapping = {f.name : f for f in fields if f.choices_with_data}
+        self.choices_with_data_mapping = {f.name: f for f in fields if f.choices_with_data}
 
         # Mapping from name to parse function, for those fields that have a parser
-        self.parse_mapping = {f.name : f.parse_fn for f in fields if f.parse_fn}
+        self.parse_mapping = {f.name: f.parse_fn for f in fields if f.parse_fn}
 
         # Set of mandatory fields
         self.mandatory = set(f.name for f in fields if f.mandatory)
@@ -111,7 +112,7 @@ class UserTemplate(object):
         # TODO Deep copy here?
         md = metadata
         md['ItemNumber'] = index
- 
+
         # Consider fields with a 'Choices with data'
         for field in self.choices_with_data_mapping.itervalues():
             value = field.choices_with_data.get(md.get(field.name), '')
@@ -119,8 +120,8 @@ class UserTemplate(object):
         return md
 
     def format_label(self, index, metadata):
-         "Returns a textual label for the given box index and metadata"
-         return self._format_label(**self.metadata(index, metadata))
+        "Returns a textual label for the given box index and metadata"
+        return self._format_label(**self.metadata(index, metadata))
 
     def validate_metadata(self, metadata):
         """Returns True if the dict metadata validates against this template;
@@ -160,4 +161,3 @@ class UserTemplate(object):
                 return False
         else:
             return True
- 

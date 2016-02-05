@@ -17,8 +17,8 @@ IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
 
 
 def ingest_image(source, dest_dir,
-        thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
-        default_metadata_items=None):
+                 thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
+                 default_metadata_items=None):
     """Copies the image in the path source to the directory in the path
     dest_dir. Creates an returns a new instance of InselectDocument for the
     copied image.
@@ -27,12 +27,12 @@ def ingest_image(source, dest_dir,
     An exception is raised if the Inselect document already exists.
     """
     dest = dest_dir / source.name
-    if source!=dest and dest.is_file():
+    if source != dest and dest.is_file():
         raise InselectError('Destination image [{0}] exists'.format(dest))
     else:
         debug_print('Ingesting [{0}] to [{1}]'.format(source, dest))
 
-        if source!=dest:
+        if source != dest:
             source.rename(dest)
 
         # Raises if the document already exists

@@ -69,5 +69,5 @@ class TestSubsegment(MainWindowTest):
         self.assertTrue(expected in mock_warning.call_args[0])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

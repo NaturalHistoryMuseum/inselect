@@ -25,5 +25,5 @@ class TestSegment(unittest.TestCase):
         self.assertEqual(list(expected), list(actual))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

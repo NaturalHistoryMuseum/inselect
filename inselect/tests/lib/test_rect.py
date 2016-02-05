@@ -5,14 +5,14 @@ from inselect.lib.rect import Coordinates, Point, Rect
 
 class TestCoordinates(unittest.TestCase):
     def test_comparison(self):
-        self.assertEqual(Coordinates(1,2,3,4), Coordinates(1,2,3,4))
-        self.assertNotEqual(Coordinates(1,2,3,4), Coordinates(-1,2,3,4))
+        self.assertEqual(Coordinates(1, 2, 3, 4), Coordinates(1, 2, 3, 4))
+        self.assertNotEqual(Coordinates(1, 2, 3, 4), Coordinates(-1, 2, 3, 4))
 
 
 class TestPoint(unittest.TestCase):
     def test_comparison(self):
-        self.assertEqual(Point(1,2), Point(1,2))
-        self.assertNotEqual(Point(1,2), Point(-1,2))
+        self.assertEqual(Point(1, 2), Point(1, 2))
+        self.assertNotEqual(Point(1, 2), Point(-1, 2))
 
 
 class TestRect(unittest.TestCase):
@@ -53,8 +53,8 @@ class TestRect(unittest.TestCase):
             a == ''
 
         with self.assertRaises(NotImplementedError):
-            a == Point(1,1)
+            a == Point(1, 1)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

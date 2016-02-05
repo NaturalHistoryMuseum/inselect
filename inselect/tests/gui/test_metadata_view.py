@@ -2,8 +2,6 @@ import unittest
 
 from pathlib import Path
 
-from PySide import QtGui
-
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.views.metadata import FieldEdit, FieldComboBox
 
@@ -22,7 +20,7 @@ class TestMetadataViewControls(MainWindowTest):
 
     def test_template_name(self):
         self.assertEqual('Test user template',
-                         self.window.view_metadata._template_label.text())  
+                         self.window.view_metadata._template_label.text())
 
     def test_controls(self):
         controls = self.window.view_metadata._form_container.controls
@@ -82,5 +80,5 @@ class TestMetadataViewControls(MainWindowTest):
         self.assertIsNone(location.itemData(4))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

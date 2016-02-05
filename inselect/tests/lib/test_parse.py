@@ -4,9 +4,8 @@ import unittest
 
 from datetime import date
 
-from inselect.lib.parse import (parse_latitude, parse_int,
-                                parse_int_gt0, parse_float, parse_float_gt0,
-                                parse_int_ge0, parse_float_ge0,
+from inselect.lib.parse import (parse_int, parse_int_gt0, parse_float,
+                                parse_float_gt0, parse_int_ge0, parse_float_ge0,
                                 parse_four_digit_int, parse_one_or_two_digit_int,
                                 parse_date, parse_sparse_date, parse_latitude,
                                 parse_longitude, parse_matches_regex,
@@ -24,14 +23,14 @@ class TestParse(unittest.TestCase):
         self.assertEqual(1000, parse_int_gt0('1000'))
         self.assertRaises(ValueError, parse_int_gt0, '1.5')
         self.assertRaises(ValueError, parse_int_gt0, '0')
-        self.assertRaises(ValueError, parse_int_gt0,'-10')
+        self.assertRaises(ValueError, parse_int_gt0, '-10')
 
     def test_parse_int_ge0(self):
         self.assertEqual(0, parse_int_ge0('0'))
         self.assertEqual(1, parse_int_ge0('1'))
         self.assertEqual(1000, parse_int_ge0('1000'))
         self.assertRaises(ValueError, parse_int_ge0, '1.5')
-        self.assertRaises(ValueError, parse_int_ge0,'-10')
+        self.assertRaises(ValueError, parse_int_ge0, '-10')
 
     def test_parse_float(self):
         self.assertEqual(1.0, parse_float('1.0'))
@@ -45,7 +44,7 @@ class TestParse(unittest.TestCase):
         self.assertEqual(2001.0, parse_float_gt0(' 2001   '))
 
         self.assertRaises(ValueError, parse_float_gt0, '0')
-        self.assertRaises(ValueError, parse_float_gt0,'-10')
+        self.assertRaises(ValueError, parse_float_gt0, '-10')
 
     def test_parse_float_ge0(self):
         self.assertEqual(0.0, parse_float_ge0('0'))
@@ -53,11 +52,11 @@ class TestParse(unittest.TestCase):
         self.assertEqual(1.0, parse_float_ge0('1.0'))
         self.assertEqual(2001, parse_float_ge0(' 2001   '))
         self.assertEqual(2001.0, parse_float_ge0(' 2001   '))
-        self.assertRaises(ValueError, parse_float_ge0,'-10')
+        self.assertRaises(ValueError, parse_float_ge0, '-10')
 
     def test_parse_date(self):
-        self.assertEqual(date(2012,8,1), parse_date('2012-08-01'))
-        self.assertEqual(date(2012,8,1), parse_date('2012-8-1'))
+        self.assertEqual(date(2012, 8, 1), parse_date('2012-08-01'))
+        self.assertEqual(date(2012, 8, 1), parse_date('2012-8-1'))
 
         # Missing components
         self.assertRaises(ValueError, parse_date, '12-8-1')
@@ -68,13 +67,13 @@ class TestParse(unittest.TestCase):
     def test_parse_sparse_date(self):
         # sparse_date delegates to assemble_sparse_date(), which has a more
         # comprehensive test plan.
-        self.assertEqual((2012,1,1),
+        self.assertEqual((2012, 1, 1),
                          tuple(parse_sparse_date('2012-1-1')))
-        self.assertEqual((2012,12,31),
+        self.assertEqual((2012, 12, 31),
                          tuple(parse_sparse_date('2012-12-31')))
 
         # February in a leap year
-        self.assertEqual((2012,2,29),
+        self.assertEqual((2012, 2, 29),
                          tuple(parse_sparse_date('2012-2-29')))
 
         # February in a non-leap year
@@ -104,7 +103,7 @@ class TestParse(unittest.TestCase):
         self.assertEqual(31, parse_one_or_two_digit_int('31'))
 
         self.assertRaises(ValueError, parse_one_or_two_digit_int, '-2')
-        self.assertRaises(ValueError, parse_one_or_two_digit_int,'123')
+        self.assertRaises(ValueError, parse_one_or_two_digit_int, '123')
 
 
 class TestParseDegrees(unittest.TestCase):
@@ -124,9 +123,9 @@ class TestParseDegrees(unittest.TestCase):
         self.assertEqual(-41,    parse_latitude(u'41°00′00″S'))
 
     def test_arithmetic(self):
-        self.assertEqual( 1, parse_latitude('1'))
+        self.assertEqual(1, parse_latitude('1'))
         self.assertEqual(-1, parse_latitude('-1'))
-        self.assertEqual( 1, parse_latitude('1 n'))
+        self.assertEqual(1, parse_latitude('1 n'))
         self.assertEqual(-1, parse_latitude('1 S '))
         self.assertAlmostEqual(1.5111111111111111,  parse_latitude('1 30 40 N'))
         self.assertAlmostEqual(1.5111111111111111,  parse_longitude('1 30 40 E'))
@@ -178,7 +177,7 @@ class TestParseDegrees(unittest.TestCase):
         self.assertRaises(ValueError, parse_latitude, '90 1 1 N')    # Latitude > 90
         self.assertRaises(ValueError, parse_latitude, '90 1 1 S')    # Latitude < -90
         self.assertRaises(ValueError, parse_latitude, '90 1 1 S')    # Latitude < -90
-        self.assertRaises(ValueError, parse_longitude, '181 E')      # Longitude > 180 
+        self.assertRaises(ValueError, parse_longitude, '181 E')      # Longitude > 180
         self.assertRaises(ValueError, parse_longitude, '181 W')      # Longitude < -180
         self.assertRaises(ValueError, parse_longitude, '180 1 0 E')  # Longitude > 180
         self.assertRaises(ValueError, parse_longitude, '180 1 1 E')  # Longitude > 180
@@ -224,5 +223,5 @@ class TestParseDegrees(unittest.TestCase):
         self.assertRaises(ValueError, parse_in_choices, ('1', '2', '3'), '')
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

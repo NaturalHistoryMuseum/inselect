@@ -1,6 +1,5 @@
 import unittest
 
-from itertools import repeat
 from mock import patch
 from pathlib import Path
 
@@ -43,7 +42,7 @@ class TestUserTemplateChoice(MainWindowTest):
         w.default_user_template()
 
         path = TESTDATA / 'test.inselect_template'
-        retval  = str(path), w.TEMPLATE_FILE_FILTER
+        retval = str(path), w.TEMPLATE_FILE_FILTER
         with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
             w.choose_user_template()
             self.assertEqual(1, mock_gofn.call_count)
@@ -52,7 +51,7 @@ class TestUserTemplateChoice(MainWindowTest):
         mock_setvalue.assert_any_call('user_template_path', str(path))
         mock_setvalue.assert_any_call('user_template_last_directory', str(path.parent))
 
-    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None,None))
+    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None, None))
     def test_cancels_choose_template(self, mock_gofn):
         "User cancels the 'choose template' box"
 
@@ -67,5 +66,5 @@ class TestUserTemplateChoice(MainWindowTest):
         self.assertEqual(1, mock_gofn.call_count)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

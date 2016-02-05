@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Post-process
 """
+from __future__ import print_function
+
 import argparse
 import traceback
 
@@ -10,7 +12,7 @@ from pathlib import Path
 
 # Import numpy here to prevent PyInstaller build from breaking
 # TODO LH find a better solution
-import numpy
+import numpy    # noqa
 
 import inselect.lib.utils
 
@@ -20,27 +22,31 @@ from inselect.lib.inselect_error import InselectError
 
 try:
     import gouda
-    from gouda.strategies.roi.roi import roi
-    from gouda.strategies.resize import resize
+
     from gouda.engines import (AccusoftEngine, InliteEngine, LibDMTXEngine,
                                SoftekEngine)
+    from gouda.strategies.resize import resize
+    from gouda.strategies.roi.roi import roi
 except ImportError:
     gouda = None
 
 # TODO LH Engine from metadata config
 
+
 def _datamatrix_engine():
     """Returns callable that is the preferred database engine
     """
-    engines = [(InliteEngine, partial(InliteEngine, datamatrix=True)),
-               (AccusoftEngine, partial(AccusoftEngine, datamatrix=True)),
-               (SoftekEngine, partial(SoftekEngine, datamatrix=True)),
-               (LibDMTXEngine, LibDMTXEngine),
-              ]
+    engines = [
+        (InliteEngine, partial(InliteEngine, datamatrix=True)),
+        (AccusoftEngine, partial(AccusoftEngine, datamatrix=True)),
+        (SoftekEngine, partial(SoftekEngine, datamatrix=True)),
+        (LibDMTXEngine, LibDMTXEngine),
+    ]
     engines = [f for e, f in engines if e.available()]
     return engines[0] if engines else None
 
 DATAMATRIX_ENGINE = _datamatrix_engine()
+
 
 class BarcodeReader(object):
     def __init__(self, debug_barcodes):

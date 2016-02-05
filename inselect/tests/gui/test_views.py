@@ -2,8 +2,6 @@ import unittest
 
 from pathlib import Path
 
-from PySide import QtGui
-
 from gui_test import MainWindowTest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
@@ -38,5 +36,5 @@ class TestViews(MainWindowTest):
         self.run_event_loop()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

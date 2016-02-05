@@ -9,9 +9,7 @@ import unicodecsv
 from PySide.QtGui import QMessageBox
 
 from gui_test import MainWindowTest
-
 from inselect.lib.templates.dwc import DWC
-
 from inselect.tests.utils import temp_directory_with_files
 
 
@@ -27,13 +25,14 @@ class TestExportCSV(MainWindowTest):
 
         # Check CSV contents
         with csv.open('rb') as f:
-            res = w = unicodecsv.DictReader(f, encoding='utf-8')
+            res = unicodecsv.DictReader(f, encoding='utf-8')
             for index, item, row in izip(count(), doc.items, res):
                 expected = item['fields']
-                expected.update({'ItemNumber': '{0}'.format(1+index),
-                                 'Cropped_image_name': '{0:04}.jpg'.format(1+index),
-                                })
-                actual = {k: v for k,v in row.items() if v}
+                expected.update({
+                    'ItemNumber': '{0}'.format(1+index),
+                    'Cropped_image_name': '{0:04}.jpg'.format(1+index),
+                })
+                actual = {k: v for k, v in row.items() if v}
                 self.assertEqual(expected, actual)
 
         # Expect 4 rows
@@ -117,5 +116,5 @@ class TestExportCSV(MainWindowTest):
             self.assertTrue(question in mock_question.call_args[0])
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

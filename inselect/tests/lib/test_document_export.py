@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 import unittest
 
-from itertools import izip, count
+from itertools import izip
 from pathlib import Path
 
 import cv2
@@ -11,7 +11,6 @@ import unicodecsv
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.user_template import UserTemplate
-from inselect.lib.templates.dwc import DWC
 
 from inselect.tests.utils import temp_directory_with_files
 
@@ -35,7 +34,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                                       (u'Elsinoë',   3),
                                       (u'D',         4),
                                       (u'インセクト', 10),
-                                     ],
+                                      ],
             },
         ]
     })
@@ -87,5 +86,5 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 self.assertIsNone(next(reader, None))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,4 @@
 import unittest
-import shutil
 
 from pathlib import Path
 
@@ -33,5 +32,5 @@ class TestSegment(unittest.TestCase):
             # TODO LH assert that segment again does not touch this document
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

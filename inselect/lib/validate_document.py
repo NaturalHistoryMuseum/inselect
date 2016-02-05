@@ -1,6 +1,7 @@
 from collections import Counter, namedtuple
 from itertools import count, izip
 
+
 def validate_document(document, template):
     """Validates an InselectDocument against a UserTemplate and returns an
     instance of ValidationProblems
@@ -9,14 +10,17 @@ def validate_document(document, template):
     _validate_document(document, template, visitor)
     return visitor.all_problems()
 
+
 def _validate_document(document, template, visitor):
     "Validates an InselectDocument against a UserTemplate"
     _visit_boxes(document, template, visitor)
     _visit_labels(document, template, visitor)
 
+
 def _visit_boxes(document, template, visitor):
     for index, box in enumerate(document.items):
         _visit_box(template, visitor, index, box)
+
 
 def _visit_box(template, visitor, index, box):
     box_label = template.format_label(1+index, box['fields'])
@@ -24,11 +28,12 @@ def _visit_box(template, visitor, index, box):
     for field in (f for f in template.mandatory if not md.get(f)):
         visitor.missing_mandatory(index, box_label, field)
 
-    for field, parse in ( (k, v) for k, v in template.parse_mapping.iteritems() if k in set(md.keys())):
+    for field, parse in ((k, v) for k, v in template.parse_mapping.iteritems() if k in set(md.keys())):
         try:
             parse(md[field])
         except ValueError:
             visitor.failed_parse(index, box_label, field)
+
 
 def _visit_labels(document, template, visitor):
     labels = [template.format_label(1+index, box['fields']) for index, box in enumerate(document.items)]
@@ -44,6 +49,7 @@ def _visit_labels(document, template, visitor):
 
 MissingMandatory = namedtuple('MissingMandatory', ['index', 'label', 'field'])
 FailedParse = namedtuple('FailedParse', ['index', 'label', 'field'])
+
 
 class CollectProblemsVisitor(object):
     """Collects validation problems

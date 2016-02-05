@@ -80,5 +80,5 @@ class TestPersistWindowState(MainWindowTest):
         w.toggle_full_screen()
         self.assertFalse(w.isFullScreen())
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

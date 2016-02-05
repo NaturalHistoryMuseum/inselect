@@ -54,7 +54,7 @@ class CropDelegate(QAbstractItemDelegate):
             else:
                 painter.setBrush(self.GREY if selected else self.DARK_GREY)
             painter.drawRect(option.rect)
- 
+
     def _paint_title(self, painter, option, index):
         """Title of this crop
         """
@@ -198,7 +198,7 @@ class ObjectView(QListView):
         # Select a single item
         sm = self.selectionModel()
         selected = sm.selectedIndexes()
-        if len(selected)>1:
+        if len(selected) > 1:
             sm.select(selected[0], QItemSelectionModel.ClearAndSelect)
         elif not selected:
             sm.select(self.model().index(0, 0), QItemSelectionModel.Select)

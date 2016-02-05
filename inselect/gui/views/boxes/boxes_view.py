@@ -9,7 +9,7 @@ class BoxesView(QtGui.QGraphicsView):
     """
     """
 
-    MAXIMUM_ZOOM = 3 # User can't zoom in more than 1:3
+    MAXIMUM_ZOOM = 3    # User can't zoom in more than 1:3
 
     def __init__(self, scene, parent=None):
         super(BoxesView, self).__init__(scene, parent)
@@ -49,7 +49,6 @@ class BoxesView(QtGui.QGraphicsView):
         """
         debug_print('BoxesView.mousePressEvent')
 
-        p = self.mapToScene(self.mapFromGlobal(QtGui.QCursor.pos()))
         if Qt.RightButton == event.button() and not self.scene().is_empty:
             # TODO Rubber-band drag uses dashed black line - difficult to see on
             # images with a dark background
@@ -101,7 +100,7 @@ class BoxesView(QtGui.QGraphicsView):
                 r.setBottomRight(self.mapToScene(event.pos()))
                 r = r.normalized()
 
-                if r.width()>0 and r.height()>0:
+                if r.width() > 0 and r.height() > 0:
                     debug_print('BoxesView.mouseReleaseEvent creating a new box')
                     # Add the box
                     self.scene().user_add_box(r)
@@ -134,7 +133,6 @@ class BoxesView(QtGui.QGraphicsView):
                 # Extremely large wheel delta
         else:
             super(BoxesView, self).wheelEvent(event)
-
 
     def zoom_in(self):
         """A higher zoom level, if possible
@@ -180,7 +178,7 @@ class BoxesView(QtGui.QGraphicsView):
                 if self.absolute_zoom > self.MAXIMUM_ZOOM:
                     self.new_absolute_zoom(self.MAXIMUM_ZOOM)
             else:
-               self.new_relative_zoom(4.0)
+                self.new_relative_zoom(4.0)
         else:
             self.zoom_home()
 
@@ -194,7 +192,7 @@ class BoxesView(QtGui.QGraphicsView):
         t_scene_rect = QtGui.QTransform.fromScale(f, f).mapRect(scene_rect)
 
         if (t_scene_rect.width() < view_rect.width() and
-            t_scene_rect.height() < view_rect.height()):
+                t_scene_rect.height() < view_rect.height()):
             # The user wants to zoom out so that the image is smaller than the
             # view
             self.zoom_home()
@@ -209,7 +207,7 @@ class BoxesView(QtGui.QGraphicsView):
             selected = self.scene().selectedItems()
             if selected:
                 # Centre on selected items
-                #self.ensureVisible(unite_rects([i.rect() for i in selected]))
+                # self.ensureVisible(unite_rects([i.rect() for i in selected]))
                 self.centerOn(unite_rects([i.rect() for i in selected]).center())
 
     def dragEnterEvent(self, event):

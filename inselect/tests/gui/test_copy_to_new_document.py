@@ -1,6 +1,4 @@
-import shutil
 import unittest
-import tempfile
 
 from mock import patch
 from pathlib import Path
@@ -8,9 +6,7 @@ from pathlib import Path
 from PySide.QtGui import QFileDialog
 
 from gui_test import MainWindowTest
-
 from inselect.gui.main_window import MainWindow
-
 from inselect.tests.utils import temp_directory_with_files
 
 
@@ -38,7 +34,7 @@ class TestCopyToNewDocument(MainWindowTest):
             image = tempdir / 'other_image.png'
             (tempdir / 'test_segment.png').rename(image)
 
-            retval  = str(image), w.IMAGE_FILE_FILTER
+            retval = str(image), w.IMAGE_FILE_FILTER
 
             with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
                 w.copy_to_new_document()
@@ -46,12 +42,13 @@ class TestCopyToNewDocument(MainWindowTest):
 
             # New document should have been called with the path to the image
             self.assertTrue(mock_new_document.called)
-            mock_new_document.assert_called_once_with(image,
-                default_metadata_items=expected_metadata)
+            mock_new_document.assert_called_once_with(
+                image, default_metadata_items=expected_metadata
+            )
 
             # Orignal document should have been closed
             self.assertIsNone(self.window.document)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

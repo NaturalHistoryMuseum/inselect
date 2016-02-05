@@ -7,6 +7,7 @@ from inselect.lib.utils import debug_print
 
 from .box_item import BoxItem
 
+
 class BoxesScene(QtGui.QGraphicsScene):
     """Boxes on an image of objects
     """
@@ -55,8 +56,7 @@ class BoxesScene(QtGui.QGraphicsScene):
         if not items:
             return None
         else:
-            items = ifilter(lambda i: isinstance(i, QtGui.QGraphicsPixmapItem),
-                              items)
+            items = ifilter(lambda i: isinstance(i, QtGui.QGraphicsPixmapItem), items)
             pixmap = items.next()
 
             # There should be only one pixmap item
@@ -109,11 +109,12 @@ class BoxesScene(QtGui.QGraphicsScene):
         key = event.key()
 
         # Mapping from cursor key to adjustment (dx1, dy1, dx2, dy2)
-        cursors = {Qt.Key_Up:    ( 0.0,-1.0, 0.0,-1.0),
-                   Qt.Key_Right: ( 1.0, 0.0, 1.0, 0.0),
-                   Qt.Key_Down:  ( 0.0, 1.0, 0.0, 1.0),
-                   Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
-                  }
+        cursors = {
+            Qt.Key_Up:    ( 0.0,-1.0, 0.0,-1.0),
+            Qt.Key_Right: ( 1.0, 0.0, 1.0, 0.0),
+            Qt.Key_Down:  ( 0.0, 1.0, 0.0, 1.0),
+            Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
+        }
 
         if key in cursors.keys():
             event.accept()
@@ -159,7 +160,7 @@ class BoxesScene(QtGui.QGraphicsScene):
 
         # List of items with a scene bounding rects different from that when
         # mousePressEvent() ocurred
-        changed = [i for i in current if current[i]!=original.get(i, current[i])]
+        changed = [i for i in current if current[i] != original.get(i, current[i])]
         if changed:
             # This assumes that the order of items in self.selectedItems() has
             # not changed and that is one item's rect has altered then they all

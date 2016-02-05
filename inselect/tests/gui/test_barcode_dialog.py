@@ -1,7 +1,6 @@
 import unittest
 
 from mock import patch
-from pathlib import Path
 
 from PySide.QtCore import QSettings
 
@@ -110,5 +109,5 @@ class TestBarcodeDialog(MainWindowTest):
     # TODO LH Test load_engine
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

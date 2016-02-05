@@ -5,35 +5,36 @@ from pathlib import Path
 
 from inselect.lib.user_template import UserTemplate
 
-from inselect.lib.parse import parse_int
-
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 class TestUserTemplate(unittest.TestCase):
-    TEMPLATE = UserTemplate(
-    {
+    TEMPLATE = UserTemplate({
         'Name': 'T1',
-        'Fields': [{'Name': 'F1'},],
+        'Fields': [{'Name': 'F1'}],
         'Cropped file suffix': '.tiff',
         'Thumbnail width pixels': 5000,
         'Object label': '{ItemNumber:03}-{First}-{Second}-{Second-value}-{Last}',
-        'Fields' :
+        'Fields':
         [
-            {'Name': 'First',
-             'Mandatory': True,
-             'Choices': ['A','B']
+            {
+                'Name': 'First',
+                'Mandatory': True,
+                'Choices': ['A', 'B']
             },
-            {'Name': 'Second',
-             'Choices with data' : OrderedDict([('ABC', 0),
-                                                ('DEF', 1)
-                                               ]),
+            {
+                'Name': 'Second',
+                'Choices with data': OrderedDict([('ABC', 0),
+                                                  ('DEF', 1),
+                                                  ]),
             },
-            {'Name': 'Third',
-             'Parser': 'int'
+            {
+                'Name': 'Third',
+                'Parser': 'int'
             },
-            {'Name': 'Last',
-             'Regex parser': '^[0-9]{9}$'
+            {
+                'Name': 'Last',
+                'Regex parser': '^[0-9]{9}$'
             },
         ],
     })
@@ -52,7 +53,7 @@ class TestUserTemplate(unittest.TestCase):
 
         self.assertEqual('First', t.fields[0].name)
         self.assertTrue(t.fields[0].mandatory)
-        self.assertEqual(['A','B'], t.fields[0].choices)
+        self.assertEqual(['A', 'B'], t.fields[0].choices)
         self.assertIsNone(t.fields[0].choices_with_data)
         self.assertIsNone(t.fields[0].parse_fn)
 
@@ -71,7 +72,7 @@ class TestUserTemplate(unittest.TestCase):
 
     def test_field_names(self):
         t = self.TEMPLATE
-        self.assertEqual(['ItemNumber', 'First', 'Second', 'Second-value', 
+        self.assertEqual(['ItemNumber', 'First', 'Second', 'Second-value',
                           'Third', 'Last'], list(t.field_names()))
 
     def test_format_label(self):
@@ -126,5 +127,5 @@ class TestUserTemplate(unittest.TestCase):
         self.assertEqual('Taxonomy', doc.fields[2].name)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

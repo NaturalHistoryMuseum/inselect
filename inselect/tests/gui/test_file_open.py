@@ -1,6 +1,5 @@
 import shutil
 import unittest
-import tempfile
 
 from functools import partial
 from mock import patch
@@ -204,7 +203,7 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Create a temporary inselect document so that it can be modified
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect', 
+        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
                                        TESTDATA / 'test_segment.png') as tempdir:
 
             # Oopen the temp doc and modify it
@@ -248,7 +247,7 @@ class TestFileOpen(MainWindowTest):
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
 
-    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None,None))
+    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None, None))
     def test_cancel_file_choose(self, mock_gofn):
         "User cancels the 'choose a file to open' box"
         w = self.window
@@ -323,5 +322,5 @@ class TestFileOpen(MainWindowTest):
         self.assertWindowTitleOpenDocument()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()

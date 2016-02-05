@@ -6,6 +6,7 @@ from pathlib import Path
 
 from inselect.lib.utils import rmtree_readonly
 
+
 @contextmanager
 def temp_directory_with_files(*paths):
     """A context manager that creates a temporary directory and copies all

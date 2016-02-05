@@ -78,5 +78,5 @@ class TestSegment(MainWindowTest):
 # TODO LH Assert that user can cancel
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     unittest.main()
