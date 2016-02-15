@@ -28,7 +28,7 @@ def _visit_box(template, visitor, index, box):
     for field in (f for f in template.mandatory if not md.get(f)):
         visitor.missing_mandatory(index, box_label, field)
 
-    for field, parse in ((k, v) for k, v in template.parse_mapping.iteritems() if k in set(md.keys())):
+    for field, parse in ((k, v) for k, v in template.parse_mapping.iteritems() if k in md):
         try:
             parse(md[field])
         except ValueError:
