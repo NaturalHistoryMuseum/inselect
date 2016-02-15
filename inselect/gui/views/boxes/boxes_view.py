@@ -3,6 +3,7 @@ from PySide.QtCore import Qt, QRectF, QSizeF
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
+from inselect.gui.colours import colour_scheme_choice
 
 
 class BoxesView(QtGui.QGraphicsView):
@@ -23,6 +24,13 @@ class BoxesView(QtGui.QGraphicsView):
         # Will contain a temporary Rect object while the user drag-drop-creates
         # a box
         self._pending_box = None
+
+        colour_scheme_choice().colour_scheme_changed.connect(self.colour_scheme_changed)
+
+    def colour_scheme_changed(self):
+        """Slot for colour_scheme_changed signal
+        """
+        self.update()
 
     def updateSceneRect(self, rect):
         """QGraphicsView slot

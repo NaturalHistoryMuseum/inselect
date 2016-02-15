@@ -1,13 +1,27 @@
 from PySide.QtCore import QRect, QSize, QPoint, Qt
-from PySide.QtGui import (QListView, QBrush, QStyle, QTransform, QPen,
+from PySide.QtGui import (QColor, QListView, QBrush, QStyle, QTransform, QPen,
                           QAbstractItemView, QAbstractItemDelegate,
                           QItemSelectionModel, QColor, QFont)
 
 from inselect.lib.utils import debug_print
-from inselect.gui.colours import COLOURS
+from inselect.gui.colours import colour_scheme_choice
 from inselect.gui.utils import painter_state
 from inselect.gui.roles import (RectRole, PixmapRole, RotationRole,
                                 MetadataValidRole)
+
+
+def _blend_colour(first, second, amount=0.5):
+    """Returns first + (second - first) * amount, without changing the alpha of
+    first.
+    """
+    r1, g1, b1, a1 = first.getRgb()
+    r2, g2, b2, a2 = second.getRgb()
+    return QColor(
+        r1 + (r2 - r1) * amount,
+        g1 + (g2 - g1) * amount,
+        b1 + (b2 - b1) * amount,
+        a1
+    )
 
 
 class CropDelegate(QAbstractItemDelegate):
@@ -18,8 +32,11 @@ class CropDelegate(QAbstractItemDelegate):
     # Brushes
     BLACK = QBrush(Qt.black)
     WHITE = QBrush(Qt.white)
-    INVALID = QBrush(QColor(COLOURS['Invalid']))
-    INVALID_SELECTED = QBrush(QColor(COLOURS['Invalid']))
+    INVALID = QBrush(QColor(colour_scheme_choice().current['Colours']['GridInvalid']))
+    # Colour of selected invalid is the invalid colour lightened
+    INVALID_SELECTED = QBrush(_blend_colour(colour_scheme_choice().current['Colours']['GridInvalid'],
+                                            QColor(0xff, 0xff, 0xff),
+                                            amount=0.3))
     GREY = QBrush(Qt.gray)
     DARK_GREY = QBrush(Qt.darkGray)
 
@@ -169,6 +186,13 @@ class ObjectView(QListView):
 
         # Activating an item toggles the expanded state
         self.activated.connect(self.toggle_expanded)
+
+        colour_scheme_choice().colour_scheme_changed.connect(self.colour_scheme_changed)
+
+    def colour_scheme_changed(self):
+        """Slot for colour_scheme_changed signal
+        """
+        self.update()
 
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView slot

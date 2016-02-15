@@ -20,6 +20,7 @@ from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print, is_writable
 
 from .about import show_about_box
+from .colours import colour_scheme_choice
 from .info_widget import InfoWidget
 from .format_validation_problems import format_validation_problems
 from .model import Model
@@ -118,6 +119,9 @@ class MainWindow(QtGui.QMainWindow):
         self.plugin_image = None
         self.plugin_image_visible = False
 
+        # Colour scheme QActions. Populated in self.create_actions()
+        self.colour_scheme_actions = []
+
         # Long-running operations are run in their own thread.
         self.running_operation = None
 
@@ -127,6 +131,7 @@ class MainWindow(QtGui.QMainWindow):
         # Conect signals
         self.tabs.currentChanged.connect(self.current_tab_changed)
         sm.selectionChanged.connect(self.selection_changed)
+        colour_scheme_choice().colour_scheme_changed.connect(self.colour_scheme_changed)
 
         # Filter events
         self.tabs.installEventFilter(self)
@@ -969,6 +974,12 @@ class MainWindow(QtGui.QMainWindow):
             shortcut='ctrl+E', triggered=self.show_expanded
         )
 
+        # Colours
+        for name in colour_scheme_choice().colour_scheme_names():
+            action = QAction(name, self, checkable=True,
+                             triggered=partial(self.set_colour_scheme, name))
+            self.colour_scheme_actions.append(action)
+
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
 
@@ -1035,6 +1046,10 @@ class MainWindow(QtGui.QMainWindow):
         self._view_menu.addSeparator()
         self._view_menu.addAction(self.show_object_grid_action)
         self._view_menu.addAction(self.show_object_expanded_action)
+        self._view_menu.addSeparator()
+        colours_popup = self._view_menu.addMenu('Colour scheme')
+        for action in self.colour_scheme_actions:
+            colours_popup.addAction(action)
 
         self._help_menu = QMenu("&Help", self)
         self._help_menu.addAction(self.about_action)
@@ -1057,6 +1072,11 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.sync_ui()
 
+    def colour_scheme_changed(self):
+        """Slot for COLOUR_SCHEME_CHANGED signal
+        """
+        self.sync_ui()
+
     @report_to_user
     def toggle_full_screen(self):
         """Toggles between full screen and normal
@@ -1072,6 +1092,11 @@ class MainWindow(QtGui.QMainWindow):
                 self.setWindowFilePath(str(self.document_path))
         else:
             self.showFullScreen()
+
+    @report_to_user
+    def set_colour_scheme(self, name):
+        "Sets the colour scheme"
+        colour_scheme_choice().set_colour_scheme(name)
 
     @report_to_user
     def default_user_template(self):
@@ -1219,3 +1244,6 @@ class MainWindow(QtGui.QMainWindow):
         self.toggle_plugin_image_action.setEnabled(document and boxes_view_visible)
         self.show_object_grid_action.setEnabled(objects_view_visible)
         self.show_object_expanded_action.setEnabled(objects_view_visible)
+        current_colour_scheme = colour_scheme_choice().current['Name']
+        for action in self.colour_scheme_actions:
+            action.setChecked(current_colour_scheme == action.text())
