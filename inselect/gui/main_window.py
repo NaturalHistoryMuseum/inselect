@@ -1044,6 +1044,7 @@ class MainWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self._view_menu)
         self.menuBar().addMenu(self._help_menu)
 
+    @report_to_user
     def show_tab(self, index):
         self.tabs.setCurrentIndex(index)
 
