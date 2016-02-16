@@ -9,7 +9,7 @@ import inselect
 from inselect.lib.utils import debug_print
 from inselect.gui.main_window import MainWindow
 
-# Values used by several importantn parts of Qt's machinery including the GUI
+# Values used by several important parts of Qt's machinery including the GUI
 # and QSettings.
 QCoreApplication.setOrganizationName('NHM')
 QCoreApplication.setApplicationName('Inselect')
