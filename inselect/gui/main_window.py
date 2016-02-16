@@ -984,11 +984,11 @@ class MainWindow(QtGui.QMainWindow):
         # Shortcuts for next / previous tab
         self.previous_tab_action = QAction(
             "Previous tab", self, triggered=partial(self.next_previous_tab, False),
-            shortcut='ctrl+PageDn'
+            shortcut='ctrl+PgDown'
         )
         self.next_tab_action = QAction(
             "Next tab", self, triggered=partial(self.next_previous_tab, True),
-            shortcut='ctrl+PageUp'
+            shortcut='ctrl+PgUp'
         )
 
         # Mac also uses these funny shortcuts
