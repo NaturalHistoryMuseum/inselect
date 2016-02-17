@@ -56,19 +56,15 @@ class SelectorView(QAbstractItemView):
             # Do not alter selection if value is 0
             pass
         else:
-            # Order items by area and send first / last n
+            # Order items by increasing / decreasing area and select the first n
             model = self.model()
             rows = xrange(model.rowCount())
 
             def box_area(row):
                 rect = model.index(row, 0).data(RectRole)
                 return rect.width() * rect.height()
-            rows = sorted(rows, key=box_area)
-            if value > 0:
-                select = rows[:value]
-            else:
-                select = rows[value:]
-            update_selection_model(model, self.selectionModel(), select)
+            rows = sorted(rows, key=box_area, reverse=value < 0)
+            update_selection_model(model, self.selectionModel(), rows[:abs(value)])
 
     def _slider_released(self):
         """QSlider.sliderReleased slot
@@ -81,7 +77,7 @@ class SelectorView(QAbstractItemView):
         """
         debug_print('_slider_pressed')
         if 0 == self.slider.value():
-            # User clicked on the centre (0) of the slider
+            # User clicked on the centre of the slider
             self.selectionModel().clear()
 
     def reset(self):
