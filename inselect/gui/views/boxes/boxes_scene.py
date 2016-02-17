@@ -116,15 +116,16 @@ class BoxesScene(QtGui.QGraphicsScene):
             Qt.Key_Left:  (-1.0, 0.0,-1.0, 0.0),
         }
 
-        if key in cursors.keys():
+        if key in cursors:
             event.accept()
             dx1, dy1, dx2, dy2 = cursors[key]
-            mod = event.modifiers()
-            if Qt.ShiftModifier == mod:
-                # Shift - move just the bottom-right corner
+            modifiers = event.modifiers()
+
+            if Qt.ShiftModifier & modifiers:
+                # Adjust the bottom-right corner
                 dx1 = dy1 = 0.0
-            elif Qt.ControlModifier == mod:
-                # Control - move just the top-left corner
+            elif Qt.AltModifier & modifiers:
+                # Adjust the top-left corner
                 dx2 = dy2 = 0.0
 
             self.adjust_selected(dx1, dy1, dx2, dy2)
