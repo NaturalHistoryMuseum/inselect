@@ -33,6 +33,7 @@ from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
 from .views.metadata import MetadataView
 from .views.object import ObjectView
+from .views.selector import SelectorView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
@@ -63,6 +64,7 @@ class MainWindow(QtGui.QMainWindow):
         self.view_metadata = MetadataView()
         self.view_object = ObjectView()
         self.view_summary = SummaryView()
+        self.view_selector = SelectorView()
 
         # Views in tabs
         self.tabs = QtGui.QTabWidget()
@@ -102,12 +104,14 @@ class MainWindow(QtGui.QMainWindow):
         self.view_metadata.setModel(self.model)
         self.view_object.setModel(self.model)
         self.view_summary.setModel(self.model)
+        self.view_selector.setModel(self.model)
 
         # A consistent selection across all views
         sm = self.view_object.selectionModel()
         self.view_graphics_item.setSelectionModel(sm)
         self.view_metadata.setSelectionModel(sm)
         self.view_summary.setSelectionModel(sm)
+        self.view_selector.setSelectionModel(sm)
 
         # Plugins
         self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
@@ -134,6 +138,7 @@ class MainWindow(QtGui.QMainWindow):
         self.view_metadata.installEventFilter(self)
         self.view_object.installEventFilter(self)
         self.view_summary.installEventFilter(self)
+        self.view_selector.installEventFilter(self)
 
         self.empty_document()
 
@@ -984,6 +989,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.view_summary.widget)
+        self.toolbar.addSeparator()
+        self.toolbar.addWidget(self.view_selector.widget)
 
         self._file_menu = QMenu("&File", self)
         self._file_menu.addAction(self.open_action)

@@ -85,3 +85,29 @@ def relayout_widget(widget, new_layout):
     del old_layout
 
     widget.setLayout(new_layout)
+
+
+def update_selection_model(model, sm, new_selection):
+    """Updates the selection model with new_selection
+    """
+    current = set(i.row() for i in sm.selectedIndexes())
+    new_selection = set(new_selection)
+
+    # Select contiguous blocks
+    for row, count in contiguous(sorted(new_selection.difference(current))):
+        top_left = model.index(row, 0)
+        bottom_right = model.index(row + count - 1, 0)
+        sm.select(QtGui.QItemSelection(top_left, bottom_right),
+                  QtGui.QItemSelectionModel.Select)
+
+    # Deselect contiguous blocks
+    for row, count in contiguous(sorted(current.difference(new_selection))):
+        top_left = model.index(row, 0)
+        bottom_right = model.index(row + count - 1, 0)
+        sm.select(QtGui.QItemSelection(top_left, bottom_right),
+                  QtGui.QItemSelectionModel.Deselect)
+
+    if new_selection:
+        # Set an arbitrary row as the current index
+        sm.setCurrentIndex(model.index(new_selection.pop(), 0),
+                           QtGui.QItemSelectionModel.Current)
