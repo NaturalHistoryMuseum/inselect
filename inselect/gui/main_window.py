@@ -767,6 +767,12 @@ class MainWindow(QtGui.QMainWindow):
         sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
 
     @report_to_user
+    def select_by_size_step(self, larger=False):
+        """Step the 'select by size' slider
+        """
+        self.view_selector.single_step(larger)
+
+    @report_to_user
     def rotate90(self, clockwise):
         """Rotates the selected boxes 90 either clockwise or counter-clockwise.
         """
@@ -861,6 +867,14 @@ class MainWindow(QtGui.QMainWindow):
             "Previous box", self,
             shortcut="ctrl+P",
             triggered=partial(self.select_next_prev, next=False)
+        )
+        self.select_by_size_larger_action = QAction(
+            "Select increasing size", self, shortcut="ctrl+>",
+            triggered=partial(self.select_by_size_step, larger=True)
+        )
+        self.select_by_size_smaller_action = QAction(
+            "Select decreasing size", self, shortcut="ctrl+<",
+            triggered=partial(self.select_by_size_step, larger=False)
         )
 
         self.delete_action = QAction(
@@ -1015,6 +1029,8 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addSeparator()
         self._edit_menu.addAction(self.next_box_action)
         self._edit_menu.addAction(self.previous_box_action)
+        self._edit_menu.addAction(self.select_by_size_larger_action)
+        self._edit_menu.addAction(self.select_by_size_smaller_action)
         self._edit_menu.addSeparator()
         self._edit_menu.addAction(self.rotate_clockwise_action)
         self._edit_menu.addAction(self.rotate_counter_clockwise_action)
@@ -1209,9 +1225,11 @@ class MainWindow(QtGui.QMainWindow):
         # Edit
         self.select_all_action.setEnabled(has_rows)
         self.select_none_action.setEnabled(document)
-        self.delete_action.setEnabled(has_selection)
         self.next_box_action.setEnabled(has_rows)
         self.previous_box_action.setEnabled(has_rows)
+        self.select_by_size_larger_action.setEnabled(has_rows)
+        self.select_by_size_smaller_action.setEnabled(has_rows)
+        self.delete_action.setEnabled(has_selection)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
         for action in self.plugin_actions:

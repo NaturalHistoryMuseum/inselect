@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 from PySide import QtGui
+from PySide.QtGui import QItemSelection, QItemSelectionModel
 
 
 def qimage_of_bgr(bgr):
@@ -41,7 +42,7 @@ def contiguous(values):
     (25, 4)
     """
     # Taken from http://stackoverflow.com/a/2361991
-    for k, g in groupby(enumerate(values), lambda (i, x): i-x):
+    for k, g in groupby(enumerate(values), lambda (i, x): i - x):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1
@@ -97,17 +98,17 @@ def update_selection_model(model, sm, new_selection):
     for row, count in contiguous(sorted(new_selection.difference(current))):
         top_left = model.index(row, 0)
         bottom_right = model.index(row + count - 1, 0)
-        sm.select(QtGui.QItemSelection(top_left, bottom_right),
-                  QtGui.QItemSelectionModel.Select)
+        sm.select(QItemSelection(top_left, bottom_right),
+                  QItemSelectionModel.Select)
 
     # Deselect contiguous blocks
     for row, count in contiguous(sorted(current.difference(new_selection))):
         top_left = model.index(row, 0)
         bottom_right = model.index(row + count - 1, 0)
-        sm.select(QtGui.QItemSelection(top_left, bottom_right),
-                  QtGui.QItemSelectionModel.Deselect)
+        sm.select(QItemSelection(top_left, bottom_right),
+                  QItemSelectionModel.Deselect)
 
     if new_selection:
         # Set an arbitrary row as the current index
         sm.setCurrentIndex(model.index(new_selection.pop(), 0),
-                           QtGui.QItemSelectionModel.Current)
+                           QItemSelectionModel.Current)

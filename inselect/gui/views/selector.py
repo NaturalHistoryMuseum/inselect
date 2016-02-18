@@ -14,6 +14,8 @@ class SelectorView(QAbstractItemView):
         # This view is not visible
         super(SelectorView, self).__init__(None)
 
+        self._updating_selection = False
+
         layout = QHBoxLayout()
         layout.addWidget(QLabel("Select by size"))
 
@@ -26,8 +28,6 @@ class SelectorView(QAbstractItemView):
         self.slider.setEnabled(False)
 
         self.slider.valueChanged.connect(self._slider_changed)
-        self.slider.sliderReleased.connect(self._slider_released)
-        self.slider.sliderPressed.connect(self._slider_pressed)
 
         # Slider has stretch greater than zero to force left-alignment
         layout.addWidget(self.slider, stretch=1)
@@ -35,10 +35,9 @@ class SelectorView(QAbstractItemView):
         self.widget = QWidget(parent)
         self.widget.setLayout(layout)
 
-    def _update_slider(self):
+    def _update_slider(self, n):
         """Sets the slider range and enabled state
         """
-        n = self.model().rowCount()
         self.slider.setEnabled(n > 0)
         if n:
             # Scale runs from -n to + n in steps of 1
@@ -46,13 +45,13 @@ class SelectorView(QAbstractItemView):
             self.slider.setMaximum(n)
             self.slider.setTickInterval(n)
             self.slider.setSingleStep(1)
-        self.slider.setEnabled(n > 0)
+            self.slider.setValue(0)
 
     def _slider_changed(self, value):
         """QSlider.valueChanged slot
         """
-        debug_print('_slider_changed', value)
-        if 0 == value:
+        debug_print('SelectorView._slider_changed', value)
+        if False and 0 == value:
             # Do not alter selection if value is 0
             pass
         else:
@@ -63,38 +62,42 @@ class SelectorView(QAbstractItemView):
             def box_area(row):
                 rect = model.index(row, 0).data(RectRole)
                 return rect.width() * rect.height()
+
             rows = sorted(rows, key=box_area, reverse=value < 0)
-            update_selection_model(model, self.selectionModel(), rows[:abs(value)])
+            self._updating_selection = True
+            try:
+                update_selection_model(model, self.selectionModel(), rows[:abs(value)])
+            finally:
+                self._updating_selection = False
 
-    def _slider_released(self):
-        """QSlider.sliderReleased slot
+    def single_step(self, larger):
+        """Steps the slider up / down
         """
-        debug_print('_slider_released')
-        self.slider.setValue(0)
+        if self.slider.isEnabled():
+            action = QSlider.SliderSingleStepAdd if larger else QSlider.SliderSingleStepSub
+            self.slider.triggerAction(action)
 
-    def _slider_pressed(self):
-        """QSlider.sliderPressed slot
+    def selectionChanged(self, selected, deselected):
+        """QAbstractItemView virtual
         """
-        debug_print('_slider_pressed')
-        if 0 == self.slider.value():
-            # User clicked on the centre of the slider
-            self.selectionModel().clear()
+        if not self._updating_selection:
+            self.slider.setValue(0)
 
     def reset(self):
         """QAbstractItemView virtual
         """
         debug_print('SelectorView.reset')
         super(SelectorView, self).reset()
-        self._update_slider()
+        self._update_slider(self.model().rowCount())
 
     def dataChanged(self, topLeft, bottomRight):
         """QAbstractItemView virtual
         """
         debug_print('SelectorView.dataChanged')
-        self._update_slider()
+        self._update_slider(self.model().rowCount())
 
     def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot
         """
         debug_print('SelectorView.rowsAboutToBeRemoved')
-        self._update_slider()
+        self._update_slider(self.model().rowCount() - (end - start))
