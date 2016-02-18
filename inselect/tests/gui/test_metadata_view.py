@@ -33,9 +33,12 @@ class TestMetadataViewControls(MainWindowTest):
     def _control_for_field(self, field):
         "Returns the control for the given field"
         f = self.window.view_metadata._form_container
-        # f.controls is a dict { control: field name } - reverse this
-        controls = {v: k for k, v in f.controls.iteritems()}
-        return controls[field]
+        # f.controls is a dict { control: field name }
+        for key, value in f.controls.iteritems():
+            if field == value:
+                return key
+        else:
+            raise ValueError('No field [{0}]'.format(field))
 
     def test_catalog_number(self):
         catalog_number = self._control_for_field('catalogNumber')
