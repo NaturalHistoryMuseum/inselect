@@ -111,7 +111,7 @@ def main():
     args = parser.parse_args()
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
-    # BarcodeReader will raise error is barcode decoding is not available
+    # BarcodeReader will raise error if barcode decoding is not available
     BarcodeReader(args.debug_barcodes).process_dir(Path(args.dir))
 
 
