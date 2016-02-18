@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.20
+-------------
+- Fixed #184 - Missing menu item ellipses (@quicklizard99)
+
 Version 0.1.19
 -------------
 - Fixed #173 - Mac build broken (@quicklizard99)
