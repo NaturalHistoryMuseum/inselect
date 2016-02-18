@@ -794,7 +794,7 @@ class MainWindow(QtGui.QMainWindow):
             icon=self.style().standardIcon(QtGui.QStyle.SP_DialogOpenButton)
         )
         self.copy_to_new_document_action = QAction(
-            "Copy to new document", self,
+            "Copy to new document...", self,
             triggered=self.copy_to_new_document
         )
         self.save_action = QAction(
@@ -883,7 +883,7 @@ class MainWindow(QtGui.QMainWindow):
             "Default template", self, triggered=self.default_user_template
         )
         self.choose_user_template_action = QAction(
-            "Choose template", self, triggered=self.choose_user_template
+            "Choose template...", self, triggered=self.choose_user_template
         )
 
         # Plugins
@@ -901,7 +901,7 @@ class MainWindow(QtGui.QMainWindow):
             self.plugin_actions[index] = action
             if hasattr(plugin, 'config'):
                 ui_action = QAction(
-                    u"Configure '{0}'".format(plugin.NAME), self,
+                    u"Configure '{0}'...".format(plugin.NAME), self,
                     triggered=partial(self.show_plugin_config, index)
                 )
                 # Force menu items to appear on Mac
