@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.20
+-------------
+- Added #179 - Standard keyboard shortcuts to move between tabs (@quicklizard99)
+
 Version 0.1.19
 -------------
 - Fixed #173 - Mac build broken (@quicklizard99)
