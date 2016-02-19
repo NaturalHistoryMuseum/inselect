@@ -2,10 +2,10 @@ from itertools import chain
 
 from PySide import QtCore, QtGui
 from PySide.QtCore import Qt, QRect, QRectF
-from PySide.QtGui import QColor, QPen, QBrush, QGraphicsItem
+from PySide.QtGui import QPen, QBrush, QGraphicsItem
 
 from inselect.lib.utils import debug_print
-from inselect.gui.colours import COLOURS
+from inselect.gui.colours import colour_scheme_choice
 from inselect.gui.utils import painter_state
 
 from .resize_handle import ResizeHandle
@@ -14,16 +14,6 @@ from .resize_handle import ResizeHandle
 class BoxItem(QtGui.QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
-
-    SELECTED = QColor(COLOURS['Selected'])
-    VALID = QColor(COLOURS['Valid'])
-    INVALID = QColor(COLOURS['Invalid'])
-
-    RESIZING = QColor(SELECTED)
-    RESIZING.setAlpha(0x50)
-
-    INVALID_FILL = QColor(INVALID)
-    INVALID_FILL.setAlpha(0x50)
 
     def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
@@ -88,20 +78,21 @@ class BoxItem(QtGui.QGraphicsRectItem):
     @property
     def colours(self):
         """Tuple of two QColors to use for the box's border and fill
-        respectively
+        respectively. Fill might be None.
         """
-        if self.has_mouse():
-            outline = self.RESIZING
-        if self.isSelected():
-            outline = self.SELECTED
+        colours = colour_scheme_choice().current['Colours']
+        has_mouse = self.has_mouse()
+        if has_mouse:
+            outline = colours['Resizing']
+        elif self.isSelected():
+            outline = colours['Selected']
         elif self._isvalid:
-            outline = self.VALID
+            outline = colours['Valid']
         else:
-            outline = self.INVALID
+            outline = colours['Invalid']
 
-        if not self._isvalid and not self.has_mouse():
-            # Fill only if invalid and not resizing
-            fill = self.INVALID_FILL
+        if not self._isvalid and not has_mouse:
+            fill = colours['InvalidFill']
         else:
             fill = None
 
