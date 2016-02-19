@@ -7,6 +7,7 @@ Version 0.1.20
 - Added #182 - Select by size (@quicklizard99)
 - Fixed #181 - Box adjustment keyboard shortcuts (@quicklizard99)
 - Added #180 - Next / previous box should zoom to fit (@quicklizard99)
+- Fixed #179 - Standard keyboard shortcuts to move between tabs (@quicklizard99)
 
 Version 0.1.19
 -------------
