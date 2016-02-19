@@ -220,7 +220,6 @@ class BoxesView(QtGui.QGraphicsView):
             if selected:
                 # Centre on selected items
                 # self.ensureVisible(unite_rects([i.rect() for i in selected]))
-                print('xxx')
                 self.centerOn(unite_rects([i.rect() for i in selected]).center())
 
     def dragEnterEvent(self, event):
