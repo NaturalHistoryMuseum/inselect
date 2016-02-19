@@ -171,7 +171,6 @@ class BoxesScene(QtGui.QGraphicsScene):
         """Adjusts the rects of the selected boxes
         """
         selected = self.selectedItems()
-        if selected:
-            for box in selected:
-                box.adjust_rect(dx1, dy1, dx2, dy2)
-            self.source.scene_item_rects_updated(selected)
+        for box in selected:
+            box.adjust_rect(dx1, dy1, dx2, dy2)
+        self.source.scene_item_rects_updated(selected)
