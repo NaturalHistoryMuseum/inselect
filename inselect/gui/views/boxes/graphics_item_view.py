@@ -6,7 +6,7 @@ from PySide.QtCore import QRect
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import PixmapRole, RectRole, MetadataValidRole
-from inselect.gui.utils import unite_rects, contiguous
+from inselect.gui.utils import unite_rects, update_selection_model
 
 from .boxes_scene import BoxesScene
 
@@ -50,7 +50,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
 
         # Build up new mapping
         rows = [None] * model.rowCount()
-        for row in xrange(0, model.rowCount()):
+        for row in xrange(model.rowCount()):
             index = model.index(row, 0)
             rows[row] = self.scene.add_box(index.data(RectRole),
                                            index.data(MetadataValidRole))
@@ -78,7 +78,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         n = 1 + end - start
         new = [None] * n
         rect = QRect(0, 0, 0, 0)
-        for row in xrange(0, n):
+        for row in xrange(n):
             new[row] = self.scene.add_box(rect, False)
         self._rows[start:start] = new
 
@@ -87,7 +87,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """
         debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
 
-        for row in xrange(topLeft.row(), 1+bottomRight.row()):
+        for row in xrange(topLeft.row(), 1 + bottomRight.row()):
 
             item = self._rows[row]
             # new is a QRect - integer coordinates
@@ -176,29 +176,9 @@ class GraphicsItemView(QtGui.QAbstractItemView):
             # TODO Context for this
             self.handling_selection_update = True
             try:
-                model = self.model()
-                sm = self.selectionModel()
-                current = set(i.row() for i in sm.selectedIndexes())
-                updated = set(self.rows_of_items(self.scene.selectedItems()))
-
-                # Select contiguous blocks
-                for row, count in contiguous(sorted(updated.difference(current))):
-                    top_left = model.index(row, 0)
-                    bottom_right = model.index(row+count-1, 0)
-                    sm.select(QtGui.QItemSelection(top_left, bottom_right),
-                              QtGui.QItemSelectionModel.Select)
-
-                # Deselect contiguous blocks
-                for row, count in contiguous(sorted(current.difference(updated))):
-                    top_left = model.index(row, 0)
-                    bottom_right = model.index(row+count-1, 0)
-                    sm.select(QtGui.QItemSelection(top_left, bottom_right),
-                              QtGui.QItemSelectionModel.Deselect)
-
-                if updated:
-                    # Set an arbitrary row as the current index
-                    sm.setCurrentIndex(model.index(updated.pop(), 0),
-                                       QtGui.QItemSelectionModel.Current)
+                new_selection = set(self.rows_of_items(self.scene.selectedItems()))
+                update_selection_model(self.model(), self.selectionModel(),
+                                       new_selection)
             finally:
                 self.handling_selection_update = False
 
