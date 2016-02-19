@@ -122,13 +122,10 @@ class BoxesScene(QtGui.QGraphicsScene):
             dx1, dy1, dx2, dy2 = cursors[key]
             modifiers = event.modifiers()
 
-            # Mac internal keyboards have this flag set
-            modifiers ^= Qt.KeypadModifier
-
-            if Qt.ShiftModifier == modifiers:
+            if Qt.ShiftModifier & modifiers and not Qt.AltModifier & modifiers:
                 # Adjust the bottom-right corner
                 dx1 = dy1 = 0.0
-            elif Qt.AltModifier == modifiers:
+            elif not Qt.ShiftModifier & modifiers and Qt.AltModifier & modifiers:
                 # Adjust the top-left corner
                 dx2 = dy2 = 0.0
 
