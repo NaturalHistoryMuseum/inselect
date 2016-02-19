@@ -116,9 +116,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plugins
         self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
-        # QActions. Populated in self.create_actions()
+        # QActions. Populated in self.create_menu_actions()
         self.plugin_actions = len(self.plugins) * [None]
-        # QActions. Populated in self.create_actions()
+        # QActions. Populated in self.create_menu_actions()
         self.plugin_config_ui_actions = len(self.plugins) * [None]
         self.plugin_image = None
         self.plugin_image_visible = False
@@ -129,7 +129,9 @@ class MainWindow(QtGui.QMainWindow):
         # Long-running operations are run in their own thread.
         self.running_operation = None
 
-        self.create_actions()
+        self.create_menu_actions()
+        self.create_non_menu_actions()
+        self.create_toolbar()
         self.create_menus()
 
         # Conect signals
@@ -802,7 +804,9 @@ class MainWindow(QtGui.QMainWindow):
         self.plugin_image_visible = not self.plugin_image_visible
         self.update_boxes_display_pixmap()
 
-    def create_actions(self):
+    def create_menu_actions(self):
+        """Creates actions that are associated with menu items
+        """
         # File menu
         self.open_action = QAction(
             "&Open...", self,
@@ -933,9 +937,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.plugin_config_ui_actions[index] = ui_action
 
         # View menu
-        # The obvious approach is to set the trigger to
+        # It is tempting to set the trigger to
         # partial(self.tabs.setCurrentIndex, 0) but this causes a segfault when
-        # the application exits on linux.
+        # the application exits on linux. It also means that exceptions will be
+        # silently swallowed.
         self.boxes_view_action = QAction(
             "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
             shortcut='ctrl+B'
@@ -1002,7 +1007,35 @@ class MainWindow(QtGui.QMainWindow):
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
 
-    def create_menus(self):
+    def create_non_menu_actions(self):
+        """Creates actions that are not associated with menu items
+        """
+        # Menu-less actions
+        # Shortcuts for next / previous tab
+        self.previous_tab_action = QAction(
+            "Previous tab", self, triggered=partial(self.next_previous_tab, False),
+            shortcut='ctrl+PgDown'
+        )
+        self.next_tab_action = QAction(
+            "Next tab", self, triggered=partial(self.next_previous_tab, True),
+            shortcut='ctrl+PgUp'
+        )
+
+        # Mac also uses these funny shortcuts
+        if 'darwin' == sys.platform:
+            self.previous_tab_action.setShortcuts(
+                ['shift+ctrl+[', self.previous_tab_action.shortcut()]
+            )
+            self.next_tab_action.setShortcuts(
+                ['shift+ctrl+]', self.next_tab_action.shortcut()]
+            )
+
+        self.addAction(self.previous_tab_action)
+        self.addAction(self.next_tab_action)
+
+    def create_toolbar(self):
+        """Creates the toolbar
+        """
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
@@ -1017,6 +1050,9 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.view_selector.widget)
 
+    def create_menus(self):
+        """Create menu items
+        """
         self._file_menu = QMenu("&File", self)
         self._file_menu.addAction(self.open_action)
         recent = self._file_menu.addMenu('Recent documents')
@@ -1085,6 +1121,18 @@ class MainWindow(QtGui.QMainWindow):
     @report_to_user
     def show_tab(self, index):
         self.tabs.setCurrentIndex(index)
+
+    @report_to_user
+    def next_previous_tab(self, next):
+        """Selects the next (if next if True) or previous (if next if False) tab
+        """
+        select = self.tabs.currentIndex()
+        select += 1 if next else -1
+        if select == self.tabs.count():
+            select = 0
+        elif select < 0:
+            select = self.tabs.count() - 1
+        self.tabs.setCurrentIndex(select)
 
     def current_tab_changed(self, index):
         """Slot for self.tabs.currentChanged() signal
