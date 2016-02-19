@@ -25,16 +25,18 @@ def _blend_colour(first, second, amount=0.5):
 
 
 class CropDelegate(QAbstractItemDelegate):
-    """Delegate that shows cropped gecimen images with a grey box and
+    """Delegate that shows cropped object images with a grey box and
     provides editing of rotation and some flags.
     """
 
     # Brushes
     BLACK = QBrush(Qt.black)
     WHITE = QBrush(Qt.white)
-    INVALID = QBrush(QColor(colour_scheme_choice().current['Colours']['GridInvalid']))
+
+    GRID_INVALID_COLOUR = QColor(0xfb, 0x9a, 0x99)
+    INVALID = QBrush(GRID_INVALID_COLOUR)
     # Colour of selected invalid is the invalid colour lightened
-    INVALID_SELECTED = QBrush(_blend_colour(colour_scheme_choice().current['Colours']['GridInvalid'],
+    INVALID_SELECTED = QBrush(_blend_colour(GRID_INVALID_COLOUR,
                                             QColor(0xff, 0xff, 0xff),
                                             amount=0.3))
     GREY = QBrush(Qt.gray)

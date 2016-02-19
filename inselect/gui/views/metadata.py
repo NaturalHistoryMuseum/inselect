@@ -129,14 +129,20 @@ class FormContainer(QWidget):
         font-weight: bold;
         color: black;
     }}
-    """.format(**{k: v.name() for k, v in colour_scheme_choice().current['Colours'].iteritems() if v})
+    """
 
     # TODO LH Text colour to come from system
 
     def __init__(self, parent=None):
         super(FormContainer, self).__init__(parent)
 
-        self.setStyleSheet(self.STYLESHEET)
+        stylesheet = self.STYLESHEET.format(**{
+            k: v.name()
+            for k, v in colour_scheme_choice().current['Colours'].iteritems()
+            if v
+        })
+
+        self.setStyleSheet(stylesheet)
 
         # Mapping { control: field name }
         self.controls = {}
