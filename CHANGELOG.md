@@ -2,6 +2,10 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.19
 -------------
+- Fixed #181 - Box adjustment keyboard shortcuts (@quicklizard99)
+
+Version 0.1.19
+-------------
 - Fixed #173 - Mac build broken (@quicklizard99)
 
 Version 0.1.18

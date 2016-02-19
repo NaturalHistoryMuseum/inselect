@@ -1,3 +1,4 @@
+from __future__ import print_function
 from itertools import ifilter
 
 from PySide import QtGui
@@ -121,13 +122,20 @@ class BoxesScene(QtGui.QGraphicsScene):
             dx1, dy1, dx2, dy2 = cursors[key]
             modifiers = event.modifiers()
 
-            if Qt.ShiftModifier & modifiers:
+            # Mac internal keyboards have this flag set
+            modifiers ^= Qt.KeypadModifier
+
+            if Qt.ShiftModifier == modifiers:
                 # Adjust the bottom-right corner
                 dx1 = dy1 = 0.0
-            elif Qt.AltModifier & modifiers:
+            elif Qt.AltModifier == modifiers:
                 # Adjust the top-left corner
                 dx2 = dy2 = 0.0
 
+            if event.isAutoRepeat():
+                # Larger steps when key is being held down
+                multiplier = 4
+                dx1, dy1, dx2, dy2 = [v * multiplier for v in (dx1, dy1, dx2, dy2)]
             self.adjust_selected(dx1, dy1, dx2, dy2)
         else:
             super(BoxesScene, self).keyPressEvent(event)
