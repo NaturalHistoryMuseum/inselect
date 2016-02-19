@@ -126,7 +126,8 @@ class BoxesView(QtGui.QGraphicsView):
             multiplier = 0.0005
             f = 1.0 + degrees * multiplier
             if 0 < f < 2:
-                debug_print('BoxesView.wheelEvent delta degrees [{0}] factor [{1}]'.format(degrees, f))
+                msg = 'BoxesView.wheelEvent delta degrees [{0}] factor [{1}]'
+                debug_print(msg.format(degrees, f))
                 self.new_relative_zoom(f)
             else:
                 pass
@@ -162,25 +163,36 @@ class BoxesView(QtGui.QGraphicsView):
         """
         self.new_absolute_zoom(self.absolute_zoom * factor)
 
+    def zoom_to_items(self, items):
+        """Centres view on the centre of the items and, if view is set to
+        'fit to view', sets the zoom level to encompass items.
+        """
+        united = unite_rects(i.sceneBoundingRect() for i in items)
+        if self.fit_to_view:
+            debug_print('Ensuring [{0}] items visible'.format(len(items)))
+            self.ensureVisible(united)
+        else:
+            # Some space
+            debug_print('Zooming on [{0}] items'.format(len(items)))
+            united.adjust(-20, -20, 40, 40)
+            self.fitInView(united, Qt.KeepAspectRatio)
+
+            # TODO LH Need a better solution
+            if self.absolute_zoom > self.MAXIMUM_ZOOM:
+                self.new_absolute_zoom(self.MAXIMUM_ZOOM)
+
     def toggle_zoom(self):
         """Toggles between 'fit to screen' and a mild zoom / zoom to selected
         """
+        self.fit_to_view = not self.fit_to_view
         if self.fit_to_view:
+            self.zoom_home()
+        else:
             selected = self.scene().selectedItems()
             if selected:
-                r = unite_rects([i.sceneBoundingRect() for i in selected])
-
-                # Some space
-                r.adjust(-20, -20, 40, 40)
-                self.fitInView(r, Qt.KeepAspectRatio)
-                self.fit_to_view = False
-                # TODO LH Need a better solution
-                if self.absolute_zoom > self.MAXIMUM_ZOOM:
-                    self.new_absolute_zoom(self.MAXIMUM_ZOOM)
+                self.zoom_to_items(selected)
             else:
                 self.new_relative_zoom(4.0)
-        else:
-            self.zoom_home()
 
     def new_absolute_zoom(self, factor):
         """Sets a new absolute zoom
