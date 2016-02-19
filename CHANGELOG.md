@@ -3,6 +3,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 Version 0.1.20
 -------------
 - Fixed #184 - Missing menu item ellipses (@quicklizard99)
+- Fixed #181 - Box adjustment keyboard shortcuts (@quicklizard99)
 - Added #180 - Next / previous box should zoom to fit (@quicklizard99)
 
 Version 0.1.19
