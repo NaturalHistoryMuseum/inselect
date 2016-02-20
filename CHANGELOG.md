@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.20
 -------------
+- Fixed #188 - Choice of colour scheme not persisted (@quicklizard99)
 - Fixed #184 - Missing menu item ellipses (@quicklizard99)
 - Added #183 - Simple colour schemes (@quicklizard99)
 - Added #182 - Select by size (@quicklizard99)
