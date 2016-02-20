@@ -9,6 +9,7 @@ Version 0.1.20
 - Fixed #181 - Box adjustment keyboard shortcuts (@quicklizard99)
 - Added #180 - Next / previous box should zoom to fit (@quicklizard99)
 - Added #179 - Standard keyboard shortcuts to move between tabs (@quicklizard99)
+- Fixed #155 - Avoiding crop file name collisions (@quicklizard99)
 
 Version 0.1.19
 -------------
