@@ -19,14 +19,21 @@ class DocumentExport(object):
 
     def crop_fnames(self, document):
         "Generator function of instances of string"
-        items = enumerate(document.items)
-        fnames = (self._template.format_label(1+index, box['fields']) for index, box in items)
+        fnames = (
+            self._template.format_label(1 + index, box['fields'])
+            for index, box in enumerate(document.items)
+        )
         suffix = self._template.cropped_file_suffix
 
-        # Do not be tempted to use Path because fname might contain empty
-        # strings if the user has done something silly, which will cause
-        # Path() to raise an exception
-        return (u'{0}{1}'.format(fn, suffix) for fn in fnames)
+        # Append numerical suffix to avoid collisions
+        seen = set()
+        for base_fname in fnames:
+            fname = base_fname
+            append = count(start=1)
+            while fname in seen:
+                fname = u'{0}-{1}'.format(base_fname, next(append))
+            seen.add(fname)
+            yield u'{0}{1}'.format(fname, suffix)
 
     def crops_dir(self, document):
         return document.crops_dir
@@ -98,7 +105,7 @@ class DocumentExport(object):
             w = unicodecsv.writer(f, encoding='utf8')
             w.writerow(chain(['Cropped_image_name'], fields))
             for index, fname, box in izip(count(), crop_fnames, document.items):
-                md = metadata(1+index, box['fields'])
+                md = metadata(1 + index, box['fields'])
                 w.writerow(chain([fname], (md.get(f) for f in fields)))
 
         return path

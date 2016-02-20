@@ -86,5 +86,63 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 self.assertIsNone(next(reader, None))
 
 
+class TestCropFnameCollision(unittest.TestCase):
+    TEMPLATE = UserTemplate({
+        'Name': 'Test',
+        'Cropped file suffix': '.png',
+        'Thumbnail width pixels': 4096,
+        'Object label': u'{scientificName}',
+        'Fields': [
+            {
+                'Name': 'scientificName'
+            }
+        ]
+    })
+
+    def test_fname_collison(self):
+        "Duplicated crop fnames have numerical suffixes to avoid collisions"
+        class FakeDocument(object):
+            pass
+
+        document = FakeDocument()
+        document.items = [
+            {
+                "fields": {
+                    "scientificName": "A"
+                },
+            }, {
+                "fields": {
+                    "scientificName": "A"
+                },
+            }, {
+                "fields": {
+                    "scientificName": "A"
+                },
+            }, {
+                "fields": {
+                    "scientificName": "D"
+                },
+            }, {
+                "fields": {
+                    "scientificName": "B"
+                },
+            }, {
+                "fields": {
+                    "scientificName": "D"
+                },
+            }, {
+                "fields": {
+                    "scientificName": "A"
+                },
+            }
+        ]
+
+        fnames = list(DocumentExport(self.TEMPLATE).crop_fnames(document))
+        self.assertEqual(
+            ['A.png', 'A-1.png', 'A-2.png', 'D.png', 'B.png', 'D-1.png', 'A-3.png'],
+            fnames
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
