@@ -1,6 +1,8 @@
 import shutil
 import tempfile
 
+from collections import defaultdict
+from functools import partial
 from itertools import chain, count, izip
 from pathlib import Path
 
@@ -18,22 +20,24 @@ class DocumentExport(object):
             self._template = metadata_template
 
     def crop_fnames(self, document):
-        "Generator function of instances of string"
+        """Generator function of instances of string. Where filenames collide,
+        a suffix is appended, starting with '-1'
+        """
         fnames = (
             self._template.format_label(1 + index, box['fields'])
             for index, box in enumerate(document.items)
         )
-        suffix = self._template.cropped_file_suffix
 
-        # Append numerical suffix to avoid collisions
+        # Set of fnames that have been yielded
         seen = set()
+        # Mapping from base_fname to iterator of integer suffixes
+        suffix = defaultdict(partial(count, start=1))
         for base_fname in fnames:
             fname = base_fname
-            append = count(start=1)
             while fname in seen:
-                fname = u'{0}-{1}'.format(base_fname, next(append))
+                fname = u'{0}-{1}'.format(base_fname, next(suffix[base_fname]))
             seen.add(fname)
-            yield u'{0}{1}'.format(fname, suffix)
+            yield u'{0}{1}'.format(fname, self._template.cropped_file_suffix)
 
     def crops_dir(self, document):
         return document.crops_dir
