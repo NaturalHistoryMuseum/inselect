@@ -51,15 +51,49 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
             self.assertEqual(crops_dir, doc.crops_dir)
 
             cropped_fnames = sorted(crops_dir.glob('*.png'))
-            self.assertEqual(['01_1.png', '02_2.png', '03_10.png', '04_3.png', '05_4.png'],
-                             [f.name for f in cropped_fnames])
+            self.assertEqual(
+                ['01_1.png', '02_2.png', '03_10.png', '04_3.png', '05_4.png'],
+                [f.name for f in cropped_fnames]
+            )
 
             # Check the contents of each file
-            boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
+            boxes = doc.scanned.from_normalised(i['rect'] for i in doc.items)
             for box, path in izip(boxes, sorted(crops_dir.glob('*.png'))):
                 x0, y0, x1, y1 = box.coordinates
                 self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] ==
                                        cv2.imread(str(path))))
+
+    def test_cancel_save_crops(self):
+        "User cancels save crops"
+        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
+                                       TESTDATA / 'test_segment.png') as tempdir:
+            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
+
+            # Create crops dir with some data
+            doc.crops_dir.mkdir()
+            with doc.crops_dir.joinpath('a_file').open('w') as outfile:
+                outfile.write(u'Some data\n')
+
+            class CancelExport(Exception):
+                pass
+
+            def progress(msg):
+                "A progress function that cancels the export"
+                raise CancelExport()
+
+            self.assertRaises(
+                CancelExport,
+                DocumentExport(self.TEMPLATE).save_crops, doc, progress=progress
+            )
+
+            # Nothing should have changed within tempdir
+            self.assertEqual(
+                ['test_segment.inselect', 'test_segment.png', doc.crops_dir.name],
+                [p.name for p in tempdir.iterdir()])
+            self.assertEqual(
+                ['a_file'],
+                [p.name for p in doc.crops_dir.iterdir()]
+            )
 
     def test_csv_export(self):
         "CSV data are exported as expected"
