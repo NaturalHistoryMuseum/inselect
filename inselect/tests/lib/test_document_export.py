@@ -89,7 +89,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
             # Nothing should have changed within tempdir
             self.assertEqual(
                 ['test_segment.inselect', 'test_segment.png', doc.crops_dir.name],
-                [p.name for p in tempdir.iterdir()])
+                sorted(p.name for p in tempdir.iterdir()))
             self.assertEqual(
                 ['a_file'],
                 [p.name for p in doc.crops_dir.iterdir()]
