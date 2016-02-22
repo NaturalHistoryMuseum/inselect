@@ -43,8 +43,12 @@ class DocumentExport(object):
         return document.crops_dir
 
     def save_crops(self, document, progress=None):
-        "Saves images cropped from document.scanned to document.crops_dir"
-        # TODO LH Test that cancel of export leaves existing crops dir.
+        """Saves images cropped from document.scanned to document.crops_dir.
+        Crops are first written to a tempdir in the same directory as document.
+        If it exists, document.crops_dir is unlinked, and the tempdir is
+        renamed to document.crops_dir. Any existing data in document.crops_dir
+        is therefore lost.
+        """
         # Create temp dir alongside scan
         tempdir = tempfile.mkdtemp(
             dir=str(document.scanned.path.parent),
