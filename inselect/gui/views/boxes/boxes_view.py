@@ -181,6 +181,7 @@ class BoxesView(QtGui.QGraphicsView):
             self.ensureVisible(united)
         else:
             # Some space
+            # TODO LH Space should be in visible units
             debug_print('Zooming on [{0}] items'.format(len(items)))
             united.adjust(-20, -20, 40, 40)
             self.fitInView(united, Qt.KeepAspectRatio)
@@ -227,8 +228,9 @@ class BoxesView(QtGui.QGraphicsView):
             selected = self.scene().selectedItems()
             if selected:
                 # Centre on selected items
-                # self.ensureVisible(unite_rects([i.rect() for i in selected]))
-                self.centerOn(unite_rects([i.rect() for i in selected]).center())
+                self.centerOn(
+                    unite_rects(i.sceneBoundingRect() for i in selected).center()
+                )
 
     def dragEnterEvent(self, event):
         """QWidget virtual
