@@ -8,6 +8,8 @@ import inselect
 # that are not automatically detected by cx_Freeze. If running into problems,
 # try including the whole of numpy/scipy.
 
+SCRIPTS = ('export_metadata', 'ingest', 'read_barcodes', 'save_crops', 'segment')
+
 setup_data = {
     'name': 'inselect',
     'version': inselect.__version__,
@@ -19,10 +21,7 @@ setup_data = {
                  'inselect.gui.views.boxes', 'inselect.lib',
                  'inselect.lib.templates','inselect.workflow'],
     'test_suite': 'inselect.tests',
-    'scripts': ['inselect/workflow/export_metadata.py',
-                'inselect/workflow/ingest.py',
-                'inselect/workflow/save_crops.py',
-                'inselect/workflow/segment.py'],
+    'scripts': ['inselect/workflow/{0}.py'.format(script) for script in SCRIPTS],
     'install_requires' : open('requirements.txt').readlines(),
     'entry_points': {
         'console_scripts': [
@@ -36,41 +35,26 @@ setup_data = {
                 'targetName': 'inselect.exe',
                 'icon': 'data/inselect.ico',
                 'base': 'Win32GUI',
-                'shortcutName': 'Inselect', # See http://stackoverflow.com/a/15736406
+                'shortcutName': 'Inselect',     # See http://stackoverflow.com/a/15736406
                 'shortcutDir': 'ProgramMenuFolder'
-            },
+            }
+        ] + [
             {
-                'script': 'inselect/workflow/export_metadata.py',
-                'targetName': 'export_metadata.exe',
+                'script': 'inselect/workflow/{0}.py'.format(script),
+                'targetName': '{0}.exe'.format(script),
                 'icon': 'data/inselect.ico',
                 'base': 'Console'
-            },
-            {
-                'script': 'inselect/workflow/ingest.py',
-                'targetName': 'ingest.exe',
-                'icon': 'data/inselect.ico',
-                'base': 'Console'
-            },
-            {
-                'script': 'inselect/workflow/save_crops.py',
-                'targetName': 'save_crops.exe',
-                'icon': 'data/inselect.ico',
-                'base': 'Console'
-            },
-            {
-                'script': 'inselect/workflow/segment.py',
-                'targetName': 'segment.exe',
-                'icon': 'data/inselect.ico',
-                'base': 'Console'
-            },
+            }
+            for script in SCRIPTS
         ],
         'include_files': [
             ('{site_packages}/numpy', 'numpy'),
         ],
         'extra_packages': ['win32com.gen_py'],
-        'excludes': ['Tkinter', 'ttk', 'Tkconstants', 'tcl',
-                     'future.moves'    # Errors from urllib otherwise
-                    ]
+        'excludes': [
+            'Tkinter', 'ttk', 'Tkconstants', 'tcl',
+            'future.moves'    # Errors from urllib otherwise
+        ]
     }
 }
 
