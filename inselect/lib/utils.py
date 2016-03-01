@@ -92,9 +92,10 @@ def unique_everseen(iterable, key=None):
 
 
 def duplicated(v):
-    """Returns values within v that appear more than once
+    """Returns a generator expression of values within v that appear more than
+    once
     """
-    return [x for x, y in Counter(v).items() if y > 1]
+    return (x for x, y in Counter(v).items() if y > 1)
 
 
 class FormatDefault(string.Formatter):
