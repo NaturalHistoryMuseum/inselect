@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.20
 -------------
+- Fixed #193 - Better logic when checking for duplicated metadata values (@quicklizard99)
 - Added #190 - read_barcodes.py to take choice of barcode engine on command line (@quicklizard99)
 - Fixed #189 - Include read_barcodes (@quicklizard99)
 - Fixed #188 - Choice of colour scheme not persisted (@quicklizard99)

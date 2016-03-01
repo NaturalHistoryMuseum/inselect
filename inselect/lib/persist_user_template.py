@@ -34,7 +34,7 @@ class _UniqueListType(ListType):
             raise ValidationError('Values must be non-empty.')
 
     def validate_unique(self, value):
-        if duplicated(value):
+        if next(duplicated(value), None):
             raise ValidationError('Values must be unique.')
 
 
@@ -160,13 +160,13 @@ def _validate_fields_not_empty(fields):
 
 def _validate_field_names_unique(fields):
     "Field names must be unique"
-    if any(duplicated(f.name for f in fields)):
+    if next(duplicated(f.name for f in fields), None):
         raise ValidationError("Names must be unique")
 
 
 def _validate_field_labels_unique(fields):
     "Field labels must be unique"
-    if any(duplicated(f.label for f in fields)):
+    if next(duplicated(f.label for f in fields), None):
         raise ValidationError("Labels must be unique")
 
 
