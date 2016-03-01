@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import argparse
+import sys
 import traceback
 
 from pathlib import Path
@@ -42,17 +43,17 @@ def segment(dir):
             print('Skipping [{0}] as it already contains items'.format(p))
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(description='Segments Inselect documents')
     parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
     segment(args.dir)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

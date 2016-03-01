@@ -12,7 +12,7 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import rmtree_readonly
-from inselect.workflow.ingest import ingest_from_directory
+from inselect.workflow.ingest import main
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
@@ -48,9 +48,8 @@ class TestIngest(unittest.TestCase):
 
     def test_ingest_fail(self):
         "Inbox directory does not exist"
-        self.assertRaises(InselectError, ingest_from_directory,
-                          Path('I am not a directory'),
-                          self.docs)
+        self.assertRaises(InselectError, main,
+                          ['I am not a directory', unicode(self.docs)])
 
     def test_ingest_create_docs(self):
         "Document dir is created on ingest"
@@ -61,7 +60,7 @@ class TestIngest(unittest.TestCase):
         inbox_img = self.inbox / 'x.png'
         shutil.copy(str(TESTDATA / 'test_segment.png'), str(inbox_img))
 
-        ingest_from_directory(self.inbox, docs)
+        main([unicode(self.inbox), unicode(docs)])
 
         self.assertTrue(docs.is_dir())
 
@@ -75,7 +74,7 @@ class TestIngest(unittest.TestCase):
         # Read the image for comparison test
         original_image = cv2.imread(str(inbox_img))
 
-        ingest_from_directory(self.inbox, self.docs)
+        main([unicode(self.inbox), unicode(self.docs)])
 
         # Document, scan and thumbnail should all exists
         self.assertTrue((self.docs / 'x.inselect').is_file())
@@ -102,7 +101,7 @@ class TestIngest(unittest.TestCase):
         shutil.copy(str(TESTDATA / 'test_segment.png'), str(self.inbox / upper))
         shutil.copy(str(TESTDATA / 'test_segment.png'), str(self.inbox / title))
 
-        ingest_from_directory(self.inbox, self.docs)
+        main([unicode(self.inbox), unicode(self.docs)])
 
         # Images should have been removed from inbox
         self.assertFalse((self.inbox / lower).is_file())

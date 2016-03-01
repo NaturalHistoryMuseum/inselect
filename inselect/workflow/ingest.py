@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import argparse
+import sys
 import traceback
 
 from pathlib import Path
@@ -45,7 +46,7 @@ def ingest_from_directory(inbox, docs):
             print('Ingested [{0}]'.format(source))
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(description='Ingests images into Inselect')
     parser.add_argument("inbox", help='Source directory containing scanned images')
     parser.add_argument("docs", help='Destination directory to which images '
@@ -54,7 +55,7 @@ def main():
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
@@ -62,4 +63,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
