@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import argparse
+import sys
 import traceback
 
 from pathlib import Path
@@ -21,8 +22,8 @@ from inselect.lib.templates.dwc import DWC
 from inselect.lib.utils import debug_print
 
 
+# TODO Export with template name
 # TODO Recursive option
-# TODO Ignore existing CSV files; option to overwrite
 
 def export_csv(dir, overwrite_existing):
     dir = Path(dir)
@@ -36,14 +37,14 @@ def export_csv(dir, overwrite_existing):
             if not overwrite_existing and csv_path.is_file():
                 print('CSV file [{0}] exists - skipping'.format(csv_path))
             else:
-                print('Will write CSV for [{0}]'.format(p))
+                print('Writing CSV for [{0}]'.format(p))
                 export.export_csv(doc)
         except Exception:
             print('Error saving CSV from [{0}]'.format(p))
             traceback.print_exc()
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(description='Exports metadata from Inselect documents')
     parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('-o', '--overwrite', action='store_true',
@@ -51,11 +52,11 @@ def main():
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
     export_csv(args.dir, args.overwrite)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

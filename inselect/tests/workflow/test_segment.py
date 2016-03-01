@@ -4,7 +4,7 @@ from pathlib import Path
 
 from inselect.lib.ingest import ingest_image
 from inselect.lib.document import InselectDocument
-from inselect.workflow.segment import segment
+from inselect.workflow.segment import main
 
 from inselect.tests.utils import temp_directory_with_files
 
@@ -22,7 +22,7 @@ class TestSegment(unittest.TestCase):
             # Create a new document
             ingest_image(tempdir / 'test_segment.png', tempdir)
 
-            segment(tempdir)
+            main([unicode(tempdir)])
 
             doc_path = tempdir / 'test_segment.inselect'
             self.assertTrue(doc_path.is_file())
