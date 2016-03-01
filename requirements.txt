@@ -10,7 +10,7 @@ schematics>=1.1.0
 unicodecsv>=0.11.0
 
 # Not from PyPI
-https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.3.tar.gz
+https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.4.tar.gz
 https://github.com/NaturalHistoryMuseum/zbar-python-patched/archive/v0.10.tar.gz ; sys_platform != 'win32'
 
 # Development
