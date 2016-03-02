@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.21
+-------------
+- Fixed #198 - Opening both .inselect files and images by drag-drop is broken (@quicklizard99)
+
 Version 0.1.20
 -------------
 - Fixed #196 - Change colour scheme does not refresh view on Windows (@quicklizard99)
