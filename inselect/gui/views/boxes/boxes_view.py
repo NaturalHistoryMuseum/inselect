@@ -30,7 +30,8 @@ class BoxesView(QtGui.QGraphicsView):
     def colour_scheme_changed(self):
         """Slot for colour_scheme_changed signal
         """
-        self.update()
+        # viewport's update rather than self's update - http://stackoverflow.com/a/3318205
+        self.viewport().update()
 
     def updateSceneRect(self, rect):
         """QGraphicsView slot
