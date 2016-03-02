@@ -199,7 +199,7 @@ class MainWindow(QtGui.QMainWindow):
             if InselectDocument.EXTENSION == path.suffix:
                 # An inselect document
                 document_path = path
-            elif IMAGE_SUFFIXES_RE.match(path.suffix):
+            elif IMAGE_SUFFIXES_RE.match(path.name):
                 # Compute the path to the inselect document (which may or
                 # may not already exist) of the image file
                 doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
@@ -1229,7 +1229,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         urls = event.mimeData().urls() if event.mimeData() else None
         path = Path(urls[0].toLocalFile()) if urls and 1 == len(urls) else None
-        if path and IMAGE_SUFFIXES_RE.match(path.suffix):
+        if path and IMAGE_SUFFIXES_RE.match(path.name):
             return urls[0].toLocalFile()
         else:
             return None
