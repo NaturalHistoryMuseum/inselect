@@ -1229,7 +1229,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         urls = event.mimeData().urls() if event.mimeData() else None
         path = Path(urls[0].toLocalFile()) if urls and 1 == len(urls) else None
-        if path and IMAGE_SUFFIXES_RE.match(path.name):
+        if path and (InselectDocument.EXTENSION == path.suffix or
+                     IMAGE_SUFFIXES_RE.match(path.name)):
             return urls[0].toLocalFile()
         else:
             return None
