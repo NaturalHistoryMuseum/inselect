@@ -17,12 +17,12 @@ setup_data = {
     'maintainer_email': 'l.hudson@nhm.ac.uk',
     'url': 'https://github.com/NaturalHistoryMuseum/inselect/',
     'description': inselect.__doc__,
-    'packages': ['inselect','inselect.gui.plugins', 'inselect.gui.views',
+    'packages': ['inselect', 'inselect.gui.plugins', 'inselect.gui.views',
                  'inselect.gui.views.boxes', 'inselect.lib',
-                 'inselect.lib.templates','inselect.workflow'],
+                 'inselect.lib.templates', 'inselect.workflow'],
     'test_suite': 'inselect.tests',
     'scripts': ['inselect/workflow/{0}.py'.format(script) for script in SCRIPTS],
-    'install_requires' : open('requirements.txt').readlines(),
+    'install_requires': open('requirements.txt').readlines(),
     'entry_points': {
         'console_scripts': [
             'inselect = inselect.app:launch'
@@ -72,6 +72,7 @@ def distutils_setup():
         maintainer_email=setup_data['maintainer_email'],
         url=setup_data['url'],
     )
+
 
 def cx_setup():
     """cx_Freeze setup. Used for building Windows installers"""
