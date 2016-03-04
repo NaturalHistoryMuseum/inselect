@@ -1,13 +1,13 @@
 # Installed via conda / manually: PySide, Pillow, numpy, opencv, pywin32
-ExifRead==2.0.0
-humanize>=0.5.1
-pathlib>=1.0
-psutil>=3.0.1
-python-dateutil>=2.3
-pytz>=2014.4
-PyYAML>=3.11
-schematics>=1.1.0
-unicodecsv>=0.11.0
+exifread==2.1.2
+humanize==0.5.1
+pathlib==1.0.1
+psutil==4.0.0
+python-dateutil==2.5.0
+pytz==2015.7
+PyYAML==3.11
+schematics==1.1.1
+unicodecsv==0.14.1
 
 # Not from PyPI
 https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.5.tar.gz
