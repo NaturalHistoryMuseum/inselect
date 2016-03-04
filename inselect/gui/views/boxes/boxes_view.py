@@ -114,8 +114,8 @@ class BoxesView(QtGui.QGraphicsView):
                     # Add the box
                     self.scene().user_add_box(r)
                 else:
-                    # Chances are that the user just click the right mouse - do
-                    # nothing
+                    # Chances are that the user just clicked the right mouse -
+                    # do nothing
                     pass
         else:
             super(BoxesView, self).mouseReleaseEvent(event)
@@ -223,15 +223,31 @@ class BoxesView(QtGui.QGraphicsView):
             msg = 'Change absolute zoom from [{0}] to [{1}]'
             debug_print(msg.format(self.absolute_zoom, f))
 
+            selected = self.scene().selectedItems()
+            if not selected:
+                # No selection so we want to centre on the mouse cursor, if it
+                # is within the view. We need to get the mouse position in
+                # scene coords before applying the zoom.
+                mouse_pos = self.mapFromGlobal(QtGui.QCursor.pos())
+                if self.rect().contains(mouse_pos, proper=True):
+                    mouse_pos = self.mapToScene(mouse_pos)
+                else:
+                    mouse_pos = None
+
             self.setTransform(QtGui.QTransform.fromScale(f, f))
             self.fit_to_view = False
 
-            selected = self.scene().selectedItems()
             if selected:
                 # Centre on selected items
                 self.centerOn(
                     unite_rects(i.sceneBoundingRect() for i in selected).center()
                 )
+            elif mouse_pos:
+                # Centre on mouse position
+                self.centerOn(mouse_pos)
+            else:
+                # Default behaviour is fine
+                pass
 
     def dragEnterEvent(self, event):
         """QWidget virtual
