@@ -1,4 +1,5 @@
 import argparse
+import locale
 import sys
 
 from PySide import QtGui
@@ -42,6 +43,10 @@ def main(args):
     if parsed.locale:
         debug_print('Will set locale to [{0}]'.format(parsed.locale))
         QLocale.setDefault(QLocale(parsed.locale))
+        locale.setlocale(locale.LC_ALL, parsed.locale)
+    else:
+        # Set Python's locale module to the user's default locale
+        locale.setlocale(locale.LC_ALL, '')
 
     debug_print(u'Locale is [{0}]'.format(QLocale().name()))
 
