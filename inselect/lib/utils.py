@@ -27,11 +27,22 @@ except ImportError:
 
 
 DEBUG_PRINT = False
+DEFAULT_LOCALE = None
 
 
 def debug_print(*args, **kwargs):
     if DEBUG_PRINT:
         print(*args, **kwargs)
+
+
+def get_default_locale():
+    """Returns cached result of locale.getdefaultlocale()
+    """
+    global DEFAULT_LOCALE
+    if not DEFAULT_LOCALE:
+        DEFAULT_LOCALE = locale.getdefaultlocale()
+        debug_print('Loaded default locale [{0}]'.format(DEFAULT_LOCALE))
+    return DEFAULT_LOCALE
 
 
 def is_writable(path):
@@ -151,7 +162,15 @@ def format_dt_display(dt):
     if hasattr(locale, 'nl_langinfo'):
         # nl_langinfo "...is not available on all systems, and the set of
         # possible options might also vary across platforms"
-        return dt.strftime(locale.nl_langinfo(locale.D_T_FMT))
+        v = dt.strftime(locale.nl_langinfo(locale.D_T_FMT))
+        # strftime "...output may contain Unicode characters encoded using the
+        # locale's default encoding"
+        # locale.getlocale() is not the correct function to use - use
+        # locale.getdefaultlocale()
+        language_code, encoding = get_default_locale()
+        # Ignoring errors because I am paranoid about the behaviour of the
+        # locale functions
+        return unicode(v, encoding, 'ignore')
     elif win32api:
         # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
         LOCALE_USER_DEFAULT = 0x0400
