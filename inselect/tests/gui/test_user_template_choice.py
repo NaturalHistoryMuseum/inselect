@@ -9,6 +9,7 @@ from PySide.QtGui import QFileDialog
 from gui_test import MainWindowTest
 
 from inselect.gui.user_template_choice import user_template_choice
+from inselect.tests.utils import temp_directory_with_files
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -64,6 +65,39 @@ class TestUserTemplateChoice(MainWindowTest):
 
         self.assertEqual('Simple Darwin Core terms', user_template_choice().current.name)
         self.assertEqual(1, mock_gofn.call_count)
+
+    def test_select_default(self):
+        "User refreshes the current, non-default template"
+        w = self.window
+        with temp_directory_with_files(TESTDATA / 'test.inselect_template') as tempdir,\
+                patch.object(QSettings, 'setValue') as mock_setvalue:
+            path = tempdir / 'test.inselect_template'
+
+            # Load the test template in tempdir
+            retval = str(path), w.TEMPLATE_FILE_FILTER
+            with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
+                w.choose_user_template()
+                self.assertEqual(1, mock_gofn.call_count)
+
+            self.assertEqual('Test user template', user_template_choice().current.name)
+
+            # Write a new template to the file and refresh
+            template = u"""Name: An updated test template
+Fields:
+    - Name: catalogNumber
+      Label: Catalog number
+      URI: http://rs.tdwg.org/dwc/terms/catalogNumber
+      Mandatory: true
+      Regex parser: '^[0-9]{9}$'
+"""
+            with path.open('w') as outfile:
+                outfile.write(template)
+
+            # Refresh loaded template
+            with patch.object(QSettings, 'value', return_value=str(path)) as mock_value:
+                w.refresh_user_template()
+
+            self.assertEqual("An updated test template", user_template_choice().current.name)
 
 
 if __name__ == '__main__':
