@@ -85,10 +85,6 @@ class TestUserTemplateChoice(MainWindowTest):
             template = u"""Name: An updated test template
 Fields:
     - Name: catalogNumber
-      Label: Catalog number
-      URI: http://rs.tdwg.org/dwc/terms/catalogNumber
-      Mandatory: true
-      Regex parser: '^[0-9]{9}$'
 """
             with path.open('w') as outfile:
                 outfile.write(template)
@@ -96,6 +92,7 @@ Fields:
             # Refresh loaded template
             with patch.object(QSettings, 'value', return_value=str(path)) as mock_value:
                 w.refresh_user_template()
+                self.assertEqual(1, mock_value.call_count)
 
             self.assertEqual("An updated test template", user_template_choice().current.name)
 
