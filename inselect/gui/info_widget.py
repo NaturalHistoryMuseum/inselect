@@ -1,4 +1,5 @@
 import humanize
+import locale
 
 from PySide.QtGui import QWidget, QFormLayout, QLabel, QGroupBox, QVBoxLayout
 
@@ -108,15 +109,21 @@ class InfoWidget(QGroupBox):
             fsize = humanize.naturalsize(document.scanned.size_bytes, binary=True)
             self._scanned_size.setText(fsize)
 
-            dim = '{0:,} x {1:,}'
-            self._scanned_dimensions.setText(dim.format(*document.scanned.dimensions))
+            dim = '{0} x {1}'
+            self._scanned_dimensions.setText(dim.format(*(
+                locale.format("%d", n, grouping=True)
+                for n in document.scanned.dimensions)
+            ))
 
             # Thumbnail might not be present
             if document.thumbnail:
                 self._thumbnail_path.setText(document.thumbnail.path.name)
                 fsize = humanize.naturalsize(document.thumbnail.size_bytes, binary=True)
                 self._thumbnail_size.setText(fsize)
-                self._thumbnail_dimensions.setText(dim.format(*document.thumbnail.dimensions))
+                self._thumbnail_dimensions.setText(dim.format(*(
+                    locale.format("%d", n, grouping=True)
+                    for n in document.thumbnail.dimensions)
+                ))
             else:
                 self._thumbnail_path.setText('')
                 self._thumbnail_size.setText('')

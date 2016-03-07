@@ -1,3 +1,4 @@
+import locale
 from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print
@@ -24,10 +25,14 @@ class SummaryView(QAbstractItemView):
         self.widget.setLayout(layout)
 
     def _n_boxes(self, n):
-        self.n_boxes.setText('{0} boxes'.format(n))
+        self.n_boxes.setText(
+            '{0} boxes'.format(locale.format("%d", n, grouping=True))
+        )
 
     def _n_selected(self, n):
-        self.n_selected.setText('{0} selected'.format(n))
+        self.n_selected.setText(
+            '{0} selected'.format(locale.format("%d", n, grouping=True))
+        )
 
     def reset(self):
         """QAbstractItemView virtual
@@ -54,8 +59,7 @@ class SummaryView(QAbstractItemView):
         """QAbstractItemView slot
         """
         debug_print('SummaryView.selectionChanged')
-        n = len(self.selectionModel().selectedIndexes())
-        self.n_selected.setText('{0} selected'.format(n))
+        self._n_selected(len(self.selectionModel().selectedIndexes()))
 
     def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot
