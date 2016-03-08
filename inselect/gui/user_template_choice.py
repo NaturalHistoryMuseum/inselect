@@ -45,6 +45,18 @@ class UserTemplateChoice(QObject):
         QSettings().setValue(self.KEY, '')
         self.template_changed.emit()
 
+    def refresh(self):
+        """Reloads the current template
+        """
+        debug_print('UserTemplateChoice.refresh'.format())
+        current = QSettings().value(self.KEY)
+        if current:
+            # A template to refresh
+            self.load(current)
+        else:
+            # Using the default (DWC) template - no need to do anything
+            pass
+
     @property
     def current(self):
         "The selected UserTemplate"

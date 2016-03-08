@@ -913,6 +913,9 @@ class MainWindow(QtGui.QMainWindow):
         self.choose_user_template_action = QAction(
             "Choose template...", self, triggered=self.choose_user_template
         )
+        self.refresh_user_template_action  = QAction(
+            "Reload template", self, triggered=self.refresh_user_template
+        )
 
         # Plugins
         # Plugin shortcuts start at F5
@@ -1084,6 +1087,7 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addSeparator()
         self._edit_menu.addAction(self.default_user_template_action)
         self._edit_menu.addAction(self.choose_user_template_action)
+        self._edit_menu.addAction(self.refresh_user_template_action)
 
         self._edit_menu.addSeparator()
         for action in self.plugin_actions:
@@ -1193,6 +1197,11 @@ class MainWindow(QtGui.QMainWindow):
             user_template_choice().load(path)
             QSettings().setValue('user_template_last_directory',
                                  str(Path(path).parent))
+
+    @report_to_user
+    def refresh_user_template(self):
+        debug_print('MetadataView.refresh_user_template')
+        user_template_choice().refresh()
 
     @report_to_user
     def copy_to_new_document(self):
