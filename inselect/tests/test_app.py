@@ -1,3 +1,4 @@
+import locale
 import unittest
 
 from mock import patch
@@ -40,12 +41,16 @@ class TestApp(unittest.TestCase):
 
     @patch.object(QApplication, 'exec_', return_value=0)
     @patch.object(QLocale, 'setDefault')
-    def test_app_set_locale(self, mock_set_default, mock_exec_):
+    @patch.object(locale, 'setlocale')
+    def test_app_set_locale(self, mock_setlocale, mock_set_default, mock_exec_):
         "User starts the application with a non-default locale"
-        locale = 'ja_JP'
-        self.assertRaises(SystemExit, main, ['path to executable', '-l', locale])
+        # Python's locale.setlocale raises an exception if the locale is
+        # unrecognised, so it is mocked.
+        loc = 'ja_JP'
+        self.assertRaises(SystemExit, main, ['path to executable', '-l', loc])
         self.assertTrue(mock_exec_.called)
-        mock_set_default.assert_called_once_with(locale)
+        mock_set_default.assert_called_once_with(loc)
+        mock_setlocale.assert_called_once_with(locale.LC_ALL, loc)
 
 
 if __name__ == '__main__':
