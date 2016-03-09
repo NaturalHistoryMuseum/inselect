@@ -70,7 +70,8 @@ class TestCookieCutterChoice(MainWindowTest):
         self.assertEqual(None, cookie_cutter_choice().current)
         self.assertEqual(1, mock_gofn.call_count)
 
-    def test_save_to_cookie_cutter(self):
+    @patch.object(QSettings, 'setValue')
+    def test_save_to_cookie_cutter(self, mock_setvalue):
         "Create a new cookie cutter"
         w = self.window
         w.open_document(TESTDATA / 'test_segment.inselect')
@@ -92,7 +93,8 @@ class TestCookieCutterChoice(MainWindowTest):
             cookie_cutter_choice().current.name
         )
 
-    def test_new_document(self):
+    @patch.object(QSettings, 'setValue')
+    def test_new_document(self, mock_setvalue):
         "Create a new document with cookie cutter applied"
         w = self.window
         w.cookie_cutter_widget.clear()
@@ -105,7 +107,7 @@ class TestCookieCutterChoice(MainWindowTest):
 
         with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir, \
                 patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes) as mock_information:
-            self.run_async_operation(partial(self.window.new_document,
+            self.run_async_operation(partial(w.new_document,
                                              tempdir / 'test_segment.png'))
             self.assertEqual(1, mock_information.call_count)
             doc = InselectDocument.load(tempdir / 'test_segment.inselect')
@@ -114,7 +116,8 @@ class TestCookieCutterChoice(MainWindowTest):
         self.assertEqual(4, w.model.rowCount())
         self.assertEqual(4, len(doc.items))
 
-    def test_apply_cookie_cutter(self):
+    @patch.object(QSettings, 'setValue')
+    def test_apply_cookie_cutter(self, mock_setvalue):
         "Applies the cookie cutter to the open document"
         w = self.window
         w.open_document(TESTDATA / 'test_segment.inselect')
@@ -137,7 +140,7 @@ class TestCookieCutterChoice(MainWindowTest):
 
         # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
-            self.assertTrue(self.window.close_document())
+            self.assertTrue(w.close_document())
 
 
 if __name__ == '__main__':
