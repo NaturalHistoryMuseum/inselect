@@ -18,10 +18,17 @@ IMAGE_PATTERNS = tuple(['*{0}'.format(s) for s in IMAGE_SUFFIXES])
 
 def ingest_image(source, dest_dir,
                  thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
-                 default_metadata_items=None):
+                 default_metadata_items=None,
+                 cookie_cutter=None):
     """Copies the image in the path source to the directory in the path
     dest_dir. Creates an returns a new instance of InselectDocument for the
     copied image.
+
+    default_metadata_items should be either None or a list of dicts.
+    cookie_cutter should be either None or an instance of lib.CookieCutter.
+
+    Default metadata takes precedence - cookie cutter items are applied only if
+    default_metadata_items is None.
 
     An exception is raised if the destination image exists.
     An exception is raised if the Inselect document already exists.
@@ -41,7 +48,14 @@ def ingest_image(source, dest_dir,
         doc.ensure_thumbnail(thumbnail_width_pixels)
 
         if default_metadata_items:
+            debug_print('Adding [{0}] default metadata items'.format(
+                len(default_metadata_items)
+            ))
             doc.set_items(default_metadata_items)
+            doc.save()
+        elif cookie_cutter:
+            debug_print('Adding cookie cutter items')
+            cookie_cutter.apply(doc)
             doc.save()
 
         # Make images read-only

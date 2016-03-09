@@ -12,6 +12,7 @@ from PySide.QtGui import (QMenu, QAction, QMessageBox, QDesktopServices,
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa
 
+from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
@@ -22,6 +23,7 @@ from inselect.lib.utils import debug_print, is_writable
 from .about import show_about_box
 from .colours import colour_scheme_choice
 from .info_widget import InfoWidget
+from .cookie_cutter_choice import cookie_cutter_choice
 from .format_validation_problems import format_validation_problems
 from .model import Model
 from .plugins.barcode import BarcodePlugin
@@ -50,7 +52,12 @@ class MainWindow(QtGui.QMainWindow):
     IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
 
     TEMPLATE_FILE_FILTER = u'Inselect user templates (*{0})'.format(
-        UserTemplate.EXTENSION)
+        UserTemplate.EXTENSION
+    )
+
+    cookie_cutter_FILE_FILTER = u'Inselect cookie cutter (*{0})'.format(
+        CookieCutter.EXTENSION
+    )
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -137,7 +144,12 @@ class MainWindow(QtGui.QMainWindow):
         # Conect signals
         self.tabs.currentChanged.connect(self.current_tab_changed)
         sm.selectionChanged.connect(self.selection_changed)
-        colour_scheme_choice().colour_scheme_changed.connect(self.colour_scheme_changed)
+        colour_scheme_choice().colour_scheme_changed.connect(
+            self.colour_scheme_changed
+        )
+        cookie_cutter_choice().cookie_cutter_changed.connect(
+            self.sync_cookie_cutter_menu_name
+        )
 
         # Filter events
         self.tabs.installEventFilter(self)
@@ -249,7 +261,8 @@ class MainWindow(QtGui.QMainWindow):
                     progress('Creating thumbnail of scanned image')
                     doc = ingest_image(self.image, self.image.parent,
                                        thumbnail_width,
-                                       self.default_metadata_items)
+                                       self.default_metadata_items,
+                                       cookie_cutter_choice().current)
                     self.document_path = doc.document_path
 
             self.run_in_worker(NewDoc(path, default_metadata_items),
@@ -265,6 +278,7 @@ class MainWindow(QtGui.QMainWindow):
         QSettings().setValue('working_directory', str(document_path.parent))
 
         self.open_file(document_path)
+
         msg = u'New Inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
         QMessageBox.information(self, "Document created", msg)
@@ -491,7 +505,9 @@ class MainWindow(QtGui.QMainWindow):
         default_fname = Path(default_fname).with_suffix(default_extension)
 
         # Default folder is the user's documents folder
-        default_dir = QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        default_dir = QDesktopServices.storageLocation(
+            QDesktopServices.DocumentsLocation
+        )
 
         debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
         debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
@@ -914,6 +930,21 @@ class MainWindow(QtGui.QMainWindow):
             "Choose template...", self, triggered=self.choose_user_template
         )
 
+        self.save_to_cookie_cutter_action = QAction(
+            "Save to new cookie cutter...", self,
+            triggered=self.save_to_cookie_cutter
+        )
+        self.choose_cookie_cutter_action = QAction(
+            "Choose cookie cutter...", self, triggered=self.choose_cookie_cutter
+        )
+        self.clear_cookie_cutter_action = QAction(
+            "Clear cookie cutter choice", self, triggered=self.clear_cookie_cutter
+        )
+        self.apply_cookie_cutter_action = QAction(
+            "New cookie cutter", self, triggered=self.apply_cookie_cutter
+        )
+        self.sync_cookie_cutter_menu_name()
+
         # Plugins
         # Plugin shortcuts start at F5
         shortcut_offset = 5
@@ -1084,6 +1115,12 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addSeparator()
         self._edit_menu.addAction(self.default_user_template_action)
         self._edit_menu.addAction(self.choose_user_template_action)
+        self._edit_menu.addSeparator()
+        cookie_cutter_popup = self._edit_menu.addMenu('Cookie cutter')
+        cookie_cutter_popup.addAction(self.choose_cookie_cutter_action)
+        cookie_cutter_popup.addAction(self.clear_cookie_cutter_action)
+        cookie_cutter_popup.addAction(self.apply_cookie_cutter_action)
+        cookie_cutter_popup.addAction(self.save_to_cookie_cutter_action)
 
         self._edit_menu.addSeparator()
         for action in self.plugin_actions:
@@ -1178,7 +1215,7 @@ class MainWindow(QtGui.QMainWindow):
     @report_to_user
     def choose_user_template(self):
         "Shows a 'choose template' file dialog"
-        debug_print('MetadataView._choose_template_clicked')
+        debug_print('MainWindow.choose_user_template')
 
         folder = QSettings().value(
             'user_template_last_directory',
@@ -1195,12 +1232,90 @@ class MainWindow(QtGui.QMainWindow):
                                  str(Path(path).parent))
 
     @report_to_user
+    def save_to_cookie_cutter(self):
+        "Saves bounding boxes to a new 'cookie cutter' file"
+        folder = QSettings().value(
+            'cookie_cutter_last_directory',
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        )
+
+        path, selectedFilter = QtGui.QFileDialog.getSaveFileName(
+            self, "New cookie cutter", folder, self.cookie_cutter_FILE_FILTER
+        )
+
+        if path:
+            # Save the user's choice
+            self.model.to_document(self.document)
+            cookie_cutter_choice().create_and_use(
+                [tuple(v['rect']) for v in self.document.items],
+                path
+            )
+            QSettings().setValue('cookie_cutter_last_directory',
+                                 str(Path(path).parent))
+
+    @report_to_user
+    def clear_cookie_cutter(self):
+        "Clears the choice of cookie cutter"
+        cookie_cutter_choice().clear()
+
+    @report_to_user
+    def choose_cookie_cutter(self):
+        "Shows a 'choose cookie cutter' file dialog"
+        debug_print('MainWindow.choose_cookie_cutter')
+
+        folder = QSettings().value(
+            'cookie_cutter_last_directory',
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        )
+
+        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
+            self, "Choose cookie cutter", folder,
+            self.cookie_cutter_FILE_FILTER
+        )
+
+        if path:
+            # Save the user's choice
+            cookie_cutter_choice().load(path)
+            QSettings().setValue('cookie_cutter_last_directory',
+                                 str(Path(path).parent))
+
+    def sync_cookie_cutter_menu_name(self):
+        """Slot for self.tabs.currentChanged() signal
+        """
+        debug_print('MainWindow.new_cookie_cutter_choice')
+        current = cookie_cutter_choice().current
+        self.apply_cookie_cutter_action.setText(
+            u"Apply '{0}'".format(current.name)
+            if current else
+            "Apply cookie cutter"
+        )
+
+    @report_to_user
+    def apply_cookie_cutter(self):
+        """Replaces existing boxes with those in cookie_cutter_choice.
+        """
+        debug_print('MainWindow.apply_cookie_cutter')
+        if self.model.rowCount():
+            msg = ('Segmenting will cause all boxes and metadata to be '
+                   'replaced.\n\nContinue and replace all existing '
+                   'boxes and metadata')
+            res = QMessageBox.question(self.parent, 'Replace boxes?', msg,
+                                       QMessageBox.No, QMessageBox.Yes)
+        else:
+            res = QMessageBox.Yes
+
+        if QMessageBox.Yes == res:
+            self.model.set_new_boxes(
+                cookie_cutter_choice().current.document_items
+            )
+
+    @report_to_user
     def copy_to_new_document(self):
         """Prompts the user to choose an image, creates an inselect document
         for the selected image, copies metadata from the currently open
         document to the new document and finally opens the new document
         """
-        debug_print('MetadataView.copy_to_new_document')
+        debug_print('MainWindow.copy_to_new_document')
 
         folder = QSettings().value(
             'working_directory',
@@ -1306,6 +1421,15 @@ class MainWindow(QtGui.QMainWindow):
         self.delete_action.setEnabled(has_selection)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
+        self.save_to_cookie_cutter_action.setEnabled(
+            has_rows
+        )
+        self.clear_cookie_cutter_action.setEnabled(
+            cookie_cutter_choice().current is not None
+        )
+        self.apply_cookie_cutter_action.setEnabled(
+            document and cookie_cutter_choice().current is not None
+        )
         for action in self.plugin_actions:
             action.setEnabled(document)
 
