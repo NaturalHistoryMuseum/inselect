@@ -25,7 +25,7 @@ class UserTemplateChoice(QObject):
             except Exception:
                 debug_print(u'Error loading user template [{0}]'.format(previous))
 
-    def _load(sef, path):
+    def _load(self, path):
         "Loads the UserTemplate in path"
         debug_print('UserTemplateChoice._load [{0}]'.format(path))
         with Path(path).open(encoding='utf8') as infile:
@@ -40,7 +40,7 @@ class UserTemplateChoice(QObject):
 
     def select_default(self):
         "Selects the default Darwin Core Archive template"
-        debug_print('UserTemplateChoice.select_default'.format())
+        debug_print('UserTemplateChoice.select_default')
         self._current = DWC
         QSettings().setValue(self.KEY, '')
         self.template_changed.emit()
