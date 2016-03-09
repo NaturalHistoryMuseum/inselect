@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from PySide.QtCore import QObject, QSettings, Signal
+from PySide.QtGui import QDesktopServices
 
 from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
@@ -19,7 +22,8 @@ def cookie_cutter_choice():
 class CookieCutterChoice(QObject):
     "Maintains the user's choice of CookieCutter"
 
-    KEY = 'cookie_cutter_path'
+    PATH_KEY = 'cookie_cutter_path'
+    DIRECTORY_KEY = 'cookie_cutter_last_directory'
 
     # Emitted when the user picks a new file
     cookie_cutter_changed = Signal()
@@ -27,7 +31,7 @@ class CookieCutterChoice(QObject):
     def __init__(self):
         super(CookieCutterChoice, self).__init__()
         self._current = None
-        previous = QSettings().value(self.KEY)
+        previous = QSettings().value(self.PATH_KEY)
         if previous:
             try:
                 self._current = self._load(previous)
@@ -36,23 +40,34 @@ class CookieCutterChoice(QObject):
                     u'Error loading cookie cutter [{0}]'.format(previous)
                 )
 
+    @classmethod
+    def last_directory(cls):
+        "Path the the most recently used directory"
+        return Path(QSettings().value(
+            cls.DIRECTORY_KEY,
+            QDesktopServices.DocumentsLocation
+        ))
+
     def _load(self, path):
         "Loads the CookieCutter in path"
         debug_print(u'CookieCutterChoice._load [{0}]'.format(path))
-        return CookieCutter.from_path(path)
+        return CookieCutter.load(path)
 
     def load(self, path):
-        "Loads the CookieCutter in path"
+        """Loads the CookieCutter in path, updates settings and emits
+        cookie_cutter_changed
+        """
         debug_print(u'CookieCutterChoice.load [{0}]'.format(path))
         self._current = self._load(path)
-        QSettings().setValue(self.KEY, str(path))
+        QSettings().setValue(self.PATH_KEY, unicode(path))
+        QSettings().setValue(self.DIRECTORY_KEY, unicode(Path(path).parent))
         self.cookie_cutter_changed.emit()
 
     def clear(self):
         "Selects cookie cutter"
         debug_print('CookieCutterChoice.clear')
         self._current = None
-        QSettings().setValue(self.KEY, '')
+        QSettings().setValue(self.PATH_KEY, '')
         self.cookie_cutter_changed.emit()
 
     def create_and_use(self, boxes, path):
@@ -61,7 +76,7 @@ class CookieCutterChoice(QObject):
         """
         debug_print(u'CookieCutterChoice.create_and_use to [{0}]'.format(path))
         cookie_cutter = CookieCutter('', boxes)
-        cookie_cutter.to_file(path)
+        cookie_cutter.save(path)
         self.load(path)
 
     @property

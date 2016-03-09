@@ -12,7 +12,6 @@ from PySide.QtGui import (QMenu, QAction, QMessageBox, QDesktopServices,
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa
 
-from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
@@ -24,6 +23,7 @@ from .about import show_about_box
 from .colours import colour_scheme_choice
 from .info_widget import InfoWidget
 from .cookie_cutter_choice import cookie_cutter_choice
+from .cookie_cutter_widget import CookieCutterWidget
 from .format_validation_problems import format_validation_problems
 from .model import Model
 from .plugins.barcode import BarcodePlugin
@@ -55,10 +55,6 @@ class MainWindow(QtGui.QMainWindow):
         UserTemplate.EXTENSION
     )
 
-    cookie_cutter_FILE_FILTER = u'Inselect cookie cutter (*{0})'.format(
-        CookieCutter.EXTENSION
-    )
-
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
         self.app = app
@@ -82,6 +78,18 @@ class MainWindow(QtGui.QMainWindow):
 
         # Information about the loaded document
         self.info_widget = InfoWidget()
+
+        # Cookie cutter widget
+        self.cookie_cutter_widget = CookieCutterWidget()
+        self.cookie_cutter_widget.save_to_new_action.triggered.connect(
+            self.save_to_cookie_cutter
+        )
+        self.cookie_cutter_widget.apply_current_action.triggered.connect(
+            self.apply_cookie_cutter
+        )
+        cookie_cutter_choice().cookie_cutter_changed.connect(
+            self.new_cookie_cutter
+        )
 
         # Metadata view above info
         sidebar_layout = QVBoxLayout()
@@ -146,9 +154,6 @@ class MainWindow(QtGui.QMainWindow):
         sm.selectionChanged.connect(self.selection_changed)
         colour_scheme_choice().colour_scheme_changed.connect(
             self.colour_scheme_changed
-        )
-        cookie_cutter_choice().cookie_cutter_changed.connect(
-            self.sync_cookie_cutter_menu_name
         )
 
         # Filter events
@@ -930,21 +935,6 @@ class MainWindow(QtGui.QMainWindow):
             "Choose template...", self, triggered=self.choose_user_template
         )
 
-        self.save_to_cookie_cutter_action = QAction(
-            "Save to new cookie cutter...", self,
-            triggered=self.save_to_cookie_cutter
-        )
-        self.choose_cookie_cutter_action = QAction(
-            "Choose cookie cutter...", self, triggered=self.choose_cookie_cutter
-        )
-        self.clear_cookie_cutter_action = QAction(
-            "Clear cookie cutter choice", self, triggered=self.clear_cookie_cutter
-        )
-        self.apply_cookie_cutter_action = QAction(
-            "New cookie cutter", self, triggered=self.apply_cookie_cutter
-        )
-        self.sync_cookie_cutter_menu_name()
-
         # Plugins
         # Plugin shortcuts start at F5
         shortcut_offset = 5
@@ -1075,6 +1065,7 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.addAction(self.zoom_in_action)
         self.toolbar.addAction(self.zoom_out_action)
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        self.toolbar.addWidget(self.cookie_cutter_widget)
 
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.view_summary.widget)
@@ -1117,10 +1108,7 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addAction(self.choose_user_template_action)
         self._edit_menu.addSeparator()
         cookie_cutter_popup = self._edit_menu.addMenu('Cookie cutter')
-        cookie_cutter_popup.addAction(self.choose_cookie_cutter_action)
-        cookie_cutter_popup.addAction(self.clear_cookie_cutter_action)
-        cookie_cutter_popup.addAction(self.apply_cookie_cutter_action)
-        cookie_cutter_popup.addAction(self.save_to_cookie_cutter_action)
+        self.cookie_cutter_widget.inject_actions(cookie_cutter_popup)
 
         self._edit_menu.addSeparator()
         for action in self.plugin_actions:
@@ -1231,16 +1219,19 @@ class MainWindow(QtGui.QMainWindow):
             QSettings().setValue('user_template_last_directory',
                                  str(Path(path).parent))
 
+    def new_cookie_cutter(self):
+        """Slot for cookie_cutter_changed signal - sets menu and button text
+        """
+        debug_print('MainWindow.new_cookie_cutter')
+        self.sync_ui()
+
     @report_to_user
     def save_to_cookie_cutter(self):
         "Saves bounding boxes to a new 'cookie cutter' file"
-        folder = QSettings().value(
-            'cookie_cutter_last_directory',
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
-        )
-
+        folder = unicode(cookie_cutter_choice().last_directory())
         path, selectedFilter = QtGui.QFileDialog.getSaveFileName(
-            self, "New cookie cutter", folder, self.cookie_cutter_FILE_FILTER
+            self, "New cookie cutter", folder,
+            CookieCutterWidget.COOKIE_CUTTER_FILE_FILTER
         )
 
         if path:
@@ -1250,45 +1241,6 @@ class MainWindow(QtGui.QMainWindow):
                 [tuple(v['rect']) for v in self.document.items],
                 path
             )
-            QSettings().setValue('cookie_cutter_last_directory',
-                                 str(Path(path).parent))
-
-    @report_to_user
-    def clear_cookie_cutter(self):
-        "Clears the choice of cookie cutter"
-        cookie_cutter_choice().clear()
-
-    @report_to_user
-    def choose_cookie_cutter(self):
-        "Shows a 'choose cookie cutter' file dialog"
-        debug_print('MainWindow.choose_cookie_cutter')
-
-        folder = QSettings().value(
-            'cookie_cutter_last_directory',
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
-        )
-
-        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
-            self, "Choose cookie cutter", folder,
-            self.cookie_cutter_FILE_FILTER
-        )
-
-        if path:
-            # Save the user's choice
-            cookie_cutter_choice().load(path)
-            QSettings().setValue('cookie_cutter_last_directory',
-                                 str(Path(path).parent))
-
-    def sync_cookie_cutter_menu_name(self):
-        """Slot for self.tabs.currentChanged() signal
-        """
-        debug_print('MainWindow.new_cookie_cutter_choice')
-        current = cookie_cutter_choice().current
-        self.apply_cookie_cutter_action.setText(
-            u"Apply '{0}'".format(current.name)
-            if current else
-            "Apply cookie cutter"
-        )
 
     @report_to_user
     def apply_cookie_cutter(self):
@@ -1296,10 +1248,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.apply_cookie_cutter')
         if self.model.rowCount():
-            msg = ('Segmenting will cause all boxes and metadata to be '
-                   'replaced.\n\nContinue and replace all existing '
-                   'boxes and metadata')
-            res = QMessageBox.question(self.parent, 'Replace boxes?', msg,
+            msg = ('Applying the cookie cutter will cause all boxes and '
+                   'metadata to be replaced.\n\nContinue and replace all '
+                   'existing boxes and metadata?')
+            res = QMessageBox.question(self, 'Replace boxes?', msg,
                                        QMessageBox.No, QMessageBox.Yes)
         else:
             res = QMessageBox.Yes
@@ -1421,15 +1373,7 @@ class MainWindow(QtGui.QMainWindow):
         self.delete_action.setEnabled(has_selection)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
-        self.save_to_cookie_cutter_action.setEnabled(
-            has_rows
-        )
-        self.clear_cookie_cutter_action.setEnabled(
-            cookie_cutter_choice().current is not None
-        )
-        self.apply_cookie_cutter_action.setEnabled(
-            document and cookie_cutter_choice().current is not None
-        )
+        self.cookie_cutter_widget.sync_actions(document, has_rows)
         for action in self.plugin_actions:
             action.setEnabled(document)
 

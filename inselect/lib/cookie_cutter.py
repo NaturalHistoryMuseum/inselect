@@ -23,11 +23,13 @@ class CookieCutter(object):
             not all(isinstance(v, float) for v in chain(*boxes))):
             raise ValueError('Must be a list of numeric coordinates')
         else:
-            self.name = name
             self._boxes = deepcopy(boxes)
+            self.name = u'{0} ({1} boxes)'.format(
+                name, len(self._boxes)
+            )
 
     @classmethod
-    def from_path(cls, path):
+    def load(cls, path):
         """Returns a new instance of CookieCutter using the json document at
         path
         """
@@ -43,7 +45,7 @@ class CookieCutter(object):
         else:
             return cls(Path(path).stem, doc['boxes'])
 
-    def to_file(self, path):
+    def save(self, path):
         """Writes boxes to path
         """
         doc = {
