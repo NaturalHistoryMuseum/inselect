@@ -142,7 +142,7 @@ class InselectDocument(object):
         return self._properties
 
     def set_items(self, items):
-        "Replace self.items with items"
+        "Replace self.items with a deep copy of items"
         items = deepcopy(items)
         items = self._preprocess_items(items)
         self._items = items
@@ -238,8 +238,7 @@ class InselectDocument(object):
         # Convert Rect instances to lists
         items = deepcopy(self._items)
         for i in xrange(0, len(items)):
-            l, t, w, h = items[i]['rect']
-            items[i]['rect'] = [l, t, w, h]
+            items[i]['rect'] = tuple(items[i]['rect'])
 
         self.properties.update({'Saved by': user_name(),
                                 'Saved on': datetime.now(pytz.timezone("UTC"))})
