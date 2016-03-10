@@ -80,11 +80,20 @@ def show_about_box(parent=None):
          to report problems and provide suggestions.
        </p>
 
-       Inselect is Copyright (c) 2014-2015, The Trustees of the Natural History
+       Inselect is Copyright (c) 2014-2016, The Trustees of the Natural History
        Museum, London and licensed under the
        <a href="https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md">
          Modified BSD License
        </a>.
+
+       <h2>Acknowledgements</h2>
+       <p>
+        This research received support from the SYNTHESYS Project,
+        <a href="http://www.synthesys.info/">www.synthesys.info</a>,
+        which is financed by European Community Research Infrastructure Action
+        under the FP7 Integrating Activities Programme (Grant agreement number
+        312253).
+       </p>
 
        <h2>Contributors</h2>
        <p>
