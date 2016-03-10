@@ -45,7 +45,7 @@ class CookieCutterChoice(QObject):
         "Path the the most recently used directory"
         return Path(QSettings().value(
             cls.DIRECTORY_KEY,
-            QDesktopServices.DocumentsLocation
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
         ))
 
     def _load(self, path):
