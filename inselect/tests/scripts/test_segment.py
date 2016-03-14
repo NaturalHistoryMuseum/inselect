@@ -4,7 +4,7 @@ from pathlib import Path
 
 from inselect.lib.ingest import ingest_image
 from inselect.lib.document import InselectDocument
-from inselect.workflow.segment import main
+from inselect.scripts.segment import main
 
 from inselect.tests.utils import temp_directory_with_files
 

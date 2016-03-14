@@ -7,7 +7,7 @@ import unicodecsv
 
 from inselect.lib.document import InselectDocument
 
-from inselect.workflow.export_metadata import main
+from inselect.scripts.export_metadata import main
 
 from inselect.tests.utils import temp_directory_with_files
 

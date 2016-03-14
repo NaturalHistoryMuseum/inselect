@@ -19,9 +19,9 @@ setup_data = {
     'description': inselect.__doc__,
     'packages': ['inselect', 'inselect.gui.plugins', 'inselect.gui.views',
                  'inselect.gui.views.boxes', 'inselect.lib',
-                 'inselect.lib.templates', 'inselect.workflow'],
+                 'inselect.lib.templates', 'inselect.scripts'],
     'test_suite': 'inselect.tests',
-    'scripts': ['inselect/workflow/{0}.py'.format(script) for script in SCRIPTS],
+    'scripts': ['inselect/scripts/{0}.py'.format(script) for script in SCRIPTS],
     'install_requires': open('requirements.txt').readlines(),
     'entry_points': {
         'console_scripts': [
@@ -40,7 +40,7 @@ setup_data = {
             }
         ] + [
             {
-                'script': 'inselect/workflow/{0}.py'.format(script),
+                'script': 'inselect/scripts/{0}.py'.format(script),
                 'targetName': '{0}.exe'.format(script),
                 'icon': 'data/inselect.ico',
                 'base': 'Console'
