@@ -12,7 +12,7 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import rmtree_readonly
-from inselect.workflow.ingest import main
+from inselect.scripts.ingest import main
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'

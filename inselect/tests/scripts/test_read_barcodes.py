@@ -4,7 +4,7 @@ from pathlib import Path
 
 from inselect.lib.document import InselectDocument
 
-from inselect.workflow.read_barcodes import main
+from inselect.scripts.read_barcodes import main
 
 from inselect.tests.utils import temp_directory_with_files
 

@@ -6,6 +6,7 @@ Version 0.1.21
 - Added #205 - A 'Reload template' button (@quicklizard99)
 - Fixed #198 - Opening both .inselect files and images by drag-drop is broken (@quicklizard99)
 - Added #192 - Cookie cutter templates (@quicklizard99)
+- Fixed #176 - workflow to scripts (@quicklizard99)
 - Fixed #48 - Zooming should follow mouse position (@quicklizard99)
 
 Version 0.1.20
