@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.22
+-------------
+
 Version 0.1.21
 -------------
 - Fixed #208 - Thousands separators for N boxes and N selected boxes (@quicklizard99)
