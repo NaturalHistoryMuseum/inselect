@@ -17,7 +17,6 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 # TODO LH Many more tests required
-# TODO Check stdout / stderr
 
 class TestExportCSV(unittest.TestCase):
     def test_export_csv_with_existing(self):
