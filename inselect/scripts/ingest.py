@@ -31,24 +31,24 @@ def ingest_from_directory(inbox, docs, cookie_cutter=None):
     inbox, docs = Path(inbox), Path(docs)
     cookie_cutter = Path(cookie_cutter) if cookie_cutter else None
     if not inbox.is_dir():
-        raise InselectError('Inbox directory [{0}] does not exist'.format(inbox))
+        raise InselectError(u'Inbox directory [{0}] does not exist'.format(inbox))
 
     if not docs.is_dir():
-        print('Create document directory [{0}]'.format(docs))
+        print(u'Create document directory [{0}]'.format(docs))
         docs.mkdir(parents=True)
 
     if cookie_cutter:
         cookie_cutter = CookieCutter.load(cookie_cutter)
 
     for source in (p for p in inbox.iterdir() if IMAGE_SUFFIXES_RE.match(p.name)):
-        print('Ingesting [{0}]'.format(source))
+        print(u'Ingesting [{0}]'.format(source))
         try:
             ingest_image(source, docs, cookie_cutter=cookie_cutter)
         except Exception:
-            print('Error ingesting [{0}]'.format(source))
+            print(u'Error ingesting [{0}]'.format(source))
             traceback.print_exc()
         else:
-            print('Ingested [{0}]'.format(source))
+            print(u'Ingested [{0}]'.format(source))
 
 
 def main(args):

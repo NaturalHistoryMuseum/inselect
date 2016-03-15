@@ -32,7 +32,7 @@ def _visit_box(template, visitor, index, box):
         try:
             parse(md[field])
         except ValueError:
-            visitor.failed_parse(index, box_label, field)
+            visitor.failed_parse(index, box_label, field, md[field])
 
 
 def _visit_labels(document, template, visitor):
@@ -48,7 +48,7 @@ def _visit_labels(document, template, visitor):
         visitor.duplicated_labels(label)
 
 MissingMandatory = namedtuple('MissingMandatory', ['index', 'label', 'field'])
-FailedParse = namedtuple('FailedParse', ['index', 'label', 'field'])
+FailedParse = namedtuple('FailedParse', ['index', 'label', 'field', 'value'])
 
 
 class CollectProblemsVisitor(object):
@@ -63,8 +63,8 @@ class CollectProblemsVisitor(object):
     def missing_mandatory(self, index, label, field):
         self._missing_mandatory.append(MissingMandatory(index, label, field))
 
-    def failed_parse(self, index, label, field):
-        self._failed_parse.append(FailedParse(index, label, field))
+    def failed_parse(self, index, label, field, value):
+        self._failed_parse.append(FailedParse(index, label, field, value))
 
     def missing_label(self, index):
         self._missing_label.append(index)
@@ -93,3 +93,37 @@ class ValidationProblems(object):
                     self.failed_parse or
                     self.missing_label or
                     self.duplicated_labels)
+
+from itertools import chain
+
+
+def format_missing_mandatory(missing_mandatory):
+    msg = u'Box [{0}] [{1}] lacks mandatory field [{2}]'
+    for index, label, field in missing_mandatory:
+        yield msg.format(1 + index, label, field)
+
+
+def format_failed_parse(failed_parse):
+    msg = u'Could not parse value of [{0}] [{1}] for box [{2}] [{3}]'
+    for index, label, field, value in failed_parse:
+        yield msg.format(field, value, 1 + index, label)
+
+
+def format_missing_label(missing_label):
+    msg = u'Missing object label for box [{0}]'
+    for index in missing_label:
+        yield msg.format(1 + index)
+
+
+def format_duplicated_labels(duplicated_labels):
+    msg = u'Duplicated object label [{0}]'
+    for duplicated in duplicated_labels:
+        yield msg.format(duplicated)
+
+
+def format_validation_problems(v):
+    "Generator function of validation failure messages for ValidationProblems v"
+    return chain(format_missing_mandatory(v.missing_mandatory),
+                 format_failed_parse(v.failed_parse),
+                 format_missing_label(v.missing_label),
+                 format_duplicated_labels(v.duplicated_labels))

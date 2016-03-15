@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 from itertools import izip, count
@@ -16,6 +17,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 # TODO LH Many more tests required
+# TODO Check stdout / stderr
 
 class TestExportCSV(unittest.TestCase):
     def test_export_csv_with_existing(self):
@@ -62,6 +64,22 @@ class TestExportCSV(unittest.TestCase):
                     })
                     actual = {k: v for k, v in row.items() if v}
                     self.assertEqual(expected, actual)
+
+    def test_export_csv_with_template(self):
+        "Export metadata to CSV using a metadata template"
+        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
+                                       TESTDATA / 'test_segment.png') as tempdir:
+            main([unicode(tempdir),
+                  u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
+            # nose hooks up stdout to a file-like object
+            stdout = sys.stdout.getvalue()
+            self.assertIn('because there are validation problems', stdout)
+            self.assertIn('Box [1] [0001] lacks mandatory field [Taxonomy]', stdout)
+            self.assertIn('Box [1] [0001] lacks mandatory field [Location]', stdout)
+            self.assertIn(
+                'Could not parse value of [catalogNumber] [1] for box [1] [0001]',
+                stdout
+            )
 
 
 if __name__ == '__main__':

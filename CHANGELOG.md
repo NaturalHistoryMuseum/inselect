@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.22
 -------------
+- Added #219 - Command-line tools to use metadata and cookie-cutter templates (@quicklizard99)
 
 Version 0.1.21
 -------------
