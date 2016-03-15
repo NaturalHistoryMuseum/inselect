@@ -55,7 +55,7 @@ def save_crops(dir, overwrite_existing, template):
             traceback.print_exc()
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(
         description='Writes cropped object images from Inselect documents'
     )
@@ -69,7 +69,7 @@ def main():
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
