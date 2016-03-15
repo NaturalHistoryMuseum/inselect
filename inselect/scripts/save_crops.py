@@ -63,8 +63,8 @@ def main():
     parser.add_argument('-o', '--overwrite', action='store_true',
                         help='Overwrite existing crops directories')
     parser.add_argument(
-        '-t', '--template', help="Path to a '{0}' file "
-        'that will be used to export the data'.format(UserTemplate.EXTENSION)
+        '-t', '--template', help="Path to a '{0}' file that will be used "
+        'to format the crop filenames'.format(UserTemplate.EXTENSION)
     )
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
