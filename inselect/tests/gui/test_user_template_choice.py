@@ -66,7 +66,7 @@ class TestUserTemplateChoice(MainWindowTest):
         self.assertEqual('Simple Darwin Core terms', user_template_choice().current.name)
         self.assertEqual(1, mock_gofn.call_count)
 
-    def test_select_default(self):
+    def test_refresh(self):
         "User refreshes the current, non-default template"
         w = self.window
         with temp_directory_with_files(TESTDATA / 'test.inselect_template') as tempdir,\
