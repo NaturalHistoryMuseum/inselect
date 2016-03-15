@@ -51,6 +51,9 @@ class TestSaveCrops(unittest.TestCase):
                 stdout
             )
 
+            crops = tempdir / 'test_segment_crops'
+            self.assertFalse(crops.is_dir())
+
 
 if __name__ == '__main__':
     unittest.main()

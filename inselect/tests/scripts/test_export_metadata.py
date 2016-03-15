@@ -84,6 +84,9 @@ class TestExportCSV(unittest.TestCase):
                 stdout
             )
 
+            csv = tempdir / 'test_segment.csv'
+            self.assertFalse(csv.is_file())
+
 
 if __name__ == '__main__':
     unittest.main()
