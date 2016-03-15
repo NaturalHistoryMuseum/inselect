@@ -1,5 +1,5 @@
 from collections import Counter, namedtuple
-from itertools import count, izip
+from itertools import chain, count, izip
 
 
 def validate_document(document, template):
@@ -23,7 +23,7 @@ def _visit_boxes(document, template, visitor):
 
 
 def _visit_box(template, visitor, index, box):
-    box_label = template.format_label(1+index, box['fields'])
+    box_label = template.format_label(1 + index, box['fields'])
     md = box['fields']
     for field in (f for f in template.mandatory if not md.get(f)):
         visitor.missing_mandatory(index, box_label, field)
@@ -36,7 +36,10 @@ def _visit_box(template, visitor, index, box):
 
 
 def _visit_labels(document, template, visitor):
-    labels = [template.format_label(1+index, box['fields']) for index, box in enumerate(document.items)]
+    labels = [
+        template.format_label(1 + index, box['fields'])
+        for index, box in enumerate(document.items)
+    ]
 
     # Labels must be given
     for index in (i for i, l in izip(count(), labels) if not l):
@@ -93,8 +96,6 @@ class ValidationProblems(object):
                     self.failed_parse or
                     self.missing_label or
                     self.duplicated_labels)
-
-from itertools import chain
 
 
 def format_missing_mandatory(missing_mandatory):
