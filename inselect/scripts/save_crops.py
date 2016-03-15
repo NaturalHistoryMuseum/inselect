@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import argparse
+import sys
 import traceback
 
 from pathlib import Path
@@ -77,4 +78,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
