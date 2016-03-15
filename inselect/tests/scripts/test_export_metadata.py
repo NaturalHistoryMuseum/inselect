@@ -31,6 +31,10 @@ class TestExportCSV(unittest.TestCase):
 
             main([unicode(tempdir)])
 
+            # nose hooks up stdout to a file-like object
+            stdout = sys.stdout.getvalue()
+            self.assertIn('exists - skipping', stdout)
+
             # File should not have been altered
             with csv.open('r') as infile:
                 res = infile.read()
