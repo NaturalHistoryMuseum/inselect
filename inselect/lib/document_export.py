@@ -70,13 +70,15 @@ class DocumentExport(object):
             shutil.rmtree(str(crops_dir), ignore_errors=True)
 
             # Rename temp dir
-            msg = 'Moving temp crops dir [{0}] to [{1}]'
-            debug_print(msg.format(tempdir, crops_dir))
+            debug_print(u'Moving temp crops dir [{0}] to [{1}]'.format(
+                tempdir, crops_dir
+            ))
             tempdir.rename(crops_dir)
             tempdir = None
 
-            msg = 'Saved [{0}] crops to [{1}]'
-            debug_print(msg.format(document.n_items, crops_dir))
+            debug_print(u'Saved [{0}] crops to [{1}]'.format(
+                document.n_items, crops_dir
+            ))
 
             return crops_dir
         finally:

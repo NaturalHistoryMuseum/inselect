@@ -8,6 +8,7 @@ import cv2
 
 import numpy as np
 
+from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
@@ -112,6 +113,19 @@ class TestIngest(unittest.TestCase):
         self.assertTrue((self.docs / lower).is_file())
         self.assertTrue((self.docs / upper).is_file())
         self.assertTrue((self.docs / title).is_file())
+
+    def test_cookie_cutter(self):
+        "Ingested image with cookie cutter applied"
+        shutil.copy(unicode(TESTDATA / 'test_segment.png'),
+                    unicode(self.inbox / 'x.png'))
+
+        main([
+            '--cookie-cutter={0}'.format(TESTDATA / '2x2.inselect_cookie_cutter'),
+            unicode(self.inbox), unicode(self.docs)
+        ])
+
+        doc = InselectDocument.load(self.docs / 'x.inselect')
+        self.assertEqual(4, len(doc.items))
 
 
 if __name__ == '__main__':

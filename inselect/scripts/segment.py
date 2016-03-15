@@ -28,19 +28,19 @@ def segment(dir):
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         doc = InselectDocument.load(p)
         if not doc.items:
-            print('Segmenting [{0}]'.format(p))
+            print(u'Segmenting [{0}]'.format(p))
             try:
-                debug_print('Will segment [{0}]'.format(p))
+                debug_print(u'Will segment [{0}]'.format(p))
                 doc, display_image = segment_document(doc)
                 del display_image    # We don't use this
                 doc.save()
             except Exception:
-                print('Error segmenting [{0}]'.format(p))
+                print(u'Error segmenting [{0}]'.format(p))
                 traceback.print_exc()
             else:
-                print('Segmented [{0}]'.format(doc))
+                print(u'Segmented [{0}]'.format(doc))
         else:
-            print('Skipping [{0}] as it already contains items'.format(p))
+            print(u'Skipping [{0}] as it already contains items'.format(p))
 
 
 def main(args):
@@ -54,6 +54,7 @@ def main(args):
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
     segment(args.dir)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

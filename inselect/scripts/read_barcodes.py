@@ -42,7 +42,7 @@ class BarcodeReader(object):
             try:
                 self.read_barcodes_in_document(InselectDocument.load(p))
             except Exception:
-                print('Error reading barcodes in [{0}]'.format(p))
+                print(u'Error reading barcodes in [{0}]'.format(p))
                 traceback.print_exc()
 
     def read_barcodes_in_document(self, doc):
@@ -52,14 +52,14 @@ class BarcodeReader(object):
             if result:
                 strategy, barcodes = result
                 barcodes = u' '.join(b.data for b in barcodes)
-                debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
+                debug_print(u'Crop [{0}] - found [{1}]'.format(index, barcodes))
 
                 # TODO LH This mapping to come from metadata config?
                 # TODO LH Could be more than one object, and hence barcode,
                 #         on a crop
                 item['fields']['catalogNumber'] = barcodes
             else:
-                debug_print('Crop [{0}] - no barcodes'.format(index))
+                debug_print(u'Crop [{0}] - no barcodes'.format(index))
 
         doc.set_items(items)
         doc.save()

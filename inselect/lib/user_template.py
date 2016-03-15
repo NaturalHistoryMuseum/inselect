@@ -4,6 +4,7 @@ import re
 
 from collections import namedtuple, OrderedDict
 from functools import partial
+from pathlib import Path
 
 import persist_user_template
 from inselect.lib.parse import parse_matches_regex
@@ -83,6 +84,13 @@ class UserTemplate(object):
         return msg.format(self.name, len(self.fields))
 
     @classmethod
+    def load(cls, path):
+        """Returns a new instance of UserTemplate using the YAML document at path
+        """
+        with Path(path).open(encoding='utf8') as infile:
+            return cls.from_file(infile)
+
+    @classmethod
     def from_file(cls, stream):
         """Returns a new instance of UserTemplate using the YAML document in
         stream
@@ -153,11 +161,11 @@ class UserTemplate(object):
             parse = self.parse_mapping[field]
             try:
                 parse(value)
-                debug_print('Parsed [{0}] [{1}]'.format(field, value))
+                debug_print(u'Parsed [{0}] [{1}]'.format(field, value))
                 return True
             except ValueError:
                 # Could not be parsed
-                debug_print('Failed to parse [{0}] [{1}]'.format(field, value))
+                debug_print(u'Failed to parse [{0}] [{1}]'.format(field, value))
                 return False
         else:
             return True

@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 from itertools import izip, count
@@ -29,6 +30,10 @@ class TestExportCSV(unittest.TestCase):
                 outfile.write(u'This is only a test\n')
 
             main([unicode(tempdir)])
+
+            # nose hooks up stdout to a file-like object
+            stdout = sys.stdout.getvalue()
+            self.assertIn('exists - skipping', stdout)
 
             # File should not have been altered
             with csv.open('r') as infile:
@@ -62,6 +67,25 @@ class TestExportCSV(unittest.TestCase):
                     })
                     actual = {k: v for k, v in row.items() if v}
                     self.assertEqual(expected, actual)
+
+    def test_export_csv_with_template(self):
+        "Export metadata to CSV using a metadata template"
+        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
+                                       TESTDATA / 'test_segment.png') as tempdir:
+            main([unicode(tempdir),
+                  u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
+            # nose hooks up stdout to a file-like object
+            stdout = sys.stdout.getvalue()
+            self.assertIn('because there are validation problems', stdout)
+            self.assertIn('Box [1] [0001] lacks mandatory field [Taxonomy]', stdout)
+            self.assertIn('Box [1] [0001] lacks mandatory field [Location]', stdout)
+            self.assertIn(
+                'Could not parse value of [catalogNumber] [1] for box [1] [0001]',
+                stdout
+            )
+
+            csv = tempdir / 'test_segment.csv'
+            self.assertFalse(csv.is_file())
 
 
 if __name__ == '__main__':
