@@ -92,7 +92,7 @@ def show_about_box(parent=None):
         <a href="http://www.synthesys.info/">www.synthesys.info</a>,
         which is financed by European Community Research Infrastructure Action
         under the FP7 Integrating Activities Programme (Grant agreement number
-        312253).
+        312253), and from the U.K. Natural Environment Research Council.
        </p>
 
        <h2>Contributors</h2>

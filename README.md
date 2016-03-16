@@ -16,4 +16,14 @@ and [OpenCV](http://opencv.org/). Read instructions for
 
 ## License
 
-Inselect is Copyright (c) 2014, The Trustees of the Natural History Museum, London and licensed under the Modified BSD License. See the [LICENSE](https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md) file for more information.
+Inselect is Copyright (c) 2014-2016, The Trustees of the Natural History Museum,
+London and licensed under the Modified BSD License. See the
+[LICENSE](https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md)
+file for more information.
+
+## Acknowledgements
+
+This research received support from the SYNTHESYS Project, www.synthesys.info,
+which is financed by European Community Research Infrastructure Action
+under the FP7 Integrating Activities Programme (Grant agreement number
+312253), and from the U.K. Natural Environment Research Council.
