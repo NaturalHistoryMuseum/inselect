@@ -2,9 +2,8 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.22
 -------------
+- Fixed #225 - Mac command-line tools are broken bug (@quicklizard99)
 - Added #219 - Command-line tools to use metadata and cookie-cutter templates (@quicklizard99)
-Command-line tools for Mac OS X are currently broken so are not included in
-the Mac OS X installer - see #225
 
 Version 0.1.21
 -------------
