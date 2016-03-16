@@ -91,7 +91,8 @@ def main(args):
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
     parser.add_argument("dir", help='Directory containing inselect documents')
-    parser.add_argument('engine', choices=sorted(options.keys()))
+    parser.add_argument('engine', choices=sorted(options.keys()),
+                        help='The barcode reading engine to use')
     args = parser.parse_args(args)
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
