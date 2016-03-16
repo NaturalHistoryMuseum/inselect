@@ -28,8 +28,7 @@ class UserTemplateChoice(QObject):
     def _load(self, path):
         "Loads the UserTemplate in path"
         debug_print('UserTemplateChoice._load [{0}]'.format(path))
-        with Path(path).open(encoding='utf8') as infile:
-            return UserTemplate.from_file(infile)
+        return UserTemplate.load(path)
 
     def load(self, path):
         "Loads the UserTemplate in path"

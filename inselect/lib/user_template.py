@@ -88,15 +88,8 @@ class UserTemplate(object):
         """Returns a new instance of UserTemplate using the YAML document at path
         """
         with Path(path).open(encoding='utf8') as infile:
-            return cls.from_file(infile)
-
-    @classmethod
-    def from_file(cls, stream):
-        """Returns a new instance of UserTemplate using the YAML document in
-        stream
-        """
-        spec = persist_user_template.load_specification_from_file(stream)
-        return cls.from_specification(spec)
+            spec = persist_user_template.load_specification_from_file(infile)
+            return cls.from_specification(spec)
 
     @classmethod
     def from_specification(cls, spec):

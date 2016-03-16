@@ -27,8 +27,7 @@ class TestMetadataValidation(MainWindowTest):
 
         # This document has 15 validation problems with this template
         w.open_document(TESTDATA / 'test_segment.inselect')
-        with (TESTDATA / 'test.inselect_template').open() as infile:
-            template = UserTemplate.from_file(infile)
+        template = UserTemplate.load(TESTDATA / 'test.inselect_template')
 
         w.save_crops(user_template=template)
 
@@ -58,7 +57,7 @@ class TestMetadataValidation(MainWindowTest):
         template = UserTemplate({
             'Name': 'T1',
             'Fields': [{'Name': 'F1'}],
-            'Cropped file suffix': '.jph',
+            'Cropped file suffix': '.jpg',
             'Thumbnail width pixels': 5000,
             'Object label': '{catalogNumber}',
         })

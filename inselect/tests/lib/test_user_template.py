@@ -115,9 +115,7 @@ class TestUserTemplate(unittest.TestCase):
 
     def test_from_file(self):
         "Load from a YAML file"
-        with (TESTDATA / 'test.inselect_template').open() as infile:
-            doc = UserTemplate.from_file(infile)
-
+        doc = UserTemplate.load(TESTDATA / 'test.inselect_template')
         self.assertEqual(doc.name, "Test user template")
         self.assertEqual(doc.cropped_file_suffix, '.jpg')
         self.assertEqual(doc.thumbnail_width_pixels, 4096)
