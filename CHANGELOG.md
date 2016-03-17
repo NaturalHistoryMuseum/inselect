@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.23
+-------------
+
 Version 0.1.22
 -------------
 - Fixed #225 - Mac command-line tools are broken bug (@quicklizard99)
