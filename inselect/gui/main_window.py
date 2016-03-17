@@ -600,6 +600,8 @@ class MainWindow(QtGui.QMainWindow):
         """Creates an empty document
         """
         debug_print('MainWindow.empty_document')
+        # Clear selection before closing for performance reasons
+        self.select_none()
         self.document = None
         self.document_path = None
         self.plugin_image = None
