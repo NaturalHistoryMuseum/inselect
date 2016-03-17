@@ -1,22 +1,27 @@
+import traceback
+
 from contextlib import contextmanager
 from functools import wraps
+from io import BytesIO
 from itertools import groupby
 
 import cv2
 import numpy as np
 
-from PySide import QtGui
-from PySide.QtGui import QItemSelection, QItemSelectionModel
+from PySide.QtGui import (QImage, QItemSelection, QItemSelectionModel,
+                          QMessageBox, QWidget)
+
+from copy_box import copy_details_box
 
 
 def qimage_of_bgr(bgr):
-    """ A QtGui.QImage representation of a BGR numpy array
+    """ A QImage representation of a BGR numpy array
     """
     bgr = cv2.cvtColor(bgr.astype('uint8'), cv2.COLOR_BGR2RGB)
     bgr = np.ascontiguousarray(bgr)
-    qt_image = QtGui.QImage(bgr.data,
-                            bgr.shape[1], bgr.shape[0],
-                            bgr.strides[0], QtGui.QImage.Format_RGB888)
+    qt_image = QImage(bgr.data,
+                      bgr.shape[1], bgr.shape[0],
+                      bgr.strides[0], QImage.Format_RGB888)
 
     # QImage does not take a deep copy of np_arr.data so hold a reference
     # to it
@@ -61,18 +66,42 @@ def painter_state(painter):
 
 
 def report_to_user(f):
-    """Decorator that reports exceptions to the user
+    """Decorator that reports exceptions to the user in a model QDialog
     """
     @wraps(f)
     def wrapper(self, *args, **kwargs):
         try:
             return f(self, *args, **kwargs)
         except Exception as e:
-            parent = self if isinstance(self, QtGui.QWidget) else None
-            QtGui.QMessageBox.critical(parent, u'An error occurred',
-                                       u'An error occurred:\n{0}'.format(e))
-            raise
+            # Grotesque hack :-(
+            # Attach a flag to the exception that indicates it has already
+            # been reported to the user, preventing another report_to_user
+            # handler higher up the stack from reporting it again.
+            if not hasattr(e, '_inselect_reported_to_user'):
+                _report_exception_to_user(e)
+                e._inselect_reported_to_user = True
+                raise
+            else:
+                # Exception has been reported to the user
+                raise
     return wrapper
+
+
+def _report_exception_to_user(exc):
+    "Shows the exception exc and the current traceback in a dialog"
+    try:
+        details = BytesIO()
+        traceback.print_exc(file=details)
+        copy_details_box(
+            QMessageBox.Critical, u'An error occurred',
+            u'An error occurred:\n{0}'.format(exc),
+            details.getvalue().encode('utf8')
+        )
+    except:
+        # Wah! Exception showing the details box.
+        QMessageBox.critical(
+            None, u'An error occurred', u'An error occurred:\n{0}'.format(exc)
+        )
 
 
 def relayout_widget(widget, new_layout):
@@ -82,7 +111,7 @@ def relayout_widget(widget, new_layout):
 
     # Reparent the old layout to a temporary widget
     old_layout = widget.layout()
-    QtGui.QWidget().setLayout(old_layout)
+    QWidget().setLayout(old_layout)
     del old_layout
 
     widget.setLayout(new_layout)
