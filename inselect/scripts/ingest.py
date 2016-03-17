@@ -17,14 +17,17 @@ import inselect
 import inselect.lib.utils
 
 from inselect.lib.cookie_cutter import CookieCutter
+from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_SUFFIXES_RE
-
 from inselect.lib.inselect_error import InselectError
+from inselect.lib.user_template import UserTemplate
 
 
 # TODO Recursive option
 
-def ingest_from_directory(inbox, docs, cookie_cutter=None):
+def ingest_from_directory(inbox, docs,
+                          thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
+                          cookie_cutter=None):
     """Ingest images from the directory given by inbox to the directory given
     by docs
     """
@@ -43,7 +46,11 @@ def ingest_from_directory(inbox, docs, cookie_cutter=None):
     for source in (p for p in inbox.iterdir() if IMAGE_SUFFIXES_RE.match(p.name)):
         print(u'Ingesting [{0}]'.format(source))
         try:
-            ingest_image(source, docs, cookie_cutter=cookie_cutter)
+            ingest_image(
+                source, docs,
+                thumbnail_width_pixels=thumbnail_width_pixels,
+                cookie_cutter=cookie_cutter
+            )
         except Exception:
             print(u'Error ingesting [{0}]'.format(source))
             traceback.print_exc()
@@ -53,13 +60,23 @@ def ingest_from_directory(inbox, docs, cookie_cutter=None):
 
 def main(args):
     parser = argparse.ArgumentParser(description='Ingests images into Inselect')
-    parser.add_argument("inbox", help='Source directory containing scanned images')
-    parser.add_argument("docs", help='Destination directory to which images '
+    parser.add_argument("inbox", type=Path,
+                        help='Source directory containing scanned images')
+    parser.add_argument(
+        "docs", type=Path, help='Destination directory to which images '
         'will be moved and in which Inselect documents will be created. Can be '
         'the same as inbox.')
-    parser.add_argument('-c', '--cookie-cutter', help="Path to a '{0}' file "
+    parser.add_argument(
+        '-c', '--cookie-cutter', type=Path, help="Path to a '{0}' file "
         'that will be applied to new Inselect '
         'documents'.format(CookieCutter.EXTENSION)
+    )
+    parser.add_argument(
+        '-w', '--thumbnail-width', type=int,
+        default=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
+        help="The width of the thumbnail in pixels; defaults to {0}".format(
+            InselectDocument.THUMBNAIL_DEFAULT_WIDTH
+        )
     )
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',
@@ -68,7 +85,8 @@ def main(args):
 
     inselect.lib.utils.DEBUG_PRINT = args.debug
 
-    ingest_from_directory(args.inbox, args.docs, args.cookie_cutter)
+    ingest_from_directory(args.inbox, args.docs, args.thumbnail_width,
+                          args.cookie_cutter)
 
 
 if __name__ == '__main__':

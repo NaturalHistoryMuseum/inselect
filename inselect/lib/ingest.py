@@ -43,9 +43,7 @@ def ingest_image(source, dest_dir,
             source.rename(dest)
 
         # Raises if the document already exists
-        doc = InselectDocument.new_from_scan(dest)
-
-        doc.ensure_thumbnail(thumbnail_width_pixels)
+        doc = InselectDocument.new_from_scan(dest, thumbnail_width_pixels)
 
         if default_metadata_items:
             debug_print(u'Adding [{0}] default metadata items'.format(
