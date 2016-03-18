@@ -35,7 +35,6 @@ class TestCookieCutterChoice(MainWindowTest):
 
         self.assertEqual(None, cookie_cutter_choice().current)
         mock_setvalue.assert_called_with(cookie_cutter_choice().PATH_KEY, '')
-        self.assertEqual(None, cookie_cutter_choice().current)
 
     @patch.object(QSettings, 'setValue')
     def test_chooses_cookie_cutter(self, mock_setvalue):
@@ -45,7 +44,7 @@ class TestCookieCutterChoice(MainWindowTest):
         w.cookie_cutter_widget.clear()
 
         path = TESTDATA / '2x2.inselect_cookie_cutter'
-        retval = str(path), w.cookie_cutter_widget.COOKIE_CUTTER_FILE_FILTER
+        retval = str(path), w.cookie_cutter_widget.FILE_FILTER
         with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
             w.cookie_cutter_widget.choose()
             self.assertEqual(1, mock_gofn.call_count)
@@ -80,7 +79,7 @@ class TestCookieCutterChoice(MainWindowTest):
             path = tempdir / 'My new cookie cutter{0}'.format(
                 CookieCutter.EXTENSION
             )
-            retval = str(path), w.cookie_cutter_widget.COOKIE_CUTTER_FILE_FILTER
+            retval = str(path), w.cookie_cutter_widget.FILE_FILTER
             with patch.object(QFileDialog, 'getSaveFileName', return_value=retval):
                 w.save_to_cookie_cutter()
 
@@ -100,7 +99,7 @@ class TestCookieCutterChoice(MainWindowTest):
         w.cookie_cutter_widget.clear()
 
         path = TESTDATA / '2x2.inselect_cookie_cutter'
-        retval = str(path), w.cookie_cutter_widget.COOKIE_CUTTER_FILE_FILTER
+        retval = str(path), w.cookie_cutter_widget.FILE_FILTER
         with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
             w.cookie_cutter_widget.choose()
             self.assertEqual(1, mock_gofn.call_count)
@@ -126,7 +125,7 @@ class TestCookieCutterChoice(MainWindowTest):
         self.assertEqual(5, w.model.rowCount())
 
         path = TESTDATA / '2x2.inselect_cookie_cutter'
-        retval = str(path), w.cookie_cutter_widget.COOKIE_CUTTER_FILE_FILTER
+        retval = str(path), w.cookie_cutter_widget.FILE_FILTER
         with patch.object(QFileDialog, 'getOpenFileName', return_value=retval):
             w.cookie_cutter_widget.choose()
 

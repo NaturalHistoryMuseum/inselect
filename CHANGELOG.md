@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.23
 -------------
+- Added #234 - Metadata template popup (@quicklizard99)
 - Fixed #230 - No way to for the user to specify thumbnail size to the ingest command-line tool (@quicklizard99)
 - Fixed #228 - Closing document can be slow (@quicklizard99)
 

@@ -20,7 +20,7 @@ class TestMetadataViewControls(MainWindowTest):
 
     def test_template_name(self):
         self.assertEqual('Test user template',
-                         self.window.view_metadata._template_label.text())
+                         self.window.view_metadata.popup_button.text())
 
     def test_controls(self):
         controls = self.window.view_metadata._form_container.controls
