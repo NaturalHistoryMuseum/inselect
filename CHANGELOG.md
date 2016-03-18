@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.24
+-------------
+
 Version 0.1.23
 -------------
 - Added #234 - Metadata template popup (@quicklizard99)
