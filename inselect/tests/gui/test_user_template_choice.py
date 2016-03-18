@@ -22,16 +22,19 @@ class TestUserTemplateChoice(MainWindowTest):
     def test_select_default(self, mock_setvalue):
         "User chooses the default template"
 
-        # Set a non-default template before testing the default_user_template
+        # Set a non-default template before testing the default user template
         # method
         t = user_template_choice()
         t.load(TESTDATA / 'test.inselect_template')
         self.assertEqual('Test user template', t.current.name)
 
-        self.window.default_user_template()
+        self.window.view_metadata.popup_button.default()
 
-        self.assertEqual('Simple Darwin Core terms', user_template_choice().current.name)
-        mock_setvalue.assert_called_with('user_template_path', '')
+        self.assertEqual('Simple Darwin Core terms',
+                        user_template_choice().current.name)
+        self.assertEqual('Simple Darwin Core terms',
+                         self.window.view_metadata.popup_button.text())
+        mock_setvalue.assert_called_with(user_template_choice().PATH_KEY, '')
 
     @patch.object(QSettings, 'setValue')
     def test_chooses_template(self, mock_setvalue):
@@ -39,18 +42,21 @@ class TestUserTemplateChoice(MainWindowTest):
 
         w = self.window
 
-        # Select default template before testing the choose_user_template method
-        w.default_user_template()
+        # Select default template before testing the choose method
+        w.view_metadata.popup_button.default()
 
         path = TESTDATA / 'test.inselect_template'
-        retval = str(path), w.TEMPLATE_FILE_FILTER
+        retval = str(path), w.view_metadata.popup_button.FILE_FILTER
         with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
-            w.choose_user_template()
+            w.view_metadata.popup_button.choose()
             self.assertEqual(1, mock_gofn.call_count)
 
-        self.assertEqual('Test user template', user_template_choice().current.name)
-        mock_setvalue.assert_any_call('user_template_path', str(path))
-        mock_setvalue.assert_any_call('user_template_last_directory', str(path.parent))
+        self.assertEqual('Test user template',
+                         user_template_choice().current.name)
+        self.assertEqual('Test user template',
+                         self.window.view_metadata.popup_button.text())
+        mock_setvalue.assert_any_call(user_template_choice().PATH_KEY, str(path))
+        mock_setvalue.assert_any_call(user_template_choice().DIRECTORY_KEY, str(path.parent))
 
     @patch.object(QFileDialog, 'getOpenFileName', return_value=(None, None))
     def test_cancels_choose_template(self, mock_gofn):
@@ -58,12 +64,15 @@ class TestUserTemplateChoice(MainWindowTest):
 
         w = self.window
 
-        # Select default template before testing the choose_user_template method
-        w.default_user_template()
+        # Select default template before testing the choose method
+        w.view_metadata.popup_button.default()
 
-        w.choose_user_template()
+        w.view_metadata.popup_button.choose()
 
-        self.assertEqual('Simple Darwin Core terms', user_template_choice().current.name)
+        self.assertEqual('Simple Darwin Core terms',
+                         user_template_choice().current.name)
+        self.assertEqual('Simple Darwin Core terms',
+                         self.window.view_metadata.popup_button.text())
         self.assertEqual(1, mock_gofn.call_count)
 
     def test_refresh(self):
@@ -74,12 +83,15 @@ class TestUserTemplateChoice(MainWindowTest):
             path = tempdir / 'test.inselect_template'
 
             # Load the test template in tempdir
-            retval = str(path), w.TEMPLATE_FILE_FILTER
+            retval = str(path), w.view_metadata.popup_button.FILE_FILTER
             with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
-                w.choose_user_template()
+                w.view_metadata.popup_button.choose()
                 self.assertEqual(1, mock_gofn.call_count)
 
-            self.assertEqual('Test user template', user_template_choice().current.name)
+            self.assertEqual('Test user template',
+                             user_template_choice().current.name)
+            self.assertEqual('Test user template',
+                             self.window.view_metadata.popup_button.text())
 
             # Write a new template to the file and refresh
             template = u"""Name: An updated test template
@@ -91,10 +103,13 @@ Fields:
 
             # Refresh loaded template
             with patch.object(QSettings, 'value', return_value=str(path)) as mock_value:
-                w.refresh_user_template()
+                w.view_metadata.popup_button.refresh()
                 self.assertEqual(1, mock_value.call_count)
 
-            self.assertEqual("An updated test template", user_template_choice().current.name)
+            self.assertEqual("An updated test template",
+                             user_template_choice().current.name)
+            self.assertEqual('An updated test template',
+                             self.window.view_metadata.popup_button.text())
 
 
 if __name__ == '__main__':

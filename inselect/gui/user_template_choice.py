@@ -1,29 +1,53 @@
 from pathlib import Path
 
 from PySide.QtCore import QObject, QSettings, Signal
+from PySide.QtGui import QDesktopServices
 
 from inselect.lib.templates.dwc import DWC
 from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print
 
 
+# Global - set to instance of UserTemplateChoice in user_template_choice
+_USER_TEMPLATE_CHOICE = None
+
+
+def user_template_choice():
+    "Returns an instance of UserTemplateChoice"
+    global _USER_TEMPLATE_CHOICE
+    if not _USER_TEMPLATE_CHOICE:
+        _USER_TEMPLATE_CHOICE = UserTemplateChoice()
+    return _USER_TEMPLATE_CHOICE
+
+
 class UserTemplateChoice(QObject):
     "Maintains the user's choice of UserTemplate"
 
-    KEY = 'user_template_path'
+    PATH_KEY = 'user_template_path'
+    DIRECTORY_KEY = 'user_template_last_directory'
+
+    DEFAULT = DWC
 
     # Emitted when the user picks a new template
     template_changed = Signal()
 
     def __init__(self):
         super(UserTemplateChoice, self).__init__()
-        self._current = DWC
-        previous = QSettings().value(self.KEY)
+        self._current = self.DEFAULT
+        previous = QSettings().value(self.PATH_KEY)
         if previous:
             try:
                 self._current = self._load(previous)
             except Exception:
                 debug_print(u'Error loading user template [{0}]'.format(previous))
+
+    @classmethod
+    def last_directory(cls):
+        "Path the the most recently used directory"
+        return Path(QSettings().value(
+            cls.DIRECTORY_KEY,
+            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+        ))
 
     def _load(self, path):
         "Loads the UserTemplate in path"
@@ -34,21 +58,22 @@ class UserTemplateChoice(QObject):
         "Loads the UserTemplate in path"
         debug_print('UserTemplateChoice.load [{0}]'.format(path))
         self._current = self._load(path)
-        QSettings().setValue(self.KEY, str(path))
+        QSettings().setValue(self.PATH_KEY, str(path))
+        QSettings().setValue(self.DIRECTORY_KEY, unicode(Path(path).parent))
         self.template_changed.emit()
 
     def select_default(self):
         "Selects the default Darwin Core Archive template"
         debug_print('UserTemplateChoice.select_default')
-        self._current = DWC
-        QSettings().setValue(self.KEY, '')
+        self._current = self.DEFAULT
+        QSettings().setValue(self.PATH_KEY, '')
         self.template_changed.emit()
 
     def refresh(self):
         """Reloads the current template
         """
         debug_print('UserTemplateChoice.refresh'.format())
-        current = QSettings().value(self.KEY)
+        current = QSettings().value(self.PATH_KEY)
         if current:
             # A template to refresh
             self.load(current)
@@ -60,15 +85,3 @@ class UserTemplateChoice(QObject):
     def current(self):
         "The selected UserTemplate"
         return self._current
-
-
-# Global - set to instance of UserTemplateChoice in user_template_choice
-_user_template_choice = None
-
-
-def user_template_choice():
-    "Returns an instance of UserTemplateChoice"
-    global _user_template_choice
-    if not _user_template_choice:
-        _user_template_choice = UserTemplateChoice()
-    return _user_template_choice

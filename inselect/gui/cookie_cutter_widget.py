@@ -5,15 +5,14 @@ from PySide.QtGui import (QAction, QFileDialog, QFontMetrics, QHBoxLayout,
 from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
 
-from cookie_cutter_choice import cookie_cutter_choice
+from .cookie_cutter_choice import cookie_cutter_choice
 from .utils import report_to_user
 
 
 class CookieCutterWidget(QWidget):
     "CookieCutter UI"
 
-    DIRECTORY_KEY = 'cookie_cutter_last_directory'
-    COOKIE_CUTTER_FILE_FILTER = u'Inselect cookie cutter (*{0})'.format(
+    FILE_FILTER = u'Inselect cookie cutter (*{0})'.format(
         CookieCutter.EXTENSION
     )
 
@@ -48,8 +47,9 @@ class CookieCutterWidget(QWidget):
     def inject_actions(self, menu):
         "Adds cookie cutter actions to menu"
         menu.addAction(self.choose_action)
-        menu.addAction(self.clear_action)
         menu.addAction(self.apply_current_action)
+        menu.addSeparator()
+        menu.addAction(self.clear_action)
         menu.addSeparator()
         menu.addAction(self.save_to_new_action)
 
@@ -65,7 +65,7 @@ class CookieCutterWidget(QWidget):
         path, selectedFilter = QFileDialog.getOpenFileName(
             self, "Choose cookie cutter",
             unicode(cookie_cutter_choice().last_directory()),
-            self.COOKIE_CUTTER_FILE_FILTER
+            self.FILE_FILTER
         )
 
         if path:
@@ -81,7 +81,9 @@ class CookieCutterWidget(QWidget):
 
         # Truncate text to fit button
         metrics = QFontMetrics(self.button.font())
-        elided = metrics.elidedText(name, Qt.ElideRight, self.button.width() - 25)
+        elided = metrics.elidedText(
+            name, Qt.ElideRight, self.button.width() - 25
+        )
         self.button.setText(elided)
 
         self.save_to_new_action.setEnabled(has_rows)

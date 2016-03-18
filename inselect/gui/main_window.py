@@ -16,7 +16,6 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print, is_writable
 
 from .about import show_about_box
@@ -50,10 +49,6 @@ class MainWindow(QtGui.QMainWindow):
     )
 
     IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
-
-    TEMPLATE_FILE_FILTER = u'Inselect user templates (*{0})'.format(
-        UserTemplate.EXTENSION
-    )
 
     def __init__(self, app, filename=None):
         super(MainWindow, self).__init__()
@@ -930,16 +925,6 @@ class MainWindow(QtGui.QMainWindow):
             triggered=partial(self.rotate90, clockwise=False)
         )
 
-        self.default_user_template_action = QAction(
-            "Default template", self, triggered=self.default_user_template
-        )
-        self.choose_user_template_action = QAction(
-            "Choose template...", self, triggered=self.choose_user_template
-        )
-        self.refresh_user_template_action  = QAction(
-            "Reload template", self, triggered=self.refresh_user_template
-        )
-
         # Plugins
         # Plugin shortcuts start at F5
         shortcut_offset = 5
@@ -1109,9 +1094,8 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addAction(self.rotate_clockwise_action)
         self._edit_menu.addAction(self.rotate_counter_clockwise_action)
         self._edit_menu.addSeparator()
-        self._edit_menu.addAction(self.default_user_template_action)
-        self._edit_menu.addAction(self.choose_user_template_action)
-        self._edit_menu.addAction(self.refresh_user_template_action)
+        user_template_popup = self._edit_menu.addMenu('Metadata template')
+        self.view_metadata.popup_button.inject_actions(user_template_popup)
         self._edit_menu.addSeparator()
         cookie_cutter_popup = self._edit_menu.addMenu('Cookie cutter')
         self.cookie_cutter_widget.inject_actions(cookie_cutter_popup)
@@ -1200,30 +1184,6 @@ class MainWindow(QtGui.QMainWindow):
         "Sets the colour scheme"
         colour_scheme_choice().set_colour_scheme(name)
 
-    @report_to_user
-    def default_user_template(self):
-        "Selects the default user_template"
-        user_template_choice().select_default()
-
-    @report_to_user
-    def choose_user_template(self):
-        "Shows a 'choose template' file dialog"
-        debug_print('MainWindow.choose_user_template')
-
-        folder = QSettings().value(
-            'user_template_last_directory',
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
-        )
-
-        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
-            self, "Choose template", folder, self.TEMPLATE_FILE_FILTER)
-
-        if path:
-            # Save the user's choice
-            user_template_choice().load(path)
-            QSettings().setValue('user_template_last_directory',
-                                 str(Path(path).parent))
-
     def new_cookie_cutter(self):
         """Slot for cookie_cutter_changed signal - sets menu and button text
         """
@@ -1236,7 +1196,7 @@ class MainWindow(QtGui.QMainWindow):
         folder = unicode(cookie_cutter_choice().last_directory())
         path, selectedFilter = QtGui.QFileDialog.getSaveFileName(
             self, "New cookie cutter", folder,
-            CookieCutterWidget.COOKIE_CUTTER_FILE_FILTER
+            CookieCutterWidget.FILE_FILTER
         )
 
         if path:
@@ -1265,11 +1225,6 @@ class MainWindow(QtGui.QMainWindow):
             self.model.set_new_boxes(
                 cookie_cutter_choice().current.document_items
             )
-
-    @report_to_user
-    def refresh_user_template(self):
-        debug_print('MetadataView.refresh_user_template')
-        user_template_choice().refresh()
 
     @report_to_user
     def copy_to_new_document(self):

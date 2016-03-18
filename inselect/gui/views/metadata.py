@@ -15,6 +15,7 @@ from inselect.gui.roles import MetadataRole
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.utils import relayout_widget
 from inselect.gui.toggle_widget_label import ToggleWidgetLabel
+from inselect.gui.user_template_popup_button import UserTemplatePopupButton
 
 
 # The value that is displayed for a field when more than one box is selected
@@ -32,8 +33,7 @@ class MetadataView(QAbstractItemView):
 
         user_template_choice().template_changed.connect(self.refresh_user_template)
 
-        self._template_label = QLabel()
-        self._template_label.setText(user_template_choice().current.name)
+        self.popup_button = UserTemplatePopupButton()
 
         # A container for the controls
         self._form_container = FormContainer()
@@ -53,7 +53,7 @@ class MetadataView(QAbstractItemView):
 
         # List of templates is fixed at the top - form can be scrolled
         layout = QVBoxLayout()
-        layout.addWidget(self._template_label)
+        layout.addWidget(self.popup_button)
         layout.addWidget(self._form_scroll)
 
         # Top-level container for the list of templates and form
@@ -62,7 +62,6 @@ class MetadataView(QAbstractItemView):
 
     def refresh_user_template(self):
         "Refreshes the UI with the currently selected UserTemplate"
-        self._template_label.setText(user_template_choice().current.name)
         self._create_controls()
         self._populate_controls()
 

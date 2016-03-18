@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.23
 -------------
+- Added #234 - Metadata template popup
 - Fixed #228 - Closing document can be slow (@quicklizard99)
 
 Version 0.1.22
