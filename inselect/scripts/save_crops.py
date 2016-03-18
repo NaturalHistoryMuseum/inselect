@@ -60,12 +60,13 @@ def main(args):
     parser = argparse.ArgumentParser(
         description='Writes cropped object images from Inselect documents'
     )
-    parser.add_argument("dir", help='Directory containing Inselect documents')
+    parser.add_argument("dir", type=Path,
+                        help='Directory containing Inselect documents')
     parser.add_argument('-o', '--overwrite', action='store_true',
                         help='Overwrite existing crops directories')
     parser.add_argument(
-        '-t', '--template', help="Path to a '{0}' file that will be used "
-        'to format the crop filenames'.format(UserTemplate.EXTENSION)
+        '-t', '--template', type=Path, help="Path to a '{0}' file that will be "
+        'used to format the crop filenames'.format(UserTemplate.EXTENSION)
     )
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',

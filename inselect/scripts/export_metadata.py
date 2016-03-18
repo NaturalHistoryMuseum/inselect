@@ -54,12 +54,13 @@ def export_csv(dir, overwrite_existing, template):
 
 def main(args):
     parser = argparse.ArgumentParser(description='Exports metadata from Inselect documents')
-    parser.add_argument("dir", help='Directory containing Inselect documents')
+    parser.add_argument("dir", type=Path,
+                        help='Directory containing Inselect documents')
     parser.add_argument('-o', '--overwrite', action='store_true',
                         help='Overwrite existing metadata files')
     parser.add_argument(
-        '-t', '--template', help="Path to a '{0}' file that will be used to "
-        'export the data'.format(UserTemplate.EXTENSION)
+        '-t', '--template', type=Path, help="Path to a '{0}' file that will be "
+        'used to export the data'.format(UserTemplate.EXTENSION)
     )
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-v', '--version', action='version',

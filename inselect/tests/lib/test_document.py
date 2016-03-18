@@ -173,56 +173,52 @@ class TestDocument(unittest.TestCase):
     def test_new_from_thumbnail(self):
         "Can't create a document from a thumbnail image"
         with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.new_from_scan(tempdir / 'test_segment.png')
-            doc.ensure_thumbnail(width=2048)
-            doc = None
-
+            doc = InselectDocument.new_from_scan(
+                tempdir / 'test_segment.png',
+                thumbnail_width_pixels=2048
+            )
             thumbnail = tempdir / 'test_segment_thumbnail.jpg'
             self.assertTrue(thumbnail.is_file())
+            self.assertEqual(2048, doc.thumbnail.array.shape[1])
             self.assertRaises(InselectError, InselectDocument.new_from_scan,
                               thumbnail)
 
     def test_new_from_scan_no_image(self):
         "Image does not exist"
-        self.assertRaises(InselectError, InselectDocument.new_from_scan, 'i am not a file')
+        self.assertRaises(
+            InselectError, InselectDocument.new_from_scan, 'i am not a file'
+        )
 
-    def test_ensure_thumbnail(self):
-        "Thumbnail is created"
-        source_doc = TESTDATA / 'test_segment.inselect'
-        source_img = TESTDATA / 'test_segment.png'
-        with temp_directory_with_files(source_doc, source_img) as tempdir:
-            # Document load with no scanned image file
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-            self.assertTrue(doc.thumbnail is None)
-            doc.ensure_thumbnail(width=2048)
-            self.assertEqual(2048, doc.thumbnail.array.shape[1])
-            self.assertTrue((tempdir / 'test_segment_thumbnail.jpg').is_file())
-
-    def test_ensure_thumbnail_silly_size(self):
+    def test_thumbnail_silly_size(self):
         "Can't create thumbnail with a silly size"
-        source_doc = TESTDATA / 'test_segment.inselect'
-        source_img = TESTDATA / 'test_segment.png'
-        with temp_directory_with_files(source_doc, source_img) as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-
-            self.assertRaises(InselectError, doc.ensure_thumbnail, -1)
-            self.assertRaises(InselectError, doc.ensure_thumbnail, 50)
-            self.assertRaises(InselectError, doc.ensure_thumbnail, 20000)
+        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
+            self.assertRaisesRegexp(
+                InselectError, "width should be between",
+                InselectDocument.new_from_scan, tempdir / 'test_segment.png', -1
+            )
+            self.assertRaisesRegexp(
+                InselectError, "width should be between",
+                InselectDocument.new_from_scan, tempdir / 'test_segment.png', 50
+            )
+            self.assertRaisesRegexp(
+                InselectError, "width should be between",
+                InselectDocument.new_from_scan, tempdir / 'test_segment.png',
+                20000
+            )
 
     @unittest.skipIf(sys.platform.startswith("win"),
                      "Read-only directories not available on Windows")
-    def test_ensure_thumbnail_read_only(self):
+    def test_thumbnail_read_only(self):
         "Can't write thumbnail to a read-only directory"
         # This case is doing more than simply testing filesystem behavour
         # because it tests the failure code in InselectDocument
-        source_doc = TESTDATA / 'test_segment.inselect'
-        source_img = TESTDATA / 'test_segment.png'
-        with temp_directory_with_files(source_doc, source_img) as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
-
+        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
             mode = make_readonly(tempdir)
 
-            self.assertRaises(InselectError, doc.ensure_thumbnail)
+            self.assertRaises(
+                InselectError, InselectDocument.new_from_scan,
+                tempdir / 'test_segment.png', thumbnail_width_pixels=2048
+            )
 
             # Restor the original mode
             tempdir.chmod(mode)

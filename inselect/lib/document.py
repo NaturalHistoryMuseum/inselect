@@ -160,9 +160,11 @@ class InselectDocument(object):
         return items
 
     @classmethod
-    def new_from_scan(cls, scanned):
+    def new_from_scan(cls, scanned,
+                      thumbnail_width_pixels=THUMBNAIL_DEFAULT_WIDTH):
         """Creates, saves and returns a new InselectDocument for the scanned
-        image"""
+        image
+        """
         # TODO LH Raise error if a thumbnail image is ingested
         scanned = Path(scanned)
         if not scanned.is_file():
@@ -170,6 +172,10 @@ class InselectDocument(object):
         elif cls.path_is_thumbnail_file(scanned):
             msg = u'Cannot create a document for thumbnail file [{0}]'
             raise InselectError(msg.format(scanned))
+        elif not cls.THUMBNAIL_MIN_WIDTH <= thumbnail_width_pixels <= cls.THUMBNAIL_MAX_WIDTH:
+            raise InselectError('width should be between [{0}] and [{1}]'.format(
+                cls.THUMBNAIL_MIN_WIDTH, cls.THUMBNAIL_MAX_WIDTH
+            ))
         else:
             debug_print('Creating on image [{0}]'.format(scanned))
             doc = cls(scanned_path=scanned, items=[],
@@ -181,6 +187,7 @@ class InselectDocument(object):
                 msg = u'Document file [{0}] already exists'
                 raise InselectError(msg.format(doc.document_path))
             else:
+                doc._create_and_load_thumbnail(thumbnail_width_pixels)
                 doc.save()
                 return doc
 
@@ -279,33 +286,26 @@ class InselectDocument(object):
         rotation = (i.get('rotation', 0) for i in self._items)
         image.save_crops(boxes, crop_paths, rotation, progress)
 
-    def ensure_thumbnail(self, width=THUMBNAIL_DEFAULT_WIDTH):
-        "Create thumbnail image, if it does not already exist"
-        if self._thumbnail is None:
-            p = self.thumbnail_path_of_scanned(self._scanned.path)
+    def _create_and_load_thumbnail(self, width):
+        "Create thumbnail image"
+        p = self.thumbnail_path_of_scanned(self._scanned.path)
 
-            # File might have been created after this instance
-            if not p.is_file():
-                if not self.THUMBNAIL_MIN_WIDTH <= width <= self.THUMBNAIL_MAX_WIDTH:
-                    msg = 'width should be between [{0}] and [{1}]'
-                    raise InselectError(msg.format(min, max))
-                else:
-                    msg = u'Creating [{0}] with width of [{1}] pixels'
-                    debug_print(msg.format(p, width))
+        msg = u'Creating [{0}] with width of [{1}] pixels'
+        debug_print(msg.format(p, width))
 
-                    img = self._scanned.array
-                    factor = float(width)/img.shape[1]
-                    debug_print('Resizing to [{0}] pixels wide'.format(width))
-                    thumbnail = cv2.resize(img, (0, 0), fx=factor, fy=factor)
-                    debug_print('Writing to [{0}]'.format(p))
-                    # TODO Copy EXIF tags?
-                    res = cv2.imwrite(str(p), thumbnail)
-                    if not res:
-                        msg = u'Unable to write thumbnail [{0}]'
-                        raise InselectError(msg.format(p))
+        img = self._scanned.array
+        factor = float(width) / img.shape[1]
+        debug_print('Resizing to [{0}] pixels wide'.format(width))
+        thumbnail = cv2.resize(img, (0, 0), fx=factor, fy=factor)
+        debug_print('Writing to [{0}]'.format(p))
+        # TODO Copy EXIF tags?
+        res = cv2.imwrite(str(p), thumbnail)
+        if not res:
+            msg = u'Unable to write thumbnail [{0}]'
+            raise InselectError(msg.format(p))
 
-            # Load it
-            self._thumbnail = InselectImage(p)
+        # Load it
+        self._thumbnail = InselectImage(p)
 
     @property
     def metadata_fields(self):
