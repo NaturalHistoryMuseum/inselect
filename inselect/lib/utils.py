@@ -167,10 +167,14 @@ def format_dt_display(dt):
         # locale's default encoding"
         # locale.getlocale() is not the correct function to use - use
         # locale.getdefaultlocale()
+        # encoding might be None
         language_code, encoding = get_default_locale()
         # Ignoring errors because I am paranoid about the behaviour of the
         # locale functions
-        return unicode(v, encoding, 'ignore')
+        if encoding:
+            return unicode(v, encoding, 'ignore')
+        else:
+            return unicode(v, errors='ignore')
     elif win32api:
         # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
         LOCALE_USER_DEFAULT = 0x0400
