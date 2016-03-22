@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.24
 -------------
+- Fixed #240 - Objects view - better object labels
 - Fixed #237 - Ugly error message when opening document on Mac OS X
 - Fixed #236 - Reset zoom mode when opening new document
 
