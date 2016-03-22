@@ -1,13 +1,13 @@
 from PySide.QtCore import QRect, QSize, QPoint, Qt
 from PySide.QtGui import (QColor, QListView, QBrush, QStyle, QTransform, QPen,
                           QAbstractItemView, QAbstractItemDelegate,
-                          QItemSelectionModel, QColor, QFont)
+                          QItemSelectionModel, QFont)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
 from inselect.gui.utils import painter_state
-from inselect.gui.roles import (RectRole, PixmapRole, RotationRole,
-                                MetadataValidRole)
+from inselect.gui.roles import (MetadataValidRole, PixmapRole, RectRole,
+                                RotationRole)
 
 
 def _blend_colour(first, second, amount=0.5):
@@ -45,6 +45,9 @@ class CropDelegate(QAbstractItemDelegate):
     # Border around cropped image
     BORDER = 25
 
+    DISPLAY_TEMPLATE = u'{0} {1}'
+    LEADING_ZEROES = u'{0:04d}'
+
     @property
     def box_rect(self):
         "QRect of the complete box"
@@ -58,12 +61,13 @@ class CropDelegate(QAbstractItemDelegate):
 
     @property
     def crop_rect(self):
-        # Bounding rectangle within which the cropped image will be drawn
+        """QRect within which the cropped image will be drawn
+        """
         b = self.BORDER
         return self.box_rect.adjusted(b, b, -b, -b)
 
     def _paint_box(self, painter, option, index):
-        """The grey box
+        """Paints the grey box
         """
         valid = index.data(MetadataValidRole)
         selected = QStyle.State_Selected & option.state
@@ -75,19 +79,25 @@ class CropDelegate(QAbstractItemDelegate):
             painter.drawRect(option.rect)
 
     def _paint_title(self, painter, option, index):
-        """Title of this crop
+        """Paints the title of this crop
         """
         with painter_state(painter):
             font = painter.font()
             font.setPointSize(13)  # TODO LH Arbitrary font size
             font.setWeight(QFont.Black)
             painter.setFont(font)
-            title = index.data(Qt.DisplayRole)
             rect = self.title_rect.translated(option.rect.topLeft())
+
+            # Textual title in black at top left, prefixed with formatted index,
+            # if different
+            title = index.data(Qt.DisplayRole)
+            formatted_index = self.LEADING_ZEROES.format(1 + index.row())
+            if formatted_index != title:
+                title = self.DISPLAY_TEMPLATE.format(formatted_index, title)
             painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft, title)
 
     def _paint_crop(self, painter, option, index):
-        """The cropped image
+        """Paints the crop
         """
         source_rect = index.data(RectRole)
         crop_rect = self.crop_rect.translated(option.rect.topLeft())

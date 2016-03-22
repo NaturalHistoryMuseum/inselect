@@ -5,8 +5,8 @@ from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect, Signal
 
 from inselect.lib.utils import debug_print
 
-from .roles import (RectRole, PixmapRole, RotationRole, MetadataRole,
-                    MetadataValidRole)
+from .roles import (MetadataRole, MetadataValidRole, PixmapRole, RectRole,
+                    RotationRole)
 from .user_template_choice import user_template_choice
 from .utils import qimage_of_bgr
 
@@ -20,8 +20,6 @@ class Model(QAbstractItemModel):
 
     # Emitted when modified status changes
     modified_changed = Signal()
-
-    DISPLAY_TEMPLATE = '{0:04} {1}'
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
@@ -183,10 +181,7 @@ class Model(QAbstractItemModel):
             item = self._data[index.row()]
             if role in (Qt.DisplayRole, Qt.ToolTipRole):
                 template = user_template_choice().current
-                return self.DISPLAY_TEMPLATE.format(
-                    1 + index.row(),
-                    template.format_label(1 + index.row(), item['fields'])
-                )
+                return template.format_label(1 + index.row(), item['fields'])
             elif Qt.WhatsThisRole == role:
                 return 'Cropped object image'
             elif RectRole == role:
