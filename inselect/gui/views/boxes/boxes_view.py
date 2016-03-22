@@ -38,7 +38,7 @@ class BoxesView(QtGui.QGraphicsView):
         """
         debug_print('BoxesView.updateSceneRect')
         # Reset zoom to fit image
-        self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+        self.zoom_home()
 
     def resizeEvent(self, event):
         """QGraphicsView virtual
