@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.25
+-------------
+
 Version 0.1.24
 -------------
 - Fixed #240 - Objects view - better object labels
