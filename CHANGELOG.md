@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.25
 -------------
+- Fixed #243 - Template validation when value is not in drop-down list of values
 
 Version 0.1.24
 -------------

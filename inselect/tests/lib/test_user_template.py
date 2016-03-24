@@ -82,11 +82,10 @@ class TestUserTemplate(unittest.TestCase):
 
     def test_validate_field_mandatory(self):
         t = self.TEMPLATE
-        self.assertTrue(t.validate_field('Second', '123'))
+        self.assertTrue(t.validate_field('Second', 'ABC'))
         self.assertTrue(t.validate_field('Not a field', '123'))
         self.assertFalse(t.validate_field('First', ''))
-        self.assertTrue(t.validate_field('First', ' '))
-        self.assertTrue(t.validate_field('First', '123'))
+        self.assertTrue(t.validate_field('First', 'A'))
 
     def test_validate_field_parser(self):
         t = self.TEMPLATE
@@ -102,16 +101,20 @@ class TestUserTemplate(unittest.TestCase):
 
     def test_validate_metadata_fail_parse(self):
         t = self.TEMPLATE
-        self.assertTrue(t.validate_metadata({'First': 'a', 'Third': ''}))
-        self.assertFalse(t.validate_metadata({'First': 'a', 'Third': 'xyz'}))
-        self.assertTrue(t.validate_metadata({'First': 'a', 'Third': '0'}))
-        self.assertTrue(t.validate_metadata({'First': 'a', 'Third': '1'}))
+        self.assertTrue(t.validate_metadata({'First': 'A', 'Third': ''}))
+        self.assertFalse(t.validate_metadata({'First': 'A', 'Third': 'xyz'}))
+        self.assertTrue(t.validate_metadata({'First': 'A', 'Third': '0'}))
+        self.assertTrue(t.validate_metadata({'First': 'A', 'Third': '1'}))
 
     def test_validate_metadata_missing_mandatory(self):
         t = self.TEMPLATE
         self.assertFalse(t.validate_metadata({'First': ''}))
-        self.assertTrue(t.validate_metadata({'First': ' '}))
-        self.assertTrue(t.validate_metadata({'First': 'xyz'}))
+        self.assertTrue(t.validate_metadata({'First': 'A'}))
+
+    def test_validate_not_in_choices(self):
+        t = self.TEMPLATE
+        self.assertFalse(t.validate_metadata({'First': 'xyz'}))
+        self.assertFalse(t.validate_metadata({'Second': 'xyz'}))
 
     def test_from_file(self):
         "Load from a YAML file"
