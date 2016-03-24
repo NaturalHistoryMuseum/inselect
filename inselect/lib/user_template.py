@@ -4,6 +4,7 @@ import re
 
 from collections import namedtuple, OrderedDict
 from functools import partial
+from itertools import chain
 from pathlib import Path
 
 import persist_user_template
@@ -66,8 +67,13 @@ class UserTemplate(object):
         # Map from field name to a instance of _Field
         self.fields_mapping = {f.name: f for f in fields}
 
-        # Map from field name to field
-        self.choices_with_data_mapping = {f.name: f for f in fields if f.choices_with_data}
+        # Map from field name to choices list
+        self.choices_mapping = {f.name: f.choices for f in fields if f.choices}
+
+        # Map from field name to choices_with_data dict
+        self.choices_with_data_mapping = {
+            f.name: f.choices_with_data for f in fields if f.choices_with_data
+        }
 
         # Mapping from name to parse function, for those fields that have a parser
         self.parse_mapping = {f.name: f.parse_fn for f in fields if f.parse_fn}
@@ -115,9 +121,9 @@ class UserTemplate(object):
         md['ItemNumber'] = index
 
         # Consider fields with a 'Choices with data'
-        for field in self.choices_with_data_mapping.itervalues():
-            value = field.choices_with_data.get(md.get(field.name), '')
-            md[u'{0}-value'.format(field.name)] = value
+        for field, choices in self.choices_with_data_mapping.iteritems():
+            value = choices.get(md.get(field), '')
+            md[u'{0}-value'.format(field)] = value
         return md
 
     def format_label(self, index, metadata):
@@ -130,6 +136,16 @@ class UserTemplate(object):
         """
         if any(not metadata.get(f) for f in self.mandatory):
             return False
+
+        field_choices = chain(self.choices_mapping.iteritems(),
+                              self.choices_with_data_mapping.iteritems())
+        for field, choices in field_choices:
+            value = metadata.get(field)
+            if value and value not in choices:
+                # The value does not appear in the list of choices /
+                # choices_with_data
+                return False
+
         try:
             parseable = self.parse_mapping.iteritems()
             parseable = ((k, v) for k, v in parseable if metadata.get(k))
@@ -150,15 +166,23 @@ class UserTemplate(object):
         elif not value and field in self.mandatory:
             # Field is mandatory and no value was provided
             return False
+        elif (field in self.choices_mapping and
+                value and
+                value not in self.choices_mapping[field]):
+            # Value does not appear in the list of choices
+            return False
+        elif (field in self.choices_with_data_mapping and
+                value and
+                value not in self.choices_with_data_mapping[field]):
+            # Value does not appear in the list of choices_with_data
+            return False
         elif value and field in self.parse_mapping:
             parse = self.parse_mapping[field]
             try:
                 parse(value)
-                debug_print(u'Parsed [{0}] [{1}]'.format(field, value))
                 return True
             except ValueError:
                 # Could not be parsed
-                debug_print(u'Failed to parse [{0}] [{1}]'.format(field, value))
                 return False
         else:
             return True

@@ -359,8 +359,11 @@ class FieldEdit(QLineEdit):
 class FieldComboBox(QComboBox):
     """A base class for controls that contain lists of items.
 
-    The first item is either empty or, when the selection contains multiple
-    values of this field, _MULTIPLE_FIELD_VALUES.
+    The first item is
+    * empty
+    * when the selection contains multiple values of this field,
+      _MULTIPLE_FIELD_VALUES
+    * a value that is not in the list, shown as invalid
 
     Derived classes should implement _data_for_model and _index_of_data
     """
@@ -395,6 +398,10 @@ class FieldComboBox(QComboBox):
         for label, value in izip(labels, values):
             self.addItem(label, value)
 
+        # True if selection contains a single non-empty value that is not in the
+        # list of options
+        self.unrecognised_value = False
+
     def __repr__(self):
         return u'<FieldComboBox [{0}]>'.format(self._field)
 
@@ -409,16 +416,36 @@ class FieldComboBox(QComboBox):
                 0 == self.currentIndex())
 
     def _ensure_multiple_choice(self):
-        """Ensures that the the 'multiple values' choice is not in the list
+        """Ensures that the 'multiple values' choice is in the list
         """
         if _MULTIPLE_FIELD_VALUES != self.itemText(0):
             self.insertItem(0, _MULTIPLE_FIELD_VALUES)
 
     def _remove_multiple_choice(self):
-        """Ensures that the the 'multiple values' choice is not in the list
+        """Removes the 'multiple values' choice from the list
         """
         if _MULTIPLE_FIELD_VALUES == self.itemText(0):
             self.removeItem(0)
+
+    @property
+    def is_unrecognised_value(self):
+        """True if an unrecognised value is visible
+        """
+        return self.unrecognised_value and 0 == self.currentIndex()
+
+    def _insert_unrecognised_value(self, value):
+        """Ensures that the unrecognised value is in the list
+        """
+        self.unrecognised_value = True
+        self.insertItem(0, value)
+        self.setCurrentIndex(0)
+
+    def _remove_unrecognised_value(self):
+        """Removes the unrecognised value from the list
+        """
+        if self.unrecognised_value:
+            self.removeItem(0)
+            self.unrecognised_value = False
 
     def _user_selected_item(self):
         """The user changed the selected item
@@ -428,11 +455,13 @@ class FieldComboBox(QComboBox):
     def clear_selection(self):
         self.selected = None
         self._remove_multiple_choice()
+        self._remove_unrecognised_value()
         self.setCurrentIndex(0)
         self.sync_background()
 
     def set_multiple(self, selected):
         self.selected = selected
+        self._remove_unrecognised_value()
         self._ensure_multiple_choice()
         self.setCurrentIndex(0)
         self.sync_background()
@@ -453,17 +482,19 @@ class FieldComboBox(QComboBox):
         """
         if not self.selected:
             return True
-
-        if self.is_multiple:
+        elif self.is_multiple:
             # Multiple values selected
             return True
+        elif self.is_unrecognised_value:
+            # A single value that is not in the list of options
+            return False
         else:
             return self._template.validate_field(self._field,
                                                  self._data_for_model())
 
     def update_model(self):
         debug_print('ChoicesWithDataFieldComboBox.update_model', self._field)
-        if not self.is_multiple:
+        if not self.is_multiple and not self.is_unrecognised_value:
             # Update the selected items with the user's choice
             new = {self._field: self._data_for_model()}
             for i in self.selected:
@@ -473,11 +504,19 @@ class FieldComboBox(QComboBox):
             # The user may have altered the choice from multiple to a value
             self._remove_multiple_choice()
 
+            # The user may have altered the choice from unrecognised to a value
+            self._remove_unrecognised_value()
+
     def set_value(self, selected, value):
         # Show the single value common to the whole selection
         self.selected = selected
         self._remove_multiple_choice()
-        self.setCurrentIndex(self._index_of_data(value))
+        self._remove_unrecognised_value()
+        index = self._index_of_data(value)
+        if -1 == index:
+            self._insert_unrecognised_value(value)
+        else:
+            self.setCurrentIndex(index)
         self.sync_background()
 
     def _data_for_model(self):

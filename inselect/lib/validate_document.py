@@ -28,6 +28,13 @@ def _visit_box(template, visitor, index, box):
     for field in (f for f in template.mandatory if not md.get(f)):
         visitor.missing_mandatory(index, box_label, field)
 
+    field_choices = chain(template.choices_mapping.iteritems(),
+                          template.choices_with_data_mapping.iteritems())
+    for field, choices in field_choices:
+        value = md.get(field)
+        if value and value not in choices:
+            visitor.not_in_choices(index, box_label, field, value)
+
     for field, parse in ((k, v) for k, v in template.parse_mapping.iteritems() if k in md):
         try:
             parse(md[field])
@@ -52,6 +59,7 @@ def _visit_labels(document, template, visitor):
 
 MissingMandatory = namedtuple('MissingMandatory', ['index', 'label', 'field'])
 FailedParse = namedtuple('FailedParse', ['index', 'label', 'field', 'value'])
+NotInChoices = namedtuple('NotInChoices', ['index', 'label', 'field', 'value'])
 
 
 class CollectProblemsVisitor(object):
@@ -62,6 +70,7 @@ class CollectProblemsVisitor(object):
         self._failed_parse = []
         self._missing_label = []
         self._duplicated_labels = []
+        self._not_in_choices = []
 
     def missing_mandatory(self, index, label, field):
         self._missing_mandatory.append(MissingMandatory(index, label, field))
@@ -75,27 +84,33 @@ class CollectProblemsVisitor(object):
     def duplicated_labels(self, label):
         self._duplicated_labels.append(label)
 
+    def not_in_choices(self, index, box_label, field, value):
+        self._not_in_choices.append(NotInChoices(index, box_label, field, value))
+
     def all_problems(self):
         return ValidationProblems(self._missing_mandatory, self._failed_parse,
-                                  self._missing_label, self._duplicated_labels)
+                                  self._missing_label, self._duplicated_labels,
+                                  self._not_in_choices)
 
 
 class ValidationProblems(object):
     """A container of validation problems
     """
     def __init__(self, missing_mandatory, failed_parse, missing_label,
-                 duplicated_labels):
+                 duplicated_labels, not_in_choices):
         self.missing_mandatory = missing_mandatory
         self.failed_parse = failed_parse
         self.missing_label = missing_label
         self.duplicated_labels = duplicated_labels
+        self.not_in_choices = not_in_choices
 
     @property
     def any_problems(self):
         return bool(self.missing_mandatory or
                     self.failed_parse or
                     self.missing_label or
-                    self.duplicated_labels)
+                    self.duplicated_labels or
+                    self.not_in_choices)
 
 
 def format_missing_mandatory(missing_mandatory):
@@ -122,9 +137,16 @@ def format_duplicated_labels(duplicated_labels):
         yield msg.format(duplicated)
 
 
+def format_not_in_choices(not_in_choices):
+    msg = u'Value of [{0}] [{1}] for box [{2}] [{3}] is not in the list of options'
+    for index, label, field, value in not_in_choices:
+        yield msg.format(field, value, 1 + index, label)
+
+
 def format_validation_problems(v):
     "Generator function of validation failure messages for ValidationProblems v"
     return chain(format_missing_mandatory(v.missing_mandatory),
                  format_failed_parse(v.failed_parse),
                  format_missing_label(v.missing_label),
-                 format_duplicated_labels(v.duplicated_labels))
+                 format_duplicated_labels(v.duplicated_labels),
+                 format_not_in_choices(v.not_in_choices))
