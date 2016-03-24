@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.25
 -------------
+- Fixed #242 - Unnecessary second read of full-res image after creating new document
 
 Version 0.1.24
 -------------

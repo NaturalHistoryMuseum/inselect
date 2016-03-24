@@ -230,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
             elif document_path:
                 # Open the .inselect document
                 debug_print('Opening inselect document [{0}]'.format(document_path))
-                self.open_document(document_path)
+                self.open_document(path=document_path)
             elif image_path:
                 msg = u'Creating new inselect document for image [{0}]'
                 debug_print(msg.format(image_path))
@@ -255,7 +255,7 @@ class MainWindow(QtGui.QMainWindow):
                 def __init__(self, image, default_metadata_items):
                     self.image = image
                     self.default_metadata_items = default_metadata_items
-                    self.document_path = None
+                    self.document = None
 
                 def __call__(self, progress):
                     progress('Creating thumbnail of scanned image')
@@ -263,7 +263,7 @@ class MainWindow(QtGui.QMainWindow):
                                        thumbnail_width,
                                        self.default_metadata_items,
                                        cookie_cutter_choice().current)
-                    self.document_path = doc.document_path
+                    self.document = doc
 
             self.run_in_worker(NewDoc(path, default_metadata_items),
                                'New document',
@@ -274,10 +274,11 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print('MainWindow.new_document_finished')
 
-        document_path = operation.document_path
+        document = operation.document
+        document_path = document.document_path
         QSettings().setValue('working_directory', str(document_path.parent))
 
-        self.open_file(document_path)
+        self.open_document(document=document)
 
         msg = u'New Inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
@@ -317,13 +318,20 @@ class MainWindow(QtGui.QMainWindow):
         recent = RecentDocuments().read_paths()
         self.open_file(recent[index])
 
-    def open_document(self, path):
-        """Opens the inselect document given by path
+    def open_document(self, path=None, document=None):
+        """Either loads the inselect document from  path or uses the existing
+        InselectDocument given in document.
         """
-        debug_print('MainWindow.open_document [{0}]'.format(path))
+        if path and document:
+            raise ValueError('Both path and document given')
 
-        path = Path(path)
-        document = InselectDocument.load(path)
+        if path:
+            path = Path(path)
+            document = InselectDocument.load(path)
+        else:
+            path = document.document_path
+
+        debug_print('MainWindow.open_document [{0}]'.format(path))
         QSettings().setValue("working_directory", str(path.parent))
 
         self.document = document
