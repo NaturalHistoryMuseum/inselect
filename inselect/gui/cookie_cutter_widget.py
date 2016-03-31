@@ -21,7 +21,7 @@ class CookieCutterWidget(QWidget):
 
         # Configure the UI
         self._create_actions()
-        self.button = QPushButton("Choose cookie cutter")
+        self.button = QPushButton("Cookie cutter")
         self.button.setMaximumWidth(250)
         self.button.setStyleSheet("text-align: left")
         self.popup = QMenu()
@@ -77,7 +77,7 @@ class CookieCutterWidget(QWidget):
         debug_print('CookieCutterWidget.sync_ui')
         current = cookie_cutter_choice().current
         has_current = cookie_cutter_choice().current is not None
-        name = current.name if current else 'Choose cookie cutter'
+        name = current.name if current else 'Cookie cutter'
 
         # Truncate text to fit button
         metrics = QFontMetrics(self.button.font())
