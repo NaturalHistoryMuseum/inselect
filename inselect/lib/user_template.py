@@ -4,7 +4,7 @@ import re
 
 from collections import namedtuple, OrderedDict
 from functools import partial
-from itertools import chain
+from itertools import count, chain, izip, repeat
 from pathlib import Path
 
 import persist_user_template
@@ -114,17 +114,53 @@ class UserTemplate(object):
 
     def metadata(self, index, metadata):
         """Returns a dict {field_name: value} for the given box index and
-        metadata, adding synthesized values where required
+        metadata, adding synthesized values where required. Does not include
+        the 'Cropped_image_name' field nor those fields that relate to
+        coordinates.
         """
-        # TODO Deep copy here?
-        md = metadata
+        md = metadata.copy()
         md['ItemNumber'] = index
 
         # Consider fields with a 'Choices with data'
         for field, choices in self.choices_with_data_mapping.iteritems():
-            value = choices.get(md.get(field), '')
-            md[u'{0}-value'.format(field)] = value
+            if field in md:
+                md[u'{0}-value'.format(field)] = choices.get(md[field], '')
         return md
+
+    def export_items(self, crop_fnames, document):
+        """Generator of dicts of metadata values for boxes in document and
+        the iterator of crop_fnames.
+        """
+        # Document might not have a thumbnail
+        if document.thumbnail:
+            thumbnail_coords = document.thumbnail.from_normalised(
+                b['rect'] for b in document.items
+            )
+        else:
+            thumbnail_coords = repeat(None)
+
+        items = izip(
+            count(start=1),
+            crop_fnames,
+            (b['rect'] for b in document.items),
+            thumbnail_coords,
+            document.scanned.from_normalised(b['rect'] for b in document.items),
+            document.items
+        )
+
+        for item_num, fname, normalised, thumbnail, scanned, box in items:
+            md = self.metadata(item_num, box['fields'])
+
+            # Push these extra values into metadata
+            md['Cropped_image_name'] = fname
+            (md['NormalisedLeft'], md['NormalisedTop'],
+             md['NormalisedRight'], md['NormalisedBottom']) = normalised.coordinates
+            if thumbnail:
+                (md['ThumbnailLeft'], md['ThumbnailTop'], md['ThumbnailRight'],
+                 md['ThumbnailBottom']) = thumbnail.coordinates
+            (md['OriginalLeft'], md['OriginalTop'], md['OriginalRight'],
+             md['OriginalBottom']) = scanned.coordinates
+            yield md
 
     def format_label(self, index, metadata):
         "Returns a textual label for the given box index and metadata"

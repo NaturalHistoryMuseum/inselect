@@ -9,6 +9,7 @@ import unicodecsv
 from PySide.QtGui import QMessageBox
 
 from gui_test import MainWindowTest
+from inselect.lib.persist_user_template import BOUNDING_BOX_FIELD_NAMES
 from inselect.lib.templates.dwc import DWC
 from inselect.tests.utils import temp_directory_with_files
 
@@ -29,10 +30,10 @@ class TestExportCSV(MainWindowTest):
             for index, item, row in izip(count(), doc.items, res):
                 expected = item['fields']
                 expected.update({
-                    'ItemNumber': '{0}'.format(1+index),
-                    'Cropped_image_name': '{0:04}.jpg'.format(1+index),
+                    'ItemNumber': '{0}'.format(1 + index),
+                    'Cropped_image_name': '{0:04}.jpg'.format(1 + index),
                 })
-                actual = {k: v for k, v in row.items() if v}
+                actual = {k: v for k, v in row.items() if v and k not in BOUNDING_BOX_FIELD_NAMES}
                 self.assertEqual(expected, actual)
 
         # Expect 4 rows

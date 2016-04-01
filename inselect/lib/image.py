@@ -56,14 +56,14 @@ class InselectImage(object):
     def from_normalised(self, boxes):
         """Generator function that yields instances of Rect
         """
-        h, w = self.array.shape[:2]
+        w, h = self.dimensions
         for left, top, width, height in boxes:
             yield Rect(int(w*left), int(h*top), int(w*width), int(h*height))
 
     def to_normalised(self, boxes):
         """Generator function that yields instances of Rect
         """
-        h, w = self.array.shape[:2]
+        w, h = self.dimensions
         for left, top, width, height in boxes:
             yield Rect(float(left)/w, float(top)/h, float(width)/w,
                        float(height)/h)
@@ -136,7 +136,7 @@ class InselectImage(object):
 
     @property
     def size_bytes(self):
-        "The iteger size of this file in bytes"
+        "The integer size of this file in bytes"
         return self._path.stat().st_size
 
     @property

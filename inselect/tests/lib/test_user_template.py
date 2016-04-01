@@ -4,6 +4,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 from inselect.lib.user_template import UserTemplate
+from inselect.lib.persist_user_template import RESERVED_FIELD_NAMES
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -72,8 +73,10 @@ class TestUserTemplate(unittest.TestCase):
 
     def test_field_names(self):
         t = self.TEMPLATE
-        self.assertEqual(['ItemNumber', 'First', 'Second', 'Second-value',
-                          'Third', 'Last'], list(t.field_names()))
+        self.assertEqual(
+            RESERVED_FIELD_NAMES + ('First', 'Second', 'Second-value', 'Third', 'Last'),
+            tuple(t.field_names())
+        )
 
     def test_format_label(self):
         t = self.TEMPLATE

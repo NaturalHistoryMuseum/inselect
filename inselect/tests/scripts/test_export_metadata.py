@@ -7,9 +7,8 @@ from pathlib import Path
 import unicodecsv
 
 from inselect.lib.document import InselectDocument
-
+from inselect.lib.persist_user_template import BOUNDING_BOX_FIELD_NAMES
 from inselect.scripts.export_metadata import main
-
 from inselect.tests.utils import temp_directory_with_files
 
 
@@ -65,7 +64,7 @@ class TestExportCSV(unittest.TestCase):
                         'ItemNumber': str(1+index),
                         'Cropped_image_name': '{0:04}.jpg'.format(1+index)
                     })
-                    actual = {k: v for k, v in row.items() if v}
+                    actual = {k: v for k, v in row.items() if v and k not in BOUNDING_BOX_FIELD_NAMES}
                     self.assertEqual(expected, actual)
 
     def test_export_csv_with_template(self):

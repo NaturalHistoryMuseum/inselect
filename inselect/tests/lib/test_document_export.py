@@ -2,6 +2,7 @@
 import unittest
 
 from itertools import izip
+from operator import itemgetter
 from pathlib import Path
 
 import cv2
@@ -108,15 +109,50 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
 
             with csv_path.open('rb') as f:
                 reader = unicodecsv.reader(f, encoding='utf8')
-                headers = ['Cropped_image_name', 'ItemNumber', 'catalogNumber',
-                           'scientificName', 'scientificName-value']
+                headers = [
+                    'Cropped_image_name', 'ItemNumber',
+                    'NormalisedLeft', 'NormalisedTop', 'NormalisedRight',
+                    'NormalisedBottom', 'ThumbnailLeft', 'ThumbnailTop',
+                    'ThumbnailRight', 'ThumbnailBottom', 'OriginalLeft',
+                    'OriginalTop', 'OriginalRight', 'OriginalBottom',
+                    'catalogNumber', 'scientificName', 'scientificName-value'
+                ]
                 self.assertEqual(headers, reader.next())
-                self.assertEqual([u'01_1.png',  u'1', u'1', u'A', u'1'], reader.next())
-                self.assertEqual([u'02_2.png',  u'2', u'2', u'B', u'2'], reader.next())
-                self.assertEqual([u'03_10.png', u'3', u'3', u'インセクト', u'10'],
-                                 reader.next())
-                self.assertEqual([u'04_3.png',  u'4', u'', u'Elsinoë', u'3'], reader.next())
-                self.assertEqual([u'05_4.png',  u'5', u'', u'D', u'4'], reader.next())
+
+                # Check only the metadata columns and 'original' coordinates
+                # columns, ignoring thumbnail (which doesn't exist)
+                # and normalised (which are floating point) coordinates
+                metadata_cols = itemgetter(0, 1, 10, 11, 12, 13, 14, 15, 16)
+                self.assertEqual(
+                    (u'01_1.png', u'1',
+                     u'0', u'0', u'187', u'187',
+                     u'1', u'A', u'1'),
+                    metadata_cols(reader.next())
+                )
+                self.assertEqual(
+                    (u'02_2.png', u'2',
+                     u'272', u'0', u'458', u'187',
+                     u'2', u'B', u'2'),
+                    metadata_cols(reader.next())
+                )
+                self.assertEqual(
+                    (u'03_10.png', u'3',
+                     u'195', u'196', u'257', u'231',
+                     u'3', u'インセクト', u'10'),
+                    metadata_cols(reader.next())
+                )
+                self.assertEqual(
+                    (u'04_3.png', u'4',
+                     u'0', u'250', u'187', u'436',
+                     u'', u'Elsinoë', u'3'),
+                    metadata_cols(reader.next())
+                )
+                self.assertEqual(
+                    (u'05_4.png', u'5',
+                     u'272', u'250', u'458', u'436',
+                     u'', u'D', u'4'),
+                    metadata_cols(reader.next())
+                )
                 self.assertIsNone(next(reader, None))
 
 

@@ -21,8 +21,15 @@ from inselect.lib.utils import duplicated
 PARSERS = {k: v for k, v in parse.PARSERS.iteritems()}
 PARSERS = {re.sub(r'^parse_', '', k): v for k, v in PARSERS.iteritems()}
 
+# Fields relating to bounding box locations
+BOUNDING_BOX_FIELD_NAMES = (
+    'NormalisedLeft', 'NormalisedTop', 'NormalisedRight', 'NormalisedBottom',
+    'ThumbnailLeft', 'ThumbnailTop', 'ThumbnailRight', 'ThumbnailBottom',
+    'OriginalLeft', 'OriginalTop', 'OriginalRight', 'OriginalBottom',
+)
+
 # Fields synthesized by UserTemplate.metadata()
-RESERVED_FIELD_NAMES = ['ItemNumber']
+RESERVED_FIELD_NAMES = ('Cropped_image_name', 'ItemNumber') + BOUNDING_BOX_FIELD_NAMES
 
 
 # TODO Check for Field-value / 'Choices with data' collisions
@@ -136,7 +143,7 @@ class _FieldModel(Model):
 
     def validate_name(self, data, value):
         if value in RESERVED_FIELD_NAMES:
-            msg = u"'Name' should not be one of {0}."
+            msg = u"Should not be one of {0}."
             raise ValidationError(msg.format(RESERVED_FIELD_NAMES))
 
     def validate_choices(self, data, value):
