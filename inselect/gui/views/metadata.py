@@ -78,10 +78,13 @@ class MetadataView(QAbstractItemView):
             metadata = [i.data(MetadataRole) for i in selected]
             for control, field in self._form_container.controls.iteritems():
                 control.setEnabled(True)
-                values = set(m.get(field, '') for m in metadata)
+                values = set(m.get(field) for m in metadata)
                 if 1 < len(values):
                     # Indicate multiple values
                     control.set_multiple(selected)
+                elif None in values:
+                    # Indicate no value selected
+                    control.clear_value(selected)
                 else:
                     # Put the value into the controls
                     control.set_value(selected, values.pop())
@@ -312,24 +315,24 @@ class FieldEdit(QLineEdit):
                     i.model().setData(i, new, MetadataRole)
             self.sync_background()
 
-    def clear_selection(self):
-        self.selected = None
-        self.multiple_values = False
-        self.setText('')
+    def _update(self, selected, multiple, value):
+        self.selected = selected
+        self.multiple_values = multiple
+        self.setText(value)
         self.sync_background()
 
+    def clear_selection(self):
+        self._update(None, False, '')
+
+    def clear_value(self, selected):
+        self._update(selected, False, '')
+
     def set_multiple(self, selected):
-        self.selected = selected
-        self.multiple_values = True
-        self.setText(_MULTIPLE_FIELD_VALUES)
-        self.sync_background()
+        self._update(selected, True, _MULTIPLE_FIELD_VALUES)
 
     def set_value(self, selected, value):
         # Show the single value common to the whole selection
-        self.selected = selected
-        self.multiple_values = False
-        self.setText(value)
-        self.sync_background()
+        self._update(selected, False, value)
 
     def sync_background(self):
         current, new = self.property("invalid"), not self.is_valid()
@@ -452,19 +455,37 @@ class FieldComboBox(QComboBox):
         """
         self.update_model()
 
-    def clear_selection(self):
-        self.selected = None
-        self._remove_multiple_choice()
-        self._remove_unrecognised_value()
-        self.setCurrentIndex(0)
+    def _update(self, selected, multiple, value):
+        self.selected = selected
+        if multiple:
+            self._remove_unrecognised_value()
+            self._ensure_multiple_choice()
+            self.setCurrentIndex(0)
+        else:
+            self._remove_multiple_choice()
+            self._remove_unrecognised_value()
+            if value:
+                index = self._index_of_data(value)
+                if -1 == index:
+                    self._insert_unrecognised_value(value)
+                else:
+                    self.setCurrentIndex(index)
+            else:
+                self.setCurrentIndex(0)
         self.sync_background()
 
+    def clear_selection(self):
+        self._update(None, False, None)
+
+    def clear_value(self, selected):
+        self._update(selected, False, None)
+
     def set_multiple(self, selected):
-        self.selected = selected
-        self._remove_unrecognised_value()
-        self._ensure_multiple_choice()
-        self.setCurrentIndex(0)
-        self.sync_background()
+        self._update(selected, True, None)
+
+    def set_value(self, selected, value):
+        # Show the single value common to the whole selection
+        self._update(selected, False, value)
 
     def sync_background(self):
         current, new = self.property("invalid"), not self.is_valid()
@@ -506,18 +527,6 @@ class FieldComboBox(QComboBox):
 
             # The user may have altered the choice from unrecognised to a value
             self._remove_unrecognised_value()
-
-    def set_value(self, selected, value):
-        # Show the single value common to the whole selection
-        self.selected = selected
-        self._remove_multiple_choice()
-        self._remove_unrecognised_value()
-        index = self._index_of_data(value)
-        if -1 == index:
-            self._insert_unrecognised_value(value)
-        else:
-            self.setCurrentIndex(index)
-        self.sync_background()
 
     def _data_for_model(self):
         """Returns a value with which to update the model

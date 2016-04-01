@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.25
 -------------
+- Fixed #249 - Better handling of multiple and unrecognised metadata values
 - Fixed #248 - Better default text in Cookie Cutter dropdown
 - Fixed #243 - Template validation when value is not in drop-down list of values
 - Fixed #242 - Unnecessary second read of full-res image after creating new document
