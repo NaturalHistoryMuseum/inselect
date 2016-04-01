@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.26
+-------------
+
 Version 0.1.25
 -------------
 - Fixed #249 - Better handling of multiple and unrecognised metadata values
