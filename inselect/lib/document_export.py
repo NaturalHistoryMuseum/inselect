@@ -3,7 +3,7 @@ import tempfile
 
 from collections import defaultdict
 from functools import partial
-from itertools import chain, count, izip
+from itertools import count
 from pathlib import Path
 
 import unicodecsv
@@ -108,15 +108,12 @@ class DocumentExport(object):
         # Crop filenames
         crop_fnames = self.crop_fnames(document)
 
-        # A function that returns a dict of metadata for a box
-        metadata = self._template.metadata
-
         with path.open('wb') as f:
             w = unicodecsv.writer(f, encoding='utf8')
-            w.writerow(chain(['Cropped_image_name'], fields))
-            for index, fname, box in izip(count(), crop_fnames, document.items):
-                md = metadata(1 + index, box['fields'])
-                w.writerow(chain([fname], (md.get(f) for f in fields)))
+            w.writerow(fields)
+            for exported in self._template.export_items(crop_fnames, document):
+                # Write metadata values in the correct order
+                w.writerow(exported.get(f) for f in fields)
 
         return path
 

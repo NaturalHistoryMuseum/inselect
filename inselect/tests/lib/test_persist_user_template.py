@@ -45,7 +45,15 @@ class TestValidateUserTemplate(unittest.TestCase):
 
     def test_illegal_field_name(self):
         res = self._invalid_specification({'Fields': [{'Name': 'ItemNumber'}]})
-        self.assertIn("ItemNumber: Name: 'Name' should not be one of ['ItemNumber'].", res)
+        self.assertIn(
+            ("ItemNumber: Name: Should not be one of "
+             "('Cropped_image_name', 'ItemNumber', 'NormalisedLeft', "
+             "'NormalisedTop', 'NormalisedRight', 'NormalisedBottom', "
+             "'ThumbnailLeft', 'ThumbnailTop', 'ThumbnailRight', "
+             "'ThumbnailBottom', 'OriginalLeft', 'OriginalTop', "
+             "'OriginalRight', 'OriginalBottom')."),
+            res
+        )
 
     def test_duplicated_field_names(self):
         spec = {'Fields': [

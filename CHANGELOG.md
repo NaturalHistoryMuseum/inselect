@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.25
 -------------
+- Fixed #247 - Locations of bounding boxes in CSV
 - Fixed #243 - Template validation when value is not in drop-down list of values
 - Fixed #242 - Unnecessary second read of full-res image after creating new document
 
