@@ -27,7 +27,7 @@ Version 0.1.23
 
 Version 0.1.22
 -------------
-- Fixed #225 - Mac command-line tools are broken bug (@quicklizard99)
+- Fixed #225 - Mac command-line tools are broken (@quicklizard99)
 - Added #219 - Command-line tools to use metadata and cookie-cutter templates (@quicklizard99)
 
 Version 0.1.21
