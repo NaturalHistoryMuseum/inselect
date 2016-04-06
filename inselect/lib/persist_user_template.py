@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 import yaml
 
-from schematics.exceptions import ValidationError
+from schematics.exceptions import ModelConversionError, ValidationError
 from schematics.models import Model
 from schematics.types import StringType, DecimalType, BooleanType, URLType
 from schematics.types.compound import (ListType, ModelType, MultiType, BaseType)
@@ -64,11 +64,11 @@ class OrderedDictType(MultiType):
         return self.field.model_class
 
     def to_native(self, value, safe=False, context=None):
-        if isinstance(value, list):
+        if value and isinstance(value, list) and 2 == len(value[0]):
             # Expect a list of tuples
             value = OrderedDict(value)
         if not isinstance(value, OrderedDict):
-            raise ValidationError(u'Only OrderedDict may be used in a OrderedDictType')
+            raise ValidationError(u'Must be a mapping.')
         else:
             return OrderedDict(
                 (self.coerce_key(k), self.field.to_native(v, context))
@@ -254,16 +254,17 @@ def validated_specification(spec):
     failures = []
     model.fields = []
     for f in spec.get('Fields', []):
-        field = _FieldModel(f)
         try:
+            field = _FieldModel(f)
             field.validate()
-        except ValidationError, e:
+        except (ModelConversionError, ValidationError), e:
             failures += _extract_validation_error(e, prompt=f.get('Name'))
-        model.fields.append(field)
+        else:
+            model.fields.append(field)
 
     try:
         model.validate()
-    except ValidationError, e:
+    except (ModelConversionError, ValidationError), e:
         failures += _extract_validation_error(e)
 
     if failures:
