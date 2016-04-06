@@ -103,6 +103,15 @@ class TestValidateUserTemplate(unittest.TestCase):
         expected = 'A field named "F2-value" cannot be defined'
         self.assertIn(expected, res)
 
+    def test_choices_with_data_defined_as_list(self):
+        "A 'Choices with data' field given as a list"
+        spec = {'Fields': [{
+            'Name': 'F', 'Choices with data': ['1', '2'],
+        }]}
+        res = self._invalid_specification(spec)
+        expected = "F: Choices with data: Must be a mapping."
+        self.assertIn(expected, res)
+
     def test_empty_parser(self):
         spec = {'Fields': [
             {'Name': 'F1', 'Parser': ''},
