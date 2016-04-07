@@ -29,6 +29,8 @@ BOUNDING_BOX_FIELD_NAMES = (
 )
 
 # Fields synthesized by UserTemplate.metadata()
+# TODO Cropped_image_name should be CroppedImageName for consistency with other
+# field names
 RESERVED_FIELD_NAMES = ('Cropped_image_name', 'ItemNumber') + BOUNDING_BOX_FIELD_NAMES
 
 
