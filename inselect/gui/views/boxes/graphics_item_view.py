@@ -6,7 +6,7 @@ from PySide.QtCore import QRect
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import PixmapRole, RectRole, MetadataValidRole
-from inselect.gui.utils import unite_rects, update_selection_model
+from inselect.gui.utils import update_selection_model
 
 from .boxes_scene import BoxesScene
 
@@ -23,7 +23,9 @@ class GraphicsItemView(QtGui.QAbstractItemView):
     * addition of boxes
     * deletion of boxes
     * metadata valid status (MetadataValidRole)
+
     * TODO box verified status
+    * TODO reordering of boxes
     """
 
     # Based on idea in:
@@ -52,8 +54,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         rows = [None] * model.rowCount()
         for row in xrange(model.rowCount()):
             index = model.index(row, 0)
-            rows[row] = self.scene.add_box(index.data(RectRole),
-                                           index.data(MetadataValidRole))
+            rows[row] = self.scene.add_box(index.data(RectRole))
         self._rows = rows
 
     def show_alternative_pixmap(self, pixmap):
@@ -79,21 +80,25 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         new = [None] * n
         rect = QRect(0, 0, 0, 0)
         for row in xrange(n):
-            new[row] = self.scene.add_box(rect, False)
+            new[row] = self.scene.add_box(rect)
         self._rows[start:start] = new
+
+        # Redraw
+        for item in self._rows[start:]:
+            item.update()
 
     def dataChanged(self, topLeft, bottomRight):
         """QAbstractItemView virtual
         """
-        debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())
+        debug_print('GraphicsItemView.dataChanged', topLeft.row(),
+                    bottomRight.row())
 
         for row in xrange(topLeft.row(), 1 + bottomRight.row()):
-
             item = self._rows[row]
             # new is a QRect - integer coordinates
             index = self.model().index(row, 0)
             item.set_rect(index.data(RectRole))
-            item.set_isvalid(index.data(MetadataValidRole))
+            item.update()
 
     def rowsAboutToBeRemoved(self, parent, start, end):
         """QAbstractItemView slot
@@ -115,6 +120,10 @@ class GraphicsItemView(QtGui.QAbstractItemView):
 
         # Remove items
         self._rows[start:end] = []
+
+        # Redraw
+        for item in self._rows[start:]:
+            item.update()
 
     def selectionChanged(self, selected, deselected):
         """QAbstractItemView virtual
@@ -213,3 +222,9 @@ class GraphicsItemView(QtGui.QAbstractItemView):
                 item = self.items_of_rows([row]).next()
                 item.setSelected(True)
                 item.update()
+
+    def item_display_title(self, item):
+        return next(self.indexes_of_items((item,))).data(QtCore.Qt.DisplayRole)
+
+    def item_is_valid(self, item):
+        return next(self.indexes_of_items((item,))).data(MetadataValidRole)

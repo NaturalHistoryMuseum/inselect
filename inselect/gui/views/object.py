@@ -45,9 +45,6 @@ class CropDelegate(QAbstractItemDelegate):
     # Border around cropped image
     BORDER = 25
 
-    DISPLAY_TEMPLATE = u'{0} {1}'
-    LEADING_ZEROES = u'{0:04d}'
-
     @property
     def box_rect(self):
         "QRect of the complete box"
@@ -88,13 +85,9 @@ class CropDelegate(QAbstractItemDelegate):
             painter.setFont(font)
             rect = self.title_rect.translated(option.rect.topLeft())
 
-            # Textual title in black at top left, prefixed with formatted index,
-            # if different
-            title = index.data(Qt.DisplayRole)
-            formatted_index = self.LEADING_ZEROES.format(1 + index.row())
-            if formatted_index != title:
-                title = self.DISPLAY_TEMPLATE.format(formatted_index, title)
-            painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft, title)
+            # Textual title in black at top left
+            painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft,
+                             index.data(Qt.DisplayRole))
 
     def _paint_crop(self, painter, option, index):
         """Paints the crop

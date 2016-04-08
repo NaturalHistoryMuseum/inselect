@@ -3,6 +3,7 @@ from itertools import ifilter
 
 from PySide import QtGui
 from PySide.QtCore import Qt
+from PySide.QtGui import QBrush, QGraphicsItem, QGraphicsSimpleTextItem
 
 from inselect.lib.utils import debug_print
 
@@ -87,13 +88,12 @@ class BoxesScene(QtGui.QGraphicsScene):
         "Iterable containin just BoxItems"
         return ifilter(lambda i: isinstance(i, BoxItem), self.items())
 
-    def add_box(self, rect, isvalid):
+    def add_box(self, rect):
         """Notification from source that a box has been added.
 
         Adds a Box item at the given rect.
         """
-        item = BoxItem(rect.left(), rect.top(), rect.width(), rect.height(),
-                       isvalid)
+        item = BoxItem(rect.left(), rect.top(), rect.width(), rect.height())
         self.addItem(item)
         return item
 

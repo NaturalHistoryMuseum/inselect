@@ -1,8 +1,9 @@
 from itertools import chain
 
-from PySide import QtCore, QtGui
+from PySide import QtCore
 from PySide.QtCore import Qt, QRect, QRectF
-from PySide.QtGui import QPen, QBrush, QGraphicsItem
+from PySide.QtGui import (QBrush, QGraphicsItem, QGraphicsRectItem, QPen,
+                          QTransform)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
@@ -11,11 +12,45 @@ from inselect.gui.utils import painter_state
 from .resize_handle import ResizeHandle
 
 
-class BoxItem(QtGui.QGraphicsRectItem):
+def generate_translation_only_transform(original_transform, target_point):
+    """To draw the unscaled icons, we desire a transform with scaling factors
+    of 1 and shearing factors of 0 and the appropriate translation such that
+    our icon center ends up at the same point. According to the
+    documentation, QTransform transforms a point in the plane to another
+    point using the following formulas:
+    x' = m11*x + m21*y + dx
+    y' = m22*y + m12*x + dy
+
+    For our new transform, m11 and m22 (scaling) are 1, and m21 and m12
+    (shearing) are 0. Since we want x' and y' to be the same, we have the
+    following equations:
+    m11*x + m21*y + dx = x + dx[new]
+    m22*y + m12*x + dy = y + dy[new]
+
+    Thus,
+    dx[new] = m11*x - x + m21*y + dx
+    dy[new] = m22*y - y + m12*x + dy
+    """
+    # http://stackoverflow.com/a/11459832
+
+    dx = (original_transform.m11() * target_point.x()
+          - target_point.x()
+          + original_transform.m21() * target_point.y()
+          + original_transform.m31())
+
+    dy = (original_transform.m22() * target_point.y()
+          - target_point.y()
+          + original_transform.m12() * target_point.x()
+          + original_transform.m32())
+
+    return QTransform.fromTranslate(dx, dy)
+
+
+class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
+    def __init__(self, x, y, w, h, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
         self.setFlags(QGraphicsItem.ItemIsFocusable |
                       QGraphicsItem.ItemIsSelectable |
@@ -25,16 +60,12 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self.setCursor(Qt.OpenHandCursor)
         self.setAcceptHoverEvents(True)
 
-        # True if the box has valid metadata
-        self._isvalid = isvalid
-
         # Sub-segmentation seed points - QPointF objects in item coordinates
         self._seeds = []
 
         # Resize handles
         positions = (Qt.TopLeftCorner, Qt.TopRightCorner, Qt.BottomLeftCorner,
                      Qt.BottomRightCorner)
-        self._handles = []
         self._handles = [self._create_handle(pos) for pos in positions]
         self._layout_handles()
 
@@ -70,6 +101,22 @@ class BoxItem(QtGui.QGraphicsRectItem):
             if fill_colour:
                 painter.fillRect(r, fill_colour)
 
+        with painter_state(painter):
+            font = painter.font()
+            font.setPointSize(14)  # TODO LH Arbitrary font size
+            painter.setFont(font)
+            painter.setClipRect(self.rect())
+            painter.setTransform(
+                generate_translation_only_transform(painter.transform(),
+                                                    r.topLeft())
+            )
+            painter.drawText(r, Qt.AlignTop | Qt.AlignLeft,
+                             self.scene().source.item_display_title(self))
+
+    @property
+    def is_valid(self):
+        return self.scene().source.item_is_valid(self)
+
     def has_mouse(self):
         """True if self or self._handles has grabbed the mouse
         """
@@ -86,12 +133,12 @@ class BoxItem(QtGui.QGraphicsRectItem):
             outline = colours['Resizing']
         elif self.isSelected():
             outline = colours['Selected']
-        elif self._isvalid:
+        elif self.is_valid:
             outline = colours['Valid']
         else:
             outline = colours['Invalid']
 
-        if not self._isvalid and not has_mouse:
+        if not self.is_valid and not has_mouse:
             fill = colours['InvalidFill']
         else:
             fill = None
@@ -200,13 +247,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
             # setrect() expects floating point rect
             self.setRect(QRectF(new_rect))
-
-    def set_isvalid(self, isvalid):
-        """Sets a new 'is valid'
-        """
-        if isvalid != self._isvalid:
-            self._isvalid = isvalid
-            self.update()
 
     def _set_z_index(self):
         """Updates the Z-index of the box
