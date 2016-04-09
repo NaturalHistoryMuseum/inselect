@@ -2,8 +2,8 @@ from itertools import chain
 
 from PySide import QtCore
 from PySide.QtCore import Qt, QRect, QRectF
-from PySide.QtGui import (QBrush, QGraphicsItem, QGraphicsRectItem, QPen,
-                          QTransform)
+from PySide.QtGui import (QBrush, QColor, QFontMetrics, QGraphicsItem,
+                          QGraphicsRectItem, QPainter, QPen, QTransform)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
@@ -50,6 +50,8 @@ class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
+    TRANSPARENT_GREY = QBrush(QColor(0x80, 0x80, 0x80, 0x80))
+
     def __init__(self, x, y, w, h, parent=None, scene=None):
         super(BoxItem, self).__init__(x, y, w, h, parent, scene)
         self.setFlags(QGraphicsItem.ItemIsFocusable |
@@ -88,8 +90,8 @@ class BoxItem(QGraphicsRectItem):
             # same thickness regardless of the view's scale factor
             outline_colour, fill_colour = self.colours
             painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
-            r = self.boundingRect()
-            painter.drawRect(r)
+            bounding = self.boundingRect()
+            painter.drawRect(bounding)
 
             if self._seeds:
                 # Draw sub-segmentation seed points
@@ -99,19 +101,41 @@ class BoxItem(QGraphicsRectItem):
                     painter.drawEllipse(point, 5, 5)
 
             if fill_colour:
-                painter.fillRect(r, fill_colour)
+                painter.fillRect(bounding, fill_colour)
 
         with painter_state(painter):
             font = painter.font()
             font.setPointSize(14)  # TODO LH Arbitrary font size
             painter.setFont(font)
-            painter.setClipRect(self.rect())
+
+            # Clip text to box
+            painter.setClipRect(self.rect(), Qt.IntersectClip)
+
+            # Constant size of text regardless of zoom level
             painter.setTransform(
                 generate_translation_only_transform(painter.transform(),
-                                                    r.topLeft())
+                                                    bounding.topLeft())
             )
-            painter.drawText(r, Qt.AlignTop | Qt.AlignLeft,
-                             self.scene().source.item_display_title(self))
+
+            title = self.scene().source.item_display_title(self)
+
+            # Transparent grey rect behind text
+            fm = QFontMetrics(font, painter.device())
+            width, height = fm.width(title), fm.height()
+            text_rect = QRect(bounding.left(), bounding.top(),
+                              width, height)
+            # Padding around text
+            h_padding, v_padding = 4, 1
+            painter.fillRect(
+                text_rect.adjusted(0, 0, h_padding * 2, v_padding * 2),
+                self.TRANSPARENT_GREY
+            )
+
+            # The title itself
+            painter.drawText(
+                text_rect.adjusted(h_padding, v_padding, h_padding, v_padding),
+                Qt.AlignTop | Qt.AlignLeft, title
+            )
 
     @property
     def is_valid(self):

@@ -3,7 +3,6 @@ from itertools import ifilter
 
 from PySide import QtGui
 from PySide.QtCore import Qt
-from PySide.QtGui import QBrush, QGraphicsItem, QGraphicsSimpleTextItem
 
 from inselect.lib.utils import debug_print
 
