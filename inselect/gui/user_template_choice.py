@@ -85,3 +85,8 @@ class UserTemplateChoice(QObject):
     def current(self):
         "The selected UserTemplate"
         return self._current
+
+    @property
+    def current_is_default(self):
+        "True if self.current is the default template"
+        return self._current == self.DEFAULT

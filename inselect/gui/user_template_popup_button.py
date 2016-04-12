@@ -79,4 +79,6 @@ class UserTemplatePopupButton(QPushButton):
     def changed(self):
         "Slot for UserTemplateChoice.template_changed"
         debug_print('UserTemplateWidget.changed')
-        self.setText(user_template_choice().current.name)
+        choice = user_template_choice()
+        self.setText(choice.current.name)
+        self._refresh_action.setEnabled(not choice.current_is_default)
