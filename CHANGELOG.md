@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.26
 -------------
+- Fixed #256 - Disable template 'Reload' command when default template selected
 - Fixed #254 - An Error Occurred: {'Choices with data ...
 
 Version 0.1.25
