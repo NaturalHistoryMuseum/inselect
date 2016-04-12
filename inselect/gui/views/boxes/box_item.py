@@ -108,8 +108,8 @@ class BoxItem(QGraphicsRectItem):
             font.setPointSize(14)  # TODO LH Arbitrary font size
             painter.setFont(font)
 
-            # Clip text to box
-            painter.setClipRect(self.rect(), Qt.IntersectClip)
+            # Clip to box
+            painter.setClipRect(self.rect())
 
             # Constant size of text regardless of zoom level
             painter.setTransform(
@@ -126,15 +126,17 @@ class BoxItem(QGraphicsRectItem):
                               width, height)
             # Padding around text
             h_padding, v_padding = 4, 1
+
             painter.fillRect(
                 text_rect.adjusted(0, 0, h_padding * 2, v_padding * 2),
                 self.TRANSPARENT_GREY
             )
 
-            # The title itself
+            # The label itself. Need to specify TextDontClip to prevent
+            # truncated text on Windows.
             painter.drawText(
                 text_rect.adjusted(h_padding, v_padding, h_padding, v_padding),
-                Qt.AlignTop | Qt.AlignLeft, title
+                Qt.AlignTop | Qt.AlignLeft | Qt.TextDontClip, title
             )
 
     @property
