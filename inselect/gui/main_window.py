@@ -962,12 +962,13 @@ class MainWindow(QtGui.QMainWindow):
         # silently swallowed.
         self.boxes_view_action = QAction(
             "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
-            shortcut='ctrl+B'
         )
+        self.boxes_view_action.setShortcuts(['ctrl+1', 'ctrl+b'])
         self.metadata_view_action = QAction(
             "Ob&jects", self, checkable=True,
-            triggered=partial(self.show_tab, 1), shortcut='ctrl+j'
+            triggered=partial(self.show_tab, 1)
         )
+        self.metadata_view_action.setShortcuts(['ctrl+2', 'ctrl+j'])
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
