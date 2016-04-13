@@ -5,6 +5,7 @@ Version 0.1.26
 - Fixed #258 - CTRL / apple key + number to select the active view
 - Fixed #256 - Disable template 'Reload' command when default template selected
 - Fixed #254 - An Error Occurred: {'Choices with data ...
+- Fixed #218 - N boxes / N selected widget to a status bar
 
 Version 0.1.25
 -------------

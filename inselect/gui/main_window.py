@@ -6,8 +6,8 @@ from pathlib import Path
 
 from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import (QMenu, QAction, QMessageBox, QDesktopServices,
-                          QVBoxLayout, QWidget)
+from PySide.QtGui import (QAction, QDesktopServices, QHBoxLayout, QMenu,
+                          QMessageBox, QVBoxLayout, QWidget)
 
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa
@@ -93,9 +93,19 @@ class MainWindow(QtGui.QMainWindow):
         sidebar = QWidget()
         sidebar.setLayout(sidebar_layout)
 
+        # Summary view below tabs
+        summary_and_tabs_layout = QVBoxLayout()
+        # Remove margins and padding
+        summary_and_tabs_layout.setContentsMargins(0, 0, 0, 0)
+        summary_and_tabs_layout.setSpacing(0)
+        summary_and_tabs_layout.addWidget(self.tabs)
+        summary_and_tabs_layout.addWidget(self.view_summary.widget)
+        summary_and_tabs = QWidget()
+        summary_and_tabs.setLayout(summary_and_tabs_layout)
+
         # Tabs alongside metadata fields
         self.splitter = QtGui.QSplitter()
-        self.splitter.addWidget(self.tabs)
+        self.splitter.addWidget(summary_and_tabs)
         self.splitter.addWidget(sidebar)
         self.splitter.setSizes([600, 300])
 
@@ -1066,8 +1076,6 @@ class MainWindow(QtGui.QMainWindow):
         self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.toolbar.addWidget(self.cookie_cutter_widget)
 
-        self.toolbar.addSeparator()
-        self.toolbar.addWidget(self.view_summary.widget)
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.view_selector.widget)
 
