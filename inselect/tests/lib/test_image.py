@@ -64,7 +64,7 @@ class TestImage(unittest.TestCase):
         i = InselectImage(TESTDATA / 'test_segment.png')
         h, w = i.array.shape[:2]
         boxes = [Rect(0, 0, 1, 1), Rect(0, 0.2, 0.1, 0.8)]
-        self.assertEqual([Rect(0, 0, 459, 437), Rect(0, 87, 45, 349)],
+        self.assertEqual([Rect(0, 0, 459, 437), Rect(0, 87, 46, 350)],
                          list(i.from_normalised(boxes)))
 
     def test_not_normalised(self):
@@ -113,10 +113,10 @@ class TestImage(unittest.TestCase):
             crop = InselectImage(p).array
 
             # Crop should have this shape
-            self.assertEqual((131, 183, 3), crop.shape)
+            self.assertEqual((131, 184, 3), crop.shape)
 
             # Crop should have these pixels
-            expected = i.array[87:218, 45:228]
+            expected = i.array[87:218, 46:230]
             self.assertTrue(np.all(expected == InselectImage(p).array))
         finally:
             shutil.rmtree(temp)
@@ -128,21 +128,23 @@ class TestImage(unittest.TestCase):
         try:
             # A crop that is partially overlapping the image
             p = Path(temp) / 'overlapping.png'
+
             i.save_crops([Rect(-0.1, -0.1, 0.4, 0.3)], [p])
 
             crop = InselectImage(p).array
 
             # Crop should have this shape
-            self.assertEqual((131, 183, 3), crop.shape)
+            self.assertEqual((131, 184, 3), crop.shape)
 
             # Non-intersecting regions should be all zeroes
-            self.assertTrue(np.all(0 == crop[0:43, 0:45]))
-            self.assertTrue(np.all(0 == crop[0:43, ]))
-            self.assertTrue(np.all(0 == crop[:, 0:45]))
+            self.assertTrue(np.all(0 == crop[0:44, 0:46]))
+            self.assertTrue(np.all(0 == crop[0:44, ]))
+            self.assertTrue(np.all(0 == crop[:, 0:46]))
+            coords = list(i.from_normalised([Rect(-0.1, -0.1, 0.4, 0.3)]))
 
-            expected = i.array[0:88, 0:138, ]
+            expected = i.array[0:87, 0:138, ]
 
-            self.assertTrue(np.all(expected == crop[43:, 45:, ]))
+            self.assertTrue(np.all(expected == crop[44:, 46:, ]))
         finally:
             shutil.rmtree(temp)
 

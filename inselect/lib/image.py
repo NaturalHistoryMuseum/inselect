@@ -58,15 +58,16 @@ class InselectImage(object):
         """
         w, h = self.dimensions
         for left, top, width, height in boxes:
-            yield Rect(int(w*left), int(h*top), int(w*width), int(h*height))
+            yield Rect(int(round(w * left)), int(round(h * top)),
+                       int(round(w * width)), int(round(h * height)))
 
     def to_normalised(self, boxes):
         """Generator function that yields instances of Rect
         """
         w, h = self.dimensions
+        w, h = float(w), float(h)
         for left, top, width, height in boxes:
-            yield Rect(float(left)/w, float(top)/h, float(width)/w,
-                       float(height)/h)
+            yield Rect(left / w, top / h, width / w, height / h)
 
     def crops(self, normalised, rotation=None):
         """Generator function that yields cropped images

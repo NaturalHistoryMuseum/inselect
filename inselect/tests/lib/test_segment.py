@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 
@@ -16,12 +17,15 @@ class TestSegment(unittest.TestCase):
 
         # Compare the rects in pixels
         expected = doc.scanned.from_normalised([i['rect'] for i in doc.items])
+        # from pprint import pprint
+        # pprint([i['rect'] for i in doc.items])
         doc.set_items([])
         self.assertEqual(0, len(doc.items))
 
         doc, display_image = segment_document(doc)
 
         actual = doc.scanned.from_normalised([i['rect'] for i in doc.items])
+        # pprint([i['rect'] for i in doc.items])
         self.assertEqual(list(expected), list(actual))
 
 
