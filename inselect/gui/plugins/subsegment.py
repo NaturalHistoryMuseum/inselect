@@ -61,9 +61,14 @@ class SubsegmentPlugin(Plugin):
 
         rects, display = segment_grabcut(image.array, window, seeds)
 
-        # Replace the item
-        rects = [{'rect': r} for r in image.to_normalised(rects)]
-        items[row:(1+row)] = rects
+        # Copy any existing metadata, rotation etc to the new items, update with
+        # new rects and replace the existing item
+        existing = items[row]
+        new_items = [None] * len(rects)
+        for index, rect in enumerate(image.to_normalised(rects)):
+            new_items[index] = existing.copy()
+            new_items[index]['rect'] = rect
+        items[row:(1+row)] = new_items
 
         # Segmentation image
         h, w = image.array.shape[:2]
