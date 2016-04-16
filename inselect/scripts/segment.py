@@ -34,6 +34,8 @@ def segment(dir):
                 doc, display_image = segment_document(doc)
                 del display_image    # We don't use this
                 doc.save()
+            except KeyboardInterrupt:
+                raise
             except Exception:
                 print(u'Error segmenting [{0}]'.format(p))
                 traceback.print_exc()

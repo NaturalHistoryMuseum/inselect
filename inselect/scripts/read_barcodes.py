@@ -41,6 +41,8 @@ class BarcodeReader(object):
             print(p)
             try:
                 self.read_barcodes_in_document(InselectDocument.load(p))
+            except KeyboardInterrupt:
+                raise
             except Exception:
                 print(u'Error reading barcodes in [{0}]'.format(p))
                 traceback.print_exc()
