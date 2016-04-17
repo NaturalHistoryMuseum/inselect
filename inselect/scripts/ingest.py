@@ -51,6 +51,8 @@ def ingest_from_directory(inbox, docs,
                 thumbnail_width_pixels=thumbnail_width_pixels,
                 cookie_cutter=cookie_cutter
             )
+        except KeyboardInterrupt:
+            raise
         except Exception:
             print(u'Error ingesting [{0}]'.format(source))
             traceback.print_exc()

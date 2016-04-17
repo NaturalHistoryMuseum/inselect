@@ -51,6 +51,8 @@ def save_crops(dir, overwrite_existing, template):
 
                 debug_print(u'Saving crops')
                 export.save_crops(doc)
+        except KeyboardInterrupt:
+            raise
         except Exception:
             print(u'Error saving crops from [{0}]'.format(p))
             traceback.print_exc()

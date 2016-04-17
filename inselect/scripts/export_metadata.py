@@ -47,6 +47,8 @@ def export_csv(dir, overwrite_existing, template):
             else:
                 print(u'Writing CSV for [{0}]'.format(p))
                 export.export_csv(doc)
+        except KeyboardInterrupt:
+            raise
         except Exception:
             print(u'Error saving CSV from [{0}]'.format(p))
             traceback.print_exc()
