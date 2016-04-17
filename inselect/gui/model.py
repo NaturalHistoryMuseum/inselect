@@ -77,11 +77,12 @@ class Model(QAbstractItemModel):
 
         data = [None] * len(items)
         for index, item in enumerate(items):
+            # Convert normalised coords to pixel coords for pixmap
             rect = item['rect']
-            rect = QRect(rect[0]*image_width,
-                         rect[1]*image_height,
-                         rect[2]*image_width,
-                         rect[3]*image_height)
+            rect = QRect(int(round(rect[0] * image_width)),
+                         int(round(rect[1] * image_height)),
+                         int(round(rect[2] * image_width)),
+                         int(round(rect[3] * image_height)))
             data[index] = {
                 "fields": item.get('fields', {}),
                 "rect": rect,

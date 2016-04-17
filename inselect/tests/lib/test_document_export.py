@@ -125,31 +125,31 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 metadata_cols = itemgetter(0, 1, 10, 11, 12, 13, 14, 15, 16)
                 self.assertEqual(
                     (u'01_1.png', u'1',
-                     u'0', u'0', u'187', u'187',
+                     u'0', u'0', u'189', u'189',
                      u'1', u'A', u'1'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'02_2.png', u'2',
-                     u'272', u'0', u'458', u'187',
+                     u'271', u'0', u'459', u'189',
                      u'2', u'B', u'2'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'03_10.png', u'3',
-                     u'195', u'196', u'257', u'231',
+                     u'194', u'196', u'257', u'232',
                      u'3', u'インセクト', u'10'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'04_3.png', u'4',
-                     u'0', u'250', u'187', u'436',
+                     u'0', u'248', u'189', u'437',
                      u'', u'Elsinoë', u'3'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'05_4.png', u'5',
-                     u'272', u'250', u'458', u'436',
+                     u'271', u'248', u'459', u'437',
                      u'', u'D', u'4'),
                     metadata_cols(reader.next())
                 )

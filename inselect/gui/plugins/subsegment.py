@@ -3,6 +3,7 @@ import numpy as np
 from PySide.QtGui import QIcon, QMessageBox
 
 from inselect.lib.segment import segment_grabcut
+from inselect.lib.rect import Rect
 from inselect.lib.utils import debug_print
 
 from .plugin import Plugin
@@ -61,9 +62,18 @@ class SubsegmentPlugin(Plugin):
 
         rects, display = segment_grabcut(image.array, window, seeds)
 
-        # Replace the item
-        rects = [{'rect': r} for r in image.to_normalised(rects)]
-        items[row:(1+row)] = rects
+        # Normalised Rects
+        rects = list(Rect(*map(lambda v: int(round(v)), rect[:4])) for rect in rects)
+        rects = image.to_normalised(rects)
+
+        # Padding of one percent of height and width
+        rects = (r.padded(percent=1) for r in rects)
+
+        # Constrain rects to be within image
+        rects = list(r.intersect(Rect(0.0, 0.0, 1.0, 1.0)) for r in rects)
+
+        # Replace the existing item
+        items[row:(1+row)] = [{'rect': r} for r in rects]
 
         # Segmentation image
         h, w = image.array.shape[:2]
@@ -74,4 +84,6 @@ class SubsegmentPlugin(Plugin):
 
         self.items, self.display = items, display_image
 
-        debug_print('SegmentPlugin.__call__ exiting. Found [{0}] boxes'.format(len(rects)))
+        debug_print(
+            'SegmentPlugin.__call__ exiting. Found [{0}] boxes'.format(len(rects))
+        )

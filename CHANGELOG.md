@@ -7,6 +7,7 @@ Version 0.1.26
 - Fixed #256 - Disable template 'Reload' command when default template selected
 - Fixed #254 - An Error Occurred: {'Choices with data ...
 - Fixed #218 - N boxes / N selected widget to a status bar
+- Fixed #213 - Increase default border around "objects" post segmentation
 
 Version 0.1.25
 -------------

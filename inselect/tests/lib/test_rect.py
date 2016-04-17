@@ -43,6 +43,15 @@ class TestRect(unittest.TestCase):
     def test_centre(self):
         self.assertEqual(Point(1, 2), self.R.centre)
 
+    def test_padded(self):
+        r = Rect(0, 0, 100, 100)
+        self.assertEqual(Rect(-10, -10, 120, 120), r.padded(10.0))
+
+    def test_intersect(self):
+        a = Rect(-10, -10, 110, 110)
+        b = Rect(0, 0, 100, 100)
+        self.assertEqual(Rect(0, 0, 100, 100), a.intersect(b))
+
     def test_comparison(self):
         a = Rect(0, 1, 2, 3)
         self.assertEqual(a, self.R)

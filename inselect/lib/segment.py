@@ -44,10 +44,16 @@ def segment_document(doc, resize=None, *args, **kwargs):
 
     rects, display_image = segment_edges(img.array, resize=resize, *args, **kwargs)
 
-    # TODO LH Apply padding here?
-
-    rects = map(lambda r: Rect(r[0], r[1], r[2], r[3]), rects)
+    # Normalised Rects
+    rects = list(Rect(*map(lambda v: int(round(v)), rect[:4])) for rect in rects)
     rects = img.to_normalised(rects)
+
+    # Padding of one percent of height and width
+    rects = (r.padded(percent=1) for r in rects)
+
+    # Constrain rects to be within image
+    rects = (r.intersect(Rect(0.0, 0.0, 1.0, 1.0)) for r in rects)
+
     items = [{"fields": {}, 'rect': r, 'rotation': 0} for r in rects]
     doc = doc.copy()    # Deep copy to avoid altering argument
     doc.set_items(items)
