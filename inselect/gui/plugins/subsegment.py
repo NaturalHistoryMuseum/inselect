@@ -76,7 +76,7 @@ class SubsegmentPlugin(Plugin):
         # new rects and replace the existing item
         existing = items[row]
         new_items = [None] * len(rects)
-        for index, rect in enumerate(image.to_normalised(rects)):
+        for index, rect in enumerate(rects):
             new_items[index] = existing.copy()
             new_items[index]['rect'] = rect
         items[row:(1+row)] = new_items

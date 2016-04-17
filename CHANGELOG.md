@@ -1,5 +1,10 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.27
+-------------
+- Fixed #277 - Subsegment box broken
+- Fixed #275 - Test image has executable bit set (@edwbaker)
+
 Version 0.1.26
 -------------
 - Fixed #263 - Subsegment box should copy metadata to new boxes
