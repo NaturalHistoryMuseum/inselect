@@ -7,6 +7,8 @@ from pathlib import Path
 from PySide.QtCore import QPointF
 from PySide.QtGui import QMessageBox
 
+from inselect.gui.roles import MetadataRole
+
 from gui_test import MainWindowTest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
@@ -38,8 +40,14 @@ class TestSubsegment(MainWindowTest):
         # Sub-segment
         self.run_async_operation(partial(w.run_plugin, 1))
 
-        # Should have three boxes
+        # Should have three boxes with the same metadata
         self.assertEqual(3, w.model.rowCount())
+        self.assertEqual({'Genus': 'Morganucodon'},
+                         w.model.data(w.model.index(0, 0), MetadataRole))
+        self.assertEqual({'Genus': 'Morganucodon'},
+                         w.model.data(w.model.index(1, 0), MetadataRole))
+        self.assertEqual({'Genus': 'Morganucodon'},
+                         w.model.data(w.model.index(2, 0), MetadataRole))
         self.assertTrue(w.model.is_modified)
 
         # Close the document

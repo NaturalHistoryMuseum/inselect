@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.26
 -------------
+- Fixed #263 - Subsegment box should copy metadata to new boxes
 - Fixed #262 - Scripts to respect keyboard interrupt (CTRL + C)
 - Fixed #258 - CTRL / apple key + number to select the active view
 - Fixed #256 - Disable template 'Reload' command when default template selected
