@@ -4,10 +4,10 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
-from PySide.QtCore import QPointF
+from PySide.QtCore import QPointF, QRect
 from PySide.QtGui import QMessageBox
 
-from inselect.gui.roles import MetadataRole
+from inselect.gui.roles import MetadataRole, RectRole
 
 from gui_test import MainWindowTest
 
@@ -44,10 +44,16 @@ class TestSubsegment(MainWindowTest):
         self.assertEqual(3, w.model.rowCount())
         self.assertEqual({'Genus': 'Morganucodon'},
                          w.model.data(w.model.index(0, 0), MetadataRole))
+        self.assertEqual(QRect(11, 31, 502, 278),
+                         w.model.data(w.model.index(0, 0), RectRole))
         self.assertEqual({'Genus': 'Morganucodon'},
                          w.model.data(w.model.index(1, 0), MetadataRole))
+        self.assertEqual(QRect(395, 157, 404, 253),
+                         w.model.data(w.model.index(1, 0), RectRole))
         self.assertEqual({'Genus': 'Morganucodon'},
                          w.model.data(w.model.index(2, 0), MetadataRole))
+        self.assertEqual(QRect(18, 370, 510, 209),
+                         w.model.data(w.model.index(2, 0), RectRole))
         self.assertTrue(w.model.is_modified)
 
         # Close the document
