@@ -29,7 +29,7 @@ class SubsegmentPlugin(Plugin):
         selected = self.parent.view_object.selectedIndexes()
         items_of_indexes = self.parent.view_graphics_item.items_of_indexes
         item = items_of_indexes(selected).next() if 1 == len(selected) else None
-        seeds = item.subsegmentation_seed_points if item else None
+        seeds = item.points_of_interest if item else None
 
         if not seeds or len(seeds) < 2:
             msg = ('Please select exactly one box that contains at least two '
@@ -56,9 +56,9 @@ class SubsegmentPlugin(Plugin):
         row = self.row
         window = image.from_normalised([items[row]['rect']]).next()
 
-        # Seed points as a list of tuples, with coordinates relative to
+        # Points as a list of tuples, with coordinates relative to
         # the top-left of the sub-segmentation window
-        seeds = [(p.x()-window.left, p.y()-window.top) for p in self.seeds]
+        seeds = [(p.x(), p.y()) for p in self.seeds]
 
         rects, display = segment_grabcut(image.array, window, seeds)
 

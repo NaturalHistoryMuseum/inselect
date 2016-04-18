@@ -9,6 +9,7 @@ from inselect.gui.colours import colour_scheme_choice
 from inselect.gui.utils import painter_state
 
 from .resize_handle import ResizeHandle
+from .reticle import Reticle
 
 
 class BoxItem(QtGui.QGraphicsRectItem):
@@ -28,15 +29,15 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # True if the box has valid metadata
         self._isvalid = isvalid
 
-        # Sub-segmentation seed points - QPointF objects in item coordinates
-        self._seeds = []
+        # Points of interest as represented by instances of Reticle
+        self._pois = []
 
         # Resize handles
         positions = (Qt.TopLeftCorner, Qt.TopRightCorner, Qt.BottomLeftCorner,
                      Qt.BottomRightCorner)
         self._handles = []
         self._handles = [self._create_handle(pos) for pos in positions]
-        self._layout_handles()
+        self._layout_children()
 
         self._set_z_index()
 
@@ -59,13 +60,6 @@ class BoxItem(QtGui.QGraphicsRectItem):
             painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
             r = self.boundingRect()
             painter.drawRect(r)
-
-            if self._seeds:
-                # Draw sub-segmentation seed points
-                painter.setBrush(QBrush(Qt.black))
-                painter.setPen(QPen(Qt.white, 5, Qt.SolidLine))
-                for point in self._seeds:
-                    painter.drawEllipse(point, 5, 5)
 
             if fill_colour:
                 painter.fillRect(r, fill_colour)
@@ -136,10 +130,12 @@ class BoxItem(QtGui.QGraphicsRectItem):
         handle.setFlags(QGraphicsItem.ItemStacksBehindParent)
         return handle
 
-    def _layout_handles(self):
-        """Moves handles to the appropriate positions
+    def _layout_children(self):
+        """Moves child graphics items to the appropriate positions
         """
-        map(lambda i: i.relayout(self.boundingRect()), self._handles)
+        bounding = self.boundingRect()
+        for child in chain(self._handles, self._pois):
+            child.layout(bounding)
 
     def setRect(self, rect):
         """QGraphicsRectItem function
@@ -147,7 +143,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
         debug_print('BoxItem.setRect')
         super(BoxItem, self).setRect(rect)
         self._set_z_index()
-        self._layout_handles()
+        self._layout_children()
 
     def mousePressEvent(self, event):
         """QGraphicsRectItem virtual
@@ -157,8 +153,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
         self._set_z_index()
 
         if Qt.ShiftModifier == event.modifiers():
-            # Add sub-segmentation seed point
-            self.append_subsegmentation_seed_point(event.pos())
+            # Add a point of interest
+            self.append_point_of_interest(event.pos())
         else:
             # Starting a move
             self.setCursor(Qt.ClosedHandCursor)
@@ -178,8 +174,10 @@ class BoxItem(QtGui.QGraphicsRectItem):
         """QGraphicsItem virtual
         """
         if change == self.ItemSelectedHasChanged:
-            # Clear sub-segmentatation seed points
-            self._seeds = []
+            # Clear points of interest
+            scene = self.scene()
+            while self._pois:
+                scene.removeItem(self._pois.pop())
 
             # Item has gained or lost selection
             self._set_z_index()
@@ -236,13 +234,17 @@ class BoxItem(QtGui.QGraphicsRectItem):
             self.prepareGeometryChange()
             self.setRect(r)
 
-    def append_subsegmentation_seed_point(self, pos):
-        "Appends pos (a QPoint) to the list of subsegmentation seeds points"
-        debug_print('New subsegmentation seed point at [{0}]'.format(pos))
-        self._seeds.append(pos)
+    def append_point_of_interest(self, pos):
+        """Appends pos (a QPoint relative to the top-left of this box) to the
+        list of points of interest
+        """
+        debug_print('New point of interest at [{0}]'.format(pos))
+        self._pois.append(Reticle(pos - self.boundingRect().topLeft(), self))
+        self._pois[-1].layout(self.boundingRect())
+        self._pois[-1].setFlags(QGraphicsItem.ItemIgnoresTransformations)
 
     @property
-    def subsegmentation_seed_points(self):
-        """An iterable of sub-segmentatation seed points in item coordinates
+    def points_of_interest(self):
+        """An iterable of QPointFs in item coordinates
         """
-        return self._seeds
+        return [poi.offset for poi in self._pois]

@@ -35,7 +35,7 @@ class TestSubsegment(MainWindowTest):
                  QPointF(586.0, 276.0),
                  QPointF(272.0, 453.0)]
         for pos in seeds:
-            box.append_subsegmentation_seed_point(pos)
+            box.append_point_of_interest(pos)
 
         # Sub-segment
         self.run_async_operation(partial(w.run_plugin, 1))
