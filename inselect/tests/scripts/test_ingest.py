@@ -8,7 +8,6 @@ import cv2
 
 import numpy as np
 
-from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
@@ -89,8 +88,6 @@ class TestIngest(unittest.TestCase):
         doc = InselectDocument.load(self.docs / 'x.inselect')
         self.assertTrue(np.all(original_image == doc.scanned.array))
         self.assertTrue(doc.thumbnail.array.shape[1], 4096)
-
-        # TODO LH Assert ingested images are read-only
 
     def test_extension_cases(self):
         "Ingestion of image files with extensions in various combinatons of case"
