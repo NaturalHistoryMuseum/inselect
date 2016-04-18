@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.28
 -------------
+- Fixed #204 - Improvements to subsegment dots
 
 Version 0.1.27
 -------------
