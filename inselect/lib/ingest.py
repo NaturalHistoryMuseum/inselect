@@ -56,11 +56,6 @@ def ingest_image(source, dest_dir,
             cookie_cutter.apply(doc)
             doc.save()
 
-        # Make images read-only
-        debug_print('Making image files read-only')
-        make_readonly(doc.scanned.path)
-        make_readonly(doc.thumbnail.path)
-
         # TODO LH Copy EXIF tags?
         debug_print(u'Ingested [{0}] to [{1}]'.format(source, dest))
 
