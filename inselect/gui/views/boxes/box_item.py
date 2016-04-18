@@ -133,7 +133,8 @@ class BoxItem(QtGui.QGraphicsRectItem):
         # Creates and returns a new ResizeHandle at the given Qt.Corner
         handle = ResizeHandle(corner, self)
         handle.setVisible(False)
-        handle.setFlags(QGraphicsItem.ItemStacksBehindParent)
+        handle.setFlags(QGraphicsItem.ItemStacksBehindParent |
+                        QGraphicsItem.ItemIgnoresTransformations)
         return handle
 
     def _layout_handles(self):

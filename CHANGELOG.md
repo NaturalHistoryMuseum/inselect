@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.28
 -------------
+- Fixed #203 - Resize handles should have constant size regardless of zoom
 
 Version 0.1.27
 -------------
