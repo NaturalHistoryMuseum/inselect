@@ -23,20 +23,19 @@ class ResizeHandle(QGraphicsItem):
             else:
                 self.setCursor(Qt.SizeBDiagCursor)
 
-    def relayout(self, rect):
+    def layout(self, parent_rect):
         """Sets position in parent coordinates
         """
-        # Rect - parent's bounding rect
         # Map Qt.Corner to the appropriate method of QRectF
         if Qt.TopLeftCorner == self._corner:
-            location = rect.topLeft()
+            location = parent_rect.topLeft()
         elif Qt.TopRightCorner == self._corner:
-            location = rect.topRight()
+            location = parent_rect.topRight()
         elif Qt.BottomLeftCorner == self._corner:
-            location = rect.bottomLeft()
+            location = parent_rect.bottomLeft()
         else:
             # Qt.BottomRightCorner
-            location = rect.bottomRight()
+            location = parent_rect.bottomRight()
 
         self.setPos(location)
 
