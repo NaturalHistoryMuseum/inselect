@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.28
+-------------
+
 Version 0.1.27
 -------------
 - Fixed #277 - Subsegment box broken
