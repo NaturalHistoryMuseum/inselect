@@ -9,6 +9,9 @@ class Reticle(QGraphicsItem):
     SIZE = 26
     HALF_SIZE = SIZE / 2
 
+    PEN = QPen(Qt.black, 1, Qt.SolidLine)
+    FILL = QBrush(QColor(0xff, 0xff, 0xff, 0x60))
+
     def __init__(self, offset, parent=None):
         super(Reticle, self).__init__(parent)
         # A QPoint offset from parent object's top-left.
@@ -34,12 +37,11 @@ class Reticle(QGraphicsItem):
             bounding = self.boundingRect()
 
             # Black circle, with partially transparent white fill
-            painter.setPen(QPen(Qt.black, 1, Qt.SolidLine))
-            painter.setBrush(QBrush(QColor(0xff, 0xff, 0xff, 0x60)))
+            painter.setPen(self.PEN)
+            painter.setBrush(self.FILL)
             painter.drawEllipse(bounding)
 
             # Filled black circle at centre
-            painter.setPen(QPen(Qt.black, 1, Qt.SolidLine))
             painter.setBrush(QBrush(Qt.black))
             painter.drawEllipse(bounding.center(), 2, 2)
 
