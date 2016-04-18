@@ -1,7 +1,6 @@
 import locale
 from PySide import QtCore
-from PySide.QtGui import (QAbstractItemView, QHBoxLayout, QLabel, QSizePolicy,
-                          QWidget)
+from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print
 
