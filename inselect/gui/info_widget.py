@@ -1,11 +1,66 @@
 import humanize
 import locale
+import platform
+import subprocess
+import sys
 
+from PySide.QtCore import Qt, QProcessEnvironment
 from PySide.QtGui import QWidget, QFormLayout, QLabel, QGroupBox, QVBoxLayout
 
 from inselect.lib.utils import format_dt_display
 
 from .toggle_widget_label import ToggleWidgetLabel
+from .utils import report_to_user
+
+
+def reveal_path(path):
+    """Shows path in Finder (on Mac) or in Explorer (on Windows)
+    """
+    # http://stackoverflow.com/a/3546503
+    if sys.platform.startswith("win"):
+        explorer = QProcessEnvironment.systemEnvironment().searchInPath("explorer.exe")
+        if not explorer:
+            # Handle gracefully
+            pass
+        else:
+            if not path.is_dir():
+                arg = u"/select,{0}".format(path)
+            else:
+                arg = unicode(path)
+        subprocess.check_call([explorer, arg])
+    elif 'Darwin' == platform.system():
+        reveal = u'tell application "Finder" to reveal POSIX file "{0}"'
+        activate = u'tell application "Finder" to activate "{0}"'
+        args = ['/usr/bin/osascript', '-e']
+        subprocess.check_call(args + [reveal.format(path)])
+        subprocess.check_call(args + [activate.format(path)])
+    else:
+        # What to do on Linux?
+        pass
+
+
+class RevealPathLabel(QLabel):
+    """A QLabel that, when clicked, reveals a path in Finder / Explorer
+    """
+    def __init__(self, parent=None, flags=0):
+        super(RevealPathLabel, self).__init__('', parent, flags)
+        self.path = None
+        self.setCursor(Qt.PointingHandCursor)
+
+    def set_label_and_path(self, path):
+        if path:
+            self.setText(path.name)
+            self.path = path
+        else:
+            self.setText('')
+            self.path = None
+
+    @report_to_user
+    def mouseReleaseEvent(self, event):
+        """QLabel virtual
+        """
+        if self.path:
+            reveal_path(self.path)
 
 
 class BoldLabel(QLabel):
@@ -28,7 +83,12 @@ class InfoWidget(QGroupBox):
     BoldLabel {
         font-weight: bold;
     }
+
+    RevealPathLabel {
+        text-decoration: underline;
+    }
     """
+
 
     def __init__(self, parent=None):
         super(InfoWidget, self).__init__(parent)
@@ -37,9 +97,7 @@ class InfoWidget(QGroupBox):
 
         layout = QFormLayout()
 
-        layout.addRow(BoldLabel('Document'))
-
-        self._document_path = QLabel()
+        self._document_path = RevealPathLabel()
         layout.addRow('Name', self._document_path)
 
         self._created_by = QLabel()
@@ -55,7 +113,7 @@ class InfoWidget(QGroupBox):
         layout.addRow('Last saved on', self._last_saved_on)
 
         layout.addRow(BoldLabel('Scanned image'))
-        self._scanned_path = QLabel()
+        self._scanned_path = RevealPathLabel()
         layout.addRow('File', self._scanned_path)
 
         self._scanned_size = QLabel()
@@ -65,7 +123,7 @@ class InfoWidget(QGroupBox):
         layout.addRow('Dimensions', self._scanned_dimensions)
 
         layout.addRow(BoldLabel('Thumbnail image'))
-        self._thumbnail_path = QLabel()
+        self._thumbnail_path = RevealPathLabel()
         layout.addRow('File', self._thumbnail_path)
 
         self._thumbnail_size = QLabel()
@@ -80,6 +138,7 @@ class InfoWidget(QGroupBox):
 
         # Show the labels about the toggle
         vlayout = QVBoxLayout()
+        vlayout.setAlignment(Qt.AlignTop)
         vlayout.addWidget(labels_widget)
         vlayout.addWidget(ToggleWidgetLabel('Information', labels_widget))
 
@@ -92,7 +151,7 @@ class InfoWidget(QGroupBox):
         document is None.
         """
         if document:
-            self._document_path.setText(document.document_path.name)
+            self._document_path.set_label_and_path(document.document_path)
 
             p = document.properties
             self._created_by.setText(p.get('Created by'))
@@ -105,7 +164,8 @@ class InfoWidget(QGroupBox):
             dt = p.get('Saved on')
             self._last_saved_on.setText(format_dt_display(dt) if dt else '')
 
-            self._scanned_path.setText(document.scanned.path.name)
+            self._scanned_path.set_label_and_path(document.scanned.path)
+
             fsize = humanize.naturalsize(document.scanned.size_bytes, binary=True)
             self._scanned_size.setText(fsize)
 
@@ -117,7 +177,8 @@ class InfoWidget(QGroupBox):
 
             # Thumbnail might not be present
             if document.thumbnail:
-                self._thumbnail_path.setText(document.thumbnail.path.name)
+                self._thumbnail_path.set_label_and_path(document.thumbnail.path)
+
                 fsize = humanize.naturalsize(document.thumbnail.size_bytes, binary=True)
                 self._thumbnail_size.setText(fsize)
                 self._thumbnail_dimensions.setText(dim.format(*(
