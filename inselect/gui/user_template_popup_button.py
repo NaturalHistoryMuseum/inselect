@@ -81,4 +81,5 @@ class UserTemplatePopupButton(QPushButton):
         debug_print('UserTemplateWidget.changed')
         choice = user_template_choice()
         self.setText(choice.current.name)
+        self._default_action.setEnabled(not choice.current_is_default)
         self._refresh_action.setEnabled(not choice.current_is_default)
