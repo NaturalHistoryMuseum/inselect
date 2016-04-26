@@ -98,6 +98,13 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view.viewport_changed.connect(
             self.view_navigator.thumbnail.new_focus_rect
         )
+        # TODO LH Syncing the UI everytime the boxes view's viewport changes
+        # is inefficient. We only need to set the checked states of
+        # self.zoom_to_selection_action and
+        # self.zoom_home_action.setChecked as the viewport changes.
+        self.boxes_view.viewport_changed.connect(
+            self.sync_ui
+        )
         self.view_object.selectionModel().selectionChanged.connect(
             self.selection_changed
         )
@@ -138,8 +145,8 @@ class MainWindow(QtGui.QMainWindow):
         self.nav_toolbar = QToolBar("Navigator")
         self.nav_toolbar.addAction(self.zoom_in_action)
         self.nav_toolbar.addAction(self.zoom_out_action)
-        self.nav_toolbar.addAction(self.zoom_to_selection_action)
         self.nav_toolbar.addAction(self.zoom_home_action)
+        self.nav_toolbar.addAction(self.zoom_to_selection_action)
 
         # Object, metadata and summary views
         self.view_metadata = MetadataView()
@@ -683,22 +690,18 @@ class MainWindow(QtGui.QMainWindow):
     @report_to_user
     def zoom_in(self):
         self.boxes_view.zoom_in()
-        self.sync_ui()
 
     @report_to_user
     def zoom_out(self):
         self.boxes_view.zoom_out()
-        self.sync_ui()
 
     @report_to_user
     def zoom_to_selection(self):
         self.boxes_view.toggle_zoom_to_selection()
-        self.sync_ui()
 
     @report_to_user
     def zoom_home(self):
         self.boxes_view.zoom_home()
-        self.sync_ui()
 
     @report_to_user
     def show_grid(self):
@@ -1051,11 +1054,12 @@ class MainWindow(QtGui.QMainWindow):
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown)
         )
         self.zoom_home_action = QAction(
-            "Zoom home", self, shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
+            "Whole image", self,
+            shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
             triggered=self.zoom_home, checkable=True
         )
         self.zoom_to_selection_action = QAction(
-            "&Zoom to selection", self, shortcut='z',
+            "&Selected", self, shortcut='z',
             triggered=self.zoom_to_selection, checkable=True
         )
         # TODO LH Is F3 (normally meaning 'find next') really the right
@@ -1199,8 +1203,8 @@ class MainWindow(QtGui.QMainWindow):
         self._view_menu.addSeparator()
         self._view_menu.addAction(self.zoom_in_action)
         self._view_menu.addAction(self.zoom_out_action)
-        self._view_menu.addAction(self.zoom_to_selection_action)
         self._view_menu.addAction(self.zoom_home_action)
+        self._view_menu.addAction(self.zoom_to_selection_action)
         self._view_menu.addAction(self.toggle_plugin_image_action)
         self._view_menu.addSeparator()
         self._view_menu.addAction(self.show_object_grid_action)
@@ -1434,9 +1438,12 @@ class MainWindow(QtGui.QMainWindow):
         self.zoom_in_action.setEnabled(document)
         self.zoom_out_action.setEnabled(document)
         self.zoom_to_selection_action.setEnabled(document)
-        self.zoom_home_action.setEnabled(document)
-        self.zoom_to_selection_action.setChecked(not self.boxes_view.zoomed_out)
-        self.zoom_home_action.setChecked(self.boxes_view.zoomed_out)
+        self.zoom_to_selection_action.setChecked(
+            document and 'follow_selection' == self.boxes_view.zoom_mode
+        )
+        self.zoom_home_action.setChecked(
+            document and 'whole_scene' == self.boxes_view.zoom_mode
+        )
         self.toggle_plugin_image_action.setEnabled(document)
         self.show_object_grid_action.setEnabled(objects_view_visible)
         self.show_object_expanded_action.setEnabled(objects_view_visible)

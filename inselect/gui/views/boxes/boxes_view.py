@@ -19,11 +19,12 @@ class BoxesView(QtGui.QGraphicsView):
         self.setCursor(Qt.CrossCursor)
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
 
-        # If True, resizeEvent() will cause the scale to be updated to
+        # If 'whole_scene', resizeEvent() will cause the scale to be updated to
         # fit the scene within the view.
-        # If False, changes in selection cause the view to scale to encompass
-        # the current selection.
-        self.zoomed_out = True
+        # If 'follow_selection', changes in selection cause the view to scale to
+        # encompass the current selection.
+        # If 'fixed', changes in selection and size do not alter the viewport.
+        self.zoom_mode = 'whole_scene'
 
         # Will contain a temporary Rect object while the user drag-drop-creates
         # a box
@@ -54,7 +55,7 @@ class BoxesView(QtGui.QGraphicsView):
         # Check for change in size because many user-interface actions trigger
         # resizeEvent(), even though they do not cause a change in the view's
         # size
-        if self.zoomed_out and event.oldSize() != event.size():
+        if 'whole_scene' == self.zoom_mode and event.oldSize() != event.size():
             self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
 
         super(BoxesView, self).resizeEvent(event)
@@ -163,11 +164,11 @@ class BoxesView(QtGui.QGraphicsView):
         self.new_relative_zoom(0.9)
 
     def zoom_home(self):
-        """Zoom to show the entire scene
+        """Zooms to show the entire scene and sets zoom_mode to 'whole_scene'
         """
         debug_print('BoxesView.zoom_home')
+        self.zoom_mode = 'whole_scene'
         self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
-        self.zoomed_out = True
 
     @property
     def absolute_zoom(self):
@@ -176,10 +177,12 @@ class BoxesView(QtGui.QGraphicsView):
         return self.transform().m11()
 
     def new_relative_zoom(self, factor):
-        """Sets a new relative zoom and emits viewport_changed.
+        """Sets a new relative zoom, sets zoom_mode to 'fixed' and emits
+        viewport_changed.
         """
+        # Do not override the follow selection
+        self.zoom_mode = 'fixed'
         self.new_absolute_zoom(self.absolute_zoom * factor)
-        self.viewport_changed.emit(self.normalised_scene_rect())
 
     def zoom_to_items(self, items):
         """Centres view on the centre of the items and, if view is set to
@@ -187,35 +190,44 @@ class BoxesView(QtGui.QGraphicsView):
         Emits viewport_changed.
         """
         united = unite_rects(i.sceneBoundingRect() for i in items)
-        if self.zoomed_out:
+        if 'whole_scene' == self.zoom_mode:
             debug_print('Ensuring [{0}] items visible'.format(len(items)))
             self.ensureVisible(united)
             self.viewport_changed.emit(self.normalised_scene_rect())
         else:
-            # Some space
-            # TODO LH Space should be in visible units
-            debug_print('Zooming on [{0}] items'.format(len(items)))
-            united.adjust(-20, -20, 40, 40)
-            self.fitInView(united, Qt.KeepAspectRatio)
+            debug_print('Showing [{0}] items'.format(len(items)))
+            # Add some padding around the selection
+            padding = 20
+            if 'follow_selection' == self.zoom_mode:
+                # Update zoom
+                united.adjust(-padding, -padding, 2 * padding, 2 * padding)
+                self.fitInView(united, Qt.KeepAspectRatio)
 
-            # TODO LH Need a better solution
-            if self.absolute_zoom > self.MAXIMUM_ZOOM:
-                self.new_absolute_zoom(self.MAXIMUM_ZOOM)
+                if self.absolute_zoom > self.MAXIMUM_ZOOM:
+                    # new_absolute_zoom() emits viewport_changed
+                    self.new_absolute_zoom(self.MAXIMUM_ZOOM)
+                else:
+                    self.viewport_changed.emit(self.normalised_scene_rect())
             else:
-                self.viewport_changed.emit(self.normalised_scene_rect())
+                # zoom_mode == fixed
+                self.ensureVisible(united, xmargin=padding, ymargin=padding)
 
     def toggle_zoom_to_selection(self):
-        """Toggles between 'fit to screen' and a mild zoom / zoom to selected
+        """Toggles between 'whole_scene' and a either 'fixed' with a mild zoom
+        (if no boxes are selected) or 'follow_selection' (if one or more boxes
+        are selected).
         """
-        self.zoomed_out = not self.zoomed_out
-        if self.zoomed_out:
+        if 'whole_scene' != self.zoom_mode:
             self.zoom_home()
         else:
+            # Currently showing the whole image
             selected = self.scene().selectedItems()
             if selected:
+                self.zoom_mode = 'follow_selection'
                 self.zoom_to_items(selected)
             else:
                 # There is no curent selection - apply a mild zoom
+                self.zoom_mode = 'fixed'
                 self.new_relative_zoom(4.0)
 
     def new_absolute_zoom(self, factor):
@@ -249,7 +261,6 @@ class BoxesView(QtGui.QGraphicsView):
                     mouse_pos = None
 
             self.setTransform(QtGui.QTransform.fromScale(f, f))
-            self.zoomed_out = False
 
             if selected:
                 # Centre on selected items
