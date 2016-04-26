@@ -11,7 +11,7 @@ before_install:
 
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-      sudo apt-get install --fix-missing python-opencv python-numpy python-pyside libtiff4-dev libjpeg8-dev zlib1g-dev libzbar-dev;
+      sudo apt-get install --fix-missing python-opencv python-numpy python-sklearn python-pyside libtiff4-dev libjpeg8-dev zlib1g-dev libzbar-dev;
     fi
   - pip install -r requirements.txt
   - "export DISPLAY=:99.0"
