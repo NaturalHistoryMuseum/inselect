@@ -1437,12 +1437,13 @@ class MainWindow(QtGui.QMainWindow):
         self.metadata_view_action.setChecked(not boxes_view_visible)
         self.zoom_in_action.setEnabled(document)
         self.zoom_out_action.setEnabled(document)
-        self.zoom_to_selection_action.setEnabled(document)
+        self.zoom_home_action.setEnabled(document)
         self.zoom_to_selection_action.setChecked(
-            document and 'follow_selection' == self.boxes_view.zoom_mode
+            'follow_selection' == self.boxes_view.zoom_mode
         )
+        self.zoom_to_selection_action.setEnabled(document)
         self.zoom_home_action.setChecked(
-            document and 'whole_scene' == self.boxes_view.zoom_mode
+            'whole_scene' == self.boxes_view.zoom_mode
         )
         self.toggle_plugin_image_action.setEnabled(document)
         self.show_object_grid_action.setEnabled(objects_view_visible)
