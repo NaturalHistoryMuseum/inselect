@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.28
 -------------
+- Fixed #288 - Minimap navigator
 - Fixed #284 - Document info view to contain links
 - Fixed #281 - Don't make images read-only
 - Fixed #204 - Improvements to subsegment dots

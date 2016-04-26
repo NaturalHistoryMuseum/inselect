@@ -9,7 +9,7 @@ from PySide.QtGui import QWidget, QFormLayout, QLabel, QGroupBox, QVBoxLayout
 
 from inselect.lib.utils import format_dt_display
 
-from .toggle_widget_label import ToggleWidgetLabel
+from .popup_panel import PopupPanel
 from .utils import report_to_user
 
 
@@ -20,8 +20,7 @@ def reveal_path(path):
     if sys.platform.startswith("win"):
         explorer = QProcessEnvironment.systemEnvironment().searchInPath("explorer.exe")
         if not explorer:
-            # Handle gracefully
-            pass
+            raise ValueError('Explorer could not be located')
         else:
             if not path.is_dir():
                 arg = u"/select,{0}".format(path)
@@ -69,17 +68,11 @@ class BoldLabel(QLabel):
     pass
 
 
-class InfoWidget(QGroupBox):
+class InfoWidget(PopupPanel):
     """Shows information about the document and the scanned image
     """
 
     STYLESHEET = """
-    ToggleWidgetLabel {
-        text-decoration: none;
-        font-weight: bold;
-        color: black;
-    }
-
     BoldLabel {
         font-weight: bold;
     }
@@ -89,12 +82,7 @@ class InfoWidget(QGroupBox):
     }
     """
 
-
     def __init__(self, parent=None):
-        super(InfoWidget, self).__init__(parent)
-
-        self.setStyleSheet(self.STYLESHEET)
-
         layout = QFormLayout()
 
         self._document_path = RevealPathLabel()
@@ -136,15 +124,10 @@ class InfoWidget(QGroupBox):
         labels_widget.setLayout(layout)
         labels_widget.setVisible(False)
 
-        # Show the labels about the toggle
-        vlayout = QVBoxLayout()
-        vlayout.setAlignment(Qt.AlignTop)
-        vlayout.addWidget(labels_widget)
-        vlayout.addWidget(ToggleWidgetLabel('Information', labels_widget))
+        # Widget containing toggle label and container
+        super(InfoWidget, self).__init__('Information', labels_widget, parent)
 
-        self.setLayout(vlayout)
-
-        # self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setStyleSheet(self.STYLESHEET)
 
     def set_document(self, document):
         """Updates controls to reflect the document. Clears controls if
