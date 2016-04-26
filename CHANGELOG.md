@@ -6,6 +6,7 @@ Version 0.1.28
 - Fixed #286 - Disable default template command when the default template selected
 - Fixed #284 - Document info view to contain links
 - Fixed #281 - Don't make images read-only
+- Fixed #212 - Customized bounding box ordering
 - Fixed #204 - Improvements to subsegment dots
 - Fixed #203 - Resize handles should have constant size regardless of zoom
 

@@ -29,6 +29,8 @@ class TestActionState(MainWindowTest):
         self.assertFalse(w.previous_box_action.isEnabled())
         self.assertFalse(w.rotate_clockwise_action.isEnabled())
         self.assertFalse(w.rotate_counter_clockwise_action.isEnabled())
+        self.assertTrue(w.sort_by_rows_action.isEnabled())
+        self.assertTrue(w.sort_by_columns_action.isEnabled())
         self.assertFalse(w.plugin_actions[0].isEnabled())
 
         # View
@@ -57,6 +59,8 @@ class TestActionState(MainWindowTest):
         self.assertTrue(w.previous_box_action.isEnabled())
         self.assertFalse(w.rotate_clockwise_action.isEnabled())
         self.assertFalse(w.rotate_counter_clockwise_action.isEnabled())
+        self.assertTrue(w.sort_by_rows_action.isEnabled())
+        self.assertTrue(w.sort_by_columns_action.isEnabled())
         self.assertTrue(w.plugin_actions[0].isEnabled())
 
         # View

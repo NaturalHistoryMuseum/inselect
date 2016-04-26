@@ -32,6 +32,7 @@ from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .recent_documents import RecentDocuments
 from .roles import RotationRole
+from .sort_document_items import sort_items_choice
 from .user_template_choice import user_template_choice
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
@@ -992,6 +993,15 @@ class MainWindow(QtGui.QMainWindow):
             triggered=partial(self.rotate90, clockwise=False)
         )
 
+        self.sort_by_rows_action = QAction(
+            "Sort by rows", self, checkable=True,
+            triggered=partial(self.sort_boxes, by_columns=False)
+        )
+        self.sort_by_columns_action = QAction(
+            "Sort by columns", self, checkable=True,
+            triggered=partial(self.sort_boxes, by_columns=True)
+        )
+
         # Plugins
         # Plugin shortcuts start at F5
         shortcut_offset = 5
@@ -1184,6 +1194,9 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addAction(self.rotate_clockwise_action)
         self._edit_menu.addAction(self.rotate_counter_clockwise_action)
         self._edit_menu.addSeparator()
+        self._edit_menu.addAction(self.sort_by_rows_action)
+        self._edit_menu.addAction(self.sort_by_columns_action)
+        self._edit_menu.addSeparator()
         user_template_popup = self._edit_menu.addMenu('Metadata template')
         self.view_metadata.popup_button.inject_actions(user_template_popup)
         self._edit_menu.addSeparator()
@@ -1345,6 +1358,22 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.new_document(path, default_metadata_items=items)
 
+    @report_to_user
+    def sort_boxes(self, by_columns):
+        """Sorts boxes either by columns or by rows.
+        """
+        if self.document:
+            # Sort boxes
+            self.model.to_document(self.document)
+            items = sort_items_choice().sort_items(
+                self.document.items, by_columns
+            )
+            self.model.set_new_boxes(items)
+        else:
+            # Record the user's choice
+            sort_items_choice().sort_items([], by_columns)
+        self.sync_ui()
+
     def _accept_drag_drop(self, event):
         """If event refers to a single file that can opened, returns the path.
         Returns None otherwise.
@@ -1428,6 +1457,8 @@ class MainWindow(QtGui.QMainWindow):
         self.delete_action.setEnabled(has_selection)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
+        self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
+        self.sort_by_columns_action.setChecked(sort_items_choice().by_columns)
         self.cookie_cutter_widget.sync_actions(document, has_rows)
         for action in self.plugin_actions:
             action.setEnabled(document)

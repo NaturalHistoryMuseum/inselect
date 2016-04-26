@@ -1,7 +1,9 @@
 from PySide.QtGui import QIcon, QMessageBox
 
-from inselect.lib.segment import segment_document
+from inselect.lib.segment_document import SegmentDocument
 from inselect.lib.utils import debug_print
+
+from inselect.gui.sort_document_items import sort_items_choice
 
 from .plugin import Plugin
 
@@ -16,6 +18,7 @@ class SegmentPlugin(Plugin):
         self.rects = self.display = None
         self.document = document
         self.parent = parent
+        self.sort_choice = sort_items_choice().by_columns
 
     @classmethod
     def icon(cls):
@@ -34,8 +37,12 @@ class SegmentPlugin(Plugin):
 
     def __call__(self, progress):
         debug_print('SegmentPlugin.__call__')
-        doc, display = segment_document(self.document, callback=progress)
+        doc, display = SegmentDocument(self.sort_choice).segment(
+            self.document, callback=progress
+        )
 
         self.items, self.display = doc.items, display
 
-        debug_print('SegmentPlugin.__call__ exiting. Found [{0}] boxes'.format(len(self.items)))
+        debug_print('SegmentPlugin.__call__ exiting. Found [{0}] boxes'.format(
+            len(self.items))
+        )

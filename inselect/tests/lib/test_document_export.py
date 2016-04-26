@@ -144,13 +144,13 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 self.assertEqual(
                     (u'04_3.png', u'4',
                      u'0', u'248', u'189', u'437',
-                     u'', u'Elsinoë', u'3'),
+                     u'4', u'Elsinoë', u'3'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'05_4.png', u'5',
                      u'271', u'248', u'459', u'437',
-                     u'', u'D', u'4'),
+                     u'5', u'D', u'4'),
                     metadata_cols(reader.next())
                 )
                 self.assertIsNone(next(reader, None))

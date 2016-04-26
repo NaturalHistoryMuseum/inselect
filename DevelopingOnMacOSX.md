@@ -24,7 +24,7 @@ conda update --yes conda
 # Inselect env
 
 ```
-conda create --yes --name inselect pillow pyside
+conda create --yes --name inselect pillow pyside scikit-learn
 source activate inselect
 ```
 
