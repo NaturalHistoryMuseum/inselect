@@ -36,7 +36,7 @@ class TestActionState(MainWindowTest):
         self.assertTrue(w.metadata_view_action.isEnabled())
         self.assertFalse(w.zoom_in_action.isEnabled())
         self.assertFalse(w.zoom_out_action.isEnabled())
-        self.assertFalse(w.toogle_zoom_action.isEnabled())
+        self.assertFalse(w.zoom_to_selection_action.isEnabled())
         self.assertFalse(w.zoom_home_action.isEnabled())
 
     def _test_document_open(self):
@@ -64,7 +64,7 @@ class TestActionState(MainWindowTest):
         self.assertTrue(w.metadata_view_action.isEnabled())
         self.assertTrue(w.zoom_in_action.isEnabled())
         self.assertTrue(w.zoom_out_action.isEnabled())
-        self.assertTrue(w.toogle_zoom_action.isEnabled())
+        self.assertTrue(w.zoom_to_selection_action.isEnabled())
         self.assertTrue(w.zoom_home_action.isEnabled())
 
     def test_open_and_closed(self):

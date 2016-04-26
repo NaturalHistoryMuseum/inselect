@@ -6,8 +6,9 @@ from pathlib import Path
 
 from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import (QAction, QDesktopServices, QHBoxLayout, QMenu,
-                          QMessageBox, QVBoxLayout, QWidget)
+from PySide.QtGui import (QAction, QDesktopServices, QMenu, QMessageBox,
+                          QPushButton, QScrollArea, QSizePolicy, QToolBar,
+                          QVBoxLayout, QWidget)
 
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa
@@ -25,6 +26,7 @@ from .cookie_cutter_choice import cookie_cutter_choice
 from .cookie_cutter_widget import CookieCutterWidget
 from .format_validation_problems import format_validation_problems
 from .model import Model
+from .navigator import NavigatorView
 from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
@@ -43,6 +45,14 @@ from .worker_thread import WorkerThread
 class MainWindow(QtGui.QMainWindow):
     """The application's main window
     """
+    STYLESHEET = """
+    ToggleWidgetLabel {
+        text-decoration: none;
+        font-weight: bold;
+        color: black;
+    }
+    """
+
     DOCUMENT_FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
         InselectDocument.EXTENSION,
         u' '.join(IMAGE_PATTERNS)
@@ -54,17 +64,115 @@ class MainWindow(QtGui.QMainWindow):
         super(MainWindow, self).__init__()
         self.app = app
 
+        self.setStyleSheet(self.STYLESHEET)
+
+        # Plugins
+        self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
+        # QActions. Populated in self.create_menu_actions()
+        self.plugin_actions = len(self.plugins) * [None]
+        # QActions. Populated in self.create_menu_actions()
+        self.plugin_config_ui_actions = len(self.plugins) * [None]
+        self.plugin_image = None
+        self.plugin_image_visible = False
+
+        # Colour scheme QActions. Populated in self._create_menu_actions() and
+        # self._create_non_menu_actions()
+        self.colour_scheme_actions = []
+
+        # Model
+        self.model = Model()
+        self.model.modified_changed.connect(self.modified_changed)
+
+        self._create_menu_actions()
+        self._create_non_menu_actions()
+        self._create_views()
+        self._create_widgets()
+        self._create_toolbar()
+        self._create_menus()
+
+        # Conect signals
+        self.tabs.currentChanged.connect(self.current_tab_changed)
+        colour_scheme_choice().colour_scheme_changed.connect(
+            self.colour_scheme_changed
+        )
+        self.boxes_view.viewport_changed.connect(
+            self.view_navigator.thumbnail.new_focus_rect
+        )
+        # TODO LH Syncing the UI everytime the boxes view's viewport changes
+        # is inefficient. We only need to set the checked states of
+        # self.zoom_to_selection_action and
+        # self.zoom_home_action.setChecked as the viewport changes.
+        self.boxes_view.viewport_changed.connect(
+            self.sync_ui
+        )
+        self.view_object.selectionModel().selectionChanged.connect(
+            self.selection_changed
+        )
+
+        # Main window layout
+        self.setCentralWidget(self.splitter)
+
+        # Document
+        self.document = None
+        self.document_path = None
+
+        # Long-running operations are run in their own thread
+        self.running_operation = None
+
+        # Event filters, for handling drag and drop
+        self.tabs.installEventFilter(self)
+        self.boxes_view.installEventFilter(self)
+        self.view_metadata.installEventFilter(self)
+        self.view_object.installEventFilter(self)
+        self.view_summary.widget.installEventFilter(self)
+        self.view_selector.installEventFilter(self)
+        self.view_navigator.widget.installEventFilter(self)
+        self.setAcceptDrops(True)
+
+        self.empty_document()
+
+        if filename:
+            self.open_file(filename)
+
+    def _create_views(self):
+        "Creates view objects"
         # Boxes view
         self.view_graphics_item = GraphicsItemView()
         # self.boxes_view is a QGraphicsView, not a QAbstractItemView
         self.boxes_view = BoxesView(self.view_graphics_item.scene)
+
+        # A toolbar containing zoom in and out
+        self.nav_toolbar = QToolBar("Navigator")
+        self.nav_toolbar.addAction(self.zoom_in_action)
+        self.nav_toolbar.addAction(self.zoom_out_action)
+        self.nav_toolbar.addAction(self.zoom_home_action)
+        self.nav_toolbar.addAction(self.zoom_to_selection_action)
 
         # Object, metadata and summary views
         self.view_metadata = MetadataView()
         self.view_object = ObjectView()
         self.view_summary = SummaryView()
         self.view_selector = SelectorView()
+        self.view_navigator = NavigatorView(nav_toolbar=self.nav_toolbar)
 
+        # Set model
+        self.view_graphics_item.setModel(self.model)
+        self.view_metadata.setModel(self.model)
+        self.view_object.setModel(self.model)
+        self.view_summary.setModel(self.model)
+        self.view_selector.setModel(self.model)
+        self.view_navigator.setModel(self.model)
+
+        # A consistent selection across all views
+        sm = self.view_object.selectionModel()
+        self.view_graphics_item.setSelectionModel(sm)
+        self.view_metadata.setSelectionModel(sm)
+        self.view_summary.setSelectionModel(sm)
+        self.view_selector.setSelectionModel(sm)
+        self.view_navigator.setSelectionModel(sm)
+
+    def _create_widgets(self):
+        "Creates widgets owned by the MainWindow"
         # Views in tabs
         self.tabs = QtGui.QTabWidget()
         self.tabs.addTab(self.boxes_view, 'Boxes')
@@ -74,24 +182,29 @@ class MainWindow(QtGui.QMainWindow):
         # Information about the loaded document
         self.info_widget = InfoWidget()
 
-        # Cookie cutter widget
-        self.cookie_cutter_widget = CookieCutterWidget()
-        self.cookie_cutter_widget.save_to_new_action.triggered.connect(
-            self.save_to_cookie_cutter
-        )
-        self.cookie_cutter_widget.apply_current_action.triggered.connect(
-            self.apply_cookie_cutter
-        )
-        cookie_cutter_choice().cookie_cutter_changed.connect(
-            self.new_cookie_cutter
-        )
+        # Sidebar with navigator, metadata and document information
+        right_bar_layout = QVBoxLayout()
+        right_bar_layout.addWidget(self.view_navigator.widget)
+        right_bar_layout.addWidget(self.view_metadata.widget)
+        right_bar_layout.addWidget(self.info_widget)
+        right_bar_layout.setSpacing(4)
 
-        # Metadata view above info
-        sidebar_layout = QVBoxLayout()
-        sidebar_layout.addWidget(self.view_metadata.widget)
-        sidebar_layout.addWidget(self.info_widget)
-        sidebar = QWidget()
-        sidebar.setLayout(sidebar_layout)
+        # Empty widget with stretch to prevent other widgets from exanding to
+        # fill
+        right_bar_layout.addWidget(QWidget(), stretch=1)
+        right_bar = QWidget()
+        right_bar.setLayout(right_bar_layout)
+
+        # A scrollable container for the form
+        right_bar_container = QScrollArea()
+        right_bar_container.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        right_bar_container.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        right_bar_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        right_bar_container.setWidget(right_bar)
+
+        # Make the controls fill the available horizontal space
+        # http://qt-project.org/forums/viewthread/11012
+        right_bar_container.setWidgetResizable(True)
 
         # Summary view below tabs
         summary_and_tabs_layout = QVBoxLayout()
@@ -103,78 +216,11 @@ class MainWindow(QtGui.QMainWindow):
         summary_and_tabs = QWidget()
         summary_and_tabs.setLayout(summary_and_tabs_layout)
 
-        # Tabs alongside metadata fields
+        # Left bar, tabs, right bar
         self.splitter = QtGui.QSplitter()
         self.splitter.addWidget(summary_and_tabs)
-        self.splitter.addWidget(sidebar)
+        self.splitter.addWidget(right_bar_container)
         self.splitter.setSizes([600, 300])
-
-        # Main window layout
-        self.setCentralWidget(self.splitter)
-
-        # Document
-        self.document = None
-        self.document_path = None
-
-        # Model
-        self.model = Model()
-        self.model.modified_changed.connect(self.modified_changed)
-
-        # Views
-        self.view_graphics_item.setModel(self.model)
-        self.view_metadata.setModel(self.model)
-        self.view_object.setModel(self.model)
-        self.view_summary.setModel(self.model)
-        self.view_selector.setModel(self.model)
-
-        # A consistent selection across all views
-        sm = self.view_object.selectionModel()
-        self.view_graphics_item.setSelectionModel(sm)
-        self.view_metadata.setSelectionModel(sm)
-        self.view_summary.setSelectionModel(sm)
-        self.view_selector.setSelectionModel(sm)
-
-        # Plugins
-        self.plugins = (SegmentPlugin, SubsegmentPlugin, BarcodePlugin)
-        # QActions. Populated in self.create_menu_actions()
-        self.plugin_actions = len(self.plugins) * [None]
-        # QActions. Populated in self.create_menu_actions()
-        self.plugin_config_ui_actions = len(self.plugins) * [None]
-        self.plugin_image = None
-        self.plugin_image_visible = False
-
-        # Colour scheme QActions. Populated in self.create_actions()
-        self.colour_scheme_actions = []
-
-        # Long-running operations are run in their own thread.
-        self.running_operation = None
-
-        self.create_menu_actions()
-        self.create_non_menu_actions()
-        self.create_toolbar()
-        self.create_menus()
-
-        # Conect signals
-        self.tabs.currentChanged.connect(self.current_tab_changed)
-        sm.selectionChanged.connect(self.selection_changed)
-        colour_scheme_choice().colour_scheme_changed.connect(
-            self.colour_scheme_changed
-        )
-
-        # Filter events
-        self.tabs.installEventFilter(self)
-        self.boxes_view.installEventFilter(self)
-        self.view_metadata.installEventFilter(self)
-        self.view_object.installEventFilter(self)
-        self.view_summary.installEventFilter(self)
-        self.view_selector.installEventFilter(self)
-
-        self.empty_document()
-
-        self.setAcceptDrops(True)
-
-        if filename:
-            self.open_file(filename)
 
     def modified_changed(self):
         "Updated UI's modified state"
@@ -354,6 +400,8 @@ class MainWindow(QtGui.QMainWindow):
 
         RecentDocuments().add_path(path)
         self._sync_recent_documents_actions()
+
+        self.zoom_home()
 
         self.sync_ui()
 
@@ -648,8 +696,8 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view.zoom_out()
 
     @report_to_user
-    def toggle_zoom(self):
-        self.boxes_view.toggle_zoom()
+    def zoom_to_selection(self):
+        self.boxes_view.toggle_zoom_to_selection()
 
     @report_to_user
     def zoom_home(self):
@@ -840,7 +888,7 @@ class MainWindow(QtGui.QMainWindow):
         self.plugin_image_visible = not self.plugin_image_visible
         self.update_boxes_display_pixmap()
 
-    def create_menu_actions(self):
+    def _create_menu_actions(self):
         """Creates actions that are associated with menu items
         """
         # File menu
@@ -872,7 +920,8 @@ class MainWindow(QtGui.QMainWindow):
         )
         self.close_action = QAction(
             "&Close", self,
-            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document
+            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document,
+            icon=self.style().standardIcon(QtGui.QStyle.SP_DialogCloseButton)
         )
         self.exit_action = QAction(
             "E&xit", self,
@@ -1004,13 +1053,14 @@ class MainWindow(QtGui.QMainWindow):
             triggered=self.zoom_out,
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown)
         )
-        self.toogle_zoom_action = QAction(
-            "&Toogle Zoom", self, shortcut='Z', triggered=self.toggle_zoom
-        )
         self.zoom_home_action = QAction(
-            "Fit To Window", self,
+            "Whole image", self,
             shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
-            triggered=self.zoom_home
+            triggered=self.zoom_home, checkable=True
+        )
+        self.zoom_to_selection_action = QAction(
+            "&Selected", self, shortcut='z',
+            triggered=self.zoom_to_selection, checkable=True
         )
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the 'toggle plugin image' action?
@@ -1037,7 +1087,7 @@ class MainWindow(QtGui.QMainWindow):
         # Help menu
         self.about_action = QAction("&About", self, triggered=self.about)
 
-    def create_non_menu_actions(self):
+    def _create_non_menu_actions(self):
         """Creates actions that are not associated with menu items
         """
         # Menu-less actions
@@ -1063,23 +1113,46 @@ class MainWindow(QtGui.QMainWindow):
         self.addAction(self.previous_tab_action)
         self.addAction(self.next_tab_action)
 
-    def create_toolbar(self):
+    def _create_toolbar(self):
         """Creates the toolbar
         """
+        # A toolbar containing document open, save etc
+        # First create some widgets to go onto the toolbar
+
+        # A popup menu of recent documents
+        self.recent_docs_button = QPushButton("Recent")
+        self.recent_docs_button.setStyleSheet("text-align: left")
+        self.recent_docs_popup = QMenu()
+        for action in self.recent_doc_actions:
+            self.recent_docs_popup.addAction(action)
+        self.recent_docs_button.setMenu(self.recent_docs_popup)
+
+        # Cookie cutter widget
+        self.cookie_cutter_widget = CookieCutterWidget()
+        self.cookie_cutter_widget.save_to_new_action.triggered.connect(
+            self.save_to_cookie_cutter
+        )
+        self.cookie_cutter_widget.apply_current_action.triggered.connect(
+            self.apply_cookie_cutter
+        )
+        cookie_cutter_choice().cookie_cutter_changed.connect(
+            self.new_cookie_cutter
+        )
+
         self.toolbar = self.addToolBar("Edit")
         self.toolbar.addAction(self.open_action)
+        self.toolbar.addWidget(self.recent_docs_button)
         self.toolbar.addAction(self.save_action)
+        self.toolbar.addAction(self.close_action)
+        self.toolbar.addSeparator()
         for action in filter(lambda a: a.icon(), self.plugin_actions):
             self.toolbar.addAction(action)
-        self.toolbar.addAction(self.zoom_in_action)
-        self.toolbar.addAction(self.zoom_out_action)
-        self.toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.toolbar.addWidget(self.cookie_cutter_widget)
 
         self.toolbar.addSeparator()
         self.toolbar.addWidget(self.view_selector.widget)
 
-    def create_menus(self):
+    def _create_menus(self):
         """Create menu items
         """
         self._file_menu = QMenu("&File", self)
@@ -1130,8 +1203,8 @@ class MainWindow(QtGui.QMainWindow):
         self._view_menu.addSeparator()
         self._view_menu.addAction(self.zoom_in_action)
         self._view_menu.addAction(self.zoom_out_action)
-        self._view_menu.addAction(self.toogle_zoom_action)
         self._view_menu.addAction(self.zoom_home_action)
+        self._view_menu.addAction(self.zoom_to_selection_action)
         self._view_menu.addAction(self.toggle_plugin_image_action)
         self._view_menu.addSeparator()
         self._view_menu.addAction(self.show_object_grid_action)
@@ -1362,11 +1435,17 @@ class MainWindow(QtGui.QMainWindow):
         # View
         self.boxes_view_action.setChecked(boxes_view_visible)
         self.metadata_view_action.setChecked(not boxes_view_visible)
-        self.zoom_in_action.setEnabled(document and boxes_view_visible)
-        self.zoom_out_action.setEnabled(document and boxes_view_visible)
-        self.toogle_zoom_action.setEnabled(document and boxes_view_visible)
-        self.zoom_home_action.setEnabled(document and boxes_view_visible)
-        self.toggle_plugin_image_action.setEnabled(document and boxes_view_visible)
+        self.zoom_in_action.setEnabled(document)
+        self.zoom_out_action.setEnabled(document)
+        self.zoom_home_action.setEnabled(document)
+        self.zoom_to_selection_action.setChecked(
+            'follow_selection' == self.boxes_view.zoom_mode
+        )
+        self.zoom_to_selection_action.setEnabled(document)
+        self.zoom_home_action.setChecked(
+            'whole_scene' == self.boxes_view.zoom_mode
+        )
+        self.toggle_plugin_image_action.setEnabled(document)
         self.show_object_grid_action.setEnabled(objects_view_visible)
         self.show_object_expanded_action.setEnabled(objects_view_visible)
         current_colour_scheme = colour_scheme_choice().current['Name']

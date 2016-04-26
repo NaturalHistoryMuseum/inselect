@@ -66,7 +66,7 @@ def painter_state(painter):
 
 
 def report_to_user(f):
-    """Decorator that reports exceptions to the user in a model QDialog
+    """Decorator that reports exceptions to the user in a modal QDialog
     """
     @wraps(f)
     def wrapper(self, *args, **kwargs):

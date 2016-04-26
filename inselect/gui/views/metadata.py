@@ -11,10 +11,11 @@ from inselect.lib.languages import LANGUAGES
 from inselect.lib.utils import debug_print
 
 from inselect.gui.colours import colour_scheme_choice
+from inselect.gui.popup_panel import PopupPanel
 from inselect.gui.roles import MetadataRole
-from inselect.gui.user_template_choice import user_template_choice
-from inselect.gui.utils import relayout_widget
 from inselect.gui.toggle_widget_label import ToggleWidgetLabel
+from inselect.gui.utils import relayout_widget
+from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.user_template_popup_button import UserTemplatePopupButton
 
 
@@ -37,28 +38,19 @@ class MetadataView(QAbstractItemView):
 
         # A container for the controls
         self._form_container = FormContainer()
-
-        # A scrollable container for the form
-        self._form_scroll = QScrollArea(parent)
-        self._form_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self._form_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self._form_scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self._form_scroll.setWidget(self._form_container)
-
-        # Make the controls fill the available horizontal space
-        # http://qt-project.org/forums/viewthread/11012
-        self._form_scroll.setWidgetResizable(True)
-
         self._create_controls()
 
-        # List of templates is fixed at the top - form can be scrolled
+        # Popup buttom above controls
         layout = QVBoxLayout()
         layout.addWidget(self.popup_button)
-        layout.addWidget(self._form_scroll)
+        layout.addWidget(self._form_container)
 
-        # Top-level container for the list of templates and form
-        self.widget = QWidget(parent)
-        self.widget.setLayout(layout)
+        # Container for the popup and form
+        container = QWidget()
+        container.setLayout(layout)
+
+        # Widget containing toggle label and container
+        self.widget = PopupPanel('Metadata', container, parent)
 
     def refresh_user_template(self):
         "Refreshes the UI with the currently selected UserTemplate"
@@ -158,9 +150,9 @@ class FormContainer(QWidget):
     def _new_group(self):
         """Returns a new layout, used during controls creation
         """
-        l = QFormLayout()
-        l.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
-        return l
+        layout = QFormLayout()
+        layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        return layout
 
     def _close_group(self, main_layout, group_name, group_layout):
         """Closes the the existing group, used during controls creation
@@ -181,6 +173,12 @@ class FormContainer(QWidget):
             group_box_layout.addWidget(ToggleWidgetLabel(group_name,
                                                          controls_widget))
             group_box_layout.addWidget(controls_widget)
+            group_box_layout.setContentsMargins(
+                0,  # left
+                0,  # top
+                0,  # right
+                0   # bottom
+            )
             group_box = QGroupBox()
             group_box.setLayout(group_box_layout)
 
@@ -197,6 +195,12 @@ class FormContainer(QWidget):
         # Show controls stacked vertically
         main_layout = QFormLayout()
         main_layout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        main_layout.setContentsMargins(
+            0,  # left
+            0,  # top
+            0,  # right
+            0   # bottom
+        )
 
         # Mapping { control, field name }
         controls = {}
