@@ -51,6 +51,9 @@ setup_data = {
             ('{site_packages}/numpy', 'numpy'),
             ('{site_packages}/scipy', 'scipy'),
             ('{site_packages}/sklearn', 'sklearn'),
+            ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
+            ('{environment_root}/Library/bin/msvcr90.dll', 'msvcr90.dll'),
+            ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
@@ -80,13 +83,17 @@ def cx_setup():
     """cx_Freeze setup. Used for building Windows installers"""
     from cx_Freeze import setup, Executable
     from distutils.sysconfig import get_python_lib
+    from pathlib import Path
 
-    # Set path to include files
-    site_packages = get_python_lib()
+    # Set paths to include files
+    format_strings = {
+        'site_packages': get_python_lib(),
+        'environment_root': Path(sys.executable).parent,
+    }
     include_files = []
     for i in setup_data['win32']['include_files']:
         include_files.append((
-            i[0].format(site_packages=site_packages),
+            i[0].format(**format_strings),
             i[1]
         ))
 
