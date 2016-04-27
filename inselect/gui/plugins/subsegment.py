@@ -45,7 +45,7 @@ class SubsegmentPlugin(Plugin):
 
         # Points as a list of tuples, with coordinates relative to
         # the top-left of the sub-segmentation window
-        seeds = [(p.x(), p.y()) for p in self.seeds]
+        seeds = [(int(p.x()), int(p.y())) for p in self.seeds]
 
         items, display_image = SegmentDocument(self.sort_choice).subsegment(
             self.document, self.row, seeds, callback=progress
