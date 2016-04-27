@@ -19,7 +19,8 @@ def sort_items_choice():
 
 class SortDocumentItems(object):
     def __init__(self):
-        self._by_columns = QSettings().value(_PATH, False)
+        # Key holds an integer
+        self._by_columns = 1 == QSettings().value(_PATH, False)
 
     @property
     def by_columns(self):
@@ -33,5 +34,7 @@ class SortDocumentItems(object):
         user's most recent preference (None).
         """
         self._by_columns = by_columns
-        QSettings().setValue(_PATH, by_columns)
+        # Pass integer to setValue - calling setValue with a bool with result
+        # in a string being written to the QSettings store.
+        QSettings().setValue(_PATH, 1 if by_columns else 0)
         return sort_document_items(items, by_columns)
