@@ -3,7 +3,7 @@ from operator import itemgetter
 
 import numpy as np
 
-from scipy.signal import argrelextrema
+from scipy.signal import argrelmin
 from sklearn.neighbors import KernelDensity
 
 
@@ -19,7 +19,7 @@ def _do_kde(values):
     # Identify minima and use as break points
     samples = np.linspace(0, RESCALE)
     evaluations = kde.score_samples(samples.reshape(-1, 1))
-    minima = argrelextrema(evaluations, np.less)[0]
+    minima = argrelmin(evaluations)
 
     # The right-hand edges of bins
     bins = np.append(samples[minima], RESCALE)
