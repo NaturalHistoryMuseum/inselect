@@ -9,10 +9,6 @@ import traceback
 
 from pathlib import Path
 
-# Import numpy here to prevent PyInstaller build from breaking
-# TODO LH find a better solution
-import numpy    # noqa
-
 import inselect
 import inselect.lib.utils
 
