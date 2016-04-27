@@ -49,6 +49,8 @@ setup_data = {
         ],
         'include_files': [
             ('{site_packages}/numpy', 'numpy'),
+            ('{site_packages}/scipy', 'scipy'),
+            ('{site_packages}/sklearn', 'sklearn'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
