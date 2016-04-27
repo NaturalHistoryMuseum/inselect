@@ -48,7 +48,7 @@ def main(args):
     parser.add_argument('--debug', action='store_true')
     parser.add_argument(
         '--sort-by-columns', action='store_true', default=False,
-        help='Sort boxes columns; default is to sort boxes by rows')
+        help='Sort boxes by columns; default is to sort boxes by rows')
     parser.add_argument(
         '-v', '--version', action='version',
         version='%(prog)s ' + inselect.__version__
