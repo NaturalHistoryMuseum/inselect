@@ -47,13 +47,19 @@ setup_data = {
             }
             for script in SCRIPTS
         ],
+        # Strings in braces within 'include_files' tuples expanded in cx_setup
         'include_files': [
             ('{site_packages}/numpy', 'numpy'),
+            ('{site_packages}/scipy', 'scipy'),
+            ('{site_packages}/sklearn', 'sklearn'),
+            ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
+            ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
-            'Tkinter', 'ttk', 'Tkconstants', 'tcl',
-            'future.moves'    # Errors from urllib otherwise
+            'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
+            'future.moves',    # Errors from urllib otherwise
+            'PySide.QtNetwork',
         ]
     }
 }
@@ -78,13 +84,17 @@ def cx_setup():
     """cx_Freeze setup. Used for building Windows installers"""
     from cx_Freeze import setup, Executable
     from distutils.sysconfig import get_python_lib
+    from pathlib import Path
 
-    # Set path to include files
-    site_packages = get_python_lib()
+    # Set paths to include files
+    format_strings = {
+        'site_packages': get_python_lib(),
+        'environment_root': Path(sys.executable).parent,
+    }
     include_files = []
     for i in setup_data['win32']['include_files']:
         include_files.append((
-            i[0].format(site_packages=site_packages),
+            i[0].format(**format_strings),
             i[1]
         ))
 
@@ -97,6 +107,8 @@ def cx_setup():
                 'packages': setup_data['packages'] + setup_data['win32']['extra_packages'],
                 'excludes': setup_data['win32']['excludes'],
                 'include_files': include_files,
+                'include_msvcr': True,
+                'optimize': 2,
             },
             'bdist_msi': {
                 'upgrade_code': '{fe2ed61d-cd5e-45bb-9d16-146f725e522f}'

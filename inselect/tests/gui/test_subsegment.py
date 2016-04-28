@@ -8,6 +8,7 @@ from PySide.QtCore import QPointF, QRect
 from PySide.QtGui import QMessageBox
 
 from inselect.gui.roles import MetadataRole, RectRole
+from inselect.gui.sort_document_items import SortDocumentItems
 
 from gui_test import MainWindowTest
 
@@ -37,8 +38,9 @@ class TestSubsegment(MainWindowTest):
         for pos in seeds:
             box.append_point_of_interest(pos)
 
-        # Sub-segment
-        self.run_async_operation(partial(w.run_plugin, 1))
+        # Sub-segment, sorting by rows
+        with patch.object(SortDocumentItems, 'by_columns', False):
+            self.run_async_operation(partial(w.run_plugin, 1))
 
         # Should have three boxes with the same metadata
         self.assertEqual(3, w.model.rowCount())

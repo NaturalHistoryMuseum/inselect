@@ -9,6 +9,7 @@ from PySide.QtGui import QMessageBox
 from gui_test import MainWindowTest
 
 from inselect.gui.roles import RectRole
+from inselect.gui.sort_document_items import SortDocumentItems
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
@@ -34,8 +35,9 @@ class TestSegment(MainWindowTest):
         indexes = [w.model.index(r, 0) for r in xrange(0, w.model.rowCount())]
         expected = [w.model.data(i, RectRole) for i in indexes]
 
-        # Segment
-        self.run_async_operation(partial(w.run_plugin, 0))
+        # Segment, sorting by rows
+        with patch.object(SortDocumentItems, 'by_columns', False):
+            self.run_async_operation(partial(w.run_plugin, 0))
 
         # Get the rects of the new boxes
         self.assertEqual(5, w.model.rowCount())

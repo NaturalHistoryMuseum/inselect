@@ -4,61 +4,11 @@ import cv2
 
 import numpy as np
 
-from .rect import Rect
 from .utils import debug_print
 
 # Breaks pyinstaller build
 # from skimage.morphology import watershed
 USE_OPENCV_WATERSHED = True
-
-SEGMENTATION_PREFERRED_WIDTH = 4096
-
-
-def segment_document(doc, resize=None, *args, **kwargs):
-    """Returns doc with items replaced by the result of calling segment_edges().
-    The caller is responsible for saving doc.
-    """
-    debug_print('Segmenting [{0}]'.format(doc))
-
-    if doc.thumbnail:
-        img = doc.thumbnail
-        debug_print('Will segment using thumbnail [{0}]'.format(img))
-    else:
-        img = doc.scanned
-        debug_print('Will segment using full-res scan [{0}]'.format(img))
-
-    # Make smaller images larger
-    height, width = img.array.shape[:2]
-    if resize is None and width != SEGMENTATION_PREFERRED_WIDTH:
-        # Resize, maintaining aspect ratio
-        # segment_edges() expects a tuple (height, width)
-        factor = float(SEGMENTATION_PREFERRED_WIDTH) / width
-        resize = (int(height * factor), SEGMENTATION_PREFERRED_WIDTH)
-
-        msg = 'Resizing [{0}] from [{1}] to preferred size of [{2}]'
-        debug_print(msg.format(doc, (height, width), resize))
-    else:
-        # Images of the preferred size or larger do not need resizing
-        debug_print('Image is of the preferred size or larger')
-        resize = False
-
-    rects, display_image = segment_edges(img.array, resize=resize, *args, **kwargs)
-
-    # Normalised Rects
-    rects = list(Rect(*map(lambda v: int(round(v)), rect[:4])) for rect in rects)
-    rects = img.to_normalised(rects)
-
-    # Padding of one percent of height and width
-    rects = (r.padded(percent=1) for r in rects)
-
-    # Constrain rects to be within image
-    rects = (r.intersect(Rect(0.0, 0.0, 1.0, 1.0)) for r in rects)
-
-    items = [{"fields": {}, 'rect': r, 'rotation': 0} for r in rects]
-    doc = doc.copy()    # Deep copy to avoid altering argument
-    doc.set_items(items)
-    debug_print('Segmented [{0}]'.format(doc))
-    return doc, display_image
 
 
 def _right_sized(contour, image, container_filter=True, size_filter=True):

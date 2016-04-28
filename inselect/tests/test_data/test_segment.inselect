@@ -42,6 +42,7 @@
         },
         {
             "fields": {
+                "catalogNumber": "4",
                 "scientificName": "Elsinoë"
             },
             "rect": [
@@ -54,6 +55,7 @@
         },
         {
             "fields": {
+                "catalogNumber": "5",
                 "scientificName": "D"
             },
             "rect": [

@@ -1,6 +1,7 @@
 # For PyInstaller build on Mac
 
 import sys
+
 from pathlib import Path
 
 block_cipher = None
@@ -9,7 +10,7 @@ a = Analysis(['inselect.py'],
              pathex=[str(Path('.').absolute())],
              binaries=None,
              datas=None,
-             hiddenimports=[],
+             hiddenimports=['sklearn.neighbors.typedefs'],
              hookspath=[],
              runtime_hooks=[],
              excludes=['Tkinter'],
@@ -18,23 +19,25 @@ a = Analysis(['inselect.py'],
              cipher=block_cipher)
 
 
-# PyInstaller does not detect some dylibs, I think because they are symlinked.
+# PyInstaller does not detect some dylibs, I think in some cases because they
+# are symlinked.
 # See Stack Overflow post http://stackoverflow.com/a/17595149 for example
 # of manipulating Analysis.binaries.
 
-# Tuples (name, source)
 MISSING_DYLIBS = (
-    ('libQtCore.4.dylib', 'libQtCore.4.8.7.dylib'),
-    ('libQtGui.4.dylib', 'libQtGui.4.8.7.dylib'),
-    ('libpng16.16.dylib', 'libpng16.16.dylib'),
-    ('libz.1.dylib', 'libz.1.dylib'),
+    'libQtCore.4.dylib',
+    'libQtGui.4.dylib',
+    'libpng16.16.dylib',
+    'libz.1.dylib',
 )
 
 # The lib directory associated with this environment
 LIB = Path(sys.argv[0]).parent.parent.joinpath('lib')
 
-a.binaries += TOC([(name, str(LIB.joinpath(source)), 'BINARY') for name, source in MISSING_DYLIBS])
-
+# Find the source for each library and add it to the list of binaries
+a.binaries += TOC([
+    (lib, str(LIB.joinpath(lib).resolve()), 'BINARY') for lib in MISSING_DYLIBS
+])
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 # Prefer to freeze to a folder rather than a single file. The choice makes no
@@ -51,7 +54,7 @@ if SINGLE_FILE:
               name='inselect',
               debug=False,
               strip=False,
-              upx=True,
+              upx=False,
               console=False,
               icon='data/inselect.icns')
 else:
@@ -62,7 +65,7 @@ else:
               name='inselect',
               debug=False,
               strip=False,
-              upx=True,
+              upx=False,
               console=False,
               icon='data/inselect.icns')
 
@@ -71,7 +74,7 @@ else:
                    a.zipfiles,
                    a.datas,
                    strip=False,
-                   upx=True,
+                   upx=False,
                    name='inselect')
 
 

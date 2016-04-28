@@ -10,10 +10,6 @@ import traceback
 from itertools import count, izip
 from pathlib import Path
 
-# Import numpy here to prevent PyInstaller build from breaking
-# TODO LH find a better solution
-import numpy    # noqa
-
 import inselect.lib.utils
 
 from inselect.lib.utils import debug_print

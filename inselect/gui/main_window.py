@@ -32,6 +32,7 @@ from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .recent_documents import RecentDocuments
 from .roles import RotationRole
+from .sort_document_items import sort_items_choice
 from .user_template_choice import user_template_choice
 from .utils import contiguous, report_to_user, qimage_of_bgr
 from .views.boxes import BoxesView, GraphicsItemView
@@ -963,11 +964,11 @@ class MainWindow(QtGui.QMainWindow):
             triggered=partial(self.select_next_prev, next=False)
         )
         self.select_by_size_larger_action = QAction(
-            "Select increasing size", self, shortcut="ctrl+>",
+            "Select &increasing size", self, shortcut="ctrl+>",
             triggered=partial(self.select_by_size_step, larger=True)
         )
         self.select_by_size_smaller_action = QAction(
-            "Select decreasing size", self, shortcut="ctrl+<",
+            "Select d&ecreasing size", self, shortcut="ctrl+<",
             triggered=partial(self.select_by_size_step, larger=False)
         )
 
@@ -984,12 +985,21 @@ class MainWindow(QtGui.QMainWindow):
                                              self.delete_action.shortcut()])
 
         self.rotate_clockwise_action = QAction(
-            "Rotate clockwise", self, shortcut="ctrl+R",
+            "Rotate c&lockwise", self, shortcut="ctrl+R",
             triggered=partial(self.rotate90, clockwise=True)
         )
         self.rotate_counter_clockwise_action = QAction(
-            "Rotate counter-clockwise", self, shortcut="ctrl+L",
+            "Rotate c&ounter-clockwise", self, shortcut="ctrl+L",
             triggered=partial(self.rotate90, clockwise=False)
+        )
+
+        self.sort_by_rows_action = QAction(
+            "Sort by &rows", self, checkable=True,
+            triggered=partial(self.sort_boxes, by_columns=False)
+        )
+        self.sort_by_columns_action = QAction(
+            "Sort by &columns", self, checkable=True,
+            triggered=partial(self.sort_boxes, by_columns=True)
         )
 
         # Plugins
@@ -1054,7 +1064,7 @@ class MainWindow(QtGui.QMainWindow):
             icon=self.style().standardIcon(QtGui.QStyle.SP_ArrowDown)
         )
         self.zoom_home_action = QAction(
-            "Whole image", self,
+            "&Whole image", self,
             shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
             triggered=self.zoom_home, checkable=True
         )
@@ -1071,10 +1081,10 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         self.show_object_grid_action = QAction(
-            'Show grid', self, shortcut='ctrl+G', triggered=self.show_grid
+            'Show &grid', self, shortcut='ctrl+G', triggered=self.show_grid
         )
         self.show_object_expanded_action = QAction(
-            'Show expanded', self,
+            'Show &expanded', self,
             shortcut='ctrl+E', triggered=self.show_expanded
         )
 
@@ -1184,6 +1194,9 @@ class MainWindow(QtGui.QMainWindow):
         self._edit_menu.addAction(self.rotate_clockwise_action)
         self._edit_menu.addAction(self.rotate_counter_clockwise_action)
         self._edit_menu.addSeparator()
+        self._edit_menu.addAction(self.sort_by_rows_action)
+        self._edit_menu.addAction(self.sort_by_columns_action)
+        self._edit_menu.addSeparator()
         user_template_popup = self._edit_menu.addMenu('Metadata template')
         self.view_metadata.popup_button.inject_actions(user_template_popup)
         self._edit_menu.addSeparator()
@@ -1210,7 +1223,7 @@ class MainWindow(QtGui.QMainWindow):
         self._view_menu.addAction(self.show_object_grid_action)
         self._view_menu.addAction(self.show_object_expanded_action)
         self._view_menu.addSeparator()
-        colours_popup = self._view_menu.addMenu('Colour scheme')
+        colours_popup = self._view_menu.addMenu('&Colour scheme')
         for action in self.colour_scheme_actions:
             colours_popup.addAction(action)
 
@@ -1345,6 +1358,22 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.new_document(path, default_metadata_items=items)
 
+    @report_to_user
+    def sort_boxes(self, by_columns):
+        """Sorts boxes either by columns or by rows.
+        """
+        if self.document:
+            # Sort boxes
+            self.model.to_document(self.document)
+            items = sort_items_choice().sort_items(
+                self.document.items, by_columns
+            )
+            self.model.set_new_boxes(items)
+        else:
+            # Record the user's choice
+            sort_items_choice().sort_items([], by_columns)
+        self.sync_ui()
+
     def _accept_drag_drop(self, event):
         """If event refers to a single file that can opened, returns the path.
         Returns None otherwise.
@@ -1428,6 +1457,8 @@ class MainWindow(QtGui.QMainWindow):
         self.delete_action.setEnabled(has_selection)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
+        self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
+        self.sort_by_columns_action.setChecked(sort_items_choice().by_columns)
         self.cookie_cutter_widget.sync_actions(document, has_rows)
         for action in self.plugin_actions:
             action.setEnabled(document)

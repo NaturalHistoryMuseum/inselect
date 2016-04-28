@@ -35,19 +35,24 @@ cd ~/projects/inselect
 pip install -r requirements.txt
 ```
 
-# OpenCV
-`numpy` is pinned by opencv installation
+## OpenCV
+Version of `numpy` is pinned by opencv installation but we want latest version -
+I have not encountered any problems by installing the latest version.
 
+`jjhelmus` provides versions after `2.4.10` but these make the Mac build
+extremely problematic by introducing many `dylib` dependencies that are
+troublesome to freeze.
 ```
-conda install --yes -c https://conda.binstar.org/jjhelmus opencv
+conda install --yes -c https://conda.binstar.org/jjhelmus opencv=2.4.10
+conda install --yes numpy
 ```
 
-# setuptools
+## setuptools
 A [bug in PyInstaller 3.1.1](https://github.com/pyinstaller/pyinstaller/issues/1773)
 means that we need to use setupools 19.2:
 
 ```
-conda install setuptools=19.2
+conda install --yes setuptools=19.2
 ```
 
 ## LibDMTX barcode reading library

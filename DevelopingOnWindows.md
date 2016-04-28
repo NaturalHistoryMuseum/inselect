@@ -25,7 +25,7 @@ follows:
 
 ```
 conda update --yes conda
-conda create --yes --name inselect pillow pyside pywin32 numpy
+conda create --yes --name inselect pillow pyside pywin32 numpy scikit-learn
 activate inselect
 python -m pip install --upgrade pip
 pip install -r requirements.txt
@@ -92,7 +92,7 @@ follows:
 
 ```
 conda update --yes conda
-conda create --yes --name inselect pillow pyside pywin32 numpy
+conda create --yes --name inselect pillow pyside pywin32 numpy scikit-learn
 activate inselect
 python -m pip install --upgrade pip
 pip install -r requirements.txt
