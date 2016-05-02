@@ -4,7 +4,7 @@ import platform
 import subprocess
 import sys
 
-from PySide.QtCore import Qt, QProcessEnvironment
+from PySide.QtCore import Qt
 from PySide.QtGui import QWidget, QFormLayout, QLabel, QGroupBox, QVBoxLayout
 
 from inselect.lib.utils import format_dt_display
@@ -17,16 +17,11 @@ def reveal_path(path):
     """Shows path in Finder (on Mac) or in Explorer (on Windows)
     """
     # http://stackoverflow.com/a/3546503
+    path = path.resolve()
     if sys.platform.startswith("win"):
-        explorer = QProcessEnvironment.systemEnvironment().searchInPath("explorer.exe")
-        if not explorer:
-            raise ValueError('Explorer could not be located')
-        else:
-            if not path.is_dir():
-                arg = u"/select,{0}".format(path)
-            else:
-                arg = unicode(path)
-        subprocess.check_call([explorer, arg])
+        res = subprocess.call(["explorer.exe", u"/select,{0}".format(path)])
+        if 1 != res:
+            raise ValueError('Unexpected exit code [{0}]'.format(res))
     elif 'Darwin' == platform.system():
         reveal = u'tell application "Finder" to reveal POSIX file "{0}"'
         activate = u'tell application "Finder" to activate "{0}"'
