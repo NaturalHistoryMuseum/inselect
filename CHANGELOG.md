@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.29
+-------------
+
 Version 0.1.28
 -------------
 - Fixed #291 - Alter travis to use Anaconda / Miniconda
