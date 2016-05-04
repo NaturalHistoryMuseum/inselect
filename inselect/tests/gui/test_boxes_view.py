@@ -76,7 +76,7 @@ class TestBoxesView(MainWindowTest):
         final = w.boxes_view.absolute_zoom
         self.assertEqual(initial, final)
 
-    def test_zoom_to_selection(self):
+    def test_toggle_zoom_to_selection(self):
         "Toggles between zooming in on the selected box and zooming out"
         w = self.window
 
@@ -88,7 +88,7 @@ class TestBoxesView(MainWindowTest):
         w.select_next_prev(next=True)
 
         # Zoom in on the selected item
-        w.zoom_to_selection()
+        w.toggle_zoom_to_selection()
         self.assertGreater(w.boxes_view.absolute_zoom, initial)
 
         # Zoom all the way out

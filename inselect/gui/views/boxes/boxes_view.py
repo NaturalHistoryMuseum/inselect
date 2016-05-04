@@ -217,18 +217,19 @@ class BoxesView(QtGui.QGraphicsView):
         (if no boxes are selected) or 'follow_selection' (if one or more boxes
         are selected).
         """
-        if 'whole_scene' != self.zoom_mode:
+        selected = self.scene().selectedItems()
+        if selected and 'follow_selection' != self.zoom_mode:
+            # Show the selection
+            self.zoom_mode = 'follow_selection'
+            self.zoom_to_items(selected)
+        elif 'whole_scene' != self.zoom_mode:
+            # Either no selection and/or currently in 'fixed' or
+            # 'follow_selection' - show the whole image
             self.zoom_home()
         else:
-            # Currently showing the whole image
-            selected = self.scene().selectedItems()
-            if selected:
-                self.zoom_mode = 'follow_selection'
-                self.zoom_to_items(selected)
-            else:
-                # There is no curent selection - apply a mild zoom
-                self.zoom_mode = 'fixed'
-                self.new_relative_zoom(4.0)
+            # Apply a mild fixed zoom
+            self.zoom_mode = 'fixed'
+            self.new_relative_zoom(4.0)
 
     def new_absolute_zoom(self, factor):
         """Sets a new absolute zoom and emits viewport_changed.
