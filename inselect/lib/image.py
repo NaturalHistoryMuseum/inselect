@@ -20,12 +20,9 @@ class InselectImage(object):
     # TODO LH __eq__, __ne__?
 
     def __init__(self, path):
-        path = Path(path)
-        if not path.is_file():
-            raise InselectError('Image file [{0}] does not exist'.format(str(path)))
-        else:
-            self._path = path
-            self._array = None
+        # path might not be a valid file at this point
+        self._path = Path(path)
+        self._array = None
 
     def __repr__(self):
         return "InselectImage('{0}')".format(str(self._path))
@@ -33,6 +30,20 @@ class InselectImage(object):
     def __str__(self):
         loaded = 'Unloaded' if self._array is None else 'Loaded'
         return "InselectImage ['{0}'] [{1}]".format(str(self._path), loaded)
+
+    @property
+    def available(self):
+        """True if self.path is a file
+        """
+        return self._path.is_file()
+
+    def assert_is_file(self):
+        """Raises an InselectError if self.path is not a file
+        """
+        if not self._path.is_file():
+            raise InselectError('[{0}] does not exist'.format(self._path))
+        else:
+            return True
 
     @property
     def path(self):
@@ -44,6 +55,7 @@ class InselectImage(object):
         order B G R
         """
         if self._array is None:
+            self.assert_is_file()
             p = str(self._path)
             debug_print('Reading from image file [{0}]'.format(p))
             image = cv2.imread(p)
@@ -127,6 +139,7 @@ class InselectImage(object):
         """
         # TODO Copy EXIF tags?
         # TODO Make read-only?
+        self.assert_is_file()
         for index, crop, path in izip(count(), self.crops(normalised, rotation), paths):
             if progress:
                 progress('Writing crop {0}'.format(1 + index))
@@ -143,6 +156,7 @@ class InselectImage(object):
     @property
     def pil_image(self):
         "Returns a PIL.Image instance represention"
+        self.assert_is_file()
         with warnings.catch_warnings(), self._path.open('rb') as f:
             # Ignore DecompressionBombWarning - expect images to be > 89478485
             # pixels

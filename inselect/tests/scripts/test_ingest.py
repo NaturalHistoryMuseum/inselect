@@ -87,7 +87,8 @@ class TestIngest(unittest.TestCase):
         # Scan is as expected?
         doc = InselectDocument.load(self.docs / 'x.inselect')
         self.assertTrue(np.all(original_image == doc.scanned.array))
-        self.assertTrue(doc.thumbnail.array.shape[1], 4096)
+        self.assertTrue(doc.thumbnail.available)
+        self.assertEqual(4096, doc.thumbnail.array.shape[1])
 
     def test_extension_cases(self):
         "Ingestion of image files with extensions in various combinatons of case"

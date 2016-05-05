@@ -1,6 +1,9 @@
 import unittest
 
+from mock import patch
+
 from PySide import QtCore, QtGui
+from PySide.QtGui import QMessageBox
 
 from inselect.gui.main_window import MainWindow
 
@@ -23,6 +26,10 @@ class MainWindowTest(GUITest):
         self.window = MainWindow(QtGui.qApp)
 
     def tearDown(self):
+        # Clean up by closing the document
+        with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
+            self.assertTrue(self.window.close_document())
+
         self.window.close()
         delattr(self, 'window')
 

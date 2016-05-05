@@ -124,6 +124,20 @@ class InfoWidget(PopupPanel):
 
         self.setStyleSheet(self.STYLESHEET)
 
+    def _update_file_controls(self, img, path, size, dimensions):
+        dim = '{0} x {1}'
+        if img.available:
+            path.set_label_and_path(img.path)
+            size.setText(humanize.naturalsize(img.size_bytes, binary=True))
+            dimensions.setText(dim.format(*(
+                locale.format("%d", n, grouping=True)
+                for n in img.dimensions)
+            ))
+        else:
+            path.setText('')
+            size.setText('')
+            dimensions.setText('')
+
     def set_document(self, document):
         """Updates controls to reflect the document. Clears controls if
         document is None.
@@ -142,31 +156,15 @@ class InfoWidget(PopupPanel):
             dt = p.get('Saved on')
             self._last_saved_on.setText(format_dt_display(dt) if dt else '')
 
-            self._scanned_path.set_label_and_path(document.scanned.path)
+            self._update_file_controls(
+                document.scanned, self._scanned_path, self._scanned_size,
+                self._scanned_dimensions
+            )
 
-            fsize = humanize.naturalsize(document.scanned.size_bytes, binary=True)
-            self._scanned_size.setText(fsize)
-
-            dim = '{0} x {1}'
-            self._scanned_dimensions.setText(dim.format(*(
-                locale.format("%d", n, grouping=True)
-                for n in document.scanned.dimensions)
-            ))
-
-            # Thumbnail might not be present
-            if document.thumbnail:
-                self._thumbnail_path.set_label_and_path(document.thumbnail.path)
-
-                fsize = humanize.naturalsize(document.thumbnail.size_bytes, binary=True)
-                self._thumbnail_size.setText(fsize)
-                self._thumbnail_dimensions.setText(dim.format(*(
-                    locale.format("%d", n, grouping=True)
-                    for n in document.thumbnail.dimensions)
-                ))
-            else:
-                self._thumbnail_path.setText('')
-                self._thumbnail_size.setText('')
-                self._thumbnail_dimensions.setText('')
+            self._update_file_controls(
+                document.thumbnail, self._thumbnail_path, self._thumbnail_size,
+                self._thumbnail_dimensions
+            )
         else:
             self._document_path.setText('')
             self._created_by.setText('')

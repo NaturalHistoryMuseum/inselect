@@ -1,6 +1,6 @@
 from itertools import count, izip
 
-from PySide.QtGui import QIcon
+from PySide.QtGui import QIcon, QMessageBox
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
@@ -31,10 +31,21 @@ class BarcodePlugin(Plugin):
             raise InselectError('Barcode decoding is not available')
         else:
             self.document = document
+            self.parent = parent
 
     @classmethod
     def icon(cls):
         return QIcon(':/data/barcode_icon.png')
+
+    def can_be_run(self):
+        if not self.document.scanned.available:
+            msg = ('Unable to read barcodes because the scanned image file does '
+                   'not exist.')
+            QMessageBox.warning(self.parent, 'Scanned image file does not exist',
+                                msg.format(self.document.scanned.path))
+            return False
+        else:
+            return True
 
     def __call__(self, progress):
         debug_print('BarcodePlugin.__call__')

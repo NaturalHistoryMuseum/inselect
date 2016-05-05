@@ -3,6 +3,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 Version 0.1.29
 -------------
 - Fixed #296 - Inconsistent zoom toggling
+- Fixed #295 - Full-resolution scan is mandatory
 - Fixed #293 - Link to files fails with ugly error message on Windows
 
 Version 0.1.28

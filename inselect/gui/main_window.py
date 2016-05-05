@@ -472,7 +472,14 @@ class MainWindow(QtGui.QMainWindow):
         crops_dir = export.crops_dir(self.document)
 
         res = QMessageBox.Yes
-        if crops_dir.is_dir():
+        if not self.document.scanned.available:
+            msg = ('Unable to save crops because the scanned image file does '
+                   'not exist.')
+            QMessageBox.warning(self, 'Scanned image file does not exist',
+                                msg.format(self.document.scanned.path))
+            res = QMessageBox.No
+
+        if QMessageBox.Yes == res and crops_dir.is_dir():
             msg = 'Overwrite the existing object images?'
             res = QMessageBox.question(self, 'Save object images?',
                                        msg, QMessageBox.No, QMessageBox.Yes)
@@ -485,19 +492,23 @@ class MainWindow(QtGui.QMainWindow):
                 'Would you like to save the object images?')
 
         if QMessageBox.Yes == res:
-            def save_crops(progress):
-                progress('Loading full-resolution scanned image')
-                self.document.scanned.array
+            complete_msg = "{0} crops saved in {1}"
+            complete_msg = complete_msg.format(self.document.n_items, crops_dir)
+            self.run_in_worker(
+                partial(self.run_save_crops, export),
+                'Save crops',
+                partial(self.save_crops_completed, complete_msg)
+            )
 
-                progress('Saving crops')
-                export.save_crops(self.document, progress)
+    def run_save_crops(self, export, progress):
+        progress('Loading full-resolution scanned image')
+        self.document.scanned.array
 
-            def completed(operation):
-                QMessageBox.information(self, "Crops saved", msg)
+        progress('Saving crops')
+        export.save_crops(self.document, progress)
 
-            msg = "{0} crops saved in {1}"
-            msg = msg.format(self.document.n_items, crops_dir)
-            self.run_in_worker(save_crops, 'Save crops', completed)
+    def save_crops_completed(self, msg, operation):
+        QMessageBox.information(self, "Crops saved", msg)
 
     @report_to_user
     def export_csv(self, user_template=None):
@@ -793,7 +804,9 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print("MainWindow.plugin_finished")
 
+        print(operation)
         if hasattr(operation, 'items'):
+            print(operation.items)
             self.model.set_new_boxes(operation.items)
 
         if hasattr(operation, 'display'):
