@@ -697,7 +697,7 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view.zoom_out()
 
     @report_to_user
-    def zoom_to_selection(self):
+    def toggle_zoom_to_selection(self):
         self.boxes_view.toggle_zoom_to_selection()
 
     @report_to_user
@@ -1070,7 +1070,7 @@ class MainWindow(QtGui.QMainWindow):
         )
         self.zoom_to_selection_action = QAction(
             "&Selected", self, shortcut='z',
-            triggered=self.zoom_to_selection, checkable=True
+            triggered=self.toggle_zoom_to_selection, checkable=True
         )
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the 'toggle plugin image' action?
