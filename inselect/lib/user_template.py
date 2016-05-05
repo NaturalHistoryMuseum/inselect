@@ -131,8 +131,16 @@ class UserTemplate(object):
         """Generator of dicts of metadata values for boxes in document and
         the iterator of crop_fnames.
         """
-        # Document might not have a thumbnail
-        if document.thumbnail:
+        # Document promises that either the thumbnail or scanned image will be
+        # available
+        if document.scanned.available:
+            scanned_coords = document.scanned.from_normalised(
+                b['rect'] for b in document.items
+            )
+        else:
+            scanned_coords = repeat(None)
+
+        if document.thumbnail.available:
             thumbnail_coords = document.thumbnail.from_normalised(
                 b['rect'] for b in document.items
             )
@@ -144,7 +152,7 @@ class UserTemplate(object):
             crop_fnames,
             (b['rect'] for b in document.items),
             thumbnail_coords,
-            document.scanned.from_normalised(b['rect'] for b in document.items),
+            scanned_coords,
             document.items
         )
 

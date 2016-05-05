@@ -33,7 +33,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(5, len(doc.items))
         self.assertEqual(5, doc.n_items)
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
-        self.assertTrue(doc.thumbnail is None)
+        self.assertFalse(doc.thumbnail.available)
         self.assertEqual(TESTDATA / 'test_segment_crops', doc.crops_dir)
         self.assertEqual('Lawrence Hudson', doc.properties['Created by'])
         self.assertEqual("2015-03-14T09:19:47",
@@ -66,6 +66,27 @@ class TestDocument(unittest.TestCase):
         finally:
             os.unlink(f.name)
 
+    def test_image_validation(self):
+        "Try to create documents with illegal image settings"
+        self.assertRaisesRegexp(
+            InselectError,
+            'Either scanned or scanned_path should be given',
+            InselectDocument
+        )
+        self.assertRaisesRegexp(
+            InselectError,
+            'scanned should be an instance of InselectImage',
+            InselectDocument,
+            scanned='hello'
+        )
+        self.assertRaisesRegexp(
+            InselectError,
+            'thumbnail should be an instance of InselectImage',
+            InselectDocument,
+            scanned_path=TESTDATA / 'test_segment.png',
+            thumbnail='hello'
+        )
+
     def test_load_not_json_document(self):
         "Try to load a file that is not a json document"
         self._test_load_fails('XYZ')
@@ -86,22 +107,30 @@ class TestDocument(unittest.TestCase):
             doc_temp = tempdir / 'test_segment.inselect'
             doc_temp.open('w').write(source.open().read())
 
-            # Document load with no scanned image file
+            # Document load with neither scanned image file nor thumbnail
             self.assertRaises(InselectError, InselectDocument.load, doc_temp)
 
-            # Document load with scanned image file present
+            # Document load with thumbnail but no scanned image file
+            thumbnail_temp = tempdir / 'test_segment_thumbnail.jpg'
+            thumbnail_temp.open('w')       # File only needs to exist
+            doc = InselectDocument.load(doc_temp)
+            self.assertFalse(doc.scanned.available)
+            self.assertTrue(doc.thumbnail.available)
+
+            # Document load with both scanned and thumbnail files
             scanned_temp = tempdir / 'test_segment.png'
             scanned_temp.open('w')       # File only needs to exist
             actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
-            self.assertFalse(actual.thumbnail)
+            self.assertTrue(actual.scanned.available)
+            self.assertTrue(actual.thumbnail.available)
 
-            # Document load with scanned and thumbnail files present
-            thumbnail_temp = tempdir / 'test_segment_thumbnail.jpg'
-            thumbnail_temp.open('w')       # File only needs to exist
+            # Document load with scanned image file but not thumbnail
+            os.unlink(str(thumbnail_temp))
             actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
-            self.assertTrue(actual.thumbnail)
+            self.assertTrue(actual.scanned.available)
+            self.assertFalse(actual.thumbnail.available)
 
     def test_save(self):
         "Save document"
@@ -179,6 +208,7 @@ class TestDocument(unittest.TestCase):
             )
             thumbnail = tempdir / 'test_segment_thumbnail.jpg'
             self.assertTrue(thumbnail.is_file())
+            self.assertTrue(doc.thumbnail.available)
             self.assertEqual(2048, doc.thumbnail.array.shape[1])
             self.assertRaises(InselectError, InselectDocument.new_from_scan,
                               thumbnail)

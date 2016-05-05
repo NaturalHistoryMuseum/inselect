@@ -30,12 +30,19 @@ class TestImage(unittest.TestCase):
         with self.assertRaises(AttributeError):
             i.path = ''
 
+        self.assertTrue(i.available)
+        self.assertTrue(i.assert_is_file)
+
     def test_non_existent_file(self):
-        self.assertRaises(InselectError, InselectImage, TESTDATA / 'i am not a file.png')
+        img = InselectImage(TESTDATA / 'i am not a file.png')
+        self.assertFalse(img.available)
+        self.assertRaises(InselectError, img.assert_is_file)
 
     def test_not_an_image(self):
         f = tempfile.NamedTemporaryFile()
         i = InselectImage(f.name)
+        self.assertTrue(i.available)
+        self.assertTrue(i.assert_is_file)
         with self.assertRaises(InselectError):
             i.array
 
@@ -66,10 +73,6 @@ class TestImage(unittest.TestCase):
         boxes = [Rect(0, 0, 1, 1), Rect(0, 0.2, 0.1, 0.8)]
         self.assertEqual([Rect(0, 0, 459, 437), Rect(0, 87, 46, 350)],
                          list(i.from_normalised(boxes)))
-
-    def test_not_normalised(self):
-        i = InselectImage(TESTDATA / 'test_segment.png')
-        self.assertRaises(i.from_normalised([Rect(0, 0, 2, 2)]))
 
     def test_to_normalised(self):
         i = InselectImage(TESTDATA / 'test_segment.png')

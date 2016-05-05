@@ -21,7 +21,9 @@ class SegmentDocument(object):
         """
         debug_print('Segmenting [{0}]'.format(doc))
 
-        if doc.thumbnail:
+        # Document promises that either the thumbnail or scanned image will be
+        # available
+        if doc.thumbnail.available:
             img = doc.thumbnail
             debug_print('Will segment using thumbnail [{0}]'.format(img))
         else:
@@ -66,7 +68,9 @@ class SegmentDocument(object):
         """seeds - a list of tuples (x, y) with coordinates relative to
         the top-left of the sub-segmentation window
         """
-        if doc.thumbnail:
+        # Document promises that either the thumbnail or scanned image will be
+        # available
+        if doc.thumbnail.available:
             debug_print('Subsegment will work on thumbnail')
             img = doc.thumbnail
         else:

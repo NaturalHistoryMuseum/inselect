@@ -67,23 +67,44 @@ class InselectDocument(object):
 
     def __init__(self, scanned=None, scanned_path=None, thumbnail=None,
                  items=[], properties={}):
-        """
+        """Scanned - InselectImage or None
+        scanned_path - Path or None
+        thumbnail - InselectImage or None
+        items - list of dicts
+        properties - dict
         """
         items = self._preprocess_items(items)
 
         # TODO Validate metadata fields
         # TODO Validate properties
 
-        self._scanned = scanned if scanned else InselectImage(scanned_path)
+        if scanned:
+            # An InselectImage
+            if not isinstance(scanned, InselectImage):
+                raise InselectError('scanned should be an instance of InselectImage')
+            else:
+                self._scanned = scanned
+        elif scanned_path:
+            self._scanned = InselectImage(scanned_path)
+        else:
+            raise InselectError('Either scanned or scanned_path should be given')
 
         if thumbnail:
-            self._thumbnail = thumbnail
+            if not isinstance(thumbnail, InselectImage):
+                raise InselectError('thumbnail should be an instance of InselectImage')
+            else:
+                self._thumbnail = thumbnail
         else:
-            t = self.thumbnail_path_of_scanned(self._scanned.path)
-            self._thumbnail = InselectImage(t) if t.is_file() else None
+            self._thumbnail = InselectImage(
+                self.thumbnail_path_of_scanned(self._scanned.path)
+            )
 
-        self._items = items
-        self._properties = properties
+        # Need either thumbnail or scanned
+        if self._scanned.available or self._thumbnail.available:
+            self._items = items
+            self._properties = properties
+        else:
+            raise InselectError('Either scanned and/or thumbnail should be given')
 
     @classmethod
     def thumbnail_path_of_scanned(cls, scanned):
