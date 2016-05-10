@@ -804,9 +804,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         debug_print("MainWindow.plugin_finished")
 
-        print(operation)
         if hasattr(operation, 'items'):
-            print(operation.items)
             self.model.set_new_boxes(operation.items)
 
         if hasattr(operation, 'display'):
