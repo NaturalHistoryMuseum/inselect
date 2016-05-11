@@ -3,7 +3,7 @@ import locale
 import sys
 
 from PySide import QtGui
-from PySide.QtCore import QSettings, QLocale, QCoreApplication
+from PySide.QtCore import QSettings, QSize, QLocale, QCoreApplication
 
 import inselect
 
@@ -49,6 +49,13 @@ def main(args):
         locale.setlocale(locale.LC_ALL, '')
 
     debug_print(u'Locale is [{0}]'.format(QLocale().name()))
+
+    # Application icon
+    icon = QtGui.QIcon()
+    path = ':/data/inselect{0}.png'
+    for size in (16, 24, 32, 48, 64, 128, 256, 512):
+        icon.addFile(path.format(size), QSize(size, size))
+    app.setWindowIcon(icon)
 
     window = MainWindow(app)
     window.show_from_geometry_settings()

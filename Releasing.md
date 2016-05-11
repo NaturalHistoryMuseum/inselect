@@ -6,7 +6,7 @@ git pull
 
 * If necesary, bump the version in `inselect/__init__.py`
 
-* If the toolbar icons in inselect/data change then you need to refresh a Python
+* If the icons in inselect/data change then you need to refresh a Python
   file:
 
 ```
