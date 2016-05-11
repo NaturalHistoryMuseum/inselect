@@ -40,6 +40,12 @@ class TestRect(unittest.TestCase):
     def test_bottomright(self):
         self.assertEqual(Point(2, 4), self.R.bottomright)
 
+    def test_x_centre(self):
+        self.assertEqual(1, self.R.x_centre)
+
+    def test_y_centre(self):
+        self.assertEqual(2, self.R.y_centre)
+
     def test_centre(self):
         self.assertEqual(Point(1, 2), self.R.centre)
 

@@ -29,9 +29,19 @@ class Rect(collections.namedtuple('Rect', ['left', 'top', 'width', 'height'])):
         return Point(self.left + self.width, self.top + self.height)
 
     @property
+    def x_centre(self):
+        "left + width / 2"
+        return self.left + self.width / 2
+
+    @property
+    def y_centre(self):
+        "top + height / 2"
+        return self.top + self.height / 2
+
+    @property
     def centre(self):
         "Point(x, y)"
-        return Point(self.left + self.width / 2, self.top + self.height / 2)
+        return Point(self.x_centre, self.y_centre)
 
     def padded(self, percent):
         "Returns self with percentage padding applied"

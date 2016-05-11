@@ -36,8 +36,8 @@ def sort_document_items(items, by_columns):
         return []
     else:
         rects = [i['rect'] for i in items]
-        x_bins = _do_kde(r.centre.x for r in rects)
-        y_bins = _do_kde(r.centre.y for r in rects)
+        x_bins = _do_kde(r.x_centre for r in rects)
+        y_bins = _do_kde(r.y_centre for r in rects)
 
         if by_columns:
             keys = izip(x_bins, y_bins, (r.left for r in rects))
