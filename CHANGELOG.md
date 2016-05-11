@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.30
+-------------
+
 Version 0.1.29
 -------------
 - Fixed #298 - Ugly error message when double-clicking on a .inselect file
