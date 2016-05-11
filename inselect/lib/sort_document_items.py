@@ -1,16 +1,21 @@
 from itertools import izip
 from operator import itemgetter
 
-import numpy as np
-
-from scipy.signal import argrelmin
-from sklearn.neighbors import KernelDensity
+from inselect.lib.utils import debug_print
 
 
 def _do_kde(values):
     """Uses kernel denstity estimation to assign values to clusters using
     minima. Returns a generator of ints that are bin numbers.
     """
+    import time
+    start = time.time()
+    from scipy.signal import argrelmin
+    from sklearn.neighbors import KernelDensity
+    debug_print('Imported scipy and sklearn in [{0}]'.format(time.time() - start))
+
+    import numpy as np
+
     # http://stackoverflow.com/a/35151947
     RESCALE = 100
     values = np.array([int(v * RESCALE) for v in values]).reshape(-1, 1)

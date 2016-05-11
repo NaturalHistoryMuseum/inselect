@@ -5,9 +5,6 @@ from functools import wraps
 from io import BytesIO
 from itertools import groupby
 
-import cv2
-import numpy as np
-
 from PySide.QtGui import (QImage, QItemSelection, QItemSelectionModel,
                           QMessageBox, QWidget)
 
@@ -17,6 +14,9 @@ from copy_box import copy_details_box
 def qimage_of_bgr(bgr):
     """ A QImage representation of a BGR numpy array
     """
+    import cv2
+    import numpy as np
+
     bgr = cv2.cvtColor(bgr.astype('uint8'), cv2.COLOR_BGR2RGB)
     bgr = np.ascontiguousarray(bgr)
     qt_image = QImage(bgr.data,

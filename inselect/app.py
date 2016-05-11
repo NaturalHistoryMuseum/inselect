@@ -27,6 +27,8 @@ def main(args):
                         help='Use LOCALE; intended for testing purposes only')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + inselect.__version__)
+    parser.add_argument('-q', '--quit', action='store_true',
+                        help='Exit immediately after showing the main window')
     parsed = parser.parse_args(args[1:])
 
     # TODO LH A command-line switch to clear all QSettings
@@ -63,4 +65,7 @@ def main(args):
     if parsed.file:
         window.open_file(parsed.file)
 
-    sys.exit(app.exec_())
+    if parsed.quit:
+        sys.exit(0)
+    else:
+        sys.exit(app.exec_())

@@ -1,9 +1,5 @@
 from random import randint
 
-import cv2
-
-import numpy as np
-
 from .utils import debug_print
 
 # Breaks pyinstaller build
@@ -31,6 +27,8 @@ def _right_sized(contour, image, container_filter=True, size_filter=True):
     result : boolean
         Object is of correct sizing.
     """
+    import cv2
+
     image_size = image.shape
     x, y, w, h = cv2.boundingRect(contour)
     area = image_size[0] * image_size[1]
@@ -80,6 +78,8 @@ def _process_contours(image, contours, hierarchy, callback, index=0,
     size_filter : boolean
         Filters large objects.
     """
+    import cv2
+
     result = []
     while index >= 0:
         callback()
@@ -101,6 +101,8 @@ def _process_contours(image, contours, hierarchy, callback, index=0,
 # alternate process, may be useful if we abandon hierarchical contours later
 def _process_contours_iterate(image, contours, hierarchy, index=0,
                               size_filter=True):
+    import cv2
+
     result = []
     for contour in contours:
         if right_sized(contour, image.shape, size_filter=size_filter):
@@ -124,6 +126,9 @@ def remove_lines(image):
     mask : (M, N) array
         Mask of image without lines.
     """
+    import cv2
+    import numpy as np
+
     gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
     v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
     h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
@@ -184,6 +189,9 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
     """
+    import cv2
+    import numpy as np
+
     if not callback:
         def swallow(*args, **kwargs):
             pass
@@ -291,6 +299,9 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
 
 
 def segment_intensity(image, window=None):
+    import cv2
+    import numpy as np
+
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -334,6 +345,9 @@ def segment_grabcut(image, window=None, seeds=[]):
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
     """
+    import cv2
+    import numpy as np
+
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -419,6 +433,9 @@ def segment_watershed(image, window=None):
     (rects, display) : list, (M, N, 3) array
         Region results and visualization image.
     """
+    import cv2
+    import numpy as np
+
     if window:
         subimage = np.array(image)
         x, y, w, h = window
@@ -458,6 +475,9 @@ def segment_watershed(image, window=None):
 
 
 if __name__ == "__main__":
+    import cv2
+    import numpy as np
+
     image = cv2.imread("../../data/drawer.jpg")
     scaled = 1.0
     image = cv2.resize(image, (int(image.shape[1] * scaled),

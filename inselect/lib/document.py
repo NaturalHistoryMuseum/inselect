@@ -7,8 +7,6 @@ from datetime import datetime
 from itertools import chain
 from pathlib import Path
 
-import cv2
-
 from .image import InselectImage
 from .inselect_error import InselectError
 from .utils import debug_print, user_name
@@ -309,6 +307,8 @@ class InselectDocument(object):
 
     def _create_and_load_thumbnail(self, width):
         "Create thumbnail image"
+        import cv2
+
         p = self.thumbnail_path_of_scanned(self._scanned.path)
 
         msg = u'Creating [{0}] with width of [{1}] pixels'
