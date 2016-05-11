@@ -376,7 +376,7 @@ class MainWindow(QtGui.QMainWindow):
         self.open_file(recent[index])
 
     def open_document(self, path=None, document=None):
-        """Either loads the inselect document from  path or uses the existing
+        """Either loads the inselect document from path or uses the existing
         InselectDocument given in document.
         """
         if path and document:
