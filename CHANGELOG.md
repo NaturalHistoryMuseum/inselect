@@ -6,6 +6,7 @@ Version 0.1.29
 - Fixed #296 - Inconsistent zoom toggling
 - Fixed #295 - Full-resolution scan is mandatory
 - Fixed #293 - Link to files fails with ugly error message on Windows
+- Fixed #131 - Main window icon
 
 Version 0.1.28
 -------------
