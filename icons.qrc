@@ -2,6 +2,13 @@
  <RCC version="1.0">
  <qresource prefix="/">
      <file>data/barcode_icon.png</file>
+     <file>data/inselect16.png</file>
+     <file>data/inselect24.png</file>
+     <file>data/inselect32.png</file>
+     <file>data/inselect48.png</file>
+     <file>data/inselect64.png</file>
+     <file>data/inselect128.png</file>
+     <file>data/inselect256.png</file>
      <file>data/segment_icon.png</file>
      <file>data/subsegment_icon.png</file>
  </qresource>
