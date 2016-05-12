@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.30
 -------------
+- Fixed #303 - Improve startup time
 
 Version 0.1.29
 -------------

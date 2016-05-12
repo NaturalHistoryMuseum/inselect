@@ -7,21 +7,29 @@ VERSION=`python inselect.py --version 2>&1 | sed 's/inselect.py //g'`
 echo Building Inselect $VERSION
 
 echo Clean
+rm -rf cover build dist
 find . -name "*pyc" -print0 | xargs -0 rm -rf
 find . -name __pycache__ -print0 | xargs -0 rm -rf
-rm -rf cover
 
 echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
+echo Report startup time and check for non-essential binary imports
+mkdir build
+time python -v inselect.py --quit &> build/startup_log
+for module in cv2 numpy pydmtx scipy sklearn zbar; do
+    if grep -q $module build/startup_log; then
+        echo Non-essential binary $module imported on startup
+        exit 1
+    fi
+done
+
 echo Source build
-rm -rf dist
 ./setup.py sdist
 mv dist/inselect-$VERSION.tar.gz .
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Clean existing build files
-    rm -rf build dist
     pyinstaller --clean inselect.spec
 
     for script in export_metadata ingest read_barcodes save_crops; do

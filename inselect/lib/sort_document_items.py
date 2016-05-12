@@ -1,16 +1,18 @@
 from itertools import izip
 from operator import itemgetter
 
-import numpy as np
-
-from scipy.signal import argrelmin
-from sklearn.neighbors import KernelDensity
+# Warning: lazy load of scipy and sklearn via local imports
 
 
 def _do_kde(values):
     """Uses kernel denstity estimation to assign values to clusters using
     minima. Returns a generator of ints that are bin numbers.
     """
+    from scipy.signal import argrelmin
+    from sklearn.neighbors import KernelDensity
+
+    import numpy as np
+
     # http://stackoverflow.com/a/35151947
     RESCALE = 100
     values = np.array([int(v * RESCALE) for v in values]).reshape(-1, 1)

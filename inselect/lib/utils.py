@@ -19,13 +19,6 @@ except ImportError:
     pwd = None
 
 
-try:
-    import pywintypes
-    import win32api
-except ImportError:
-    pywintypes = win32api = None
-
-
 DEBUG_PRINT = False
 DEFAULT_LOCALE = None
 
@@ -136,20 +129,26 @@ class FormatDefault(string.Formatter):
 def user_name():
     """The name of the current user
     """
-    if win32api and pywintypes:
-        NameDisplay = 3
-        try:
-            return win32api.GetUserNameEx(NameDisplay)
-        except pywintypes.error:
-            try:
-                return win32api.GetUserName()
-            except pywintypes.error:
-                return ''
-    elif pwd:
+    if pwd:
         # Strip trailing commas seen on Linux
         return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
     else:
-        return ''
+        try:
+            import pywintypes
+            import win32api
+        except ImportError:
+            pass
+        else:
+            NameDisplay = 3
+            try:
+                return win32api.GetUserNameEx(NameDisplay)
+            except pywintypes.error:
+                try:
+                    return win32api.GetUserName()
+                except pywintypes.error:
+                    return ''
+
+    return ''
 
 
 def format_dt_display(dt):
@@ -175,12 +174,17 @@ def format_dt_display(dt):
             return unicode(v, encoding, 'ignore')
         else:
             return unicode(v, errors='ignore')
-    elif win32api:
-        # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
-        LOCALE_USER_DEFAULT = 0x0400
-        DATE_LONGDATE = 2
-        time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
-        date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
-        return u'{0} {1}'.format(date, time)
     else:
-        return dt.isoformat()
+        try:
+            import win32api
+        except ImportError:
+            pass
+        else:
+            # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
+            LOCALE_USER_DEFAULT = 0x0400
+            DATE_LONGDATE = 2
+            time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
+            date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
+            return u'{0} {1}'.format(date, time)
+
+    return dt.isoformat()

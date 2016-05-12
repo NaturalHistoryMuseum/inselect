@@ -3,28 +3,37 @@ from PySide.QtCore import QSettings
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 
-try:
-    import gouda
-    from gouda.engines import InliteEngine, LibDMTXEngine, ZbarEngine
-    from gouda.strategies.roi.roi import roi
-    from gouda.strategies.resize import resize
-except ImportError:
-    gouda = InliteEngine = LibDMTXEngine = ZbarEngine = roi = resize = None
+# Warning: lazy load of gouda via local imports
 
 
 def inlite_available():
     "Returns True if the Inlite engine is available"
-    return InliteEngine is not None and InliteEngine.available()
+    try:
+        from gouda.engines import InliteEngine
+    except ImportError:
+        return False
+    else:
+        return InliteEngine.available()
 
 
 def libdmtx_available():
     "Returns True if the libdmtx engine is available"
-    return LibDMTXEngine is not None and LibDMTXEngine.available()
+    try:
+        from gouda.engines import LibDMTXEngine
+    except ImportError:
+        return False
+    else:
+        return LibDMTXEngine.available()
 
 
 def zbar_available():
     "Returns True if the zbar engine is available"
-    return ZbarEngine is not None and ZbarEngine.available()
+    try:
+        from gouda.engines import ZbarEngine
+    except ImportError:
+        return False
+    else:
+        return ZbarEngine.available()
 
 
 def current_settings():
@@ -57,7 +66,11 @@ def update_settings(new_settings):
 def load_engine():
     """Returns an instance of the user's choice of barcode reading engine
     """
-    if gouda:
+    try:
+        from gouda.engines import InliteEngine, LibDMTXEngine, ZbarEngine
+    except ImportError:
+        raise InselectError('Barcode decoding is not available')
+    else:
         settings = current_settings()
         engine = settings['engine']
         if 'libdmtx' == engine:
@@ -68,5 +81,3 @@ def load_engine():
             return InliteEngine(settings['inlite-format'])
         else:
             raise ValueError('Unrecognised barcode reader [{0}]'.format(engine))
-    else:
-        raise InselectError('Barcode decoding is not available')

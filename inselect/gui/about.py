@@ -2,9 +2,7 @@
 """
 import platform
 
-import cv2
 import humanize
-import numpy as np
 import psutil
 import PySide
 import PySide.QtCore
@@ -12,11 +10,16 @@ import PySide.QtCore
 from PySide import QtGui
 from PySide.QtGui import QMessageBox
 
+# Warning: lazy load of cv2 and numpy via local imports
+
 
 def _environment():
     """Returns a formatted string containing version numbers of important
     dependencies
     """
+    import cv2
+    import numpy as np
+
     # Bit depth of interpreter
     python_bit_depth = platform.architecture()[0]
     if '32bit' == python_bit_depth:

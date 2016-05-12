@@ -3,14 +3,13 @@ import warnings
 from itertools import izip, count, chain, repeat
 from pathlib import Path
 
-import cv2
-import numpy as np
-
 from PIL import Image
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
+
+# Warning: lazy load of cv2 and numpy via local imports
 
 
 class InselectImage(object):
@@ -54,6 +53,7 @@ class InselectImage(object):
         """Lazy-load np.array of the colour image array, with channels stored in
         order B G R
         """
+        import cv2
         if self._array is None:
             self.assert_is_file()
             p = str(self._path)
@@ -86,6 +86,8 @@ class InselectImage(object):
         Rotation should be None, an int or an iterable. If not None, crops will
         be rotated by that many clockwise degrees.
         """
+        import cv2
+        import numpy as np
 
         if not rotation:
             rotation = repeat(0)
@@ -139,6 +141,7 @@ class InselectImage(object):
         """
         # TODO Copy EXIF tags?
         # TODO Make read-only?
+        import cv2
         self.assert_is_file()
         for index, crop, path in izip(count(), self.crops(normalised, rotation), paths):
             if progress:
