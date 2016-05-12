@@ -14,6 +14,15 @@ rm -rf cover
 echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
+echo Report startup time and check for non-essential binary imports
+time python -v inselect.py --quit &> build/startup_log
+for module in cv2 numpy pydmtx scipy sklearn zbar; do
+    if grep -q $module build/startup_log; then
+        echo Non-essential binary $module imported on startup
+        exit 1
+    fi
+done
+
 echo Source build
 rm -rf dist
 ./setup.py sdist
