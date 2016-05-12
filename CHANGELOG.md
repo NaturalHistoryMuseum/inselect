@@ -1,5 +1,8 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.31
+-------------
+
 Version 0.1.30
 -------------
 - Fixed #303 - Improve startup time
