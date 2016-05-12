@@ -10,6 +10,8 @@ import PySide.QtCore
 from PySide import QtGui
 from PySide.QtGui import QMessageBox
 
+# Warning: lazy load of cv2 and numpy via local imports
+
 
 def _environment():
     """Returns a formatted string containing version numbers of important

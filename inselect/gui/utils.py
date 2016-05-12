@@ -10,6 +10,8 @@ from PySide.QtGui import (QImage, QItemSelection, QItemSelectionModel,
 
 from copy_box import copy_details_box
 
+# Warning: lazy load of cv2 and numpy via local imports
+
 
 def qimage_of_bgr(bgr):
     """ A QImage representation of a BGR numpy array

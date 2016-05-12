@@ -2,6 +2,9 @@ from random import randint
 
 from .utils import debug_print
 
+# Warning: lazy load of cv2 and numpy via local imports
+
+# TODO LH Decide on use of skimage's watershed
 # Breaks pyinstaller build
 # from skimage.morphology import watershed
 USE_OPENCV_WATERSHED = True

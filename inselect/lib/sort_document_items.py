@@ -1,18 +1,15 @@
 from itertools import izip
 from operator import itemgetter
 
-from inselect.lib.utils import debug_print
+# Warning: lazy load of scipy and sklearn via local imports
 
 
 def _do_kde(values):
     """Uses kernel denstity estimation to assign values to clusters using
     minima. Returns a generator of ints that are bin numbers.
     """
-    import time
-    start = time.time()
     from scipy.signal import argrelmin
     from sklearn.neighbors import KernelDensity
-    debug_print('Imported scipy and sklearn in [{0}]'.format(time.time() - start))
 
     import numpy as np
 

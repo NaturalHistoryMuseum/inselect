@@ -9,14 +9,9 @@ from .plugin import Plugin
 from .barcode_dialog import BarcodeDialog
 from .barcode_settings import load_engine
 
-try:
-    from gouda.strategies.roi.roi import roi
-    from gouda.strategies.resize import resize
+import inselect.lib.utils
 
-    import inselect.lib.utils
-    import gouda.util
-except ImportError:
-    roi = resize = None
+# Warning: lazy load of gouda via local imports
 
 
 class BarcodePlugin(Plugin):
@@ -27,7 +22,10 @@ class BarcodePlugin(Plugin):
 
     def __init__(self, document, parent):
         super(BarcodePlugin, self).__init__()
-        if not roi and not resize:
+        try:
+            import gouda.strategies.roi.roi     # noqa
+            import gouda.strategies.resize      # noqa
+        except ImportError:
             raise InselectError('Barcode decoding is not available')
         else:
             self.document = document
@@ -52,6 +50,7 @@ class BarcodePlugin(Plugin):
 
         engine = load_engine()
 
+        import gouda.util
         gouda.util.DEBUG_PRINT = inselect.lib.utils.DEBUG_PRINT
 
         progress('Loading full-res image')
@@ -75,6 +74,8 @@ class BarcodePlugin(Plugin):
         debug_print('BarcodePlugin.__call__ exiting. [{0}] boxes'.format(len(items)))
 
     def _decode_barcodes(self, engine, crop, progress):
+        from gouda.strategies.roi.roi import roi
+        from gouda.strategies.resize import resize
         for strategy in (resize, roi):
             # TODO LH Must be able to cancel within call to strategy
             progress()

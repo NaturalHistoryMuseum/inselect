@@ -9,6 +9,8 @@ from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.lib.rect import Rect
 
+# Warning: lazy load of cv2 and numpy via local imports
+
 
 class InselectImage(object):
     """Simple representation of an inselect image
@@ -139,6 +141,7 @@ class InselectImage(object):
         """
         # TODO Copy EXIF tags?
         # TODO Make read-only?
+        import cv2
         self.assert_is_file()
         for index, crop, path in izip(count(), self.crops(normalised, rotation), paths):
             if progress:

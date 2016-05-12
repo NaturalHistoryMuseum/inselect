@@ -3,6 +3,9 @@ from .segment import segment_edges, segment_grabcut
 from .sort_document_items import sort_document_items
 from .utils import debug_print
 
+# Warning: lazy load of numpy via local imports
+
+
 SEGMENTATION_PREFERRED_WIDTH = 4096
 
 
