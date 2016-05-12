@@ -16,7 +16,7 @@ import inselect.lib.utils
 
 class BarcodePlugin(Plugin):
     NAME = 'Read barcodes'
-    DESCRIPTION = ("Will load the full-resolution scanned image and will set "
+    DESCRIPTION = ("Will load the original full-resolution image and will set "
                    "each box's 'catalogNumber' metadata field with value(s) of "
                    "any barcodes.")
 
@@ -37,10 +37,12 @@ class BarcodePlugin(Plugin):
 
     def can_be_run(self):
         if not self.document.scanned.available:
-            msg = ('Unable to read barcodes because the scanned image file does '
-                   'not exist.')
-            QMessageBox.warning(self.parent, 'Scanned image file does not exist',
-                                msg.format(self.document.scanned.path))
+            msg = ('Unable to read barcodes because the original '
+                   'full-resolution image file does not exist.')
+            QMessageBox.warning(
+                self.parent, 'Original full-resolution image file does not exist',
+                msg.format(self.document.scanned.path)
+            )
             return False
         else:
             return True

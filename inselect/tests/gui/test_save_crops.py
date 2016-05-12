@@ -97,8 +97,8 @@ class TestSaveCrops(MainWindowTest):
 
             self.window.save_crops(DWC)
 
-            expected = ('Unable to save crops because the scanned image file '
-                        'does not exist.')
+            expected = ('Unable to save crops because the original '
+                        'full-resolution image file does not exist.')
             self.assertTrue(expected in mock_warning.call_args[0])
 
             # Crops should not have been written
