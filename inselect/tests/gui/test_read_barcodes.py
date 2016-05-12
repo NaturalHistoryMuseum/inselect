@@ -67,8 +67,8 @@ class TestReadBarcodes(MainWindowTest):
 
             self.window.run_plugin(2)
 
-            expected = ('Unable to read barcodes because the scanned image file '
-                        'does not exist.')
+            expected = ('Unable to read barcodes because the original '
+                        'full-resolution image file does not exist.')
             self.assertTrue(expected in mock_warning.call_args[0])
 
             model = self.window.model

@@ -473,10 +473,12 @@ class MainWindow(QtGui.QMainWindow):
 
         res = QMessageBox.Yes
         if not self.document.scanned.available:
-            msg = ('Unable to save crops because the scanned image file does '
-                   'not exist.')
-            QMessageBox.warning(self, 'Scanned image file does not exist',
-                                msg.format(self.document.scanned.path))
+            msg = ('Unable to save crops because the original full-resolution '
+                   'image file does not exist.')
+            QMessageBox.warning(
+                self, 'Original full-resolution  image file does not exist',
+                msg.format(self.document.scanned.path)
+            )
             res = QMessageBox.No
 
         if QMessageBox.Yes == res and crops_dir.is_dir():

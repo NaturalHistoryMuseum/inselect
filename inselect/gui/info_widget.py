@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from PySide.QtCore import Qt
-from PySide.QtGui import QWidget, QFormLayout, QLabel, QGroupBox, QVBoxLayout
+from PySide.QtGui import QWidget, QFormLayout, QLabel
 
 from inselect.lib.utils import format_dt_display
 
@@ -95,7 +95,7 @@ class InfoWidget(PopupPanel):
         self._last_saved_on = QLabel()
         layout.addRow('Last saved on', self._last_saved_on)
 
-        layout.addRow(BoldLabel('Scanned image'))
+        layout.addRow(BoldLabel('Original full-resolution image'))
         self._scanned_path = RevealPathLabel()
         layout.addRow('File', self._scanned_path)
 
