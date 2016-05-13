@@ -15,7 +15,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 # TODO LH Many more tests required
 
 class TestSegment(unittest.TestCase):
-    def shapes(self):
+    def test_shapes(self):
         "Segment an existing document"
 
         with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
