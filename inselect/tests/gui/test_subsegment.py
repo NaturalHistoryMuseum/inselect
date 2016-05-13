@@ -10,7 +10,7 @@ from PySide.QtGui import QMessageBox
 from inselect.gui.roles import MetadataRole, RectRole
 from inselect.gui.sort_document_items import SortDocumentItems
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -18,13 +18,16 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 # TODO LH coverage does not detect code executed within a QThread
 
 
-class TestSubsegment(MainWindowTest):
+class TestSubsegment(GUITest):
     def test_subsegment(self):
         "Subsegment a single box with three seeds points"
         w = self.window
 
+        # Clear any existing plugin image
+        w.plugin_image = None
+
         # Open document for subsegmentation
-        w.open_document(TESTDATA / 'test_subsegment.inselect')
+        w.open_document(TESTDATA / 'pinned.inselect')
         self.assertEqual(1, w.model.rowCount())
 
         # Select a box and add sub-segmentation seed points
@@ -58,17 +61,24 @@ class TestSubsegment(MainWindowTest):
                          w.model.data(w.model.index(2, 0), RectRole))
         self.assertTrue(w.model.is_modified)
 
+        # Check that the display image was created
+        self.assertIsNotNone(w.plugin_image)
+
         # Close the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
 
+        # Check that the display image was cleared when the document was
+        # closed
+        self.assertIsNone(w.plugin_image)
+
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Yes)
-    def test_no_seeds(self, mock_warning):
+    def test_subsegment_no_seeds(self, mock_warning):
         "Warning message if subsegment with no seeds"
         w = self.window
 
         # Open document for subsegmentation
-        w.open_document(TESTDATA / 'test_subsegment.inselect')
+        w.open_document(TESTDATA / 'pinned.inselect')
         self.assertEqual(1, w.model.rowCount())
 
         # Attempt subsegment

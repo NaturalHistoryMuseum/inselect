@@ -1,13 +1,13 @@
 import unittest
 from pathlib import Path
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestActionState(MainWindowTest):
+class TestActionState(GUITest):
     """Test the state of UI actions
     """
     def _test_no_document(self):
@@ -77,7 +77,7 @@ class TestActionState(MainWindowTest):
         self.window.close_document()
         self._test_no_document()
 
-        self.window.open_document(TESTDATA / 'test_segment.inselect')
+        self.window.open_document(TESTDATA / 'shapes.inselect')
         self.assertEqual(5, w.model.rowCount())
         self._test_document_open()
 
@@ -88,7 +88,7 @@ class TestActionState(MainWindowTest):
         "Enabled state for actions that depend upon what is selected"
         w = self.window
 
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
 
         # Select all boxes
         w.select_all()

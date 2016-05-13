@@ -10,7 +10,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 class TestSortBoxes(unittest.TestCase):
     def test_order_by_rows(self):
-        doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
+        doc = InselectDocument.load(TESTDATA / 'shapes.inselect')
 
         items = sort_document_items(doc.items, by_columns=False)
         self.assertEqual(
@@ -19,7 +19,7 @@ class TestSortBoxes(unittest.TestCase):
         )
 
     def test_order_by_columns(self):
-        doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
+        doc = InselectDocument.load(TESTDATA / 'shapes.inselect')
         items = sort_document_items(doc.items, by_columns=True)
         self.assertEqual(
             ['1', '4', '3', '2', '5'],

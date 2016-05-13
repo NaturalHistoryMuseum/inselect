@@ -6,7 +6,7 @@ from pathlib import Path
 from PySide.QtCore import QSettings
 from PySide.QtGui import QFileDialog
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.tests.utils import temp_directory_with_files
@@ -14,7 +14,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestUserTemplateChoice(MainWindowTest):
+class TestUserTemplateChoice(GUITest):
     """Test the template choice
     """
 

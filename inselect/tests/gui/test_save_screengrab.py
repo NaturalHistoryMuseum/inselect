@@ -9,22 +9,22 @@ from cv2 import imread
 
 from PySide.QtGui import QFileDialog
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestSaveScreengrab(MainWindowTest):
+class TestSaveScreengrab(GUITest):
     """Tests saving of a screengrab
     """
     def test_save_screengrab_with_doc(self):
         "User saves a screengrab with a document loaded"
-        self.window.open_file(TESTDATA / 'test_segment.inselect')
+        self.window.open_file(TESTDATA / 'shapes.inselect')
 
         temp = tempfile.mkdtemp()
         try:
-            img_path = Path(temp) / 'test_segment_screengrab.png'
+            img_path = Path(temp) / 'shapes_screengrab.png'
             with patch.object(QFileDialog, 'getSaveFileName',
                               return_value=(str(img_path), '.png')) as mock_file_dialog:
                 self.window.save_screengrab()

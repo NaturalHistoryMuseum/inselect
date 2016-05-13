@@ -19,7 +19,7 @@ class TestModelData(GUITest):
     """
     def test_insert_invalid_rows(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         self.assertEqual(5, m.rowCount())
         self.assertRaises(ValueError, m.insertRows, -1, 1)   # -ve row
@@ -28,7 +28,7 @@ class TestModelData(GUITest):
 
     def test_insert_rows(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         self.assertEqual(5, m.rowCount())
         m.insertRows(5, 2)
@@ -47,7 +47,7 @@ class TestModelData(GUITest):
 
     def test_insert_row(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         self.assertEqual(5, m.rowCount())
         m.insertRow(5)
@@ -61,7 +61,7 @@ class TestModelData(GUITest):
 
     def test_remove_invalid_rows(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         self.assertEqual(5, m.rowCount())
         self.assertRaises(ValueError, m.removeRows, -1, 1)   # -ve row
@@ -70,7 +70,7 @@ class TestModelData(GUITest):
 
     def test_remove_rows(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         m.removeRows(0, 1)
         self.assertEqual(4, m.rowCount())

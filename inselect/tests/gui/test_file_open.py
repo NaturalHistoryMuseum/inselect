@@ -10,7 +10,7 @@ from PySide.QtGui import QMessageBox, QFileDialog
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import make_readonly
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 from inselect.gui.main_window import MainWindow
 
@@ -20,7 +20,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestFileOpen(MainWindowTest):
+class TestFileOpen(GUITest):
     """Tests the several routes to opening a file
     """
     def _load_and_modify(self, path):
@@ -47,11 +47,11 @@ class TestFileOpen(MainWindowTest):
         # check modified behaviour because MainWindow.modified_changed slot
         # is not called without event loop.
         self.assertRegexpMatches(self.window.windowTitle(),
-                                 '^test_segment\\.inselect.*')
+                                 '^shapes\\.inselect.*')
 
     def test_open_doc(self):
         "Open an inselect document"
-        self.window.open_file(TESTDATA / 'test_segment.inselect')
+        self.window.open_file(TESTDATA / 'shapes.inselect')
         self.assertEqual(5, self.window.model.rowCount())
         self.assertWindowTitleOpenDocument()
         self.assertFalse(self.window.model.is_modified)
@@ -59,14 +59,14 @@ class TestFileOpen(MainWindowTest):
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_open_readonly_doc(self, mock_warning):
         "User is warned when opening a read-only inselect document"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png',
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png',
                                        ) as tempdir:
-            make_readonly(tempdir / 'test_segment.inselect')
-            self.window.open_file(tempdir / 'test_segment.inselect')
+            make_readonly(tempdir / 'shapes.inselect')
+            self.window.open_file(tempdir / 'shapes.inselect')
 
             self.assertTrue(mock_warning.called)
-            expected = (u'The file [test_segment.inselect] is read-only.\n\n'
+            expected = (u'The file [shapes.inselect] is read-only.\n\n'
                         u'You will not be able to save any changes that you '
                         'make.')
             self.assertTrue(expected in mock_warning.call_args[0])
@@ -75,7 +75,7 @@ class TestFileOpen(MainWindowTest):
         """Open the scanned image file of an existing inselect document - the
         inselect document should be opened
         """
-        self.window.open_file(TESTDATA / 'test_segment.png')
+        self.window.open_file(TESTDATA / 'shapes.png')
         self.assertEqual(5, self.window.model.rowCount())
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleOpenDocument()
@@ -84,13 +84,13 @@ class TestFileOpen(MainWindowTest):
         """Open the thumbnail image file of an existing inselect document - the
         inselect document should be opened
         """
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png',
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png',
                                        ) as tempdir:
-            thumbnail = tempdir / 'test_segment_thumbnail.jpg'
+            thumbnail = tempdir / 'shapes_thumbnail.jpg'
 
             # The test document contains no thumbnail file - create one now
-            shutil.copy(str(tempdir / 'test_segment.png'), str(thumbnail))
+            shutil.copy(str(tempdir / 'shapes.png'), str(thumbnail))
 
             self.window.open_file(thumbnail)
             self.assertEqual(5, self.window.model.rowCount())
@@ -108,10 +108,10 @@ class TestFileOpen(MainWindowTest):
         with temp_directory_with_files() as tempdir:
             # Check that open_file accepts images with a file extension that is
             # not all lower case.
-            shutil.copy(str(TESTDATA / 'test_segment.png'),
-                        str(tempdir / 'test_segment.Png'))
-            self.window.open_file(tempdir / 'test_segment.Png')
-            mock_new_document.assert_called_once_with(tempdir / 'test_segment.Png')
+            shutil.copy(str(TESTDATA / 'shapes.png'),
+                        str(tempdir / 'shapes.Png'))
+            self.window.open_file(tempdir / 'shapes.Png')
+            mock_new_document.assert_called_once_with(tempdir / 'shapes.Png')
 
     @patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes)
     def test_new_document_thread(self, mock_information):
@@ -121,16 +121,16 @@ class TestFileOpen(MainWindowTest):
         # worker thread - I could not think of a way to test the complete
         # operation in a single test.
         # This test checks that new_document behaves as expected.
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
             self.run_async_operation(partial(self.window.new_document,
-                                             tempdir / 'test_segment.png'))
+                                             tempdir / 'shapes.png'))
 
             # New document should have been created
-            self.assertTrue((TESTDATA / 'test_segment.inselect').is_file())
+            self.assertTrue((TESTDATA / 'shapes.inselect').is_file())
 
             # User should have been told about the new document
             self.assertTrue(mock_information.called)
-            expected = u'New Inselect document [test_segment] created in [{0}]'
+            expected = u'New Inselect document [shapes] created in [{0}]'
             expected = expected.format(tempdir)
             self.assertTrue(expected in mock_information.call_args[0])
 
@@ -181,10 +181,10 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Open and modify a document
-        self._load_and_modify(TESTDATA / 'test_segment.inselect')
+        self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open another doc - user says not to save
-        w.open_file(TESTDATA / 'test_subsegment.inselect')
+        w.open_file(TESTDATA / 'pinned.inselect')
         self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
         self.assertTrue(expected in mock_question.call_args[0])
@@ -192,7 +192,7 @@ class TestFileOpen(MainWindowTest):
         self.assertEqual(1, w.model.rowCount())
 
         # Original document should not have changed
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
         self.assertEqual(5, w.model.rowCount())
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
@@ -203,20 +203,20 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Create a temporary inselect document so that it can be modified
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Oopen the temp doc and modify it
-            self._load_and_modify(tempdir / 'test_segment.inselect')
+            self._load_and_modify(tempdir / 'shapes.inselect')
 
             # Open another doc - user says not to save
-            w.open_file(TESTDATA / 'test_subsegment.inselect')
+            w.open_file(TESTDATA / 'pinned.inselect')
             self.assertTrue(mock_question.called)
             expected = "Save the document before closing?"
             self.assertTrue(expected in mock_question.call_args[0])
 
             # Original document should have changed - it should contain no boxes
-            w.open_file(tempdir / 'test_segment.inselect')
+            w.open_file(tempdir / 'shapes.inselect')
             self.assertEqual(0, w.model.rowCount())
             self.assertFalse(w.model.is_modified)
             self.assertWindowTitleOpenDocument()
@@ -229,10 +229,10 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Open and modify a document
-        self._load_and_modify(TESTDATA / 'test_segment.inselect')
+        self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open another document - user says not to save
-        w.open_file(TESTDATA / 'test_subsegment.inselect')
+        w.open_file(TESTDATA / 'pinned.inselect')
 
         self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
@@ -268,10 +268,10 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Open and modify a document
-        self._load_and_modify(TESTDATA / 'test_segment.inselect')
+        self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open the same document again
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
 
         self.assertTrue(mock_question.called)
         self.assertTrue('Discard changes?' in mock_question.call_args[0])
@@ -287,10 +287,10 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Open and modify a document
-        self._load_and_modify(TESTDATA / 'test_segment.inselect')
+        self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open the same document again
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
 
         self.assertTrue(mock_question.called)
         self.assertTrue('Discard changes?' in mock_question.call_args[0])
@@ -310,10 +310,10 @@ class TestFileOpen(MainWindowTest):
         w = self.window
 
         # Open a document again
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
 
         # Open the document again
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
 
         self.assertTrue(mock_information.called)
         self.assertTrue('Document already open' in mock_information.call_args[0])

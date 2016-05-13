@@ -42,9 +42,9 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
 
     def test_save_crops(self):
         "Cropped object images are written correctly"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
+            doc = InselectDocument.load(tempdir / 'shapes.inselect')
 
             crops_dir = DocumentExport(self.TEMPLATE).save_crops(doc)
 
@@ -66,9 +66,9 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
 
     def test_cancel_save_crops(self):
         "User cancels save crops"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
+            doc = InselectDocument.load(tempdir / 'shapes.inselect')
 
             # Create crops dir with some data
             doc.crops_dir.mkdir()
@@ -89,7 +89,7 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
 
             # Nothing should have changed within tempdir
             self.assertEqual(
-                ['test_segment.inselect', 'test_segment.png', doc.crops_dir.name],
+                ['shapes.inselect', 'shapes.png', doc.crops_dir.name],
                 sorted(p.name for p in tempdir.iterdir()))
             self.assertEqual(
                 ['a_file'],
@@ -98,12 +98,12 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
 
     def test_csv_export(self):
         "CSV data are exported as expected"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
+            doc = InselectDocument.load(tempdir / 'shapes.inselect')
 
             csv_path = DocumentExport(self.TEMPLATE).export_csv(doc)
-            self.assertEqual(csv_path, tempdir / 'test_segment.csv')
+            self.assertEqual(csv_path, tempdir / 'shapes.csv')
 
             # Check CSV contents
 

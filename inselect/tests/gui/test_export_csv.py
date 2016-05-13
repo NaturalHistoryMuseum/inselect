@@ -8,7 +8,7 @@ import unicodecsv
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 from inselect.lib.persist_user_template import BOUNDING_BOX_FIELD_NAMES
 from inselect.lib.templates.dwc import DWC
 from inselect.tests.utils import temp_directory_with_files
@@ -17,7 +17,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestExportCSV(MainWindowTest):
+class TestExportCSV(GUITest):
     """Metadata CSV files are written
     """
     def _test_csv(self):
@@ -45,18 +45,18 @@ class TestExportCSV(MainWindowTest):
         w = self.window
 
         # Load document and write the CSV file
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Load document and export CSV file
-            w.open_document(tempdir / 'test_segment.inselect')
+            w.open_document(tempdir / 'shapes.inselect')
             w.export_csv(user_template=DWC)
             self._test_csv()
 
             # User should have been told about the export
             self.assertTrue(mock_information.called)
             expected = u"Data for 5 boxes written to {0}"
-            expected = expected.format(tempdir / 'test_segment.csv')
+            expected = expected.format(tempdir / 'shapes.csv')
             self.assertTrue(expected in mock_information.call_args[0])
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
@@ -66,21 +66,21 @@ class TestExportCSV(MainWindowTest):
         w = self.window
 
         # Load document and write the CSV file
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Create a CSV file to force the GUI to prompt for over-write
-            (tempdir / 'test_segment.csv').open('w')
+            (tempdir / 'shapes.csv').open('w')
 
             # Load document and export CSV file
-            w.open_document(tempdir / 'test_segment.inselect')
+            w.open_document(tempdir / 'shapes.inselect')
             w.export_csv(user_template=DWC)
             self._test_csv()
 
             # User should have been told about the export
             self.assertTrue(mock_information.called)
             expected = u"Data for 5 boxes written to {0}"
-            expected = expected.format(tempdir / 'test_segment.csv')
+            expected = expected.format(tempdir / 'shapes.csv')
             self.assertTrue(expected in mock_information.call_args[0])
 
             # User should have been prompted to overwrite the existing file
@@ -95,18 +95,18 @@ class TestExportCSV(MainWindowTest):
         w = self.window
 
         # Load document and write the CSV file
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Create a CSV file to force the GUI to prompt for over-write
-            (tempdir / 'test_segment.csv').open('w')
+            (tempdir / 'shapes.csv').open('w')
 
             # Load document and export CSV file
-            w.open_document(tempdir / 'test_segment.inselect')
+            w.open_document(tempdir / 'shapes.inselect')
             w.export_csv(user_template=DWC)
 
             # File should not have been altered
-            self.assertEqual('', (tempdir / 'test_segment.csv').open().read())
+            self.assertEqual('', (tempdir / 'shapes.csv').open().read())
 
             # User should not have been told about the export
             self.assertFalse(mock_information.called)

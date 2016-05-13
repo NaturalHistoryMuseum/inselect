@@ -9,7 +9,13 @@ from inselect.gui.main_window import MainWindow
 
 
 class GUITest(unittest.TestCase):
-    """Base class for GUI tests, which require a QApplication.
+    """Base class for GUI tests, which require a MainWindow.
+
+    Ensures that QtGui.qApp exists. Creates an instance of MainWindow in
+    `cls.window`.
+
+    Silently closes the open document (if any), discarding any changes, after
+    each test completes.
     """
     @classmethod
     def setUpClass(cls):
@@ -17,21 +23,17 @@ class GUITest(unittest.TestCase):
         if not QtGui.qApp:
             QtGui.QApplication([])
 
+        cls.window = MainWindow(QtGui.qApp)
 
-class MainWindowTest(GUITest):
-    """Base class for tests that require a MainWindow.
-    """
-    def setUp(self):
-        assert not hasattr(self, 'window')
-        self.window = MainWindow(QtGui.qApp)
+    @classmethod
+    def tearDownClass(cls):
+        cls.window.close()
+        delattr(cls, 'window')
 
     def tearDown(self):
         # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
-
-        self.window.close()
-        delattr(self, 'window')
 
     def run_async_operation(self, operation):
         """Runs an async operation in self.window's worker thread and waits for

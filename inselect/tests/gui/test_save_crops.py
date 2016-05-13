@@ -11,22 +11,22 @@ from PySide.QtGui import QMessageBox
 from inselect.lib.templates.dwc import DWC
 from inselect.tests.utils import temp_directory_with_files
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestSaveCrops(MainWindowTest):
+class TestSaveCrops(GUITest):
     @patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes)
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_save_crops(self, mock_warning, mock_information):
         "The user saves crops using DWC template"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            self.window.open_document(tempdir / 'test_segment.inselect')
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
+            self.window.open_document(tempdir / 'shapes.inselect')
 
-            crops_dir = tempdir / 'test_segment_crops'
+            crops_dir = tempdir / 'shapes_crops'
             self.assertFalse(crops_dir.is_dir())
             self.run_async_operation(partial(self.window.save_crops, DWC))
 
@@ -44,11 +44,11 @@ class TestSaveCrops(MainWindowTest):
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_save_crops_overwrite(self, mock_warning, mock_information):
         "The user is prompted to overwrite existing crops"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
-            self.window.open_document(tempdir / 'test_segment.inselect')
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
+            self.window.open_document(tempdir / 'shapes.inselect')
 
-            crops_dir = tempdir / 'test_segment_crops'
+            crops_dir = tempdir / 'shapes_crops'
             crops_dir.mkdir()
             self.assertTrue(crops_dir.is_dir())
 
@@ -86,13 +86,13 @@ class TestSaveCrops(MainWindowTest):
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_save_crops_no_scanned_image(self, mock_warning):
         "The user is informed that there is no scanned image"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect') as tempdir:
             # Create thumbnail file
-            img = cv2.imread(str(TESTDATA.joinpath('test_segment.png')))
-            cv2.imwrite(str(tempdir.joinpath('test_segment_thumbnail.jpg')), img)
-            self.window.open_document(tempdir / 'test_segment.inselect')
+            img = cv2.imread(str(TESTDATA.joinpath('shapes.png')))
+            cv2.imwrite(str(tempdir.joinpath('shapes_thumbnail.jpg')), img)
+            self.window.open_document(tempdir / 'shapes.inselect')
 
-            crops_dir = tempdir / 'test_segment_crops'
+            crops_dir = tempdir / 'shapes_crops'
             self.assertFalse(crops_dir.is_dir())
 
             self.window.save_crops(DWC)
