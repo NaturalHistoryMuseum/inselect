@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide.QtCore import QSettings
 from PySide.QtGui import QFileDialog, QMessageBox
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.cookie_cutter import CookieCutter
@@ -17,7 +17,7 @@ from inselect.tests.utils import temp_directory_with_files
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestCookieCutterChoice(MainWindowTest):
+class TestCookieCutterChoice(GUITest):
     """Test the choices of initial boxes file
     """
 
@@ -73,7 +73,7 @@ class TestCookieCutterChoice(MainWindowTest):
     def test_save_to_cookie_cutter(self, mock_setvalue):
         "Create a new cookie cutter"
         w = self.window
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
 
         with temp_directory_with_files() as tempdir:
             path = tempdir / 'My new cookie cutter{0}'.format(
@@ -104,12 +104,12 @@ class TestCookieCutterChoice(MainWindowTest):
             w.cookie_cutter_widget.choose()
             self.assertEqual(1, mock_gofn.call_count)
 
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir, \
+        with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir, \
                 patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes) as mock_information:
             self.run_async_operation(partial(w.new_document,
-                                             tempdir / 'test_segment.png'))
+                                             tempdir / 'shapes.png'))
             self.assertEqual(1, mock_information.call_count)
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
+            doc = InselectDocument.load(tempdir / 'shapes.inselect')
 
         # The new document should have been created with four boxes
         self.assertEqual(4, w.model.rowCount())
@@ -119,7 +119,7 @@ class TestCookieCutterChoice(MainWindowTest):
     def test_apply_cookie_cutter(self, mock_setvalue):
         "Applies the cookie cutter to the open document"
         w = self.window
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
 
         # Document has 5 boxes
         self.assertEqual(5, w.model.rowCount())

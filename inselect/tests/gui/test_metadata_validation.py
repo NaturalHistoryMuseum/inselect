@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 from inselect.gui.roles import MetadataRole
 from inselect.lib.user_template import UserTemplate
@@ -14,7 +14,7 @@ from inselect.lib.user_template import UserTemplate
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestMetadataValidation(MainWindowTest):
+class TestMetadataValidation(GUITest):
     @patch.object(QMessageBox, 'setText')
     @patch.object(QMessageBox, 'setDetailedText')
     @patch.object(QMessageBox, 'exec_', return_value=QMessageBox.No)
@@ -26,7 +26,7 @@ class TestMetadataValidation(MainWindowTest):
         w = self.window
 
         # This document has 15 validation problems with this template
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
         template = UserTemplate.load(TESTDATA / 'test.inselect_template')
 
         w.save_crops(user_template=template)
@@ -52,7 +52,7 @@ class TestMetadataValidation(MainWindowTest):
         """
         w = self.window
 
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
 
         template = UserTemplate({
             'Name': 'T1',

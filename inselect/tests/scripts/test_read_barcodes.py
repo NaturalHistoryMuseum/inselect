@@ -22,9 +22,9 @@ class TestReadBarcodes(unittest.TestCase):
                      "LibDMTXEngine not available")
     def test_read_barcodes(self):
         "Read barcodes"
-        with temp_directory_with_files(TESTDATA / 'test_barcodes.inselect',
-                                       TESTDATA / 'test_barcodes.jpg') as tempdir:
-            doc_path = tempdir.joinpath('test_barcodes.inselect')
+        with temp_directory_with_files(TESTDATA / 'barcodes.inselect',
+                                       TESTDATA / 'barcodes.jpg') as tempdir:
+            doc_path = tempdir.joinpath('barcodes.inselect')
 
             # Doc should not have any catalog numbers
             doc = InselectDocument.load(doc_path)

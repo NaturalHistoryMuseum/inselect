@@ -20,11 +20,11 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 class TestExportCSV(unittest.TestCase):
     def test_export_csv_with_existing(self):
         "Attempt to export metadata over an existing CSV file"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Create CSV file
-            csv = tempdir / 'test_segment.csv'
+            csv = tempdir / 'shapes.csv'
             with csv.open('w') as outfile:
                 outfile.write(u'This is only a test\n')
 
@@ -41,21 +41,21 @@ class TestExportCSV(unittest.TestCase):
 
     def test_export_csv(self):
         "Export metadata to CSV"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Create an empty CSV file
-            csv = tempdir / 'test_segment.csv'
+            csv = tempdir / 'shapes.csv'
             with csv.open('w'):
                 pass
 
             main([unicode(tempdir), '--overwrite'])
 
-            csv = tempdir / 'test_segment.csv'
+            csv = tempdir / 'shapes.csv'
             self.assertTrue(csv.is_file())
 
             # Check CSV contents
-            doc = InselectDocument.load(tempdir / 'test_segment.inselect')
+            doc = InselectDocument.load(tempdir / 'shapes.inselect')
             with csv.open('rb') as f:
                 res = unicodecsv.DictReader(f, encoding='utf-8')
                 for index, item, row in izip(count(), doc.items, res):
@@ -69,8 +69,8 @@ class TestExportCSV(unittest.TestCase):
 
     def test_export_csv_with_template(self):
         "Export metadata to CSV using a metadata template"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
             main([unicode(tempdir),
                   u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
             # nose hooks up stdout to a file-like object
@@ -83,7 +83,7 @@ class TestExportCSV(unittest.TestCase):
                 stdout
             )
 
-            csv = tempdir / 'test_segment.csv'
+            csv = tempdir / 'shapes.csv'
             self.assertFalse(csv.is_file())
 
 

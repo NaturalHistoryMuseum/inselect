@@ -34,7 +34,7 @@ class TestApp(unittest.TestCase):
     @patch.object(MainWindow, 'open_file')
     def test_app_load_file(self, mock_open_file, mock_exec_):
         "User starts the application with a file"
-        path = str(TESTDATA / 'test_segment.inselect')
+        path = str(TESTDATA / 'shapes.inselect')
         self.assertRaises(SystemExit, main, ['path to executable', path])
         self.assertTrue(mock_exec_.called)
         mock_open_file.assert_called_once_with(path)

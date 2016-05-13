@@ -14,11 +14,11 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 class TestSaveCrops(unittest.TestCase):
     def test_save_crops_with_existing(self):
         "Attempt to save crops over an existing directory"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
 
             # Create crops dir
-            crops = tempdir / 'test_segment_crops'
+            crops = tempdir / 'shapes_crops'
             crops.mkdir()
             main([unicode(tempdir)])
 
@@ -28,16 +28,16 @@ class TestSaveCrops(unittest.TestCase):
 
     def test_save_crops(self):
         "Save crops"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
             main([unicode(tempdir)])
-            crops = tempdir / 'test_segment_crops'
+            crops = tempdir / 'shapes_crops'
             self.assertEqual(5, len(list(crops.glob('*jpg'))))
 
     def test_save_crops_with_template(self):
         "Save crops using a metadata template"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
             main([unicode(tempdir),
                   u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
 
@@ -51,7 +51,7 @@ class TestSaveCrops(unittest.TestCase):
                 stdout
             )
 
-            crops = tempdir / 'test_segment_crops'
+            crops = tempdir / 'shapes_crops'
             self.assertFalse(crops.is_dir())
 
 

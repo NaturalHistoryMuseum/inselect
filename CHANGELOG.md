@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.31
 -------------
+- Fixed #307 - Test performance
 - Fixed #305 - Remove references to 'scanned image'
 
 Version 0.1.30

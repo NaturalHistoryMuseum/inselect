@@ -6,10 +6,10 @@ from PySide.QtCore import QSettings
 
 from inselect.gui.plugins.barcode_dialog import BarcodeDialog
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
-class TestBarcodeDialog(MainWindowTest):
+class TestBarcodeDialog(GUITest):
     """Tests the config dialog box of the 'Read barcode' plugin
     """
     @patch.object(QSettings, 'setValue')

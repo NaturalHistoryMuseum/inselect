@@ -7,10 +7,10 @@ from PySide.QtCore import QSettings
 
 from inselect.gui.recent_documents import RecentDocuments
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
-class TestRecentDocuments(MainWindowTest):
+class TestRecentDocuments(GUITest):
     """Tests the recent documents and associated menu items
     """
     def setUp(self):

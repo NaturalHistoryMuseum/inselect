@@ -25,7 +25,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 class TestDocument(unittest.TestCase):
     def test_load(self):
         "Load a document from a file"
-        path = TESTDATA / 'test_segment.inselect'
+        path = TESTDATA / 'shapes.inselect'
         doc = InselectDocument.load(path)
 
         # Properties are as expected
@@ -34,7 +34,7 @@ class TestDocument(unittest.TestCase):
         self.assertEqual(5, doc.n_items)
         self.assertEqual(doc.scanned.path, path.with_suffix('.png'))
         self.assertFalse(doc.thumbnail.available)
-        self.assertEqual(TESTDATA / 'test_segment_crops', doc.crops_dir)
+        self.assertEqual(TESTDATA / 'shapes_crops', doc.crops_dir)
         self.assertEqual('Lawrence Hudson', doc.properties['Created by'])
         self.assertEqual("2015-03-14T09:19:47",
                          doc.properties['Created on'].strftime('%Y-%m-%dT%H:%M:%S'))
@@ -83,7 +83,7 @@ class TestDocument(unittest.TestCase):
             InselectError,
             'thumbnail should be an instance of InselectImage',
             InselectDocument,
-            scanned_path=TESTDATA / 'test_segment.png',
+            scanned_path=TESTDATA / 'shapes.png',
             thumbnail='hello'
         )
 
@@ -102,23 +102,23 @@ class TestDocument(unittest.TestCase):
 
     def test_load_images(self):
         "Load document's images"
-        source = TESTDATA / 'test_segment.inselect'
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect') as tempdir:
-            doc_temp = tempdir / 'test_segment.inselect'
+        source = TESTDATA / 'shapes.inselect'
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect') as tempdir:
+            doc_temp = tempdir / 'shapes.inselect'
             doc_temp.open('w').write(source.open().read())
 
             # Document load with neither scanned image file nor thumbnail
             self.assertRaises(InselectError, InselectDocument.load, doc_temp)
 
             # Document load with thumbnail but no scanned image file
-            thumbnail_temp = tempdir / 'test_segment_thumbnail.jpg'
+            thumbnail_temp = tempdir / 'shapes_thumbnail.jpg'
             thumbnail_temp.open('w')       # File only needs to exist
             doc = InselectDocument.load(doc_temp)
             self.assertFalse(doc.scanned.available)
             self.assertTrue(doc.thumbnail.available)
 
             # Document load with both scanned and thumbnail files
-            scanned_temp = tempdir / 'test_segment.png'
+            scanned_temp = tempdir / 'shapes.png'
             scanned_temp.open('w')       # File only needs to exist
             actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
@@ -134,14 +134,14 @@ class TestDocument(unittest.TestCase):
 
     def test_save(self):
         "Save document"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
             items = [{
                 'fields': {'type': u'インセクト'},
                 'rect': Rect(0.1, 0.2, 0.5, 0.5),
             }]
 
-            doc_temp = tempdir / 'test_segment.inselect'
+            doc_temp = tempdir / 'shapes.inselect'
             d = InselectDocument.load(doc_temp)
             d.set_items(items)
             d.save()
@@ -154,14 +154,14 @@ class TestDocument(unittest.TestCase):
             self.assertLessEqual((now - saved_on).seconds, 2)
 
     def test_repr(self):
-        path = TESTDATA / 'test_segment.inselect'
+        path = TESTDATA / 'shapes.inselect'
         doc = InselectDocument.load(path)
         expected = "InselectDocument ['{0}'] [5 items]".format(str(doc.scanned.path))
         self.assertEqual(expected, repr(doc))
 
     def test_crops(self):
         "Cropped object images are as expected"
-        path = TESTDATA / 'test_segment.inselect'
+        path = TESTDATA / 'shapes.inselect'
         doc = InselectDocument.load(path)
 
         self.assertEqual(5, len(doc.items))
@@ -175,7 +175,7 @@ class TestDocument(unittest.TestCase):
     def test_set_items(self):
         "Items are set as expected"
         # TODO LH Check field validation
-        path = TESTDATA / 'test_segment.inselect'
+        path = TESTDATA / 'shapes.inselect'
         doc = InselectDocument.load(path)
 
         items = [{'fields': {}, 'rect': Rect(0, 0, 0.5, 0.5)}]
@@ -184,10 +184,10 @@ class TestDocument(unittest.TestCase):
 
     def test_new_from_scan(self):
         "New document is created and saved"
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
-            doc = InselectDocument.new_from_scan(tempdir / 'test_segment.png')
+        with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
+            doc = InselectDocument.new_from_scan(tempdir / 'shapes.png')
             self.assertTrue(doc.document_path.is_file())
-            self.assertEqual(tempdir / 'test_segment.png', doc.scanned.path)
+            self.assertEqual(tempdir / 'shapes.png', doc.scanned.path)
 
             # Saved on time should be within last 2 seconds
             now = datetime.now(pytz.timezone("UTC"))
@@ -196,17 +196,17 @@ class TestDocument(unittest.TestCase):
 
     def test_new_from_scan_doc_exists(self):
         "Document of scanned image already exists"
-        path = TESTDATA / 'test_segment.png'
+        path = TESTDATA / 'shapes.png'
         self.assertRaises(InselectError, InselectDocument.new_from_scan, path)
 
     def test_new_from_thumbnail(self):
         "Can't create a document from a thumbnail image"
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
             doc = InselectDocument.new_from_scan(
-                tempdir / 'test_segment.png',
+                tempdir / 'shapes.png',
                 thumbnail_width_pixels=2048
             )
-            thumbnail = tempdir / 'test_segment_thumbnail.jpg'
+            thumbnail = tempdir / 'shapes_thumbnail.jpg'
             self.assertTrue(thumbnail.is_file())
             self.assertTrue(doc.thumbnail.available)
             self.assertEqual(2048, doc.thumbnail.array.shape[1])
@@ -221,18 +221,18 @@ class TestDocument(unittest.TestCase):
 
     def test_thumbnail_silly_size(self):
         "Can't create thumbnail with a silly size"
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
             self.assertRaisesRegexp(
                 InselectError, "width should be between",
-                InselectDocument.new_from_scan, tempdir / 'test_segment.png', -1
+                InselectDocument.new_from_scan, tempdir / 'shapes.png', -1
             )
             self.assertRaisesRegexp(
                 InselectError, "width should be between",
-                InselectDocument.new_from_scan, tempdir / 'test_segment.png', 50
+                InselectDocument.new_from_scan, tempdir / 'shapes.png', 50
             )
             self.assertRaisesRegexp(
                 InselectError, "width should be between",
-                InselectDocument.new_from_scan, tempdir / 'test_segment.png',
+                InselectDocument.new_from_scan, tempdir / 'shapes.png',
                 20000
             )
 
@@ -242,12 +242,12 @@ class TestDocument(unittest.TestCase):
         "Can't write thumbnail to a read-only directory"
         # This case is doing more than simply testing filesystem behavour
         # because it tests the failure code in InselectDocument
-        with temp_directory_with_files(TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
             mode = make_readonly(tempdir)
 
             self.assertRaises(
                 InselectError, InselectDocument.new_from_scan,
-                tempdir / 'test_segment.png', thumbnail_width_pixels=2048
+                tempdir / 'shapes.png', thumbnail_width_pixels=2048
             )
 
             # Restor the original mode

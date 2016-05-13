@@ -31,13 +31,13 @@ class TestModelModified(GUITest):
     def test_new_document_not_modified(self):
         "Open a document - expect it not show as modified"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
         self.assertFalse(m.is_modified)
 
     def test_set_rotation_modifies(self):
         "Alter box's rotation"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), 90, RotationRole)
@@ -47,7 +47,7 @@ class TestModelModified(GUITest):
     def test_set_same_rotation_does_not_modify(self):
         "Set box's rotation to the same value as it currently has"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), 0, RotationRole)
@@ -57,7 +57,7 @@ class TestModelModified(GUITest):
     def test_set_rect_modifies(self):
         "Alter box's rect"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), QRect(0, 0, 1, 1), RectRole)
@@ -67,7 +67,7 @@ class TestModelModified(GUITest):
     def test_set_same_rect_does_not_modify(self):
         "Set box's rect with the same value as it currently has"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), m.data(m.index(0, 0), RectRole), RectRole)
@@ -77,7 +77,7 @@ class TestModelModified(GUITest):
     def test_set_metadata_modifies(self):
         "Alter box's metadata"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         mock_modified_changed = self._new_mock_modified_changed(m)
         m.setData(m.index(0, 0), {'catalogNumber': None}, MetadataRole)
@@ -86,10 +86,10 @@ class TestModelModified(GUITest):
 
     def test_modified_cleared(self):
         "Alter document and clear"
-        with temp_directory_with_files(TESTDATA / 'test_segment.inselect',
-                                       TESTDATA / 'test_segment.png') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'shapes.inselect',
+                                       TESTDATA / 'shapes.png') as tempdir:
             m = Model()
-            m.from_document(InselectDocument.load(tempdir / 'test_segment.inselect'))
+            m.from_document(InselectDocument.load(tempdir / 'shapes.inselect'))
 
             # Alter data
             mock_modified_changed = self._new_mock_modified_changed(m)

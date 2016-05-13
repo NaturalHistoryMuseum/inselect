@@ -2,13 +2,13 @@ import unittest
 
 from pathlib import Path
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestSelection(MainWindowTest):
+class TestSelection(GUITest):
     """Tests selection
     """
     def test_select_all_none(self):
@@ -17,7 +17,7 @@ class TestSelection(MainWindowTest):
         sm = w.view_object.selectionModel()
 
         # Open a document
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
 
         # Five boxes, none selected
         self.assertEqual(5, self.window.model.rowCount())
@@ -40,7 +40,7 @@ class TestSelection(MainWindowTest):
         sm = w.view_object.selectionModel()
 
         # Open a document
-        w.open_file(TESTDATA / 'test_segment.inselect')
+        w.open_file(TESTDATA / 'shapes.inselect')
 
         # Select the first box
         w.select_next_prev(next=True)

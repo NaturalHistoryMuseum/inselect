@@ -23,7 +23,7 @@ class TestSegment(unittest.TestCase):
 
     def test_segment_document_sort_by_rows(self):
         "Segment the document with boxes sorted by rows"
-        doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
+        doc = InselectDocument.load(TESTDATA / 'shapes.inselect')
         expected = doc.scanned.from_normalised(
             [i['rect'] for i in doc.items]
         )
@@ -31,7 +31,7 @@ class TestSegment(unittest.TestCase):
 
     def test_segment_document_sort_by_columns(self):
         "Segment the document with boxes sorted by columns"
-        doc = InselectDocument.load(TESTDATA / 'test_segment.inselect')
+        doc = InselectDocument.load(TESTDATA / 'shapes.inselect')
         items = doc.items
         expected = doc.scanned.from_normalised(
             [items[index]['rect'] for index in (0, 3, 2, 1, 4)]

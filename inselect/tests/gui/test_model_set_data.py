@@ -19,7 +19,7 @@ class TestModelData(GUITest):
     """
     def test_set_invalid_rotation(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         i = m.index(0, 0)
         self.assertRaises(ValueError, m.setData, i, 'not an integer', RotationRole)
@@ -29,7 +29,7 @@ class TestModelData(GUITest):
     def test_set_rotation(self):
         "Alter box's rotation"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         i = m.index(0, 0)
         self.assertEqual(0, m.data(i, RotationRole))
@@ -43,7 +43,7 @@ class TestModelData(GUITest):
 
     def test_set_invalid_rect(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         self.assertRaises(ValueError, m.setData, m.index(0, 0), 'not a rect',
                           RectRole)
@@ -51,7 +51,7 @@ class TestModelData(GUITest):
     def test_set_rect(self):
         "Alter box's rect"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         i = m.index(0, 0)
         r = QRect(0, 0, 1, 1)
@@ -65,7 +65,7 @@ class TestModelData(GUITest):
     def test_set_metadata(self):
         "Alter box's metadata"
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         i = m.index(0, 0)
         expected = {
@@ -87,14 +87,14 @@ class TestModelData(GUITest):
 
     def test_set_invalid_metadata(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         self.assertRaises(ValueError, m.setData, m.index(0, 0), 'not a dict',
                           MetadataRole)
 
     def test_display_role(self):
         m = Model()
-        m.from_document(InselectDocument.load(TESTDATA / 'test_segment.inselect'))
+        m.from_document(InselectDocument.load(TESTDATA / 'shapes.inselect'))
 
         # First four characters only - remainder depend upon current template
         self.assertEqual('0001', m.data(m.index(0, 0), Qt.DisplayRole)[:4])

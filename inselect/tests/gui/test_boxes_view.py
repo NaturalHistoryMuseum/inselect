@@ -3,21 +3,23 @@ import unittest
 from itertools import repeat
 from pathlib import Path
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestBoxesView(MainWindowTest):
+class TestBoxesView(GUITest):
     """Activities in boxes view
     """
     def setUp(self):
         super(TestBoxesView, self).setUp()
-        self.window.open_file(TESTDATA / 'test_segment.inselect')
 
-    def tearDown(self):
-        self.window.close()
-        super(TestBoxesView, self).tearDown()
+        # GUITest's tearDown will close the document
+        self.window.open_file(TESTDATA / 'shapes.inselect')
+
+    def test_paint(self):
+        "Boxes view is painted"
+        self.run_event_loop()
 
     def test_zoom_in(self):
         "User zooms in"

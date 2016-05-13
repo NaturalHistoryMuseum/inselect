@@ -5,12 +5,12 @@ from pathlib import Path
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.views.metadata import FieldEdit, FieldComboBox
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestMetadataViewControls(MainWindowTest):
+class TestMetadataViewControls(GUITest):
     """Controls in the metadata view reflect the selected template
     """
     def setUp(self):

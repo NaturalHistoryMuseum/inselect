@@ -11,7 +11,7 @@ from inselect.gui.plugins import barcode_settings
 from inselect.gui.roles import MetadataRole
 from inselect.tests.utils import temp_directory_with_files
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
 try:
@@ -23,14 +23,14 @@ except ImportError:
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
-class TestReadBarcodes(MainWindowTest):
+class TestReadBarcodes(GUITest):
     @unittest.skipIf(LibDMTXEngine is None or not LibDMTXEngine.available(),
                      "LibDMTXEngine not available")
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     @patch.object(barcode_settings, 'current_settings',
                   return_value={'engine': 'libdmtx'})
     def test_read_barcodes(self, current_settings, mock_warning):
-        self.window.open_document(TESTDATA / 'test_barcodes.inselect')
+        self.window.open_document(TESTDATA / 'barcodes.inselect')
 
         model = self.window.model
         self.assertFalse(model.is_modified)
@@ -59,11 +59,11 @@ class TestReadBarcodes(MainWindowTest):
         """The user is informed that barcodes cxannot be read without the
         scanned image
         """
-        with temp_directory_with_files(TESTDATA / 'test_barcodes.inselect') as tempdir:
+        with temp_directory_with_files(TESTDATA / 'barcodes.inselect') as tempdir:
             # Create thumbnail file
-            shutil.copy(str(TESTDATA.joinpath('test_barcodes.jpg')),
-                        str(tempdir.joinpath('test_barcodes_thumbnail.jpg')))
-            self.window.open_document(tempdir / 'test_barcodes.inselect')
+            shutil.copy(str(TESTDATA.joinpath('barcodes.jpg')),
+                        str(tempdir.joinpath('barcodes_thumbnail.jpg')))
+            self.window.open_document(tempdir / 'barcodes.inselect')
 
             self.window.run_plugin(2)
 

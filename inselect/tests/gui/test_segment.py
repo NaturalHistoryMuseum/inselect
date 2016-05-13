@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 from inselect.gui.roles import RectRole
 from inselect.gui.sort_document_items import SortDocumentItems
@@ -18,7 +18,7 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 # TODO LH coverage does not detect code executed within a QThread
 
 
-class TestSegment(MainWindowTest):
+class TestSegment(GUITest):
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_segment(self, mock_question):
         """Segment a document that already has boxes, making sure that the
@@ -27,8 +27,11 @@ class TestSegment(MainWindowTest):
         """
         w = self.window
 
+        # Clear any existing plugin image
+        w.plugin_image = None
+
         # Load document with five boxes
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
         self.assertEqual(5, w.model.rowCount())
 
         # Get the rects of the existing boxes
@@ -44,9 +47,16 @@ class TestSegment(MainWindowTest):
         indexes = [w.model.index(r, 0) for r in xrange(0, w.model.rowCount())]
         actual = [w.model.data(i, RectRole) for i in indexes]
 
+        # Check that the display image was created
+        self.assertIsNotNone(w.plugin_image)
+
         # Close the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
+
+        # Check that the display image was cleared when the document was
+        # closed
+        self.assertIsNone(w.plugin_image)
 
         # Check that bounding boxes are the same as the original boxes
         self.assertEqual(expected, actual)
@@ -65,7 +75,7 @@ class TestSegment(MainWindowTest):
         w = self.window
 
         # Open document and remove existing boxes
-        w.open_document(TESTDATA / 'test_segment.inselect')
+        w.open_document(TESTDATA / 'shapes.inselect')
         w.select_all()
         w.delete_selected()
 

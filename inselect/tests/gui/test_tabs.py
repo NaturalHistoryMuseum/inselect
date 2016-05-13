@@ -1,9 +1,9 @@
 import unittest
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
-class TestTabs(MainWindowTest):
+class TestTabs(GUITest):
     """Basic tests of the MainWindow's active tab.
     """
 

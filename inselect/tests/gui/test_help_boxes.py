@@ -4,10 +4,10 @@ from mock import patch
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import MainWindowTest
+from gui_test import GUITest
 
 
-class TestHelpBoxes(MainWindowTest):
+class TestHelpBoxes(GUITest):
     """Help boxes are shown
     """
     @patch.object(QMessageBox, 'about', return_value=QMessageBox.Yes)

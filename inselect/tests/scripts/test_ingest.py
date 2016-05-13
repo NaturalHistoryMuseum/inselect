@@ -58,7 +58,7 @@ class TestIngest(unittest.TestCase):
 
         # Create an image to ingest
         inbox_img = self.inbox / 'x.png'
-        shutil.copy(str(TESTDATA / 'test_segment.png'), str(inbox_img))
+        shutil.copy(str(TESTDATA / 'shapes.png'), str(inbox_img))
 
         main([unicode(self.inbox), unicode(docs)])
 
@@ -69,7 +69,7 @@ class TestIngest(unittest.TestCase):
         inbox_img = self.inbox / 'x.png'
         docs_img = self.docs / 'x.png'
 
-        shutil.copy(str(TESTDATA / 'test_segment.png'), str(inbox_img))
+        shutil.copy(str(TESTDATA / 'shapes.png'), str(inbox_img))
 
         # Read the image for comparison test
         original_image = cv2.imread(str(inbox_img))
@@ -96,9 +96,9 @@ class TestIngest(unittest.TestCase):
         lower = 'lower.png'
         upper = 'upper.png'
         title = 'title.Png'
-        shutil.copy(str(TESTDATA / 'test_segment.png'), str(self.inbox / lower))
-        shutil.copy(str(TESTDATA / 'test_segment.png'), str(self.inbox / upper))
-        shutil.copy(str(TESTDATA / 'test_segment.png'), str(self.inbox / title))
+        shutil.copy(str(TESTDATA / 'shapes.png'), str(self.inbox / lower))
+        shutil.copy(str(TESTDATA / 'shapes.png'), str(self.inbox / upper))
+        shutil.copy(str(TESTDATA / 'shapes.png'), str(self.inbox / title))
 
         main([unicode(self.inbox), unicode(self.docs)])
 
@@ -114,7 +114,7 @@ class TestIngest(unittest.TestCase):
 
     def test_cookie_cutter(self):
         "Ingested image with cookie cutter applied"
-        shutil.copy(unicode(TESTDATA / 'test_segment.png'),
+        shutil.copy(unicode(TESTDATA / 'shapes.png'),
                     unicode(self.inbox / 'x.png'))
 
         main([
