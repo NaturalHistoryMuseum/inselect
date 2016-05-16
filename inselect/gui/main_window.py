@@ -61,7 +61,7 @@ class MainWindow(QtGui.QMainWindow):
 
     IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
 
-    def __init__(self, app, filename=None):
+    def __init__(self, app):
         super(MainWindow, self).__init__()
         self.app = app
 
@@ -131,11 +131,6 @@ class MainWindow(QtGui.QMainWindow):
         self.setAcceptDrops(True)
 
         self.empty_document()
-
-        if filename:
-            # Process messages before loading document
-            QtGui.qApp.processEvents()
-            self.open_file(filename)
 
     def _create_views(self):
         "Creates view objects"

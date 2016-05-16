@@ -63,6 +63,8 @@ def main(args):
     window.show_from_geometry_settings()
 
     if parsed.file:
+        # Process messages before loading document
+        app.processEvents()
         window.open_file(parsed.file)
 
     if parsed.quit:
