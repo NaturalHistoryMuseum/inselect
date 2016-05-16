@@ -133,6 +133,8 @@ class MainWindow(QtGui.QMainWindow):
         self.empty_document()
 
         if filename:
+            # Process messages before loading document
+            QtGui.qApp.processEvents()
             self.open_file(filename)
 
     def _create_views(self):
