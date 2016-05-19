@@ -1,6 +1,6 @@
 from PySide.QtCore import QRect, QSize, QPoint, Qt
 from PySide.QtGui import (QColor, QListView, QBrush, QStyle, QTransform, QPen,
-                          QAbstractItemView, QAbstractItemDelegate,
+                          QAbstractItemView, QStyledItemDelegate,
                           QItemSelectionModel, QFont)
 
 from inselect.lib.utils import debug_print
@@ -9,6 +9,8 @@ from inselect.gui.utils import painter_state
 from inselect.gui.roles import (MetadataValidRole, PixmapRole, RectRole,
                                 RotationRole)
 
+
+# TODO LH Delegate should respect stylesheet
 
 def _blend_colour(first, second, amount=0.5):
     """Returns first + (second - first) * amount, without changing the alpha of
@@ -24,7 +26,7 @@ def _blend_colour(first, second, amount=0.5):
     )
 
 
-class CropDelegate(QAbstractItemDelegate):
+class CropDelegate(QStyledItemDelegate):
     """Delegate that shows cropped object images with a grey box and
     provides editing of rotation and some flags.
     """
@@ -36,9 +38,11 @@ class CropDelegate(QAbstractItemDelegate):
     GRID_INVALID_COLOUR = QColor(0xfb, 0x9a, 0x99)
     INVALID = QBrush(GRID_INVALID_COLOUR)
     # Colour of selected invalid is the invalid colour lightened
-    INVALID_SELECTED = QBrush(_blend_colour(GRID_INVALID_COLOUR,
-                                            QColor(0xff, 0xff, 0xff),
-                                            amount=0.3))
+    INVALID_SELECTED = QBrush(
+        _blend_colour(GRID_INVALID_COLOUR,
+                      QColor(0xff, 0xff, 0xff),
+                      amount=0.3)
+    )
     GREY = QBrush(Qt.gray)
     DARK_GREY = QBrush(Qt.darkGray)
 
@@ -64,7 +68,7 @@ class CropDelegate(QAbstractItemDelegate):
         return self.box_rect.adjusted(b, b, -b, -b)
 
     def _paint_box(self, painter, option, index):
-        """Paints the grey box
+        """Paints background
         """
         valid = index.data(MetadataValidRole)
         selected = QStyle.State_Selected & option.state
@@ -73,6 +77,7 @@ class CropDelegate(QAbstractItemDelegate):
                 painter.setBrush(self.INVALID_SELECTED if selected else self.INVALID)
             else:
                 painter.setBrush(self.GREY if selected else self.DARK_GREY)
+            painter.setPen(Qt.black)
             painter.drawRect(option.rect)
 
     def _paint_title(self, painter, option, index):
@@ -80,12 +85,13 @@ class CropDelegate(QAbstractItemDelegate):
         """
         with painter_state(painter):
             font = painter.font()
-            font.setPointSize(13)  # TODO LH Arbitrary font size
+            font.setPointSize(14)  # TODO LH Arbitrary font size
             font.setWeight(QFont.Black)
             painter.setFont(font)
             rect = self.title_rect.translated(option.rect.topLeft())
 
             # Textual title in black at top left
+            painter.setPen(Qt.black)
             painter.drawText(rect, Qt.AlignTop | Qt.AlignLeft,
                              index.data(Qt.DisplayRole))
 
@@ -187,7 +193,7 @@ class ObjectView(QListView):
         self.setWrapping(True)
         self.setResizeMode(self.Adjust)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.setStyleSheet("background-color: darkgray;")
+        # self.setStyleSheet("background-color: darkgray;")
 
         # Activating an item toggles the expanded state
         self.activated.connect(self.toggle_expanded)

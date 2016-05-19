@@ -8,7 +8,9 @@ from PySide.QtCore import QSettings, QSize, QLocale, QCoreApplication
 import inselect
 
 from inselect.lib.utils import debug_print
+
 from inselect.gui.main_window import MainWindow
+from inselect.gui.style import STYLESHEET
 
 # Values used by several important parts of Qt's machinery including the GUI
 # and QSettings.
@@ -23,6 +25,8 @@ def main(args):
     parser.add_argument("file", help='The inselect document to open', nargs='?')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='Show debug messages')
+    parser.add_argument('-s', '--stylesheet', action='store',
+                        help='Use stylesheet; intended for dev purposes only')
     parser.add_argument('-l', '--locale', action='store',
                         help='Use LOCALE; intended for testing purposes only')
     parser.add_argument('-v', '--version', action='version',
@@ -54,12 +58,19 @@ def main(args):
 
     # Application icon
     icon = QtGui.QIcon()
-    path = ':/data/inselect{0}.png'
+    path = ':/icons/inselect{0}.png'
     for size in (16, 24, 32, 48, 64, 128, 256, 512):
         icon.addFile(path.format(size), QSize(size, size))
     app.setWindowIcon(icon)
 
     window = MainWindow(app)
+
+    if parsed.stylesheet:
+        with open(parsed.stylesheet) as qss:
+            app.setStyleSheet(qss.read())
+    else:
+        app.setStyleSheet(STYLESHEET)
+
     window.show_from_geometry_settings()
 
     if parsed.file:

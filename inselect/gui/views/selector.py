@@ -1,6 +1,5 @@
 from PySide.QtCore import Qt
-from PySide.QtGui import (QAbstractItemView, QHBoxLayout, QLabel, QSlider,
-                          QWidget)
+from PySide.QtGui import QAbstractItemView, QSlider
 
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import RectRole
@@ -16,24 +15,14 @@ class SelectorView(QAbstractItemView):
 
         self._updating_selection = False
 
-        layout = QHBoxLayout()
-        layout.addWidget(QLabel("Select by size"))
-
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = QSlider(Qt.Horizontal, parent=parent)
         self.slider.setTickPosition(QSlider.TicksBothSides)
         self.slider.setMinimum(-1)
         self.slider.setMaximum(1)
         self.slider.setTickInterval(1)
         self.slider.setSingleStep(1)
         self.slider.setEnabled(False)
-
         self.slider.valueChanged.connect(self._slider_changed)
-
-        # Slider has stretch greater than zero to force left-alignment
-        layout.addWidget(self.slider, stretch=1)
-
-        self.widget = QWidget(parent)
-        self.widget.setLayout(layout)
 
     def _update_slider(self, n):
         """Sets the slider range and enabled state

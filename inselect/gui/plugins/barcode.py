@@ -1,15 +1,18 @@
 from itertools import count, izip
 
-from PySide.QtGui import QIcon, QMessageBox
+from PySide.QtGui import QMessageBox
+
+import inselect.lib.utils
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
+
+from inselect.gui.utils import load_icon
 
 from .plugin import Plugin
 from .barcode_dialog import BarcodeDialog
 from .barcode_settings import load_engine
 
-import inselect.lib.utils
 
 # Warning: lazy load of gouda via local imports
 
@@ -33,7 +36,7 @@ class BarcodePlugin(Plugin):
 
     @classmethod
     def icon(cls):
-        return QIcon(':/data/barcode_icon.png')
+        return load_icon(':/icons/barcode.png')
 
     def can_be_run(self):
         if not self.document.scanned.available:

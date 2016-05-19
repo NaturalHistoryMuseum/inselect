@@ -10,6 +10,9 @@ import PySide.QtCore
 from PySide import QtGui
 from PySide.QtGui import QMessageBox
 
+from inselect.gui.utils import HTML_LINK_TEMPLATE
+
+
 # Warning: lazy load of cv2 and numpy via local imports
 
 
@@ -72,7 +75,7 @@ def _machine_summary():
 def show_about_box(parent=None):
     """Shows a model about box
     """
-    text = u"""<h1>{application} {version}</h1>
+    body = u"""<h1>{application} {version}</h1>
 
        <p>
          Segmentation, validation and annotation of images of museum objects.
@@ -119,8 +122,8 @@ def show_about_box(parent=None):
     """
 
     # TODO LH Button to copy to clipboard
-    text = text.format(application=QtGui.qApp.applicationName(),
+    body = body.format(application=QtGui.qApp.applicationName(),
                        version=QtGui.qApp.applicationVersion(),
                        environment=_environment())
     QMessageBox.about(parent, 'About {0}'.format(QtGui.qApp.applicationName()),
-                      text)
+                      HTML_LINK_TEMPLATE.format(body))

@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from PySide.QtCore import Qt
-from PySide.QtGui import QWidget, QFormLayout, QLabel
+from PySide.QtGui import QFormLayout, QFrame, QLabel, QWidget
 
 from inselect.lib.utils import format_dt_display
 
@@ -63,20 +63,17 @@ class BoldLabel(QLabel):
     pass
 
 
+class HorizontalLine(QFrame):
+    """A horizontal line
+    """
+    def __init__(self, parent=None):
+        super(HorizontalLine, self).__init__(parent)
+        self.setFrameShape(QFrame.HLine)
+
+
 class InfoWidget(PopupPanel):
     """Shows information about the document and the scanned image
     """
-
-    STYLESHEET = """
-    BoldLabel {
-        font-weight: bold;
-    }
-
-    RevealPathLabel {
-        text-decoration: underline;
-    }
-    """
-
     def __init__(self, parent=None):
         layout = QFormLayout()
 
@@ -95,6 +92,8 @@ class InfoWidget(PopupPanel):
         self._last_saved_on = QLabel()
         layout.addRow('Last saved on', self._last_saved_on)
 
+        layout.addRow(HorizontalLine())
+
         layout.addRow(BoldLabel('Original full-resolution image'))
         self._scanned_path = RevealPathLabel()
         layout.addRow('File', self._scanned_path)
@@ -105,6 +104,7 @@ class InfoWidget(PopupPanel):
         self._scanned_dimensions = QLabel()
         layout.addRow('Dimensions', self._scanned_dimensions)
 
+        layout.addRow(HorizontalLine())
         layout.addRow(BoldLabel('Thumbnail image'))
         self._thumbnail_path = RevealPathLabel()
         layout.addRow('File', self._thumbnail_path)
@@ -117,12 +117,11 @@ class InfoWidget(PopupPanel):
 
         labels_widget = QWidget()
         labels_widget.setLayout(layout)
-        labels_widget.setVisible(False)
 
         # Widget containing toggle label and container
-        super(InfoWidget, self).__init__('Information', labels_widget, parent)
-
-        self.setStyleSheet(self.STYLESHEET)
+        super(InfoWidget, self).__init__(
+            'Information', labels_widget, initially_visible=False, parent=parent
+        )
 
     def _update_file_controls(self, img, path, size, dimensions):
         dim = '{0} x {1}'

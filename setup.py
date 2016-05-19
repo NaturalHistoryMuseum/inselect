@@ -33,7 +33,7 @@ setup_data = {
             {
                 'script': 'inselect.py',
                 'targetName': 'inselect.exe',
-                'icon': 'data/inselect.ico',
+                'icon': 'icons/inselect.ico',
                 'base': 'Win32GUI',
                 'shortcutName': 'Inselect',     # See http://stackoverflow.com/a/15736406
                 'shortcutDir': 'ProgramMenuFolder'
@@ -42,7 +42,7 @@ setup_data = {
             {
                 'script': 'inselect/scripts/{0}.py'.format(script),
                 'targetName': '{0}.exe'.format(script),
-                'icon': 'data/inselect.ico',
+                'icon': 'icons/inselect.ico',
                 'base': 'Console'
             }
             for script in SCRIPTS

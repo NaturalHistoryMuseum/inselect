@@ -1,9 +1,10 @@
-from PySide.QtGui import QIcon, QMessageBox
+from PySide.QtGui import QMessageBox
 
 from inselect.lib.segment_document import SegmentDocument
 from inselect.lib.utils import debug_print
 
 from inselect.gui.sort_document_items import sort_items_choice
+from inselect.gui.utils import load_icon
 
 from .plugin import Plugin
 
@@ -22,7 +23,7 @@ class SegmentPlugin(Plugin):
 
     @classmethod
     def icon(cls):
-        return QIcon(':/data/segment_icon.png')
+        return load_icon(':/icons/segment.png')
 
     def can_be_run(self):
         if self.document.items:

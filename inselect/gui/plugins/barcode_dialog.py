@@ -2,6 +2,7 @@ from PySide.QtGui import (QDialog, QRadioButton, QVBoxLayout, QLabel, QWidget,
                           QDialogButtonBox, QFrame)
 
 from inselect.lib.utils import debug_print
+from inselect.gui.utils import HTML_LINK_TEMPLATE
 
 from .barcode_settings import (current_settings, update_settings,
                                inlite_available, libdmtx_available,
@@ -62,8 +63,10 @@ class BarcodeDialog(QDialog):
         radio.setEnabled(zbar_available())
         self._layout.addWidget(radio)
 
-        prompt = QLabel('Barcodes will be decoded using the open-source '
-                        '<a href="http://zbar.sourceforge.net/">ZBar</a> library')
+        prompt = QLabel(HTML_LINK_TEMPLATE.format(
+            'Barcodes will be decoded using the open-source '
+            '<a href="http://zbar.sourceforge.net/">ZBar</a> library'
+        ))
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)
         self._layout.addWidget(prompt)
@@ -77,9 +80,10 @@ class BarcodeDialog(QDialog):
         radio.setEnabled(libdmtx_available())
         self._layout.addWidget(radio)
 
-        prompt = QLabel(
+        prompt = QLabel(HTML_LINK_TEMPLATE.format(
             'Barcodes will be decoded using the open-source '
-            '<a href="http://www.libdmtx.org/">libdmtx</a> library')
+            '<a href="http://www.libdmtx.org/">libdmtx</a> library'
+        ))
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)
         self._layout.addWidget(prompt)
@@ -96,11 +100,11 @@ class BarcodeDialog(QDialog):
         radio.setEnabled(inlite_available())
         self._layout.addWidget(radio)
 
-        prompt = QLabel(
+        prompt = QLabel(HTML_LINK_TEMPLATE.format(
             'Only available on Windows. '
             'Visit <a href="http://www.inliteresearch.com/">Inlite Research</a> '
             'to download and install Inlite Research\'s ClearImage library.'
-        )
+        ))
         prompt.setWordWrap(True)
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)
