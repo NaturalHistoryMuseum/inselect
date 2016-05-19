@@ -255,7 +255,7 @@ QMenu {
 QMenu::item {
     /* top right bottom left */
     padding: 4px 4px 4px 20px;
-    border-left: 4px;    /* So that icon aren't touching left of menu */
+    margin-left: 2px;    /* So that icon aren't touching left of menu */
 }
 
 QMenu::item:selected {
