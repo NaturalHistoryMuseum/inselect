@@ -53,7 +53,7 @@ QRadioButton::indicator {
 }
 
 QRadioButton::indicator:checked {
-    background-color: #7e5bea;
+    background-color: #8d20ae;
 }
 
 QRadioButton::indicator:disabled {
