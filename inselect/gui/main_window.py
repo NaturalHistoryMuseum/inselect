@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings, QSize
 from PySide.QtGui import (QAction, QDesktopServices, QGridLayout, QHBoxLayout,
-                          QLabel, QMenu, QMessageBox, QScrollArea,
+                          QIcon, QLabel, QMenu, QMessageBox, QScrollArea,
                           QSizePolicy, QToolButton, QVBoxLayout, QWidget)
 
 # This import is to register our icon resources with QT
@@ -1134,7 +1134,11 @@ class MainWindow(QtGui.QMainWindow):
             self.colour_scheme_actions.append(action)
 
         # Help menu
-        self.about_action = QAction("&About", self, triggered=self.about)
+        # Not using load_icon for this coloured icon that is never disabled
+        self.about_action = QAction(
+            "&About", self, triggered=self.about,
+            icon=QIcon(':/icons/inselect48.png')
+        )
 
     def _create_non_menu_actions(self):
         """Creates actions that are not associated with menu items
