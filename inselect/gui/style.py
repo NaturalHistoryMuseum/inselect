@@ -6,6 +6,7 @@ QWidget {
     padding: 0;
     margin: 0;
     font-family: Arial;
+    /*TODO LH Can we include Avenir or some other good font?*/
     /*font-family: "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;*/
 }
 
@@ -183,24 +184,6 @@ QSplitter::handle:horizontal:hover {
     background-color: #5b5b5b;
 }
 
-/*
-QAbstractSpinBox {
-    padding-right: 15px;
-}
-
-QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
-    border: 1px solid #5A5A5A;
-    background: #353535;
-    subcontrol-origin: border;
-}
-
-QAbstractSpinBox::up-arrow, QAbstractSpinBox::down-arrow {
-    width: 3px;
-    height: 3px;
-    border: 1px solid #5A5A5A;
-}
-*/
-
 QProgressBar {
     text-align: center;
 }
@@ -280,7 +263,7 @@ QMenu::item:selected {
     background-color: #3a3a3a;
 }
 
-QMenu::icon:checked { /* appearance of a 'checked' icon */
+QMenu::icon:checked {
     background: #3a3a3a;;
     position: absolute;
     top: 0;
@@ -367,11 +350,6 @@ QToolBar QToolButton:disabled {
 QToolBar QToolButton::menu-indicator {
     image: "";
 }
-
-/*QToolBar QLabel {
-    font-
-}
-
 
 /* Custom widgets */
 SideBar {
