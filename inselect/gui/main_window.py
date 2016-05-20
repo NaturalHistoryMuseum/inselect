@@ -1251,18 +1251,33 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
-        # Segment     Cookie cutter |
-        # Subsegment                |
-        #           Boxes           |
+        # Zoom in    Home       |
+        # Zoom out   Selection  |
+        #        Zoom           |
+        block = QGridLayout()
+        block.addWidget(button(self.zoom_in_action), 0, 0)
+        block.addWidget(button(self.zoom_out_action), 1, 0)
+        block.addWidget(button(self.zoom_home_action), 0, 1)
+        block.addWidget(button(self.zoom_to_selection_action), 1, 1)
+        block.addWidget(QLabel('Zoom'), 2, 0, 1, 2, Qt.AlignHCenter)
+        block.setContentsMargins(0, 0, 0, 0)
+        block.setSpacing(0)
+        widget = QWidget()
+        widget.setLayout(block)
+        toolbar.addWidget(widget)
+        toolbar.addSeparator()
+
+        # Segment  Subsegment |
+        #    Cookie cutter    |
+        #       Boxes         |
         block = QGridLayout()
         block.addWidget(button(self.plugin_actions[0]), 0, 0)
-        block.addWidget(button(self.plugin_actions[1]), 1, 0)
+        block.addWidget(button(self.plugin_actions[1]), 0, 1)
         self.cookie_cutter_button = button(
             icon=load_icon(':/icons/cookie_cutter.png'), text='Cookie cutter',
             menu=self.cookie_cutter_widget.popup, tooltip='Cookie cutter'
         )
-        self.cookie_cutter_button.setFixedWidth(150)
-        block.addWidget(self.cookie_cutter_button, 0, 1)
+        block.addWidget(self.cookie_cutter_button, 1, 0, 1, 2)
         block.addWidget(QLabel('Boxes'), 2, 0, 1, 2, Qt.AlignHCenter)
         block.setContentsMargins(0, 0, 0, 0)
         block.setSpacing(0)
@@ -1292,22 +1307,6 @@ class MainWindow(QtGui.QMainWindow):
         block.addWidget(button(self.rotate_clockwise_action))
         block.addWidget(button(self.rotate_counter_clockwise_action))
         block.addWidget(QLabel('Rotate boxes'), 0, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
-        toolbar.addWidget(widget)
-        toolbar.addSeparator()
-
-        # Zoom in    Home       |
-        # Zoom out   Selection  |
-        #        Zoom           |
-        block = QGridLayout()
-        block.addWidget(button(self.zoom_in_action), 0, 0)
-        block.addWidget(button(self.zoom_out_action), 1, 0)
-        block.addWidget(button(self.zoom_home_action), 0, 1)
-        block.addWidget(button(self.zoom_to_selection_action), 1, 1)
-        block.addWidget(QLabel('Zoom'), 2, 0, 1, 2, Qt.AlignHCenter)
         block.setContentsMargins(0, 0, 0, 0)
         block.setSpacing(0)
         widget = QWidget()
