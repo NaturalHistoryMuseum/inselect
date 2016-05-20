@@ -73,12 +73,12 @@ QStatusBar::item{
     border: none;
 }
 
-QLabel#statusMessage {
+QStatusBar > QLabel {
     border-left: 2px solid #5A5A5A;
 }
 
 QScrollBar {
-    border: 1px solid #5A5A5A;
+    border: None;
     background: #191919;
 }
 
@@ -254,22 +254,26 @@ QMenu {
 
 QMenu::item {
     /* top right bottom left */
-    padding: 4px 4px 4px 20px;
-    margin-left: 2px;    /* So that icon aren't touching left of menu */
+    padding: 4px 6px 4px 24px;
+    border: 1px solid rgba(0, 0, 0, 0);    /* Space for selection box */
+}
+
+QMenu::icon {
+    margin-left: 4px;    /* So that icons do not touching left of menu */
 }
 
 QMenu::item:selected {
     color: white;
-    background-color: #3a3a3a;
+    background: rgba(141, 32, 174, 88);
+    border: 1px solid #3b034c;
+    border-radius: 3px;
 }
 
-QMenu::icon:checked {
-    background: #3a3a3a;;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+QMenu::item:checked {
+    color: white;
+    background: rgba(141, 32, 174, 88);
+    border: 1px solid #3b034c;
+    border-radius: 3px;
 }
 
 QMenu::item::disabled {
@@ -291,10 +295,11 @@ QTabBar {
 }
 
 QTabBar::tab {
-    border: 0;
     padding: 8px;
     margin: 0;
-    border-radius: 0;
+    border: 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 QTabBar::tab:selected {
