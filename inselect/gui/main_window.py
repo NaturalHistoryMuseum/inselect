@@ -1277,6 +1277,7 @@ class MainWindow(QtGui.QMainWindow):
             icon=load_icon(':/icons/cookie_cutter.png'), text='Cookie cutter',
             menu=self.cookie_cutter_widget.popup, tooltip='Cookie cutter'
         )
+        self.cookie_cutter_button.setFixedWidth(250)
         block.addWidget(self.cookie_cutter_button, 1, 0, 1, 2)
         block.addWidget(QLabel('Boxes'), 2, 0, 1, 2, Qt.AlignHCenter)
         block.setContentsMargins(0, 0, 0, 0)
