@@ -4,6 +4,7 @@ Version 0.1.31
 -------------
 - Fixed #307 - Test performance
 - Fixed #305 - Remove references to 'scanned image'
+- Fixed #210 - Improve UI design
 
 Version 0.1.30
 -------------

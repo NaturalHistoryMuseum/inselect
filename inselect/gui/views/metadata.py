@@ -1,20 +1,18 @@
 from itertools import izip, repeat
 
 from PySide import QtGui
-from PySide.QtGui import (QAbstractItemView, QSizePolicy, QScrollArea,
-                          QWidget, QGroupBox, QLabel, QLineEdit, QComboBox,
-                          QFormLayout, QVBoxLayout)
-from PySide.QtCore import Qt
+from PySide.QtGui import (QAbstractItemView, QWidget, QGroupBox, QLabel,
+                          QLineEdit, QComboBox, QFormLayout, QSizePolicy,
+                          QVBoxLayout)
 
 from inselect.lib.countries import COUNTRIES
 from inselect.lib.languages import LANGUAGES
 from inselect.lib.utils import debug_print
 
-from inselect.gui.colours import colour_scheme_choice
 from inselect.gui.popup_panel import PopupPanel
 from inselect.gui.roles import MetadataRole
 from inselect.gui.toggle_widget_label import ToggleWidgetLabel
-from inselect.gui.utils import relayout_widget
+from inselect.gui.utils import relayout_widget, HTML_LINK_TEMPLATE
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.user_template_popup_button import UserTemplatePopupButton
 
@@ -40,7 +38,7 @@ class MetadataView(QAbstractItemView):
         self._form_container = FormContainer()
         self._create_controls()
 
-        # Popup buttom above controls
+        # Popup button above controls
         layout = QVBoxLayout()
         layout.addWidget(self.popup_button)
         layout.addWidget(self._form_container)
@@ -50,7 +48,7 @@ class MetadataView(QAbstractItemView):
         container.setLayout(layout)
 
         # Widget containing toggle label and container
-        self.widget = PopupPanel('Metadata', container, parent)
+        self.widget = PopupPanel('Metadata', container)
 
     def refresh_user_template(self):
         "Refreshes the UI with the currently selected UserTemplate"
@@ -108,35 +106,8 @@ class FormContainer(QWidget):
     """A widget that holds metadata edit controls
     """
 
-    # Set when field contains an invalid value
-    STYLESHEET = """
-    FieldEdit[invalid="true"] {{
-        background: {InvalidFill};
-    }}
-
-    FieldComboBox[invalid="true"] {{
-        background: {InvalidFill};
-    }}
-
-    ToggleWidgetLabel {{
-        text-decoration: none;
-        font-weight: bold;
-        color: black;
-    }}
-    """
-
-    # TODO LH Text colour to come from system
-
     def __init__(self, parent=None):
         super(FormContainer, self).__init__(parent)
-
-        stylesheet = self.STYLESHEET.format(**{
-            k: v.name()
-            for k, v in colour_scheme_choice().current['Colours'].iteritems()
-            if v
-        })
-
-        self.setStyleSheet(stylesheet)
 
         # Mapping { control: field name }
         self.controls = {}
@@ -170,8 +141,9 @@ class FormContainer(QWidget):
             # The group box, which contains the label to toggle the controls
             # and the controls themselves
             group_box_layout = QVBoxLayout()
-            group_box_layout.addWidget(ToggleWidgetLabel(group_name,
-                                                         controls_widget))
+            group_box_layout.addWidget(ToggleWidgetLabel(
+                group_name, controls_widget, initially_visible=False
+            ))
             group_box_layout.addWidget(controls_widget)
             group_box_layout.setContentsMargins(
                 0,  # left
@@ -253,19 +225,12 @@ class FormContainer(QWidget):
 
 
 class URLLabel(QLabel):
-    """A label that displays a clickable URL in black.
+    """A label that displays a clickable URL in grey.
     """
-
-    # TODO LH Text colour to come from system
-    HTML = '''<html><head><style type=text/css>
-    a:link {{ color: black; text-decoration: underline;}}
-    </style></head>
-    <body><a href="{0}">{1}</a></body>
-    </html>
-    '''
-
     def __init__(self, url, label, parent=None, f=0):
-        html = self.HTML.format(url, label)
+        html = HTML_LINK_TEMPLATE.format(
+            '<a href="{0}">{1}</a>'.format(url, label)
+        )
         super(URLLabel, self).__init__(html, parent, f)
         self.setOpenExternalLinks(True)
 
@@ -389,10 +354,15 @@ class FieldComboBox(QComboBox):
 
         # QComboBox's default behaviour is to set a minimum width that is large
         # enough to show the longest item in the list. This has the effect of
-        # setting the minimum width of the entire form. Set a minimum number
-        # of characters width to allow the QComboBox, and hence the form, to
-        # shrink to a narrower width.
+        # setting the minimum width of the entire form.
+        # Setting the minimum number of characters width to one and the
+        # horizontal size policy to Expanding allows the QComboBox, and hence
+        # the form, to shrink to a narrower width, while at the same time
+        # having the combobox expand to fill available horizontal space.
         self.setMinimumContentsLength(1)
+        self.setSizePolicy(
+            QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        )
 
         self._template = template
 

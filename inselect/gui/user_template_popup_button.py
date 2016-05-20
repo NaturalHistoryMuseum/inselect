@@ -4,7 +4,7 @@ from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print
 
 from .user_template_choice import user_template_choice
-from .utils import report_to_user
+from .utils import report_to_user, load_icon
 
 
 class UserTemplatePopupButton(QPushButton):
@@ -35,10 +35,12 @@ class UserTemplatePopupButton(QPushButton):
 
     def _create_actions(self):
         self._choose_action = QAction(
-            "Choose...", self, triggered=self.choose
+            "Choose...", self, triggered=self.choose,
+            icon=load_icon(':/icons/open.png')
         )
         self._refresh_action = QAction(
-            "Reload", self, triggered=self.refresh
+            "Reload", self, triggered=self.refresh,
+            icon=load_icon(':/icons/refresh.png')
         )
         self._default_action = QAction(
             u"Default ({0})".format(user_template_choice().DEFAULT.name),

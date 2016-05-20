@@ -5,12 +5,46 @@ from functools import wraps
 from io import BytesIO
 from itertools import groupby
 
-from PySide.QtGui import (QImage, QItemSelection, QItemSelectionModel,
-                          QMessageBox, QWidget)
+from PySide.QtCore import Qt
+from PySide.QtGui import (QColor, QIcon, QImage, QItemSelection,
+                          QItemSelectionModel, QMessageBox, QPainter, QPixmap,
+                          QWidget)
 
 from copy_box import copy_details_box
 
 # Warning: lazy load of cv2 and numpy via local imports
+
+# Nasty hacks to get HTML links inside QLabels to appear in grey.
+HTML_LINK_STYLE = """<style type=text/css>
+   a:link {{ color: #dddddd; text-decoration: underline;}}
+</style>
+"""
+
+HTML_LINK_TEMPLATE = """<html><head>{0}</head><body>
+    {{0}}
+</body></html>
+""".format(HTML_LINK_STYLE)
+
+
+def load_icon(path):
+    """Returns a QIcon with the image at path as the Normal state and the image
+    recoloured as the Disabled state.
+    """
+
+    pixmap = QPixmap(path)
+    icon = QIcon()
+    icon.addPixmap(pixmap)
+
+    # Create disabled
+    mask = pixmap.createMaskFromColor(QColor(0xff, 0xff, 0xff), Qt.MaskOutColor)
+    p = QPainter(pixmap)
+    p.setPen(QColor(0xaa, 0xaa, 0xaa))
+    p.drawPixmap(pixmap.rect(), mask, mask.rect())
+    p.end()
+
+    icon.addPixmap(pixmap, QIcon.Disabled)
+
+    return icon
 
 
 def qimage_of_bgr(bgr):

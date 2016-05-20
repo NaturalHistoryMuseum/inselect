@@ -1,7 +1,6 @@
-from PySide import QtGui
 from PySide.QtCore import QModelIndex, Qt, QRect, QRectF
-from PySide.QtGui import (QAbstractItemView, QGroupBox, QPainter, QPen,
-                          QSizePolicy, QVBoxLayout, QWidget)
+from PySide.QtGui import (QAbstractItemView, QBrush, QColor, QPen, QPainter,
+                          QVBoxLayout, QWidget)
 
 from .popup_panel import PopupPanel
 from .roles import PixmapRole
@@ -16,44 +15,36 @@ class NavigatorView(QAbstractItemView):
         # This view is not visible
         super(NavigatorView, self).__init__(None)
 
-        self.thumbnail = ThumbnailWidget()
-        self.thumbnail.setFixedWidth(self.SIZE)
-        self.thumbnail.setFixedHeight(self.SIZE)
-        self.thumbnail.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.thumbnail.setContentsMargins(
-            0,  # left
-            0,  # top
-            0,  # right
-            0   # bottom
-        )
+        self.navigator = Navigator()
+        self.navigator.setFixedWidth(self.SIZE)
+        self.navigator.setFixedHeight(self.SIZE)
+        self.navigator.setContentsMargins(0, 0, 0, 0)
 
         # Widget containing nav toolbar and thumbnail
         layout = QVBoxLayout()
-        layout.addWidget(nav_toolbar)
-        layout.addWidget(self.thumbnail)
-        layout.setAlignment(self.thumbnail, Qt.AlignHCenter)
+        if nav_toolbar:
+            layout.addWidget(nav_toolbar)
+        layout.addWidget(self.navigator)
+        layout.setAlignment(self.navigator, Qt.AlignHCenter)
         layout.setSpacing(0)
-        layout.setContentsMargins(
-            0,  # left
-            0,  # top
-            0,  # right
-            0   # bottom
-        )
+        layout.setContentsMargins(0, 0, 0, 0)
         container = QWidget()
+        container.setContentsMargins(0, 0, 0, 0)
         container.setLayout(layout)
 
         # Widget containing toggle label and container
-        self.widget = PopupPanel('Navigator', container, parent)
+        self.widget = PopupPanel('Navigator', container, parent=parent)
+        self.widget.setContentsMargins(0, 0, 0, 0)
 
     def reset(self):
         """QAbstractItemView virtual
         """
-        self.thumbnail.set_pixmap(self.model().data(QModelIndex(), PixmapRole))
+        self.navigator.set_pixmap(self.model().data(QModelIndex(), PixmapRole))
 
 
-class ThumbnailWidget(QWidget):
+class Navigator(QWidget):
     def __init__(self, parent=None):
-        super(ThumbnailWidget, self).__init__(parent)
+        super(Navigator, self).__init__(parent)
         self.pixmap = None
         self.focus = None
 
@@ -100,6 +91,3 @@ class ThumbnailWidget(QWidget):
                 # Inner box in black
                 painter.setPen(QPen(Qt.black, 1, Qt.SolidLine))
                 painter.drawRect(pixels.adjusted(1, 1, -1, -1))
-        else:
-            painter.setBrush(QtGui.qApp.palette().brush(self.backgroundRole()))
-            painter.drawRect(self.rect())

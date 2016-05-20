@@ -1,16 +1,17 @@
-from PySide.QtCore import Qt
-from PySide.QtGui import (QAction, QFileDialog, QFontMetrics, QHBoxLayout,
-                          QMenu, QPushButton, QWidget)
+from PySide.QtCore import Qt, QObject
+from PySide.QtGui import QAction, QFileDialog, QFontMetrics, QMenu
 
 from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
 
 from .cookie_cutter_choice import cookie_cutter_choice
-from .utils import report_to_user
+from .utils import report_to_user, load_icon
 
 
-class CookieCutterWidget(QWidget):
-    "CookieCutter UI"
+class CookieCutterWidget(QObject):
+    """Button that shows name of the currently selected cookie cutter and
+    shows a popup menu when pressed.
+    """
 
     FILE_FILTER = u'Inselect cookie cutter (*{0})'.format(
         CookieCutter.EXTENSION
@@ -18,29 +19,22 @@ class CookieCutterWidget(QWidget):
 
     def __init__(self, parent=None):
         super(CookieCutterWidget, self).__init__(parent)
-
-        # Configure the UI
         self._create_actions()
-        self.button = QPushButton("Cookie cutter")
-        self.button.setMaximumWidth(250)
-        self.button.setStyleSheet("text-align: left")
         self.popup = QMenu()
         self.inject_actions(self.popup)
-        self.button.setMenu(self.popup)
-
-        layout = QHBoxLayout()
-        layout.addWidget(self.button)
-        self.setLayout(layout)
 
     def _create_actions(self):
         self.save_to_new_action = QAction(
-            "Save boxes to new cookie cutter...", self
+            "Save boxes to new cookie cutter...", self,
+            icon=load_icon(':/icons/save.png')
         )
         self.choose_action = QAction(
-            "Choose...", self, triggered=self.choose
+            "Choose...", self, triggered=self.choose,
+            icon=load_icon(':/icons/open.png')
         )
         self.clear_action = QAction(
-            "Do not use a cookie cutter", self, triggered=self.clear
+            "Do not use a cookie cutter", self, triggered=self.clear,
+            icon=load_icon(':/icons/close.png')
         )
         self.apply_current_action = QAction("Apply", self)
 
@@ -63,7 +57,7 @@ class CookieCutterWidget(QWidget):
         "Shows a 'choose cookie cutter' file dialog"
         debug_print('CookieCutterWidget.choose_cookie_cutter')
         path, selectedFilter = QFileDialog.getOpenFileName(
-            self, "Choose cookie cutter",
+            None, "Choose cookie cutter",
             unicode(cookie_cutter_choice().last_directory()),
             self.FILE_FILTER
         )
@@ -72,7 +66,7 @@ class CookieCutterWidget(QWidget):
             # Save the user's choice
             cookie_cutter_choice().load(path)
 
-    def sync_actions(self, has_document, has_rows):
+    def sync_ui(self, button, has_document, has_rows):
         "Sync state of actions"
         debug_print('CookieCutterWidget.sync_ui')
         current = cookie_cutter_choice().current
@@ -80,11 +74,11 @@ class CookieCutterWidget(QWidget):
         name = current.name if current else 'Cookie cutter'
 
         # Truncate text to fit button
-        metrics = QFontMetrics(self.button.font())
+        metrics = QFontMetrics(button.font())
         elided = metrics.elidedText(
-            name, Qt.ElideRight, self.button.width() - 25
+            name, Qt.ElideRight, button.width() - 25
         )
-        self.button.setText(elided)
+        button.setText(elided)
 
         self.save_to_new_action.setEnabled(has_rows)
         self.clear_action.setEnabled(has_current)

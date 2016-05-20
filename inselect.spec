@@ -56,7 +56,7 @@ if SINGLE_FILE:
               strip=False,
               upx=False,
               console=False,
-              icon='data/inselect.icns')
+              icon='icons/inselect.icns')
 else:
     # A folder
     exe = EXE(pyz,
@@ -67,7 +67,7 @@ else:
               strip=False,
               upx=False,
               console=False,
-              icon='data/inselect.icns')
+              icon='icons/inselect.icns')
 
     coll = COLLECT(exe,
                    a.binaries,
@@ -80,5 +80,5 @@ else:
 
 app = BUNDLE(coll,
              name='inselect.app',
-             icon='data/inselect.icns',
+             icon='icons/inselect.icns',
              bundle_identifier=None)
