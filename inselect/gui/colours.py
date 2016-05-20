@@ -54,7 +54,9 @@ class ColourSchemeChoice(QObject):
     def set_colour_scheme(self, name):
         "Sets the colour scheme"
         if name not in COLOURS:
-            raise ValueError('[{0}] is not the name of a colour scheme'.format(name))
+            raise ValueError(
+                '[{0}] is not the name of a colour scheme'.format(name)
+            )
         else:
             QSettings().setValue(self.KEY, name)
             self._current = COLOURS[name]
