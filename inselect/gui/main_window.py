@@ -212,7 +212,6 @@ class MainWindow(QtGui.QMainWindow):
         # the behaviour that we require, so create a permanent QLabel to hold
         # status messages.
         self.status_message = QLabel()
-        self.status_message.setObjectName('statusMessage')
         self.status_message.setAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
         self.status_message.setSizePolicy(
             QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
