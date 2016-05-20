@@ -288,6 +288,11 @@ QMenuBar , QMenuBar::item {
     background: transparent;
 }
 
+QTabWidget::tab-bar {
+    position: absolute;
+    left: 0;
+}
+
 QTabBar {
     font-size: 17pt;
     margin-left: 2px;
