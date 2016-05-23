@@ -2,7 +2,7 @@ STYLESHEET = """
 QWidget {
     background: #2e2e2e;
     color: #dddddd;
-    border: 1px solid #5a5a5a;
+    border: 0;
     padding: 0;
     margin: 0;
     font-family: Arial;
@@ -63,6 +63,7 @@ QRadioButton::indicator:disabled {
 
 QStatusBar {
     border: none;
+    border-top: 1px solid #5a5a5a;
 }
 
 QStatusBar QWidget {
@@ -145,7 +146,8 @@ QScrollBar::sub-line:vertical {
     subcontrol-position: top;
 }
 
-QScrollBar:left-arrow, QScrollBar::right-arrow, QScrollBar::up-arrow, QScrollBar::down-arrow {
+QScrollBar:left-arrow, QScrollBar::right-arrow,
+QScrollBar::up-arrow, QScrollBar::down-arrow {
     border: 1px solid #5A5A5A;
     width: 3px;
     height: 3px;
@@ -284,62 +286,89 @@ QMenu::item::disabled {
 /* To get menu bar appearing correctly on Windows
 See https://bugreports.qt.io/browse/QTBUG-49115
 */
-QMenuBar , QMenuBar::item {
+QMenuBar, QMenuBar::item {
     background: transparent;
+}
+
+QTabWidget {
+    background-color: blue;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+QTabWidget::pane {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    background-color: red;
 }
 
 QTabWidget::tab-bar {
     position: absolute;
     left: 0;
+    background-color: black;
 }
 
 QTabBar {
+    background-color: green;
     font-size: 17pt;
-    margin-left: 2px;
+    padding: 0;
     border: 0;
+    margin: 0;
+    margin-left: 4px;
 }
 
 QTabBar::tab {
     padding: 8px;
-    margin: 0;
     border: 0;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    margin: 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 QTabBar::tab:selected {
-    margin: 0;
     color: white;
-    background-color: #5b5b5b;
+    background-color: #2e2e2e;
+/*
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop: 0 #5b5b5b, stop:1 #2e2e2e
+    );
+*/
 }
 
 QTabBar::tab:hover {
     color: white;
-    background-color: #5b5b5b;
-}
-
-QTabWidget::pane {
-    border: none;
+    background-color: #2e2e2e;
 }
 
 QToolBar {
+    spacing: 0;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    border-bottom: 1px solid #5a5a5a;
+}
+
+QToolBar QWidget {
+    font-size: 11px;
     padding: 0;
     border: 0;
     margin: 0;
 }
 
-QToolBar QWidget {
-    font-size: 11px;
-}
-
 QToolBar::separator {
     background: #666666;
     width: 1px;
-    margin: 2px;
+    padding: 0;
+    border: 0;
+    margin: 0;
 }
 
 QToolBar QToolButton {
-    border: none;
+    margin: 0;
+    border: 0;
     padding: 2px;
 }
 
@@ -365,6 +394,7 @@ QToolBar QToolButton::menu-indicator {
 SideBar {
     padding: 0 2px;
     border: none;
+
 }
 
 ToggleWidgetLabel {
@@ -395,7 +425,7 @@ PanelContainer {
     border-radius: 2px;
 }
 
-PanelContainer QWidget {
+PanelContainer > QWidget {
     background: #4f4f4f;
 }
 

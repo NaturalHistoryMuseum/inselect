@@ -8,7 +8,8 @@ from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings, QSize
 from PySide.QtGui import (QAction, QDesktopServices, QGridLayout, QHBoxLayout,
                           QIcon, QLabel, QMenu, QMessageBox, QScrollArea,
-                          QSizePolicy, QToolButton, QVBoxLayout, QWidget)
+                          QSizePolicy, QToolBar, QToolButton, QVBoxLayout,
+                          QWidget)
 
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa
@@ -101,7 +102,7 @@ class MainWindow(QtGui.QMainWindow):
         self._create_non_menu_actions()
         self._create_views()
         self._create_widgets()
-        self._create_toolbar()
+        self._create_toolbars()
         self._create_menus()
 
         # Conect signals
@@ -124,7 +125,7 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         # Main window layout
-        self.setCentralWidget(self.splitter)
+        self.setCentralWidget(self.central)
 
         # Document
         self.document = None
@@ -179,14 +180,18 @@ class MainWindow(QtGui.QMainWindow):
 
     def _create_widgets(self):
         "Creates widgets owned by the MainWindow"
-        # Views in tabs
+        # Tab of toolbars - populated in self._create_toolbars
         self.tabs = QtGui.QTabWidget()
+        self.tabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        self.tabs.setDocumentMode(True)
         font = self.tabs.font()
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         font = self.tabs.setFont(font)
-        self.tabs.addTab(self.boxes_view, 'Boxes')
-        self.tabs.addTab(self.view_object, 'Objects')
-        self.tabs.setCurrentIndex(0)
+
+        # Views in a stack
+        self.stack = QtGui.QStackedWidget()
+        self.stack.addWidget(self.boxes_view)
+        self.stack.addWidget(self.view_object)
 
         # Information about the loaded document
         self.info_widget = InfoWidget()
@@ -225,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Left bar, tabs, right bar
         self.splitter = QtGui.QSplitter()
-        self.splitter.addWidget(self.tabs)
+        self.splitter.addWidget(self.stack)
         self.splitter.addWidget(right_bar_container)
         self.splitter.setSizes([600, 200])
 
@@ -240,6 +245,14 @@ class MainWindow(QtGui.QMainWindow):
         cookie_cutter_choice().cookie_cutter_changed.connect(
             self.new_cookie_cutter
         )
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(self.tabs)
+        layout.addWidget(self.splitter)
+        self.central = QWidget()
+        self.central.setLayout(layout)
 
     def modified_changed(self):
         "Updated UI's modified state"
@@ -1165,21 +1178,28 @@ class MainWindow(QtGui.QMainWindow):
         self.addAction(self.previous_tab_action)
         self.addAction(self.next_tab_action)
 
-    def _create_toolbar(self):
-        """Creates the toolbar
+    def _create_toolbars(self):
+        """Creates the toolbars, contained within self.tabs
         """
-        # The main window's toolbar
-        toolbar = self.addToolBar("Main")
-        # This style applies to QToolButtons that are immediate children
-        # of the toolbar - it does not apply to QToolButtons that are
-        # contained within QWidgets added to toolbar.
-        toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-        toolbar.setMovable(False)
-        toolbar.setFloatable(False)
+        def create_toolbar(title):
+            """Creates, adds to self.tabs and returns a QToolBar
+            """
+            toolbar = self.addToolBar(title)
+            toolbar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+            self.tabs.addTab(toolbar, title)
 
-        layout = QHBoxLayout()
+            # This style applies to QToolButtons that are immediate children
+            # of the toolbar - it does not apply to QToolButtons that are
+            # contained within QWidgets added to toolbar.
+            toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+            toolbar.setMovable(False)
+            toolbar.setFloatable(False)
+            toolbar.setIconSize(QSize(25, 25))
+            return toolbar
 
         def button(action=None, icon=None, text=None, menu=None, tooltip=None):
+            """Returns a QToolButton
+            """
             button = QToolButton()
             if action:
                 button.setDefaultAction(action)
@@ -1198,13 +1218,25 @@ class MainWindow(QtGui.QMainWindow):
             button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
             # Point size for text buttons
-            # font = button.font()
-            # font.setPointSize(12)
             button.setFont(toolbar.font())
 
             # Expanding in x and in y so that text buttons fill available space
             button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
             return button
+
+        def create_block():
+            """Returns a tuple QGridLayout, QWidget for a new block of controls
+            """
+            widget = QWidget()
+            #widget.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+            widget.setContentsMargins(0, 0, 0, 0)
+
+            layout = QGridLayout(widget)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(0)
+            return layout, widget
+
+        toolbar = create_toolbar('Boxes')
 
         # Open   Save  |
         # Recent Close |
@@ -1220,57 +1252,43 @@ class MainWindow(QtGui.QMainWindow):
             menu=self.recent_docs_popup, tooltip='Open a recent document'
         )
 
-        block = QGridLayout()
+        block, widget = create_block()
         block.addWidget(button(self.open_action), 0, 0)
         block.addWidget(self.recent_docs_button, 1, 0)
         block.addWidget(button(self.save_action), 0, 1)
         block.addWidget(button(self.close_action), 1, 1)
         label = QLabel('File')
         label.setContentsMargins(0, 4, 0, 0)
-        block.addWidget(label, 2, 0, 1, 2, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
-        layout.addWidget(widget)
-
+        block.addWidget(label, 2, 0, 1, 2, Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
         # Crops  |
         #  CSV   |
         # Export |
-        block = QVBoxLayout()
-        block.addWidget(button(self.save_crops_action))
-        block.addWidget(button(self.export_csv_action))
-        block.addWidget(QLabel('Export'), 0, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
+        block, widget = create_block()
+        block.addWidget(button(self.save_crops_action), 0, 0)
+        block.addWidget(button(self.export_csv_action), 1, 0)
+        block.addWidget(QLabel('Export'), 2, 0, alignment=Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
         # Zoom in    Home       |
         # Zoom out   Selection  |
         #        Zoom           |
-        block = QGridLayout()
+        block, widget = create_block()
         block.addWidget(button(self.zoom_in_action), 0, 0)
         block.addWidget(button(self.zoom_out_action), 1, 0)
         block.addWidget(button(self.zoom_home_action), 0, 1)
         block.addWidget(button(self.zoom_to_selection_action), 1, 1)
-        block.addWidget(QLabel('Zoom'), 2, 0, 1, 2, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
+        block.addWidget(QLabel('Zoom'), 2, 0, 1, 2, Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
         # Segment  Subsegment |
         #    Cookie cutter    |
         #       Boxes         |
-        block = QGridLayout()
+        block, widget = create_block()
         block.addWidget(button(self.plugin_actions[0]), 0, 0)
         block.addWidget(button(self.plugin_actions[1]), 0, 1)
         self.cookie_cutter_button = button(
@@ -1279,50 +1297,70 @@ class MainWindow(QtGui.QMainWindow):
         )
         self.cookie_cutter_button.setFixedWidth(250)
         block.addWidget(self.cookie_cutter_button, 1, 0, 1, 2)
-        block.addWidget(QLabel('Boxes'), 2, 0, 1, 2, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
+        block.addWidget(QLabel('Boxes'), 2, 0, 1, 2, Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
         # Into rows    |
         # Into columns |
         #  Sort boxes  |
-        block = QVBoxLayout()
-        block.addWidget(button(self.sort_by_rows_action))
-        block.addWidget(button(self.sort_by_columns_action))
-        block.addWidget(QLabel('Sort boxes'), 0, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
+        block, widget = create_block()
+        block.addWidget(button(self.sort_by_rows_action), 0, 0)
+        block.addWidget(button(self.sort_by_columns_action), 1, 0)
+        block.addWidget(QLabel('Sort boxes'), 2, 0, alignment=Qt.AlignCenter)
+        toolbar.addWidget(widget)
+        toolbar.addSeparator()
+
+        # Slider for selecting increasingly larger / smaller boxes
+        block, widget = create_block()
+        self.view_selector.slider.setFixedHeight(65)
+        self.view_selector.slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        block.addWidget(self.view_selector.slider, 0, 0, 2, 1)
+        block.addWidget(QLabel('Select by size'), 2, 0, alignment=Qt.AlignCenter)
+        toolbar.addWidget(widget)
+
+        toolbar = create_toolbar('Object')
+
+        # Open   Save  |
+        # Recent Close |
+        #    File      |
+
+        self.recent_docs_button = button(
+            icon=load_icon(':/icons/recent.png'), text='Recent',
+            menu=self.recent_docs_popup, tooltip='Open a recent document'
+        )
+
+        block, widget = create_block()
+        block.addWidget(button(self.open_action), 0, 0)
+        block.addWidget(self.recent_docs_button, 1, 0)
+        block.addWidget(button(self.save_action), 0, 1)
+        block.addWidget(button(self.close_action), 1, 1)
+        label = QLabel('File')
+        label.setContentsMargins(0, 4, 0, 0)
+        block.addWidget(label, 2, 0, 1, 2, Qt.AlignCenter)
+        toolbar.addWidget(widget)
+        toolbar.addSeparator()
+
+        # Crops  |
+        #  CSV   |
+        # Export |
+        block, widget = create_block()
+        block.addWidget(button(self.save_crops_action), 0, 0)
+        block.addWidget(button(self.export_csv_action), 1, 0)
+        block.addWidget(QLabel('Export'), 2, 0, alignment=Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
         # Clockwise (Right)         |
         # Counter-clockwise (Left)  |
         #      Rotation             |
-        block = QVBoxLayout()
-        block.addWidget(button(self.rotate_clockwise_action))
-        block.addWidget(button(self.rotate_counter_clockwise_action))
-        block.addWidget(QLabel('Rotate boxes'), 0, Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
+        block, widget = create_block()
+        block.addWidget(button(self.rotate_clockwise_action), 0, 0)
+        block.addWidget(button(self.rotate_counter_clockwise_action), 1, 0)
+        block.addWidget(QLabel('Rotate boxes'), 2, 0, alignment=Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
-
-        block = QGridLayout()
-        block.addWidget(self.view_selector.slider, 0, 0, 2, 1)
-        block.addWidget(QLabel('Select by size'), 2, 0, alignment=Qt.AlignHCenter)
-        block.setContentsMargins(0, 0, 0, 0)
-        block.setSpacing(0)
-        widget = QWidget()
-        widget.setLayout(block)
-        toolbar.addWidget(widget)
 
     def _create_menus(self):
         """Create menu items
@@ -1416,9 +1454,11 @@ class MainWindow(QtGui.QMainWindow):
             select = self.tabs.count() - 1
         self.tabs.setCurrentIndex(select)
 
+    @report_to_user
     def current_tab_changed(self, index):
         """Slot for self.tabs.currentChanged() signal
         """
+        self.stack.setCurrentIndex(index)
         self.sync_ui()
         self.sync_status_message()
 
@@ -1602,8 +1642,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         document = self.document is not None
         has_rows = self.model.rowCount() > 0 if self.model else False
-        boxes_view_visible = self.boxes_view == self.tabs.currentWidget()
-        objects_view_visible = self.view_object == self.tabs.currentWidget()
+        boxes_view_visible = self.boxes_view == self.stack.currentWidget()
+        objects_view_visible = self.view_object == self.stack.currentWidget()
         has_selection = len(self.view_object.selectedIndexes()) > 0
 
         # File
@@ -1652,7 +1692,7 @@ class MainWindow(QtGui.QMainWindow):
             action.setChecked(current_colour_scheme == action.text())
 
     def sync_status_message(self):
-        if self.boxes_view == self.tabs.currentWidget():
+        if self.boxes_view == self.stack.currentWidget():
             prompt = ('Right click + drag to create box  |  '
                       'CTRL + N / P to move between boxes  |  '
                       'SHIFT / ALT + arrow keys to adjust selected box')
