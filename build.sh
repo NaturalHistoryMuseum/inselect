@@ -24,6 +24,9 @@ for module in cv2 numpy pydmtx scipy sklearn zbar; do
     fi
 done
 
+echo Freeze stylesheet
+python -m bin.freeze_stylesheet
+
 echo Source build
 ./setup.py sdist
 mv dist/inselect-$VERSION.tar.gz .

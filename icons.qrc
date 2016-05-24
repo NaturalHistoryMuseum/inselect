@@ -21,6 +21,8 @@
      <file>icons/save.png</file>
      <file>icons/save_crops.png</file>
      <file>icons/segment.png</file>
+     <file>icons/show_expanded.png</file>
+     <file>icons/show_grid.png</file>
      <file>icons/sort_cols.png</file>
      <file>icons/sort_rows.png</file>
      <file>icons/subsegment.png</file>

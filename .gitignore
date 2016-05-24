@@ -13,3 +13,4 @@ MANIFEST
 *tar.gz
 *dmg
 .directory
+inselect/gui/frozen_stylesheet.py

@@ -6,9 +6,9 @@ from pathlib import Path
 
 from PySide import QtGui
 from PySide.QtCore import Qt, QEvent, QSettings, QSize
-from PySide.QtGui import (QAction, QDesktopServices, QGridLayout, QHBoxLayout,
+from PySide.QtGui import (QAction, QActionGroup, QDesktopServices, QGridLayout,
                           QIcon, QLabel, QMenu, QMessageBox, QScrollArea,
-                          QSizePolicy, QToolBar, QToolButton, QVBoxLayout,
+                          QSizePolicy, QToolButton, QVBoxLayout,
                           QWidget)
 
 # This import is to register our icon resources with QT
@@ -32,7 +32,9 @@ from .plugins.barcode import BarcodePlugin
 from .plugins.segment import SegmentPlugin
 from .plugins.subsegment import SubsegmentPlugin
 from .recent_documents import RecentDocuments
+from .ribbon import Ribbon
 from .roles import RotationRole
+from .sidebar import SideBar
 from .sort_document_items import sort_items_choice
 from .user_template_choice import user_template_choice
 from .utils import contiguous, report_to_user, qimage_of_bgr, load_icon
@@ -42,29 +44,6 @@ from .views.object import ObjectView
 from .views.selector import SelectorView
 from .views.summary import SummaryView
 from .worker_thread import WorkerThread
-
-
-class SideBar(QScrollArea):
-    """A scrollable container for PopupPanels
-    """
-
-    def __init__(self, parent=None):
-        super(SideBar, self).__init__(parent)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        # Make the controls fill the available horizontal space
-        # http://qt-project.org/forums/viewthread/11012
-        self.setWidgetResizable(True)
-        self.setContentsMargins(0, 0, 0, 0)
-        self.setViewportMargins(0, 0, 0, 0)
-
-    def resizeEvent(self, event):
-        """Virtual
-        """
-        self.setViewportMargins(0, 0, 0, 0)
-        return super(SideBar, self).resizeEvent(event)
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -106,7 +85,7 @@ class MainWindow(QtGui.QMainWindow):
         self._create_menus()
 
         # Conect signals
-        self.tabs.currentChanged.connect(self.current_tab_changed)
+        self.ribbon.currentChanged.connect(self.current_tab_changed)
         colour_scheme_choice().colour_scheme_changed.connect(
             self.colour_scheme_changed
         )
@@ -135,7 +114,7 @@ class MainWindow(QtGui.QMainWindow):
         self.running_operation = None
 
         # Event filters, for handling drag and drop
-        self.tabs.installEventFilter(self)
+        self.ribbon.installEventFilter(self)
         self.boxes_view.installEventFilter(self)
         self.view_metadata.installEventFilter(self)
         self.view_object.installEventFilter(self)
@@ -180,38 +159,40 @@ class MainWindow(QtGui.QMainWindow):
 
     def _create_widgets(self):
         "Creates widgets owned by the MainWindow"
-        # Tab of toolbars - populated in self._create_toolbars
-        self.tabs = QtGui.QTabWidget()
-        self.tabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
-        self.tabs.setDocumentMode(True)
-        font = self.tabs.font()
+        # Ribbon of toolbars - populated in self._create_toolbars
+        # TODO get these colours from stylesheet
+        self.ribbon = Ribbon(
+            QtGui.QColor(0x4f, 0x4f, 0x4f),
+            QtGui.QColor(0xdd, 0xdd, 0xdd)
+        )
+        font = self.ribbon.font()
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
-        font = self.tabs.setFont(font)
+        font = self.ribbon.setFont(font)
 
         # Views in a stack
-        self.stack = QtGui.QStackedWidget()
-        self.stack.addWidget(self.boxes_view)
-        self.stack.addWidget(self.view_object)
+        self.views = QtGui.QStackedWidget()
+        self.views.addWidget(self.boxes_view)
+        self.views.addWidget(self.view_object)
 
         # Information about the loaded document
         self.info_widget = InfoWidget()
 
-        # Sidebar with navigator, metadata and document information
-        right_bar_layout = QVBoxLayout()
-        right_bar_layout.addWidget(self.view_navigator.widget)
-        right_bar_layout.addWidget(self.view_metadata.widget)
-        right_bar_layout.addWidget(self.info_widget)
-        right_bar_layout.setSpacing(2)
-        right_bar_layout.setContentsMargins(0, 0, 0, 0)
+        # Side bar containing navigator, metadata and document information
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.addWidget(self.view_navigator.widget)
+        sidebar_layout.addWidget(self.view_metadata.widget)
+        sidebar_layout.addWidget(self.info_widget)
+        sidebar_layout.setSpacing(2)
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
 
         # Empty widget with stretch to prevent other widgets from exanding to
         # fill
-        right_bar_layout.addWidget(QWidget(), stretch=1)
-        right_bar = QWidget()
-        right_bar.setLayout(right_bar_layout)
+        sidebar_layout.addWidget(QWidget(), stretch=1)
+        sidebar_widget = QWidget()
+        sidebar_widget.setLayout(sidebar_layout)
 
-        right_bar_container = SideBar()
-        right_bar_container.setWidget(right_bar)
+        sidebar = SideBar()
+        sidebar.setWidget(sidebar_widget)
 
         # QStatusBar places temporary message at bottom left, which is not
         # the behaviour that we require, so create a permanent QLabel to hold
@@ -228,10 +209,10 @@ class MainWindow(QtGui.QMainWindow):
         status_bar.addPermanentWidget(self.view_summary.widget)
         status_bar.addPermanentWidget(self.status_message, stretch=1)
 
-        # Left bar, tabs, right bar
+        # Stack of views, side bar
         self.splitter = QtGui.QSplitter()
-        self.splitter.addWidget(self.stack)
-        self.splitter.addWidget(right_bar_container)
+        self.splitter.addWidget(self.views)
+        self.splitter.addWidget(sidebar)
         self.splitter.setSizes([600, 200])
 
         # Cookie cutter widget - contained within toolbar
@@ -249,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        layout.addWidget(self.tabs)
+        layout.addWidget(self.ribbon)
         layout.addWidget(self.splitter)
         self.central = QWidget()
         self.central.setLayout(layout)
@@ -749,14 +730,6 @@ class MainWindow(QtGui.QMainWindow):
         self.boxes_view.zoom_home()
 
     @report_to_user
-    def show_grid(self):
-        self.view_object.show_grid()
-
-    @report_to_user
-    def show_expanded(self):
-        self.view_object.show_expanded()
-
-    @report_to_user
     def about(self):
         show_about_box(self)
 
@@ -1040,16 +1013,19 @@ class MainWindow(QtGui.QMainWindow):
             triggered=partial(self.rotate90, clockwise=False)
         )
 
+        group = QActionGroup(self)
         self.sort_by_rows_action = QAction(
             "Into &rows", self, checkable=True,
             icon=load_icon(':/icons/sort_rows.png'),
             triggered=partial(self.sort_boxes, by_columns=False)
         )
+        self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
         self.sort_by_columns_action = QAction(
             "Into &columns", self, checkable=True,
             icon=load_icon(':/icons/sort_cols.png'),
             triggered=partial(self.sort_boxes, by_columns=True)
         )
+        self.sort_by_columns_action.setChecked(sort_items_choice().by_columns)
 
         # Plugins
         # Plugin shortcuts start at F5
@@ -1074,19 +1050,23 @@ class MainWindow(QtGui.QMainWindow):
                 self.plugin_config_ui_actions[index] = ui_action
 
         # View menu
+        group = QActionGroup(self)
         # It is tempting to set the trigger to
-        # partial(self.tabs.setCurrentIndex, 0) but this causes a segfault when
+        # partial(self.ribbon.setCurrentIndex, 0) but this causes a segfault when
         # the application exits on linux. It also means that exceptions will be
         # silently swallowed.
         self.boxes_view_action = QAction(
             "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
         )
         self.boxes_view_action.setShortcuts(['ctrl+1', 'ctrl+b'])
-        self.metadata_view_action = QAction(
+        self.boxes_view_action.setChecked(True)
+        group.addAction(self.boxes_view_action)
+        self.objects_view_action = QAction(
             "Ob&jects", self, checkable=True,
             triggered=partial(self.show_tab, 1)
         )
-        self.metadata_view_action.setShortcuts(['ctrl+2', 'ctrl+j'])
+        self.objects_view_action.setShortcuts(['ctrl+2', 'ctrl+j'])
+        group.addAction(self.objects_view_action)
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
@@ -1131,19 +1111,15 @@ class MainWindow(QtGui.QMainWindow):
             statusTip="Display plugin image", checkable=True
         )
 
-        self.show_object_grid_action = QAction(
-            'Show &grid', self, shortcut='ctrl+G', triggered=self.show_grid
-        )
-        self.show_object_expanded_action = QAction(
-            'Show &expanded', self,
-            shortcut='ctrl+E', triggered=self.show_expanded
-        )
-
         # Colours
+        group = QActionGroup(self)
+        current_colour_scheme = colour_scheme_choice().current['Name']
         for name in colour_scheme_choice().colour_scheme_names():
             action = QAction(name, self, checkable=True,
                              triggered=partial(self.set_colour_scheme, name))
+            action.setChecked(current_colour_scheme == action.text())
             self.colour_scheme_actions.append(action)
+            group.addAction(action)
 
         # Help menu
         # Not using load_icon for this coloured icon that is never disabled
@@ -1179,14 +1155,14 @@ class MainWindow(QtGui.QMainWindow):
         self.addAction(self.next_tab_action)
 
     def _create_toolbars(self):
-        """Creates the toolbars, contained within self.tabs
+        """Creates the toolbars, contained within self.ribbon
         """
         def create_toolbar(title):
-            """Creates, adds to self.tabs and returns a QToolBar
+            """Creates, adds to self.ribbon and returns a QToolBar
             """
             toolbar = self.addToolBar(title)
             toolbar.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
-            self.tabs.addTab(toolbar, title)
+            self.ribbon.addTab(toolbar, title)
 
             # This style applies to QToolButtons that are immediate children
             # of the toolbar - it does not apply to QToolButtons that are
@@ -1301,6 +1277,16 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
+        # For light background |
+        # For dark background  |
+        #     Box colours      |
+        block, widget = create_block()
+        block.addWidget(button(self.colour_scheme_actions[0]), 0, 0)
+        block.addWidget(button(self.colour_scheme_actions[1]), 1, 0)
+        block.addWidget(QLabel('Box colours'), 2, 0, alignment=Qt.AlignCenter)
+        toolbar.addWidget(widget)
+        toolbar.addSeparator()
+
         # Into rows    |
         # Into columns |
         #  Sort boxes  |
@@ -1313,14 +1299,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # Slider for selecting increasingly larger / smaller boxes
         block, widget = create_block()
-        self.view_selector.slider.setFixedHeight(65)
-        self.view_selector.slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         block.addWidget(self.view_selector.slider, 0, 0, 2, 1)
         block.addWidget(QLabel('Select by size'), 2, 0, alignment=Qt.AlignCenter)
         toolbar.addWidget(widget)
 
-        toolbar = create_toolbar('Object')
+        toolbar = create_toolbar('Objects')
 
         # Open   Save  |
         # Recent Close |
@@ -1352,13 +1335,23 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
+        #   Grid   |
+        # Expanded |
+        #   Show   |
+        block, widget = create_block()
+        block.addWidget(button(self.view_object.grid_action), 0, 0)
+        block.addWidget(button(self.view_object.expanded_action), 1, 0)
+        block.addWidget(QLabel('Show objects'), 2, 0, alignment=Qt.AlignCenter)
+        toolbar.addWidget(widget)
+        toolbar.addSeparator()
+
         # Clockwise (Right)         |
         # Counter-clockwise (Left)  |
         #      Rotation             |
         block, widget = create_block()
         block.addWidget(button(self.rotate_clockwise_action), 0, 0)
         block.addWidget(button(self.rotate_counter_clockwise_action), 1, 0)
-        block.addWidget(QLabel('Rotate boxes'), 2, 0, alignment=Qt.AlignCenter)
+        block.addWidget(QLabel('Rotate selected'), 2, 0, alignment=Qt.AlignCenter)
         toolbar.addWidget(widget)
         toolbar.addSeparator()
 
@@ -1413,7 +1406,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self._view_menu = QMenu("&View", self)
         self._view_menu.addAction(self.boxes_view_action)
-        self._view_menu.addAction(self.metadata_view_action)
+        self._view_menu.addAction(self.objects_view_action)
         self._view_menu.addSeparator()
         self._view_menu.addAction(self.full_screen_action)
         self._view_menu.addSeparator()
@@ -1423,8 +1416,8 @@ class MainWindow(QtGui.QMainWindow):
         self._view_menu.addAction(self.zoom_to_selection_action)
         self._view_menu.addAction(self.toggle_plugin_image_action)
         self._view_menu.addSeparator()
-        self._view_menu.addAction(self.show_object_grid_action)
-        self._view_menu.addAction(self.show_object_expanded_action)
+        self._view_menu.addAction(self.view_object.grid_action)
+        self._view_menu.addAction(self.view_object.expanded_action)
         self._view_menu.addSeparator()
         colours_popup = self._view_menu.addMenu('&Colour scheme')
         for action in self.colour_scheme_actions:
@@ -1440,25 +1433,25 @@ class MainWindow(QtGui.QMainWindow):
 
     @report_to_user
     def show_tab(self, index):
-        self.tabs.setCurrentIndex(index)
+        self.ribbon.setCurrentIndex(index)
 
     @report_to_user
     def next_previous_tab(self, next):
         """Selects the next (if next if True) or previous (if next if False) tab
         """
-        select = self.tabs.currentIndex()
+        select = self.ribbon.currentIndex()
         select += 1 if next else -1
-        if select == self.tabs.count():
+        if select == self.ribbon.count():
             select = 0
         elif select < 0:
-            select = self.tabs.count() - 1
-        self.tabs.setCurrentIndex(select)
+            select = self.ribbon.count() - 1
+        self.ribbon.setCurrentIndex(select)
 
     @report_to_user
     def current_tab_changed(self, index):
-        """Slot for self.tabs.currentChanged() signal
+        """Slot for self.ribbon.currentChanged() signal
         """
-        self.stack.setCurrentIndex(index)
+        self.views.setCurrentIndex(index)
         self.sync_ui()
         self.sync_status_message()
 
@@ -1642,8 +1635,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         document = self.document is not None
         has_rows = self.model.rowCount() > 0 if self.model else False
-        boxes_view_visible = self.boxes_view == self.stack.currentWidget()
-        objects_view_visible = self.view_object == self.stack.currentWidget()
+        boxes_view_visible = self.boxes_view == self.views.currentWidget()
+        objects_view_visible = self.view_object == self.views.currentWidget()
         has_selection = len(self.view_object.selectedIndexes()) > 0
 
         # File
@@ -1663,8 +1656,6 @@ class MainWindow(QtGui.QMainWindow):
         self.delete_action.setEnabled(has_selection)
         self.rotate_clockwise_action.setEnabled(has_selection)
         self.rotate_counter_clockwise_action.setEnabled(has_selection)
-        self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
-        self.sort_by_columns_action.setChecked(sort_items_choice().by_columns)
         self.cookie_cutter_widget.sync_ui(
             self.cookie_cutter_button, document, has_rows,
         )
@@ -1672,8 +1663,6 @@ class MainWindow(QtGui.QMainWindow):
             action.setEnabled(document)
 
         # View
-        self.boxes_view_action.setChecked(boxes_view_visible)
-        self.metadata_view_action.setChecked(not boxes_view_visible)
         self.zoom_in_action.setEnabled(document)
         self.zoom_out_action.setEnabled(document)
         self.zoom_home_action.setEnabled(document)
@@ -1685,14 +1674,13 @@ class MainWindow(QtGui.QMainWindow):
             'whole_scene' == self.boxes_view.zoom_mode
         )
         self.toggle_plugin_image_action.setEnabled(document)
-        self.show_object_grid_action.setEnabled(objects_view_visible)
-        self.show_object_expanded_action.setEnabled(objects_view_visible)
-        current_colour_scheme = colour_scheme_choice().current['Name']
+        self.view_object.grid_action.setEnabled(objects_view_visible)
+        self.view_object.expanded_action.setEnabled(objects_view_visible)
         for action in self.colour_scheme_actions:
-            action.setChecked(current_colour_scheme == action.text())
+            action.setEnabled(boxes_view_visible)
 
     def sync_status_message(self):
-        if self.boxes_view == self.stack.currentWidget():
+        if self.boxes_view == self.views.currentWidget():
             prompt = ('Right click + drag to create box  |  '
                       'CTRL + N / P to move between boxes  |  '
                       'SHIFT / ALT + arrow keys to adjust selected box')

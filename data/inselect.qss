@@ -1,4 +1,3 @@
-STYLESHEET = """
 QWidget {
     background: #2e2e2e;
     color: #dddddd;
@@ -27,13 +26,13 @@ QDialog QPushButton {
 }
 
 QAbstractItemView {
-    border: none;
-    background-color: #8f8e93;
+    border: 1px solid black;
+    background: #8f8e93;
 }
 
 QGraphicsView {
-    border: none;
-    background-color: #8f8e93;
+    border: 1px solid black;
+    background: #8f8e93;
 }
 
 QLabel {
@@ -47,18 +46,18 @@ QCheckBox, QRadioButton {
 QRadioButton::indicator {
     border: 2px solid #3a3939;
     border-radius: 6px;
-    background-color: white;
+    background: white;
     width: 10px;
     height: 10px;
     margin-left: 5px;
 }
 
 QRadioButton::indicator:checked {
-    background-color: #8d20ae;
+    background: #8d20ae;
 }
 
 QRadioButton::indicator:disabled {
-    background-color: #3e3e3e;
+    background: #3e3e3e;
 }
 
 QStatusBar {
@@ -183,7 +182,7 @@ QSplitterHandle:hover {
 }
 
 QSplitter::handle:horizontal:hover {
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QProgressBar {
@@ -192,7 +191,7 @@ QProgressBar {
 
 QProgressBar::chunk {
     width: 1px;
-    background-color: #8d20ae;
+    background: #8d20ae;
 }
 
 QSlider {
@@ -201,7 +200,7 @@ QSlider {
 
 QSlider::handle:horizontal {
     width: 10px;
-    background-color: #dddddd;
+    background: #dddddd;
     border-radius: 3px;
     /* -ve vertical margins to get handle to protude beyond groove */
     margin-top: -4px;
@@ -209,11 +208,11 @@ QSlider::handle:horizontal {
 }
 
 QSlider::handle:horizontal:hover {
-    background-color: white;
+    background: white;
 }
 
 QSlider::handle:horizontal:disabled {
-    background-color: #aaaaaa;
+    background: #aaaaaa;
 }
 
 QSlider::groove:horizontal {
@@ -236,22 +235,22 @@ QPushButton::menu-indicator {
 
 QPushButton:hover {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QPushButton:default {
     color: white;
-    background-color: #8d20ae;
+    background: #8d20ae;
     border: white;
 }
 
 QComboBox:selected {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QMenu {
-    background-color: #4f4f4f;
+    background: #4f4f4f;
 }
 
 QMenu::item {
@@ -280,7 +279,7 @@ QMenu::item:checked {
 
 QMenu::item::disabled {
     color: gray;
-    background-color: #4f4f4f;
+    background: #4f4f4f;
 }
 
 /* To get menu bar appearing correctly on Windows
@@ -290,96 +289,32 @@ QMenuBar, QMenuBar::item {
     background: transparent;
 }
 
-QTabWidget {
-    background-color: blue;
-    border: 0;
-    margin: 0;
-    padding: 0;
-}
-
-QTabWidget::pane {
-    border: 0;
-    margin: 0;
-    padding: 0;
-    background-color: red;
-}
-
-QTabWidget::tab-bar {
-    position: absolute;
-    left: 0;
-    background-color: black;
-}
-
-QTabBar {
-    background-color: green;
-    font-size: 17pt;
-    padding: 0;
-    border: 0;
-    margin: 0;
-    margin-left: 4px;
-}
-
-QTabBar::tab {
-    padding: 8px;
-    border: 0;
-    margin: 0;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-}
-
-QTabBar::tab:selected {
-    color: white;
-    background-color: #2e2e2e;
-/*
-    background: qlineargradient(
-        x1:0, y1:0, x2:0, y2:1,
-        stop: 0 #5b5b5b, stop:1 #2e2e2e
-    );
-*/
-}
-
-QTabBar::tab:hover {
-    color: white;
-    background-color: #2e2e2e;
-}
-
 QToolBar {
     spacing: 0;
-    margin: 0;
-    border: 0;
-    padding: 0;
     border-bottom: 1px solid #5a5a5a;
 }
 
 QToolBar QWidget {
     font-size: 11px;
-    padding: 0;
-    border: 0;
-    margin: 0;
 }
 
 QToolBar::separator {
     background: #666666;
     width: 1px;
-    padding: 0;
-    border: 0;
-    margin: 0;
 }
 
 QToolBar QToolButton {
-    margin: 0;
-    border: 0;
     padding: 2px;
 }
 
 QToolBar QToolButton:checked {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QToolBar QToolButton:hover {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QToolBar QToolButton:disabled {
@@ -425,7 +360,7 @@ PanelContainer {
     border-radius: 2px;
 }
 
-PanelContainer > QWidget {
+PanelContainer QWidget {
     background: #4f4f4f;
 }
 
@@ -438,7 +373,7 @@ RevealPathLabel {
 }
 
 FieldEdit {
-    background-color: #4a4a4a;
+    background: #4a4a4a;
     padding: 2px;
     border: 1px solid #3a3939;
     margin: 0;
@@ -450,12 +385,12 @@ FieldEdit:disabled {
 
 FieldEdit:hover:!focus {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 FieldEdit:focus {
     color: black;
-    background-color: white;
+    background: white;
 }
 
 FieldEdit[invalid="true"] {
@@ -463,12 +398,7 @@ FieldEdit[invalid="true"] {
     background: #fb9a99;
 }
 
-FieldEdit[invalid="true"]:hover {
-    color: black;
-    background: #fbb8b6;
-}
-
-FieldEdit[invalid="true"]:focus {
+FieldEdit[invalid="true"]:hover, FieldEdit[invalid="true"]:focus {
     color: black;
     background: #fbb8b6;
 }
@@ -487,18 +417,14 @@ FieldComboBox:disabled {
 
 FieldComboBox:hover {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 FieldComboBox[invalid="true"] {
     background: #fb9a99;
 }
 
-FieldComboBox[invalid="true"]:hover {
-    background: #fbb8b6;
-}
-
-FieldComboBox[invalid="true"]:focus {
+FieldComboBox[invalid="true"]:hover, FieldComboBox[invalid="true"]:focus {
     background: #fbb8b6;
 }
 
@@ -508,4 +434,63 @@ HorizontalLine {
     border-bottom: 0;
     border-right: 0;
 }
-"""
+
+Ribbon {
+    margin-top: 10px;
+}
+
+Ribbon::pane {
+}
+
+Ribbon::tab-bar {
+    left: 5px;
+}
+
+Ribbon QTabBar {
+    font-size: 16pt;
+    background: #4f4f4f;
+}
+
+Ribbon QTabBar::tab {
+    min-width: 8ex;
+    padding: 4px 10px;
+    border: 1px solid #4f4f4f;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-color: #dddddd;
+
+    /* To prevent gaps in horizontal line */
+    margin-left: -1px;
+    margin-right: -1px;
+}
+
+Ribbon QTabBar::tab:selected,
+Ribbon QTabBar::tab:hover {
+    color: white;
+}
+
+Ribbon QTabBar::tab:selected {
+    background: #2e2e2e;
+    margin-left: -4px;
+    margin-right: -4px;
+    border-color: #dddddd;
+    border-bottom-color: #2e2e2e;
+}
+
+Ribbon QTabBar::tab:!selected {
+    /* Non-selected tabs look smaller */
+    margin-top: 2px;
+}
+
+Ribbon QTabBar::tab:first:selected {
+    margin-left: 0;
+}
+
+Ribbon QTabBar::tab:last:selected {
+    margin-right: 0;
+}
+
+#viewSelectorSlider {
+    height: 65px;
+    margin: 0 10px;
+}

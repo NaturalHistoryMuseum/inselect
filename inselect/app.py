@@ -2,15 +2,15 @@ import argparse
 import locale
 import sys
 
+from pathlib import Path
+
 from PySide import QtGui
 from PySide.QtCore import QSettings, QSize, QLocale, QCoreApplication
 
 import inselect
 
 from inselect.lib.utils import debug_print
-
 from inselect.gui.main_window import MainWindow
-from inselect.gui.style import STYLESHEET
 
 # Values used by several important parts of Qt's machinery including the GUI
 # and QSettings.
@@ -21,18 +21,32 @@ QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
 
 def main(args):
-    parser = argparse.ArgumentParser(description='Runs the inselect user-interface')
-    parser.add_argument("file", help='The inselect document to open', nargs='?')
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='Show debug messages')
-    parser.add_argument('-s', '--stylesheet', action='store',
-                        help='Use stylesheet; intended for dev purposes only')
-    parser.add_argument('-l', '--locale', action='store',
-                        help='Use LOCALE; intended for testing purposes only')
-    parser.add_argument('-v', '--version', action='version',
-                        version='%(prog)s ' + inselect.__version__)
-    parser.add_argument('-q', '--quit', action='store_true',
-                        help='Exit immediately after showing the main window')
+    parser = argparse.ArgumentParser(
+        description='Runs the inselect user-interface'
+    )
+    parser.add_argument(
+        "file", help='The inselect document to open', nargs='?', type=Path
+    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true', help='Show debug messages'
+    )
+    parser.add_argument(
+        '-l', '--locale', action='store',
+        help='Use LOCALE; intended for dev purposes only'
+    )
+    parser.add_argument(
+        '-q', '--quit', action='store_true',
+        help='Exit immediately after showing the main window; intended for dev '
+              'purposes only'
+    )
+    parser.add_argument(
+        '-s', '--stylesheet', action='store', type=Path,
+        help='Use stylesheet; intended for dev purposes only'
+    )
+    parser.add_argument(
+        '-v', '--version', action='version',
+        version='%(prog)s ' + inselect.__version__
+    )
     parsed = parser.parse_args(args[1:])
 
     # TODO LH A command-line switch to clear all QSettings
@@ -63,14 +77,14 @@ def main(args):
         icon.addFile(path.format(size), QSize(size, size))
     app.setWindowIcon(icon)
 
-    window = MainWindow(app)
-
+    # Stylesheet
     if parsed.stylesheet:
-        with open(parsed.stylesheet) as qss:
+        with parsed.stylesheet.open() as qss:
             app.setStyleSheet(qss.read())
     else:
-        app.setStyleSheet(STYLESHEET)
+        app.setStyleSheet(_stylesheet())
 
+    window = MainWindow(app)
     window.show_from_geometry_settings()
 
     if parsed.file:
@@ -82,3 +96,12 @@ def main(args):
         sys.exit(0)
     else:
         sys.exit(app.exec_())
+
+
+def _stylesheet():
+    try:
+        from inselect.gui import frozen_styleheet
+        return frozen_styleheet.STYLESHEET
+    except ImportError:
+        with Path(__file__).parent.parent.joinpath('data/inselect.qss').open() as qss:
+            return qss.read()

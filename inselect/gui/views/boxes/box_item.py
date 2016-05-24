@@ -57,12 +57,14 @@ class BoxItem(QtGui.QGraphicsRectItem):
             # Zero thickness indicates a cosmetic pen, which is drawn with the
             # same thickness regardless of the view's scale factor
             outline_colour, fill_colour = self.colours
-            painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
+
             r = self.boundingRect()
-            painter.drawRect(r)
 
             if fill_colour:
                 painter.fillRect(r, fill_colour)
+
+            painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
+            painter.drawRect(r)
 
     def has_mouse(self):
         """True if self or self._handles has grabbed the mouse
