@@ -118,7 +118,7 @@ class InselectImage(object):
             if 0 != rotate % 90:
                 msg = 'Rotation is not a multiple of 90: [{0}]'
                 raise ValueError(msg.format(rotate))
-            else:
+            elif rotate:
                 n_rotations = (rotate % 360) / 90
                 # n_rotations will be 0, 1, 2 or 3 = the number of 90 degree
                 # clockwise rotations
