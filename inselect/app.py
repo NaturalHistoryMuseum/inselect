@@ -12,6 +12,11 @@ import inselect
 from inselect.lib.utils import debug_print
 from inselect.gui.main_window import MainWindow
 
+try:
+    from inselect.gui import frozen_stylesheet
+except ImportError:
+    frozen_stylesheet = None
+
 # Values used by several important parts of Qt's machinery including the GUI
 # and QSettings.
 QCoreApplication.setOrganizationName('NHM')
@@ -99,9 +104,8 @@ def main(args):
 
 
 def _stylesheet():
-    try:
-        from inselect.gui import frozen_styleheet
-        return frozen_styleheet.STYLESHEET
-    except ImportError:
+    if frozen_stylesheet:
+        return frozen_stylesheet.STYLESHEET
+    else:
         with Path(__file__).parent.parent.joinpath('data/inselect.qss').open() as qss:
             return qss.read()
