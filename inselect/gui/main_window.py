@@ -1019,13 +1019,14 @@ class MainWindow(QtGui.QMainWindow):
             icon=load_icon(':/icons/sort_rows.png'),
             triggered=partial(self.sort_boxes, by_columns=False)
         )
-        self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
+        group.addAction(self.sort_by_rows_action)
         self.sort_by_columns_action = QAction(
             "Into &columns", self, checkable=True,
             icon=load_icon(':/icons/sort_cols.png'),
             triggered=partial(self.sort_boxes, by_columns=True)
         )
-        self.sort_by_columns_action.setChecked(sort_items_choice().by_columns)
+        group.addAction(self.sort_by_columns_action)
+        self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
 
         # Plugins
         # Plugin shortcuts start at F5
@@ -1157,6 +1158,9 @@ class MainWindow(QtGui.QMainWindow):
     def _create_toolbars(self):
         """Creates the toolbars, contained within self.ribbon
         """
+        ICON_SIZE = QSize(25, 25)
+        CONTROL_HEIGHT = 32
+
         def create_toolbar(title):
             """Creates, adds to self.ribbon and returns a QToolBar
             """
@@ -1170,7 +1174,7 @@ class MainWindow(QtGui.QMainWindow):
             toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
             toolbar.setMovable(False)
             toolbar.setFloatable(False)
-            toolbar.setIconSize(QSize(25, 25))
+            toolbar.setIconSize(ICON_SIZE)
             return toolbar
 
         def button(action=None, icon=None, text=None, menu=None, tooltip=None):
@@ -1189,7 +1193,8 @@ class MainWindow(QtGui.QMainWindow):
             if tooltip:
                 button.setToolTip(tooltip)
 
-            button.setIconSize(QSize(25, 25))
+            button.setIconSize(ICON_SIZE)
+            button.setFixedHeight(CONTROL_HEIGHT)
             button.setAutoRaise(True)
             button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
@@ -1212,42 +1217,56 @@ class MainWindow(QtGui.QMainWindow):
             layout.setSpacing(0)
             return layout, widget
 
+        def create_common_blocks(toolbar):
+            """Blocks common to more than one toolbar
+            """
+            # Open   Save  |
+            # Recent Close |
+            #    File      |
+
+            # A popup menu of recent documents
+            # self.recent_docs_button.setStyleSheet("text-align: left")
+            self.recent_docs_popup = QMenu()
+            for action in self.recent_doc_actions:
+                self.recent_docs_popup.addAction(action)
+            self.recent_docs_button = button(
+                icon=load_icon(':/icons/recent.png'), text='Recent',
+                menu=self.recent_docs_popup, tooltip='Open a recent document'
+            )
+
+            block, widget = create_block()
+            block.addWidget(button(self.open_action), 0, 0)
+            block.addWidget(self.recent_docs_button, 1, 0)
+            block.addWidget(button(self.save_action), 0, 1)
+            block.addWidget(button(self.close_action), 1, 1)
+            label = QLabel('File')
+            label.setContentsMargins(0, 4, 0, 0)
+            block.addWidget(label, 2, 0, 1, 2, Qt.AlignCenter)
+            toolbar.addWidget(widget)
+            toolbar.addSeparator()
+
+            # Crops  |
+            #  CSV   |
+            # Export |
+            block, widget = create_block()
+            block.addWidget(button(self.save_crops_action), 0, 0)
+            block.addWidget(button(self.export_csv_action), 1, 0)
+            block.addWidget(QLabel('Export'), 2, 0, alignment=Qt.AlignCenter)
+            toolbar.addWidget(widget)
+            toolbar.addSeparator()
+
+            #   Read    |
+            # Configure |
+            # Barcodes  |
+            block, widget = create_block()
+            block.addWidget(button(self.plugin_actions[2]), 0, 0)
+            block.addWidget(button(self.plugin_config_ui_actions[2]), 1, 0)
+            block.addWidget(QLabel('Barcodes'), 2, 0, alignment=Qt.AlignCenter)
+            toolbar.addWidget(widget)
+            toolbar.addSeparator()
+
         toolbar = create_toolbar('Boxes')
-
-        # Open   Save  |
-        # Recent Close |
-        #    File      |
-
-        # A popup menu of recent documents
-        # self.recent_docs_button.setStyleSheet("text-align: left")
-        self.recent_docs_popup = QMenu()
-        for action in self.recent_doc_actions:
-            self.recent_docs_popup.addAction(action)
-        self.recent_docs_button = button(
-            icon=load_icon(':/icons/recent.png'), text='Recent',
-            menu=self.recent_docs_popup, tooltip='Open a recent document'
-        )
-
-        block, widget = create_block()
-        block.addWidget(button(self.open_action), 0, 0)
-        block.addWidget(self.recent_docs_button, 1, 0)
-        block.addWidget(button(self.save_action), 0, 1)
-        block.addWidget(button(self.close_action), 1, 1)
-        label = QLabel('File')
-        label.setContentsMargins(0, 4, 0, 0)
-        block.addWidget(label, 2, 0, 1, 2, Qt.AlignCenter)
-        toolbar.addWidget(widget)
-        toolbar.addSeparator()
-
-        # Crops  |
-        #  CSV   |
-        # Export |
-        block, widget = create_block()
-        block.addWidget(button(self.save_crops_action), 0, 0)
-        block.addWidget(button(self.export_csv_action), 1, 0)
-        block.addWidget(QLabel('Export'), 2, 0, alignment=Qt.AlignCenter)
-        toolbar.addWidget(widget)
-        toolbar.addSeparator()
+        create_common_blocks(toolbar)
 
         # Zoom in    Home       |
         # Zoom out   Selection  |
@@ -1272,6 +1291,7 @@ class MainWindow(QtGui.QMainWindow):
             menu=self.cookie_cutter_widget.popup, tooltip='Cookie cutter'
         )
         self.cookie_cutter_button.setFixedWidth(250)
+        self.cookie_cutter_button.setFixedHeight(CONTROL_HEIGHT)
         block.addWidget(self.cookie_cutter_button, 1, 0, 1, 2)
         block.addWidget(QLabel('Boxes'), 2, 0, 1, 2, Qt.AlignCenter)
         toolbar.addWidget(widget)
@@ -1304,36 +1324,7 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addWidget(widget)
 
         toolbar = create_toolbar('Objects')
-
-        # Open   Save  |
-        # Recent Close |
-        #    File      |
-
-        self.recent_docs_button = button(
-            icon=load_icon(':/icons/recent.png'), text='Recent',
-            menu=self.recent_docs_popup, tooltip='Open a recent document'
-        )
-
-        block, widget = create_block()
-        block.addWidget(button(self.open_action), 0, 0)
-        block.addWidget(self.recent_docs_button, 1, 0)
-        block.addWidget(button(self.save_action), 0, 1)
-        block.addWidget(button(self.close_action), 1, 1)
-        label = QLabel('File')
-        label.setContentsMargins(0, 4, 0, 0)
-        block.addWidget(label, 2, 0, 1, 2, Qt.AlignCenter)
-        toolbar.addWidget(widget)
-        toolbar.addSeparator()
-
-        # Crops  |
-        #  CSV   |
-        # Export |
-        block, widget = create_block()
-        block.addWidget(button(self.save_crops_action), 0, 0)
-        block.addWidget(button(self.export_csv_action), 1, 0)
-        block.addWidget(QLabel('Export'), 2, 0, alignment=Qt.AlignCenter)
-        toolbar.addWidget(widget)
-        toolbar.addSeparator()
+        create_common_blocks(toolbar)
 
         #   Grid   |
         # Expanded |
