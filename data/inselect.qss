@@ -1,8 +1,7 @@
-STYLESHEET = """
 QWidget {
     background: #2e2e2e;
     color: #dddddd;
-    border: 1px solid #5a5a5a;
+    border: 0;
     padding: 0;
     margin: 0;
     font-family: Arial;
@@ -27,13 +26,13 @@ QDialog QPushButton {
 }
 
 QAbstractItemView {
-    border: none;
-    background-color: #8f8e93;
+    border: 1px solid black;
+    background: #8f8e93;
 }
 
 QGraphicsView {
-    border: none;
-    background-color: #8f8e93;
+    border: 1px solid black;
+    background: #8f8e93;
 }
 
 QLabel {
@@ -47,22 +46,23 @@ QCheckBox, QRadioButton {
 QRadioButton::indicator {
     border: 2px solid #3a3939;
     border-radius: 6px;
-    background-color: white;
+    background: white;
     width: 10px;
     height: 10px;
     margin-left: 5px;
 }
 
 QRadioButton::indicator:checked {
-    background-color: #8d20ae;
+    background: #8d20ae;
 }
 
 QRadioButton::indicator:disabled {
-    background-color: #3e3e3e;
+    background: #3e3e3e;
 }
 
 QStatusBar {
     border: none;
+    border-top: 1px solid #5a5a5a;
 }
 
 QStatusBar QWidget {
@@ -145,7 +145,8 @@ QScrollBar::sub-line:vertical {
     subcontrol-position: top;
 }
 
-QScrollBar:left-arrow, QScrollBar::right-arrow, QScrollBar::up-arrow, QScrollBar::down-arrow {
+QScrollBar:left-arrow, QScrollBar::right-arrow,
+QScrollBar::up-arrow, QScrollBar::down-arrow {
     border: 1px solid #5A5A5A;
     width: 3px;
     height: 3px;
@@ -171,6 +172,10 @@ QComboBox::down-arrow {
     border: 1px solid #5A5A5A;
 }
 
+QSplitter {
+    border-top: 1px solid #5a5a5a;
+}
+
 /* No image for splitter handle */
 QSplitter::handle:horizontal {
     image: none;
@@ -181,7 +186,7 @@ QSplitterHandle:hover {
 }
 
 QSplitter::handle:horizontal:hover {
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QProgressBar {
@@ -190,16 +195,17 @@ QProgressBar {
 
 QProgressBar::chunk {
     width: 1px;
-    background-color: #8d20ae;
+    background: #8d20ae;
 }
 
 QSlider {
     border: 0;
+    margin: 2px;
 }
 
 QSlider::handle:horizontal {
     width: 10px;
-    background-color: #dddddd;
+    background: #dddddd;
     border-radius: 3px;
     /* -ve vertical margins to get handle to protude beyond groove */
     margin-top: -4px;
@@ -207,11 +213,11 @@ QSlider::handle:horizontal {
 }
 
 QSlider::handle:horizontal:hover {
-    background-color: white;
+    background: white;
 }
 
 QSlider::handle:horizontal:disabled {
-    background-color: #aaaaaa;
+    background: #aaaaaa;
 }
 
 QSlider::groove:horizontal {
@@ -234,22 +240,22 @@ QPushButton::menu-indicator {
 
 QPushButton:hover {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QPushButton:default {
     color: white;
-    background-color: #8d20ae;
+    background: #8d20ae;
     border: white;
 }
 
 QComboBox:selected {
     color: white;
-    background-color: #5b5b5b;
+    background: #5b5b5b;
 }
 
 QMenu {
-    background-color: #4f4f4f;
+    background: #4f4f4f;
 }
 
 QMenu::item {
@@ -278,69 +284,43 @@ QMenu::item:checked {
 
 QMenu::item::disabled {
     color: gray;
-    background-color: #4f4f4f;
+    background: #4f4f4f;
 }
 
 /* To get menu bar appearing correctly on Windows
 See https://bugreports.qt.io/browse/QTBUG-49115
 */
-QMenuBar , QMenuBar::item {
+QMenuBar, QMenuBar::item {
     background: transparent;
 }
 
-QTabWidget::tab-bar {
-    position: absolute;
-    left: 0;
-}
-
-QTabBar {
-    font-size: 17pt;
-    margin-left: 2px;
-    border: 0;
-}
-
-QTabBar::tab {
-    padding: 8px;
-    margin: 0;
-    border: 0;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-}
-
-QTabBar::tab:selected {
-    margin: 0;
-    color: white;
-    background-color: #5b5b5b;
-}
-
-QTabBar::tab:hover {
-    color: white;
-    background-color: #5b5b5b;
-}
-
-QTabWidget::pane {
-    border: none;
+QMenuBar {
+    padding-bottom: 2px;
+    border-bottom: 1px solid #dddddd;
 }
 
 QToolBar {
     padding: 0;
     border: 0;
     margin: 0;
-}
-
-QToolBar QWidget {
-    font-size: 11px;
+    spacing: 0;
 }
 
 QToolBar::separator {
     background: #666666;
     width: 1px;
-    margin: 2px;
 }
 
 QToolBar QToolButton {
-    border: none;
-    padding: 2px;
+    font-size: 11px;
+    border: 0;
+    height: 26px;
+    qproperty-iconSize: 20px;
+}
+
+QToolBar QLabel {
+    font-size: 10px;
+    qproperty-alignment: 'AlignBottom | AlignHCenter';
 }
 
 QToolBar QToolButton:checked {
@@ -365,6 +345,7 @@ QToolBar QToolButton::menu-indicator {
 SideBar {
     padding: 0 2px;
     border: none;
+    border-top: 1px solid #5a5a5a;
 }
 
 ToggleWidgetLabel {
@@ -460,16 +441,8 @@ FieldComboBox:hover {
     background-color: #5b5b5b;
 }
 
-FieldComboBox[invalid="true"] {
+FieldComboBox[invalid="true"]:hover, FieldComboBox[invalid="true"]:focus {
     background: #fb9a99;
-}
-
-FieldComboBox[invalid="true"]:hover {
-    background: #fbb8b6;
-}
-
-FieldComboBox[invalid="true"]:focus {
-    background: #fbb8b6;
 }
 
 HorizontalLine {
@@ -478,4 +451,56 @@ HorizontalLine {
     border-bottom: 0;
     border-right: 0;
 }
-"""
+
+Ribbon {
+}
+
+Ribbon::tab-bar {
+    left: 5px;
+}
+
+Ribbon QTabBar {
+    font-size: 16pt;
+    background: #4f4f4f;
+}
+
+Ribbon QTabBar::tab {
+    min-width: 8ex;
+    padding: 4px 10px;
+    border: 1px solid #4f4f4f;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-color: #dddddd;
+
+    margin-top: 5px;
+
+    /*To prevent gaps in horizontal line*/
+    margin-left: -1px;
+    margin-right: -1px;
+}
+
+Ribbon QTabBar::tab:selected,
+Ribbon QTabBar::tab:hover {
+    color: white;
+}
+
+Ribbon QTabBar::tab:selected {
+    background: #2e2e2e;
+    margin-left: -4px;
+    margin-right: -4px;
+    border-color: #dddddd;
+    border-bottom-color: #2e2e2e;
+}
+
+Ribbon QTabBar::tab:!selected {
+    /*Non-selected tabs look smaller*/
+    margin-top: 2px;
+}
+
+Ribbon QTabBar::tab:first:selected {
+    margin-left: 0;
+}
+
+Ribbon QTabBar::tab:last:selected {
+    margin-right: 0;
+}

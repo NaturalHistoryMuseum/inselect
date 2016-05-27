@@ -20,9 +20,9 @@ class TestObjectsView(GUITest):
         w.open_file(TESTDATA / 'barcodes.inselect')
         w.show_tab(1)
         if expanded:
-            w.show_expanded()
+            w.view_object.show_expanded()
         else:
-            w.show_grid()
+            w.view_object.show_grid()
         w.showFullScreen()
         self.run_event_loop()
 
