@@ -376,12 +376,21 @@ PanelContainer {
     background: #4f4f4f;
     padding: -10px;
     margin: 2;
-    border: 1px solid #dddddd;
     border-radius: 2px;
 }
 
 PanelContainer QWidget {
     background: #4f4f4f;
+}
+
+PanelContainer QPushButton, PanelContainer QGroupBox {
+    border: 1px solid #666666;
+}
+
+PanelContainer QGroupBox {
+    border-radius: 2px;
+    /* Prevent last QGroupBox from loosing its lower border */
+    margin-bottom: 1px;
 }
 
 BoldLabel {
