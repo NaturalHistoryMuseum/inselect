@@ -180,10 +180,6 @@ QComboBox::down-arrow {
     border: 1px solid #5A5A5A;
 }
 
-QSplitter {
-    border-top: 1px solid #5a5a5a;
-}
-
 /* No image for splitter handle */
 QSplitter::handle:horizontal {
     image: none;
@@ -354,7 +350,6 @@ QToolBar QToolButton::menu-indicator {
 SideBar {
     padding: 0 2px;
     border: none;
-    border-top: 1px solid #5a5a5a;
 }
 
 ToggleWidgetLabel {
@@ -462,6 +457,10 @@ HorizontalLine {
 }
 
 Ribbon {
+}
+
+Ribbon::pane {
+    border-bottom: 1px solid #5a5a5a;;
 }
 
 Ribbon::tab-bar {
