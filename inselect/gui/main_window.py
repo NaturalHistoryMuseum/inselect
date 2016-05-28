@@ -1063,7 +1063,6 @@ class MainWindow(QtGui.QMainWindow):
             "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
         )
         self.boxes_view_action.setShortcuts(['ctrl+1', 'ctrl+b'])
-        group.addAction(self.boxes_view_action)
         self.objects_view_action = QAction(
             "Ob&jects", self, checkable=True,
             triggered=partial(self.show_tab, 1)
