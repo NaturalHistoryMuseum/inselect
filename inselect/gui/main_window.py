@@ -1371,6 +1371,7 @@ class MainWindow(QtGui.QMainWindow):
     @report_to_user
     def show_tab(self, index):
         self.ribbon.setCurrentIndex(index)
+        self.sync_ui()
 
     @report_to_user
     def next_previous_tab(self, next):
