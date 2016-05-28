@@ -919,7 +919,7 @@ class MainWindow(QtGui.QMainWindow):
             icon=load_icon(':/icons/open.png')
         )
         self.copy_to_new_document_action = QAction(
-            "Copy to new document...", self,
+            "Copy to &new document...", self,
             triggered=self.copy_to_new_document
         )
 
@@ -937,7 +937,7 @@ class MainWindow(QtGui.QMainWindow):
             icon=load_icon(':/icons/export_csv.png')
         )
         self.save_screengrab_action = QAction(
-            "Save screen grab", self,
+            "Save screen &grab...", self,
             triggered=self.save_screengrab
         )
         self.close_action = QAction(
@@ -1301,7 +1301,7 @@ class MainWindow(QtGui.QMainWindow):
         self._file_menu = QMenu("&File", self)
         self._file_menu.addAction(self.open_action)
         recent = self._file_menu.addMenu(
-            load_icon(':/icons/recent.png'), 'Recent documents'
+            load_icon(':/icons/recent.png'), '&Recent documents'
         )
         for action in self.recent_doc_actions:
             recent.addAction(action)
