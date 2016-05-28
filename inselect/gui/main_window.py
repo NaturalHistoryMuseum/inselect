@@ -19,6 +19,8 @@ from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, is_writable
 
+import prompts
+
 from .about import show_about_box
 from .colours import colour_scheme_choice
 from .cookie_cutter_choice import cookie_cutter_choice
@@ -1619,9 +1621,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def sync_status_message(self):
         if self.boxes_view == self.views.currentWidget():
-            prompt = ('Right click + drag to create box  |  '
-                      'CTRL + N / P to move between boxes  |  '
-                      'SHIFT / ALT + arrow keys to adjust selected box')
+            prompt = prompts.BOXES_VIEW_TIP
         else:
-            prompt = 'CTRL + N / P or arrow keys to move between boxes'
+            prompt = prompts.OBJECTS_VIEW_TIP
         self.status_message.setText(prompt)
