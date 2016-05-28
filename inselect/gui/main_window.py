@@ -1055,7 +1055,6 @@ class MainWindow(QtGui.QMainWindow):
                 self.plugin_config_ui_actions[index] = ui_action
 
         # View menu
-        group = QActionGroup(self)
         # It is tempting to set the trigger to
         # partial(self.ribbon.setCurrentIndex, 0) but this causes a segfault when
         # the application exits on linux. It also means that exceptions will be
@@ -1064,14 +1063,12 @@ class MainWindow(QtGui.QMainWindow):
             "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
         )
         self.boxes_view_action.setShortcuts(['ctrl+1', 'ctrl+b'])
-        self.boxes_view_action.setChecked(True)
         group.addAction(self.boxes_view_action)
         self.objects_view_action = QAction(
             "Ob&jects", self, checkable=True,
             triggered=partial(self.show_tab, 1)
         )
         self.objects_view_action.setShortcuts(['ctrl+2', 'ctrl+j'])
-        group.addAction(self.objects_view_action)
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
@@ -1084,6 +1081,7 @@ class MainWindow(QtGui.QMainWindow):
             KeySequenceFullScreen = QtGui.QKeySequence.FullScreen
         self.full_screen_action = QAction(
             "&Full screen", self, shortcut=KeySequenceFullScreen,
+            checkable=True,
             triggered=self.toggle_full_screen
         )
 
@@ -1603,6 +1601,8 @@ class MainWindow(QtGui.QMainWindow):
             action.setEnabled(document)
 
         # View
+        self.boxes_view_action.setChecked(boxes_view_visible)
+        self.objects_view_action.setChecked(objects_view_visible)
         self.zoom_in_action.setEnabled(document)
         self.zoom_out_action.setEnabled(document)
         self.zoom_home_action.setEnabled(document)
@@ -1618,6 +1618,7 @@ class MainWindow(QtGui.QMainWindow):
         self.view_object.expanded_action.setEnabled(objects_view_visible)
         for action in self.colour_scheme_actions:
             action.setEnabled(boxes_view_visible)
+        self.full_screen_action.setChecked(self.isFullScreen())
 
     def sync_status_message(self):
         if self.boxes_view == self.views.currentWidget():
