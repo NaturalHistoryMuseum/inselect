@@ -183,6 +183,7 @@ QComboBox::down-arrow {
 /* No image for splitter handle */
 QSplitter::handle:horizontal {
     image: none;
+    background: #202020;
 }
 
 /* Taken from https://bugreports.qt.io/browse/QTBUG-13768 */
