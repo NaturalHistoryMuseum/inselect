@@ -1030,6 +1030,7 @@ class MainWindow(QtGui.QMainWindow):
         )
         group.addAction(self.sort_by_columns_action)
         self.sort_by_rows_action.setChecked(not sort_items_choice().by_columns)
+        self.sort_by_columns_action.setChecked(sort_items_choice().by_columns)
 
         # Plugins
         # Plugin shortcuts start at F5
