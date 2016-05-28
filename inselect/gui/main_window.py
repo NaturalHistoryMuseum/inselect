@@ -1104,7 +1104,7 @@ class MainWindow(QtGui.QMainWindow):
             icon=load_icon(':/icons/zoom_home.png')
         )
         self.zoom_to_selection_action = QAction(
-            "Follow selection", self, shortcut='z',
+            "&Follow selection", self, shortcut='z',
             triggered=self.toggle_zoom_to_selection, checkable=True,
             icon=load_icon(':/icons/zoom_selected.png')
         )
@@ -1359,7 +1359,7 @@ class MainWindow(QtGui.QMainWindow):
         self._view_menu.addAction(self.view_object.grid_action)
         self._view_menu.addAction(self.view_object.expanded_action)
         self._view_menu.addSeparator()
-        colours_popup = self._view_menu.addMenu('&Colour scheme')
+        colours_popup = self._view_menu.addMenu('&Box colours')
         for action in self.colour_scheme_actions:
             colours_popup.addAction(action)
 
