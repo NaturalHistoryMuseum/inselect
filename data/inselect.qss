@@ -23,6 +23,7 @@ QDialog QPushButton {
     padding: 8px 36px;
     border-radius: 12px;
     margin-left: 6px;
+    background: #5b5b5b;
 }
 
 QAbstractItemView {
@@ -43,20 +44,27 @@ QCheckBox, QRadioButton {
     border: 0;
 }
 
-QRadioButton::indicator {
+QCheckBox::indicator, QRadioButton::indicator {
     border: 2px solid #3a3939;
-    border-radius: 6px;
-    background: white;
+    background: #dddddd;
     width: 10px;
     height: 10px;
-    margin-left: 5px;
+    margin: 0 4px;
 }
 
-QRadioButton::indicator:checked {
+QRadioButton::indicator {
+    border-radius: 6px;
+}
+
+QCheckBox::indicator:hover, QRadioButton::indicator:hover {
+    background: white;
+}
+
+QCheckBox::indicator:checked, QRadioButton::indicator:checked {
     background: #8d20ae;
 }
 
-QRadioButton::indicator:disabled {
+QCheckBox::indicator:disabled, QRadioButton::indicator:disabled {
     background: #3e3e3e;
 }
 
@@ -231,6 +239,7 @@ QPushButton {
     padding: 8px;
     border-radius: 12px;
     text-align: center;
+    background: #5b5b5b;
 }
 
 /* No drop-down menu item */
@@ -240,7 +249,7 @@ QPushButton::menu-indicator {
 
 QPushButton:hover {
     color: white;
-    background: #5b5b5b;
+    background: #7c7c7c;
 }
 
 QPushButton:default {
