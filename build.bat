@@ -4,7 +4,10 @@ echo Building Inselect
 
 echo Clean
 del /S *pyc
-rmdir /Q /S dist build 
+rmdir /Q /S dist build
+
+echo Freeze icons
+python -m bin.freeze_icons
 
 echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect

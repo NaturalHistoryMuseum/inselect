@@ -63,13 +63,25 @@ python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
 python -c "from gouda.engines import InliteEngine; print(InliteEngine.available())"
 ```
 
-## Build
+# Developing
+
+Icons are stored individually in `icons`. They are frozen into
+a python file `inselect/gui/icons.py` by running
+
+```
+python -m bin.freeze_icons
+```
+
+# Build
+
+The build script freezes icons
 
 ```
 build.sh
 ```
 
 Installer will be in `dist`.
+
 
 # Install Miniconda 32 bit
 * Download and run [Miniconda-latest-Windows-x86.exe](https://repo.continuum.io/miniconda/)
@@ -131,7 +143,18 @@ python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
 python -c "from gouda.engines import InliteEngine; print(InliteEngine.available())"
 ```
 
-## Build
+# Developing
+
+Icons are stored individually in `icons`. They are frozen into
+a python file `inselect/gui/icons.py` by running
+
+```
+python -m bin.freeze_icons
+```
+
+# Build
+
+The build script freezes icons
 
 ```
 build.sh

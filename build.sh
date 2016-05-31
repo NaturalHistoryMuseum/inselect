@@ -11,6 +11,9 @@ rm -rf cover build dist
 find . -name "*pyc" -print0 | xargs -0 rm -rf
 find . -name __pycache__ -print0 | xargs -0 rm -rf
 
+echo Freeze icons
+pyside-rcc icons.qrc > inselect/gui/icons.py
+
 echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 

@@ -6,17 +6,6 @@ git pull
 
 * If necesary, bump the version in `inselect/__init__.py`
 
-* If the icons in inselect/data change then you need to refresh a Python
-  file:
-
-```
-pyside-rcc icons.qrc > inselect/gui/icons.py
-git commit -m "Refreshed icons" inselect/gui/icons.py
-git push origin master
-```
-
-This taken from a [stackoverflow thread](http://stackoverflow.com/a/11547144)
-
 * Check everything into git and `git push origin master`
 * Build the Python package and Mac OS X installer:
 

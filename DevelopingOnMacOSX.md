@@ -107,10 +107,20 @@ python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
 python -c "from gouda.engines import LibDMTXEngine; print(LibDMTXEngine.available())"
 ```
 
-## Build
+# Developing
+
+Icons are stored individually in `icons`. They are frozen into
+a python file `inselect/gui/icons.py` by running
 
 ```
-cd ~/projects/inselect
+pyside-rcc icons.qrc > inselect/gui/icons.py
+```
+
+# Build
+
+The build script freezes icons
+
+```
 ./build.sh
 ```
 
