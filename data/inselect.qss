@@ -424,6 +424,10 @@ FieldComboBox {
     /* Fiddling here for consistency with FieldEdit */
     padding-top: 2px;
     padding-left: 5px;
+}
+
+/*This margin needed only on Mac to align LHS of FieldEdit and FieldComboBox*/
+FieldComboBox[style=QMacStyle] {
     margin-left: 3px;
 }
 
