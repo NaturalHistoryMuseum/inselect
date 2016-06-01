@@ -62,7 +62,7 @@ QCheckBox::indicator:hover, QRadioButton::indicator:hover {
 }
 
 QCheckBox::indicator:checked, QRadioButton::indicator:checked {
-    background: #8d20ae;
+    background: #aa66cc;
 }
 
 QCheckBox::indicator:disabled, QRadioButton::indicator:disabled {
@@ -206,7 +206,7 @@ QProgressBar {
 
 QProgressBar::chunk {
     width: 1px;
-    background: #8d20ae;
+    background: #aa66cc;
 }
 
 QSlider {
@@ -257,7 +257,7 @@ QPushButton:hover {
 
 QPushButton:default {
     color: white;
-    background: #8d20ae;
+    background: #aa66cc;
     border: white;
 }
 
@@ -277,14 +277,14 @@ QMenu::icon {
 
 QMenu::item:selected {
     color: white;
-    background: rgba(141, 32, 174, 88);
+    background: rgba(170, 102, 204, 88);
     border: 1px solid #3b034c;
     border-radius: 3px;
 }
 
 QMenu::item:checked {
     color: white;
-    background: rgba(141, 32, 174, 88);
+    background: rgba(170, 102, 204, 88);
     border: 1px solid #3b034c;
     border-radius: 3px;
 }
