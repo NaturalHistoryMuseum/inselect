@@ -400,11 +400,6 @@ BoldLabel {
     font-size: 16px;
 }
 
-/*HeaderLabel {
-    font-weight: bold;
-    font-size: 16px;
-}
-*/
 RevealPathLabel {
     text-decoration: underline;
 }
