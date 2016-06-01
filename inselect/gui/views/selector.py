@@ -1,5 +1,5 @@
 from PySide.QtCore import Qt
-from PySide.QtGui import QAbstractItemView, QSlider
+from PySide.QtGui import QAbstractItemView, QSizePolicy, QSlider
 
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import RectRole
@@ -16,6 +16,8 @@ class SelectorView(QAbstractItemView):
         self._updating_selection = False
 
         self.slider = QSlider(Qt.Horizontal, parent=parent)
+        self.slider.setObjectName('viewSelectorSlider')
+        self.slider.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.slider.setTickPosition(QSlider.TicksBothSides)
         self.slider.setMinimum(-1)
         self.slider.setMaximum(1)

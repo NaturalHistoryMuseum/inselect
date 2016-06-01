@@ -35,7 +35,7 @@ class TestActionState(GUITest):
 
         # View
         self.assertTrue(w.boxes_view_action.isEnabled())
-        self.assertTrue(w.metadata_view_action.isEnabled())
+        self.assertTrue(w.objects_view_action.isEnabled())
         self.assertFalse(w.zoom_in_action.isEnabled())
         self.assertFalse(w.zoom_out_action.isEnabled())
         self.assertFalse(w.zoom_to_selection_action.isEnabled())
@@ -65,7 +65,7 @@ class TestActionState(GUITest):
 
         # View
         self.assertTrue(w.boxes_view_action.isEnabled())
-        self.assertTrue(w.metadata_view_action.isEnabled())
+        self.assertTrue(w.objects_view_action.isEnabled())
         self.assertTrue(w.zoom_in_action.isEnabled())
         self.assertTrue(w.zoom_out_action.isEnabled())
         self.assertTrue(w.zoom_to_selection_action.isEnabled())
@@ -108,15 +108,17 @@ class TestActionState(GUITest):
         "Checked state of view actions reflects the active view"
         w = self.window
 
-        w.show_tab(0)
+        w.boxes_view_action.trigger()
         self.assertTrue(w.boxes_view_action.isChecked())
-        self.assertFalse(w.metadata_view_action.isChecked())
+        self.assertFalse(w.objects_view_action.isChecked())
 
-        w.show_tab(1)
+        w.objects_view_action.trigger()
         self.assertFalse(w.boxes_view_action.isChecked())
-        self.assertTrue(w.metadata_view_action.isChecked())
+        self.assertTrue(w.objects_view_action.isChecked())
 
-        w.show_tab(0)
+        w.boxes_view_action.trigger()
+        self.assertTrue(w.boxes_view_action.isChecked())
+        self.assertFalse(w.objects_view_action.isChecked())
 
 
 if __name__ == '__main__':

@@ -36,8 +36,8 @@ pip install -r requirements.txt
 ```
 
 ## OpenCV
-Version of `numpy` is pinned by opencv installation but we want latest version -
-I have not encountered any problems by installing the latest version.
+Version of `numpy` is pinned by opencv installation but we want a later
+version.
 
 `jjhelmus` provides versions after `2.4.10` but these make the Mac build
 extremely problematic by introducing many `dylib` dependencies that are
