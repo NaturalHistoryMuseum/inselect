@@ -122,6 +122,7 @@ def show_shortcuts(main_window):
     """Shows a modal QDialog of shortcuts
     """
     dialog = QDialog(main_window)
+    dialog.setWindowTitle('Inselect')
 
     hlayout = QHBoxLayout()
     hlayout.addWidget(_column1(main_window), alignment=Qt.AlignTop)
