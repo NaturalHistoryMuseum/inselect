@@ -5,9 +5,10 @@ import subprocess
 import sys
 
 from PySide.QtCore import Qt
-from PySide.QtGui import QFormLayout, QFrame, QLabel, QWidget
+from PySide.QtGui import QFormLayout, QLabel, QWidget
 
 from inselect.lib.utils import format_dt_display
+from inselect.gui.utils import BoldLabel, HorizontalLine
 
 from .popup_panel import PopupPanel
 from .utils import report_to_user
@@ -55,20 +56,6 @@ class RevealPathLabel(QLabel):
         """
         if self.path:
             reveal_path(self.path)
-
-
-class BoldLabel(QLabel):
-    """A label in a bold font
-    """
-    pass
-
-
-class HorizontalLine(QFrame):
-    """A horizontal line
-    """
-    def __init__(self, parent=None):
-        super(HorizontalLine, self).__init__(parent)
-        self.setFrameShape(QFrame.HLine)
 
 
 class InfoWidget(PopupPanel):

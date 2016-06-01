@@ -20,7 +20,7 @@ def sort_items_choice():
 class SortDocumentItems(object):
     def __init__(self):
         # Key holds an integer
-        self._by_columns = 1 == QSettings().value(_PATH, False)
+        self._by_columns = 1 == QSettings().value(_PATH, 0)
 
     @property
     def by_columns(self):

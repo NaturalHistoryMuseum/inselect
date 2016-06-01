@@ -35,6 +35,7 @@ from .plugins.subsegment import SubsegmentPlugin
 from .recent_documents import RecentDocuments
 from .toolbar_ribbon import ToolbarRibbon
 from .roles import RotationRole
+from .shortcuts_help import show_shortcuts, show_shortcuts_post_startup
 from .sidebar import SideBar
 from .sort_document_items import sort_items_choice
 from .user_template_choice import user_template_choice
@@ -736,6 +737,18 @@ class MainWindow(QtGui.QMainWindow):
     def about(self):
         show_about_box(self)
 
+    @report_to_user
+    def show_shortcuts(self):
+        """Shows a modal QDialog of shortcuts.
+        """
+        show_shortcuts(self)
+
+    @report_to_user
+    def show_shortcuts_post_startup(self):
+        """Shows a modal QDialog of shortcuts, if this appropriate.
+        """
+        show_shortcuts_post_startup(self)
+
     def run_in_worker(self, operation, name, complete_fn=None):
         """Runs the callable operation in a worker thread. The callable
         complete_fn is called when the operation has finished.
@@ -994,7 +1007,7 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         self.delete_action = QAction(
-            "&Delete selected", self,
+            "&Delete", self,
             shortcut=QtGui.QKeySequence.Delete,
             triggered=self.delete_selected
         )
@@ -1125,6 +1138,11 @@ class MainWindow(QtGui.QMainWindow):
             group.addAction(action)
 
         # Help menu
+        self.show_shortcuts_action = QAction(
+            "&Show shortcuts", self, triggered=self.show_shortcuts,
+            shortcut='?'
+        )
+
         # Not using load_icon for this coloured icon that is never disabled
         self.about_action = QAction(
             "&About", self, triggered=self.about,
@@ -1362,6 +1380,7 @@ class MainWindow(QtGui.QMainWindow):
             colours_popup.addAction(action)
 
         self._help_menu = QMenu("&Help", self)
+        self._help_menu.addAction(self.show_shortcuts_action)
         self._help_menu.addAction(self.about_action)
 
         self.menuBar().addMenu(self._file_menu)

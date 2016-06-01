@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from PySide import QtGui
-from PySide.QtCore import QSettings, QSize, QLocale, QCoreApplication
+from PySide.QtCore import QCoreApplication, QLocale, QSettings, QSize, QTimer
 
 import inselect
 
@@ -92,6 +92,7 @@ def main(args):
     if parsed.quit:
         sys.exit(0)
     else:
+        QTimer.singleShot(100, window.show_shortcuts_post_startup)
         sys.exit(app.exec_())
 
 
