@@ -48,7 +48,7 @@ you created above.
 
 ```
 conda update --yes conda
-conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.2.1 pywin32=220 numpy=1.11.0 scipy==0.17.0 scikit-learn=0.17.1
+conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.2.1 pywin32=220 numpy=1.11.0 scipy==0.17.1 scikit-learn=0.17.1
 activate inselect
 python -m pip install --upgrade pip
 pip install -r requirements.txt

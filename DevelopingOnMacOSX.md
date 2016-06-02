@@ -24,7 +24,7 @@ conda update --yes conda
 # Inselect env
 
 ```
-conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.1.2 numpy=1.10.1 scipy==0.17.0 scikit-learn=0.17.1
+conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.1.2 numpy=1.11.0 scipy==0.17.1 scikit-learn=0.17.1
 source activate inselect
 ```
 
@@ -44,7 +44,7 @@ extremely problematic by introducing many `dylib` dependencies that are
 troublesome to freeze.
 ```
 conda install --yes -c https://conda.binstar.org/jjhelmus opencv=2.4.10
-conda install --yes numpy=1.10.1
+conda install --yes numpy=1.11.0
 ```
 
 ## setuptools
