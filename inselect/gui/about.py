@@ -73,7 +73,7 @@ def _machine_summary():
 
 
 def show_about_box(parent=None):
-    """Shows a model about box
+    """Shows a modal about box
     """
     body = u"""<h1>{application} {version}</h1>
 

@@ -6,9 +6,9 @@ from io import BytesIO
 from itertools import groupby
 
 from PySide.QtCore import Qt
-from PySide.QtGui import (QColor, QIcon, QImage, QItemSelection,
-                          QItemSelectionModel, QMessageBox, QPainter, QPixmap,
-                          QWidget)
+from PySide.QtGui import (QColor, QFrame, QIcon, QImage, QItemSelection,
+                          QItemSelectionModel, QLabel, QMessageBox, QPainter,
+                          QPixmap, QWidget)
 
 from copy_box import copy_details_box
 
@@ -177,3 +177,25 @@ def update_selection_model(model, sm, new_selection):
         # Set an arbitrary row as the current index
         sm.setCurrentIndex(model.index(new_selection.pop(), 0),
                            QItemSelectionModel.Current)
+
+
+class HorizontalLine(QFrame):
+    """A horizontal line
+    """
+    def __init__(self, parent=None):
+        super(HorizontalLine, self).__init__(parent)
+        self.setFrameShape(QFrame.HLine)
+
+
+class VerticalLine(QFrame):
+    """A vertical line
+    """
+    def __init__(self, parent=None):
+        super(VerticalLine, self).__init__(parent)
+        self.setFrameShape(QFrame.VLine)
+
+
+class BoldLabel(QLabel):
+    """A label in a bold font
+    """
+    pass

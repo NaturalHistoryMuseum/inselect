@@ -2,6 +2,8 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.32
 -------------
+- Fixed #315 - Ribbon
+- Fixed #207 - Help for hotkeys
 
 Version 0.1.31
 -------------

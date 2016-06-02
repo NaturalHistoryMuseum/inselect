@@ -25,6 +25,9 @@ class PopupPanel(QGroupBox):
         layout.setAlignment(Qt.AlignTop)
         layout.setSpacing(0)
         layout.addWidget(ToggleWidgetLabel(label, widget, initially_visible))
+        # Tempting to call widget.setVisible(initially_visible) but this would
+        # lead to the widget appearing instantly, most likely a top-level
+        # window.
         if not initially_visible:
             widget.setVisible(False)
         container = PanelContainer(widget)

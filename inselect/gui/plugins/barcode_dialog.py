@@ -1,20 +1,12 @@
 from PySide.QtGui import (QDialog, QRadioButton, QVBoxLayout, QLabel, QWidget,
-                          QDialogButtonBox, QFrame)
+                          QDialogButtonBox)
 
 from inselect.lib.utils import debug_print
-from inselect.gui.utils import HTML_LINK_TEMPLATE
+from inselect.gui.utils import HTML_LINK_TEMPLATE, HorizontalLine
 
 from .barcode_settings import (current_settings, update_settings,
                                inlite_available, libdmtx_available,
                                zbar_available)
-
-
-class HorizontalLine(QFrame):
-    """A horizontal line
-    """
-    def __init__(self, parent=None):
-        super(HorizontalLine, self).__init__(parent)
-        self.setFrameShape(QFrame.HLine)
 
 
 class BarcodeDialog(QDialog):

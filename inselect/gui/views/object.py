@@ -1,11 +1,11 @@
 from PySide.QtCore import QRect, QSize, QPoint, Qt
-from PySide.QtGui import (QColor, QListView, QBrush, QStyle, QTransform, QPen,
-                          QAbstractItemView, QStyledItemDelegate,
-                          QItemSelectionModel, QFont)
+from PySide.QtGui import (QAction, QActionGroup, QColor, QListView, QBrush,
+                          QStyle, QTransform, QPen, QAbstractItemView,
+                          QStyledItemDelegate, QItemSelectionModel, QFont)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
-from inselect.gui.utils import painter_state
+from inselect.gui.utils import load_icon, painter_state, report_to_user
 from inselect.gui.roles import (MetadataValidRole, PixmapRole, RectRole,
                                 RotationRole)
 
@@ -52,7 +52,7 @@ class CropDelegate(QStyledItemDelegate):
     @property
     def box_rect(self):
         "QRect of the complete box"
-        expanded = self.parent().expanded
+        expanded = self.parent().expanded_action.isChecked()
         return self.parent().viewport().rect() if expanded else QRect(0, 0, 250, 250)
 
     @property
@@ -183,22 +183,35 @@ class ObjectView(QListView):
     def __init__(self, parent=None):
         super(ObjectView, self).__init__(parent)
 
-        # Items are shown in a grid if False.
-        # A single item is shown expanded if True.
+        # Items are shown either in a grid or with a single item expanded
         # When more than one item is selected, view changes to grid.
-        self.expanded = False
 
         self.setItemDelegate(CropDelegate(self))
         self.setFlow(self.LeftToRight)
         self.setWrapping(True)
         self.setResizeMode(self.Adjust)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        # self.setStyleSheet("background-color: darkgray;")
 
         # Activating an item toggles the expanded state
         self.activated.connect(self.toggle_expanded)
 
         colour_scheme_choice().colour_scheme_changed.connect(self.colour_scheme_changed)
+
+        self._create_actions()
+
+    def _create_actions(self):
+        group = QActionGroup(self)
+        self.grid_action = QAction(
+            '&Grid', self, shortcut='ctrl+G', triggered=self.show_grid,
+            checkable=True, icon=load_icon(':/icons/show_grid.png')
+        )
+        self.grid_action.setChecked(True)
+        group.addAction(self.grid_action)
+        self.expanded_action = QAction(
+            '&Expanded', self, shortcut='ctrl+E', triggered=self.show_expanded,
+            checkable=True, icon=load_icon(':/icons/show_expanded.png')
+        )
+        group.addAction(self.expanded_action)
 
     def colour_scheme_changed(self):
         """Slot for colour_scheme_changed signal
@@ -211,24 +224,25 @@ class ObjectView(QListView):
         debug_print('ObjectView.selectionChanged')
 
         # Grid view unless exactly one item selected
-        if self.expanded and 1 != len(self.selectionModel().selectedIndexes()):
-            self.show_grid()
+        if (self.expanded_action.isChecked() and
+                1 != len(self.selectionModel().selectedIndexes())):
+            self.grid_action.trigger()
 
         super(ObjectView, self).selectionChanged(selected, deselected)
 
+    @report_to_user
     def show_grid(self):
         """Shows the list as a grid of squares
         """
         debug_print('ObjectView.show_grid')
-        self.expanded = False
         self._refresh()
 
+    @report_to_user
     def show_expanded(self):
         """Shows the first item of the selection expanded to fill the viewport.
         If the selection is empty, the first item in the list is selected.
         """
         debug_print('ObjectView.show_expanded')
-        self.expanded = True
 
         # Select a single item
         sm = self.selectionModel()
@@ -245,10 +259,10 @@ class ObjectView(QListView):
         """
         debug_print('ObjectView.toggle_expanded')
         self.selectionModel().select(index, QItemSelectionModel.Select)
-        if self.expanded:
-            self.show_grid()
+        if self.expanded_action.isChecked():
+            self.grid_action.trigger()
         else:
-            self.show_expanded()
+            self.expanded_action.trigger()
 
     def _refresh(self):
         debug_print('ObjectView._refresh')

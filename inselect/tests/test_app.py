@@ -50,7 +50,9 @@ class TestApp(unittest.TestCase):
         self.assertRaises(SystemExit, main, ['path to executable', '-l', loc])
         self.assertTrue(mock_exec_.called)
         mock_set_default.assert_called_once_with(loc)
-        mock_setlocale.assert_called_once_with(locale.LC_ALL, loc)
+        # Other actions inside main might cause setlocale to be called so
+        # should not assert number of calls.
+        mock_setlocale.assert_any_call(locale.LC_ALL, loc)
 
 
 if __name__ == '__main__':

@@ -20,6 +20,7 @@ setup_data = {
     'packages': ['inselect', 'inselect.gui.plugins', 'inselect.gui.views',
                  'inselect.gui.views.boxes', 'inselect.lib',
                  'inselect.lib.templates', 'inselect.scripts'],
+    'package_data': {'inselect': ['data/inselect.qss']},
     'test_suite': 'inselect.tests',
     'scripts': ['inselect/scripts/{0}.py'.format(script) for script in SCRIPTS],
     'install_requires': open('requirements.txt').readlines(),
@@ -54,6 +55,7 @@ setup_data = {
             ('{site_packages}/sklearn', 'sklearn'),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
+            ('{project_root}/data/inselect.qss', 'data/inselect.qss'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
@@ -90,6 +92,7 @@ def cx_setup():
     format_strings = {
         'site_packages': get_python_lib(),
         'environment_root': Path(sys.executable).parent,
+        'project_root': Path(__file__).parent,
     }
     include_files = []
     for i in setup_data['win32']['include_files']:
