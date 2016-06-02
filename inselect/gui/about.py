@@ -22,6 +22,8 @@ def _environment():
     """
     import cv2
     import numpy as np
+    import scipy
+    import sklearn
 
     # Bit depth of interpreter
     python_bit_depth = platform.architecture()[0]
@@ -39,6 +41,8 @@ def _environment():
         ('OpenCV', cv2.__version__),
         ('PySide', PySide.__version__),
         ('Qt', PySide.QtCore.__version__),  # Version compiled against
+        ('scikit-learn', sklearn.__version__),
+        ('SciPy', scipy.__version__),
     ]
 
     return '\n'.join(['<p>{0}: {1}</p>'.format(i, v) for i, v in versions])
