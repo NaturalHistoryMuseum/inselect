@@ -300,16 +300,20 @@ class MainWindow(QtGui.QMainWindow):
             if not self.close_document(document_path):
                 # User does not want to close the existing document
                 pass
-            elif document_path:
-                # Open the .inselect document
-                debug_print('Opening inselect document [{0}]'.format(document_path))
-                self.open_document(path=document_path)
-            elif image_path:
-                msg = u'Creating new inselect document for image [{0}]'
-                debug_print(msg.format(image_path))
-                self.new_document(image_path)
             else:
-                raise InselectError('Unknown file type [{0}]'.format(path))
+                # Process messages after closing to redraw the UI.
+                self.app.processEvents()
+
+                if document_path:
+                    # Open the .inselect document
+                    debug_print('Opening inselect document [{0}]'.format(document_path))
+                    self.open_document(path=document_path)
+                elif image_path:
+                    msg = u'Creating new inselect document for image [{0}]'
+                    debug_print(msg.format(image_path))
+                    self.new_document(image_path)
+                else:
+                    raise InselectError('Unknown file type [{0}]'.format(path))
 
     def new_document(self, path, default_metadata_items=None):
         """Creates and opens a new inselect document for the scanned image
