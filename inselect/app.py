@@ -107,4 +107,4 @@ def _stylesheet(user_stylesheet):
         path = root.joinpath('data/inselect.qss')
 
     with path.open() as infile:
-            return infile.read()
+        return infile.read()
