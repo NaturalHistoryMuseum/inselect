@@ -2,7 +2,7 @@
 
 On Windows, this tool expects PySide-rcc.exe to be within the PySide directory,
 which, at the time of writing, is where Anaconda on Windows installs it.
-On other OSes, this tool expects pyside-rcc' to be on the path.
+On other OSes, this tool expects pyside-rcc to be on the path.
 
 On OS X and Linux, the freeze could be implemented in bash simply as:
 
