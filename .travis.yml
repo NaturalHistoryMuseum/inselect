@@ -9,7 +9,7 @@ virtualenv:
 before_install:
   - sudo apt-get update
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-      sudo apt-get install -y --fix-missing libzbar-dev;
+      sudo apt-get install -y --fix-missing libzbar-dev pyside-tools;
     fi
 
   # We do this conditionally because it saves us some downloading if the
@@ -33,6 +33,7 @@ install:
   - pip install -r requirements.txt
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  - python -m bin.freeze_icons
 
 script:
   - nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
