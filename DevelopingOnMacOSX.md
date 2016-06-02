@@ -24,7 +24,7 @@ conda update --yes conda
 # Inselect env
 
 ```
-conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.2.1 numpy=1.10.1 scipy==0.17.0 scikit-learn=0.17.1
+conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.1.2 numpy=1.10.1 scipy==0.17.0 scikit-learn=0.17.1
 source activate inselect
 ```
 
