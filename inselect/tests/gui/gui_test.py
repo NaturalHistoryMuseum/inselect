@@ -1,10 +1,11 @@
 import unittest
 
-from mock import patch
+from mock import MagicMock, patch
 
 from PySide import QtCore, QtGui
 from PySide.QtGui import QMessageBox
 
+from inselect.gui import shortcuts_help
 from inselect.gui.main_window import MainWindow
 
 
@@ -24,6 +25,10 @@ class GUITest(unittest.TestCase):
             QtGui.QApplication([])
 
         cls.window = MainWindow(QtGui.qApp)
+
+        # Crude way of ensuring that the shortcuts help box is not shown at
+        # startup
+        shortcuts_help._show_shortcuts_at_startup = MagicMock(return_value=False)
 
     @classmethod
     def tearDownClass(cls):

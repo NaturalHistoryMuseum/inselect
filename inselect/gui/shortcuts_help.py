@@ -115,7 +115,7 @@ def _show_shortcuts_at_startup():
     """True if shortcuts should be shown at startup; default True.
     """
     # Key holds an integer
-    return 1 == QSettings().value(_KEY, True)
+    return 1 == QSettings().value(_KEY, 1)
 
 
 def show_shortcuts(main_window):
@@ -174,5 +174,5 @@ def show_shortcuts_post_startup(main_window):
     selected.
     """
     # Key holds an integer
-    if 1 == QSettings().value(_KEY, 1):
+    if _show_shortcuts_at_startup():
         show_shortcuts(main_window)

@@ -5,6 +5,8 @@ from mock import patch
 from PySide.QtCore import QSettings
 from PySide.QtGui import QDialog, QMessageBox
 
+from inselect.gui import shortcuts_help
+
 from gui_test import GUITest
 
 
@@ -22,17 +24,19 @@ class TestHelpBoxes(GUITest):
         self.window.show_shortcuts()
         self.assertEqual(1, mock_exec.call_count)
 
-    @patch.object(QSettings, 'value', return_value=1)
+    @patch.object(shortcuts_help, '_show_shortcuts_at_startup', return_value=True)
     @patch.object(QDialog, 'exec_', return_value=QMessageBox.Ok)
-    def test_show_shortcuts_post_startup(self, mock_exec, mock_value):
+    def test_show_shortcuts_post_startup(self, mock_exec, mock_show):
         self.window.show_shortcuts_post_startup()
         mock_exec.assert_called_once_with()
+        mock_show.assert_called_with()
 
-    @patch.object(QSettings, 'value', return_value=0)
+    @patch.object(shortcuts_help, '_show_shortcuts_at_startup', return_value=False)
     @patch.object(QDialog, 'exec_', return_value=QMessageBox.Ok)
-    def test_do_not_show_shortcuts_post_startup(self, mock_exec, mock_value):
+    def test_do_not_show_shortcuts_post_startup(self, mock_exec, mock_show):
         self.window.show_shortcuts_post_startup()
         mock_exec.assert_not_called()
+        mock_show.assert_called_with()
 
 
 if __name__ == '__main__':
