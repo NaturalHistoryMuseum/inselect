@@ -109,16 +109,16 @@ python -c "from gouda.engines import LibDMTXEngine; print(LibDMTXEngine.availabl
 
 # Developing
 
-Icons are stored individually in `icons`. They are frozen into
+Icons are stored as individual files in `icons`. They are frozen into
 a python file `inselect/gui/icons.py` by running
 
 ```
-pyside-rcc icons.qrc > inselect/gui/icons.py
+python -m bin.freeze_icons
 ```
 
 # Build
 
-The build script freezes icons
+The build script freezes icons.
 
 ```
 ./build.sh
