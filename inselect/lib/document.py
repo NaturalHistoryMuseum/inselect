@@ -66,14 +66,14 @@ class InselectDocument(object):
     # TODO LH Validate rotation?
 
     def __init__(self, scanned=None, scanned_path=None, thumbnail=None,
-                 items=[], properties={}):
+                 items=None, properties=None):
         """Scanned - InselectImage or None
         scanned_path - Path or None
         thumbnail - InselectImage or None
         items - list of dicts
         properties - dict
         """
-        items = self._preprocess_items(items)
+        items = self._preprocess_items(items if items else [])
 
         # TODO Validate metadata fields
         # TODO Validate properties
@@ -102,7 +102,7 @@ class InselectDocument(object):
         # Need either thumbnail or scanned
         if self._scanned.available or self._thumbnail.available:
             self._items = items
-            self._properties = properties
+            self._properties = properties if properties else {}
         else:
             raise InselectError('Either scanned and/or thumbnail should be given')
 
