@@ -72,6 +72,8 @@ def _column1(main_window):
     _add_row(layout, main_window.delete_action)
     _add_row(layout, main_window.rotate_clockwise_action)
     _add_row(layout, main_window.rotate_counter_clockwise_action)
+    for plugin in main_window.plugin_actions:
+        _add_row(layout, plugin)
 
     return panel
 
@@ -81,6 +83,11 @@ def _column2(main_window):
     """
     panel, layout = _new_panel()
 
+    _add_header(layout, 'View')
+    _add_row(layout, main_window.full_screen_action)
+    _add_row(layout, main_window.toggle_plugin_image_action)
+
+    _add_hline(layout)
     _add_header(layout, 'Tab navigation')
     _add_row(layout, main_window.boxes_view_action)
     _add_row(layout, main_window.objects_view_action)
