@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.33
+-------------
+- #320 Some view menu items missing from keyboard shortcuts box
+
 Version 0.1.32
 -------------
 - #315 Ribbon
