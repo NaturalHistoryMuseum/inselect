@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import QCoreApplication
+from PySide.QtCore import QCoreApplication, QSize
 
 from gui_test import GUITest
 
@@ -79,6 +79,18 @@ class TestPersistWindowState(GUITest):
 
         w.toggle_full_screen()
         self.assertFalse(w.isFullScreen())
+
+    def test_show_size(self):
+        "Show with size"
+        w = self.window
+
+        w.showNormal()
+        w.show_with_size(QSize(300, 400))
+        self.assertEqual(QSize(300, 400), w.size())
+
+        w.show_with_size(QSize(800, 600))
+        self.assertEqual(QSize(800, 600), w.size())
+
 
 if __name__ == '__main__':
     unittest.main()
