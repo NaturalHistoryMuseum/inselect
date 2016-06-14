@@ -25,6 +25,10 @@ a = Analysis(['inselect.py'],
 # of manipulating Analysis.binaries.
 
 MISSING_DYLIBS = (
+    'libiomp5.dylib',
+    'libmkl_intel_lp64.dylib',
+    'libmkl_intel_thread.dylib',
+    'libmkl_core.dylib',
     'libQtCore.4.dylib',
     'libQtGui.4.dylib',
     'libpng16.16.dylib',
