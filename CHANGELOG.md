@@ -2,7 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.34
 -------------
-Command-line option to set window size #325
+- #325 Command-line option to set window size
 
 Version 0.1.33
 -------------
