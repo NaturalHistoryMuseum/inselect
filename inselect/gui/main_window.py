@@ -1126,7 +1126,7 @@ class MainWindow(QtGui.QMainWindow):
         # TODO LH Is F3 (normally meaning 'find next') really the right
         # shortcut for the 'toggle plugin image' action?
         self.toggle_plugin_image_action = QAction(
-            "&Display plugin image", self, shortcut="f3",
+            "&Toggle plugin image", self, shortcut="f3",
             triggered=self.toggle_plugin_image,
             statusTip="Display plugin image", checkable=True
         )
