@@ -1579,7 +1579,16 @@ class MainWindow(QtGui.QMainWindow):
         s.setValue("mainwindow/pos", self.pos())
         s.setValue("mainwindow/size", self.size())
 
+    def show_with_size(self, size):
+        """Shows the window using the integer values given in size, which
+        should be a tuple (width, height)
+        """
+        self.resize(size)
+        self.show()
+
     def show_from_geometry_settings(self):
+        """Shows the window using the QSettings in mainwindow/geometry
+        """
         debug_print('MainWindow.show_from_geometry_settings')
 
         # TODO LH What if screen resolution, desktop config change or roaming

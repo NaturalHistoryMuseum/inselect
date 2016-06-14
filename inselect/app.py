@@ -1,5 +1,6 @@
 import argparse
 import locale
+import re
 import sys
 
 from pathlib import Path
@@ -48,6 +49,10 @@ def main(args):
         '-v', '--version', action='version',
         version='%(prog)s ' + inselect.__version__
     )
+    parser.add_argument(
+        '-w', '--window-size', action='store', type=_window_size,
+        help='Set window size to WxH'
+    )
     parsed = parser.parse_args(args[1:])
 
     # TODO LH A command-line switch to clear all QSettings
@@ -82,7 +87,10 @@ def main(args):
     app.setStyleSheet(_stylesheet(parsed.stylesheet))
 
     window = MainWindow(app)
-    window.show_from_geometry_settings()
+    if parsed.window_size:
+        window.show_with_size(parsed.window_size)
+    else:
+        window.show_from_geometry_settings()
 
     if parsed.file:
         # Process messages before loading document
@@ -108,3 +116,16 @@ def _stylesheet(user_stylesheet):
 
     with path.open() as infile:
         return infile.read()
+
+
+def _window_size(v):
+    """Raises argparse.ArgumentTypeError() if v is not a string in the format
+    WxH, where W and H are integers greater than zero. Otherwise returns a QSize
+    of W and H.
+    """
+    match = re.match("^([0-9]+)x([0-9]+)$", v)
+    if match:
+        w, h = match.groups()
+        return QSize(int(w), int(h))
+    else:
+        raise argparse.ArgumentTypeError("Should be in the form 'WxH'")

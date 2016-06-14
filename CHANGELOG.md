@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.34
+-------------
+Command-line option to set window size #325
+
 Version 0.1.33
 -------------
 - #322 Build scripts to check that barcode readers are available
