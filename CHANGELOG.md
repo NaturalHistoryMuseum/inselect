@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.33
 -------------
+- #322 Build scripts to check that barcode readers are available
 - #320 Some view menu items missing from keyboard shortcuts box
 
 Version 0.1.32
