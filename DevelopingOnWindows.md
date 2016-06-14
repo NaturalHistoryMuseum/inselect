@@ -7,7 +7,8 @@ of Inselect
 * Download and run [Miniconda-latest-Windows-x86_64.exe](https://repo.continuum.io/miniconda/)
 
     * Destination folder should be called Miniconda64
-    * Uncheck 'Add Miniconda to my PATH'
+    * Uncheck 'Add Anaconda to my PATH'
+    * Uncheck 'Register Anaconda as my default Python 2.7'
 
 ## Minicoda64 shortcut
 
@@ -44,6 +45,11 @@ follows:
 You should run through these for both the 32-bit and 64-bit environments that
 you created above.
 
+## Install Visual C++ compiler for Python 2.7
+
+This is required to build `cx_Freeze`.
+Download from http://aka.ms/vcpython27 and install with defaults.
+
 ## Inselect environment
 
 ```
@@ -51,10 +57,22 @@ conda update --yes conda
 conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.2.1 pywin32=220 numpy=1.11.0 scipy==0.17.1 scikit-learn=0.17.1
 activate inselect
 python -m pip install --upgrade pip
+
+# Visual C++ is required to build cx_Freeze
+"%HOMEPATH%\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat"
 pip install -r requirements.txt
+
+# For 64-bit
 pip install -r requirements.win64
+
+# For 32-bit
+pip install -r requirements.win32
+
 FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\Scripts\pywin32_postinstall.py -install
 ```
+
+Don't worry about the "Can't install shortcuts..." message when you run the
+`pywin32_postinstall` step.
 
 ## Install OpenCV
 * Download [OpenCV 2.4.11](http://opencv.org/)
