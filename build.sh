@@ -14,8 +14,9 @@ find . -name __pycache__ -print0 | xargs -0 rm -rf
 echo Freeze icons
 python -m bin.freeze_icons
 
-echo Tests
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
+echo Check for presence of barcode engines
+python -c "from gouda.engines import ZbarEngine; assert ZbarEngine.available()"
+python -c "from gouda.engines import LibDMTXEngine; assert LibDMTXEngine.available()"
 
 echo Report startup time and check for non-essential binary imports
 mkdir build
@@ -26,6 +27,9 @@ for module in cv2 numpy pydmtx scipy sklearn zbar; do
         exit 1
     fi
 done
+
+echo Tests
+nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
 echo Source build
 ./setup.py sdist
