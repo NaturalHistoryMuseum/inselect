@@ -82,6 +82,14 @@ class UserTemplateChoice(QObject):
             pass
 
     @property
+    def current_path(self):
+        """The path to the selected UserTemplate or None, if the default
+        template is selected
+        """
+        current = QSettings().value(self.PATH_KEY)
+        return Path(current) if current else None
+
+    @property
     def current(self):
         "The selected UserTemplate"
         return self._current
