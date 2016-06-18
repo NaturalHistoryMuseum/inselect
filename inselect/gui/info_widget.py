@@ -1,37 +1,13 @@
 import humanize
 import locale
-import platform
-import subprocess
-import sys
-
 from PySide.QtCore import Qt
 from PySide.QtGui import QFormLayout, QLabel, QWidget
 
 from inselect.lib.utils import format_dt_display
-from inselect.gui.utils import BoldLabel, HorizontalLine
+from inselect.gui.utils import BoldLabel, HorizontalLine, reveal_path
 
 from .popup_panel import PopupPanel
 from .utils import report_to_user
-
-
-def reveal_path(path):
-    """Shows path in Finder (on Mac) or in Explorer (on Windows)
-    """
-    # http://stackoverflow.com/a/3546503
-    path = path.resolve()
-    if sys.platform.startswith("win"):
-        res = subprocess.call(["explorer.exe", u"/select,{0}".format(path)])
-        if 1 != res:
-            raise ValueError('Unexpected exit code [{0}]'.format(res))
-    elif 'Darwin' == platform.system():
-        reveal = u'tell application "Finder" to reveal POSIX file "{0}"'
-        activate = u'tell application "Finder" to activate "{0}"'
-        args = ['/usr/bin/osascript', '-e']
-        subprocess.check_call(args + [reveal.format(path)])
-        subprocess.check_call(args + [activate.format(path)])
-    else:
-        # What to do on Linux?
-        pass
 
 
 class RevealPathLabel(QLabel):

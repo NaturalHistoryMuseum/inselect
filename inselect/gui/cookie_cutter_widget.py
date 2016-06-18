@@ -5,7 +5,7 @@ from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
 
 from .cookie_cutter_choice import cookie_cutter_choice
-from .utils import report_to_user, load_icon
+from .utils import report_to_user, load_icon, reveal_path
 
 
 class CookieCutterWidget(QObject):
@@ -32,6 +32,9 @@ class CookieCutterWidget(QObject):
             "Choose...", self, triggered=self.choose,
             icon=load_icon(':/icons/open.png')
         )
+        self.reveal_action = QAction(
+            "Reveal cookie cutter", self, triggered=self.reveal
+        )
         self.clear_action = QAction(
             "Do not use a cookie cutter", self, triggered=self.clear,
             icon=load_icon(':/icons/close.png')
@@ -42,6 +45,7 @@ class CookieCutterWidget(QObject):
         "Adds cookie cutter actions to menu"
         menu.addAction(self.choose_action)
         menu.addAction(self.apply_current_action)
+        menu.addAction(self.reveal_action)
         menu.addSeparator()
         menu.addAction(self.clear_action)
         menu.addSeparator()
@@ -66,6 +70,10 @@ class CookieCutterWidget(QObject):
             # Save the user's choice
             cookie_cutter_choice().load(path)
 
+    @report_to_user
+    def reveal(self):
+        reveal_path(cookie_cutter_choice().current_path)
+
     def sync_ui(self, button, has_document, has_rows):
         "Sync state of actions"
         debug_print('CookieCutterWidget.sync_ui')
@@ -82,4 +90,5 @@ class CookieCutterWidget(QObject):
 
         self.save_to_new_action.setEnabled(has_rows)
         self.clear_action.setEnabled(has_current)
+        self.reveal_action.setEnabled(has_current)
         self.apply_current_action.setEnabled(has_document and has_current)

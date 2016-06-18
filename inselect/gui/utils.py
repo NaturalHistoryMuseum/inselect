@@ -1,3 +1,6 @@
+import platform
+import subprocess
+import sys
 import traceback
 
 from contextlib import contextmanager
@@ -199,3 +202,23 @@ class BoldLabel(QLabel):
     """A label in a bold font
     """
     pass
+
+
+def reveal_path(path):
+    """Shows path in Finder (on Mac) or in Explorer (on Windows)
+    """
+    # http://stackoverflow.com/a/3546503
+    path = path.resolve()
+    if sys.platform.startswith("win"):
+        res = subprocess.call(["explorer.exe", u"/select,{0}".format(path)])
+        if 1 != res:
+            raise ValueError('Unexpected exit code [{0}]'.format(res))
+    elif 'Darwin' == platform.system():
+        reveal = u'tell application "Finder" to reveal POSIX file "{0}"'
+        activate = u'tell application "Finder" to activate "{0}"'
+        args = ['/usr/bin/osascript', '-e']
+        subprocess.check_call(args + [reveal.format(path)])
+        subprocess.check_call(args + [activate.format(path)])
+    else:
+        # What to do on Linux?
+        pass

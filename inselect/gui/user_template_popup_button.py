@@ -4,7 +4,7 @@ from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print
 
 from .user_template_choice import user_template_choice
-from .utils import report_to_user, load_icon
+from .utils import report_to_user, load_icon, reveal_path
 
 
 class UserTemplatePopupButton(QPushButton):
@@ -42,15 +42,19 @@ class UserTemplatePopupButton(QPushButton):
             "Reload", self, triggered=self.refresh,
             icon=load_icon(':/icons/refresh.png')
         )
+        self._reveal_template_action = QAction(
+            "Reveal template", self, triggered=self.reveal
+        )
         self._default_action = QAction(
             u"Default ({0})".format(user_template_choice().DEFAULT.name),
-            self, triggered=self.default
+            self, triggered=self.default, icon=load_icon(':/icons/close.png')
         )
 
     def inject_actions(self, menu):
         "Adds user template actions to menu"
         menu.addAction(self._choose_action)
         menu.addAction(self._refresh_action)
+        menu.addAction(self._reveal_template_action)
         menu.addSeparator()
         menu.addAction(self._default_action)
 
@@ -78,6 +82,10 @@ class UserTemplatePopupButton(QPushButton):
         debug_print('UserTemplateWidget.refresh')
         user_template_choice().refresh()
 
+    @report_to_user
+    def reveal(self):
+        reveal_path(user_template_choice().current_path)
+
     def changed(self):
         "Slot for UserTemplateChoice.template_changed"
         debug_print('UserTemplateWidget.changed')
@@ -85,3 +93,4 @@ class UserTemplatePopupButton(QPushButton):
         self.setText(choice.current.name)
         self._default_action.setEnabled(not choice.current_is_default)
         self._refresh_action.setEnabled(not choice.current_is_default)
+        self._reveal_template_action.setEnabled(not choice.current_is_default)
