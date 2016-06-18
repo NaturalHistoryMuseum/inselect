@@ -81,7 +81,7 @@ class CookieCutterChoice(QObject):
 
     @property
     def current_path(self):
-        """The path to the selected UserTemplate or None, if the default
+        """The path to the selected CookieCutter or None, if the default
         template is selected
         """
         current = QSettings().value(self.PATH_KEY)
