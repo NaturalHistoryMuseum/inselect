@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.34
 -------------
+- #330 libdmtx URL incorrect
 - #328 Menu commands to show cookie cutter and metadata template files
 - #325 Command-line option to set window size
 
