@@ -234,7 +234,7 @@ def _extract_validation_error(e, prompt=None):
                 for field_message in field_messages:
                     messages.append(msg.format(field, field_message))
             else:
-                messages.append(field, field_messages)
+                messages.append(msg.format(field, field_messages))
     else:
         messages = e.messages
 
