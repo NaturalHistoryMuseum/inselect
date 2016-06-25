@@ -74,7 +74,7 @@ class BarcodeDialog(QDialog):
 
         prompt = QLabel(HTML_LINK_TEMPLATE.format(
             'Barcodes will be decoded using the open-source '
-            '<a href="http://www.libdmtx.org/">libdmtx</a> library'
+            '<a href="http://libdmtx.sourceforge.net/">libdmtx</a> library'
         ))
         prompt.setOpenExternalLinks(True)
         prompt.setStyleSheet(self.STYLESHEET)
