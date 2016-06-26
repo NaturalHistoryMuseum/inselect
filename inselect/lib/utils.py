@@ -18,6 +18,11 @@ try:
 except ImportError:
     pwd = None
 
+try:
+    import win32api
+except ImportError:
+    win32api = None
+
 
 DEBUG_PRINT = False
 DEFAULT_LOCALE = None
@@ -141,10 +146,12 @@ def user_name():
         else:
             NameDisplay = 3
             try:
+                # Returns Unicode
                 return win32api.GetUserNameEx(NameDisplay)
             except pywintypes.error:
                 try:
-                    return win32api.GetUserName()
+                    # Returns MBCS
+                    return unicode(win32api.GetUserName(), 'mcbs')
                 except pywintypes.error:
                     return ''
 
@@ -174,17 +181,14 @@ def format_dt_display(dt):
             return unicode(v, encoding, 'ignore')
         else:
             return unicode(v, errors='ignore')
-    else:
-        try:
-            import win32api
-        except ImportError:
-            pass
-        else:
-            # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
-            LOCALE_USER_DEFAULT = 0x0400
-            DATE_LONGDATE = 2
-            time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
-            date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
-            return u'{0} {1}'.format(date, time)
+    elif win32api:
+        # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
+        LOCALE_USER_DEFAULT = 0x0400
+        DATE_LONGDATE = 2
+        time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
+        time = unicode(time, "mbcs")
+        date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
+        date = unicode(date, "mbcs")
+        return u'{0} {1}'.format(date, time)
 
     return dt.isoformat()

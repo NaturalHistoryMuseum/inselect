@@ -1,12 +1,24 @@
+import sys
 import tempfile
 import unittest
 
+from datetime import datetime
+
+from mock import patch
 from pathlib import Path
 
-from inselect.lib.utils import make_readonly, rmtree_readonly, is_writable
+
+try:
+    import win32api
+except ImportError:
+    win32api = None
 
 
-class TestFileReadWrite(unittest.TestCase):
+from inselect.lib.utils import (format_dt_display, is_writable, make_readonly,
+                                rmtree_readonly)
+
+
+class TestUtils(unittest.TestCase):
     def test_makereadonly_file(self):
         f = tempfile.NamedTemporaryFile()
         path = Path(f.name)
@@ -23,8 +35,6 @@ class TestFileReadWrite(unittest.TestCase):
         finally:
             rmtree_readonly(temp)
 
-
-class TestRMTreeReadOnly(unittest.TestCase):
     def test_rmtree_readonly(self):
         d = tempfile.mkdtemp()
         path = Path(d)
@@ -37,6 +47,14 @@ class TestRMTreeReadOnly(unittest.TestCase):
         finally:
             rmtree_readonly(path)
             self.assertFalse(path.is_dir())
+
+    @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
+    @patch.object(win32api, 'GetTimeFormat', return_value='01:01:01')
+    @patch.object(win32api, 'GetDateFormat', return_value='Sonntag, 1. M\xe4rz 2015')
+    def format_dt_display_windows(self, mock_get_time_format, mock_get_date_format):
+        self.assertEqual(
+            u'Sonntag, 1. M\xe4rz 2015', format_dt_display(datetime.now())
+        )
 
 
 if __name__ == '__main__':
