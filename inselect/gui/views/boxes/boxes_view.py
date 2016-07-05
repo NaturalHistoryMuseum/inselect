@@ -10,7 +10,8 @@ class BoxesView(QtGui.QGraphicsView):
     """Zoomable image with bounding boxes
     """
 
-    MAXIMUM_ZOOM = 3    # User can't zoom in more than 1:3
+    # self.absolute_zoom limited to be <= MAXIMUM_ZOOM
+    MAXIMUM_ZOOM = 1.8
 
     viewport_changed = Signal(QRectF)
 
