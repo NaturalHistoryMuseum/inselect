@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Metadata templates - Inselect</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <link href="https://naturalhistorymuseum.github.io/inselect/images/favicon.png" rel="icon">
+
+<link rel="canonical" href="https://naturalhistorymuseum.github.io/inselect/pages/metadata-templates.html">
+
+        <meta name="author" content="Trustees of the Natural History Museum, London" />
+        <meta name="description" content="Objective: to configure and use Inselect metadata templates. This example will cover how inselect treats metadata and validation, Inselect&#39;s metadata template format and how to export crops and CSV files. Preamble Open 3.Metadata\Scopelodes_spp_Lim_14.inselect This is a SatScan image of pinned insects - moths in family Limacodidae Segment ..." />
+
+    <meta property="og:site_name" content="Inselect" />
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Metadata templates"/>
+    <meta property="og:url" content="https://naturalhistorymuseum.github.io/inselect/pages/metadata-templates.html"/>
+    <meta property="og:description" content="Objective: to configure and use Inselect metadata templates. This example will cover how inselect treats metadata and validation, Inselect&#39;s metadata template format and how to export crops and CSV files. Preamble Open 3.Metadata\Scopelodes_spp_Lim_14.inselect This is a SatScan image of pinned insects - moths in family Limacodidae Segment ..." />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://naturalhistorymuseum.github.io/inselect/theme/css/bootstrap.readable.min.css" type="text/css"/>
+    <link href="https://naturalhistorymuseum.github.io/inselect/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="https://naturalhistorymuseum.github.io/inselect/theme/css/pygments/friendly.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://naturalhistorymuseum.github.io/inselect/theme/css/style.css" type="text/css"/>
+
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="https://naturalhistorymuseum.github.io/inselect/" class="navbar-brand">
+<img class="img-responsive pull-left gap-right" src="https://naturalhistorymuseum.github.io/inselect/images/inselect128.png" width="32"/> Inselect            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/gallery.html">Gallery</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/install.html">Install</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/documentation.html">Documentation</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/category/news.html">News</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/newsletter.html">Newsletter</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/faqs.html">FAQs</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content" class="body">
+        <h1 class="entry-title">Metadata templates</h1>
+        
+        <div class="entry-content">
+            <p><strong>Objective</strong>: to configure and use Inselect metadata templates.</p>
+<p>This example will cover</p>
+<ul>
+<li>how inselect treats metadata and validation,</li>
+<li>Inselect's metadata template format and</li>
+<li>how to export crops and <code>CSV</code> files.</li>
+</ul>
+<h2>Preamble</h2>
+<p>Open <code>3.Metadata\Scopelodes_spp_Lim_14.inselect</code></p>
+<ul>
+<li>This is a SatScan image of pinned insects - moths in family Limacodidae</li>
+<li>Segment the image and refine bounding boxes</li>
+</ul>
+<p><img alt="Moths with bounding boxes" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/moths_refined.jpg" /></p>
+<h2>Metadata template in Inselect</h2>
+<p>You have complete control over metadata fields and validation through
+<code>.inselect_template</code> files, which are simple text files that you can edit
+using any good text editor.</p>
+<ul>
+<li>Load the <code>Templates/limacodidae.inselect_template</code> template by clicking on the
+'Simple Darwin Core' button and clicking <code>Choose...</code></li>
+<li>Pink shading over the bounding boxes indicates one or more validation problems,
+so we can see at a glance any boxes that need our attention</li>
+<li>The template specifies that the <code>Location</code> and <code>Taxonomy</code> fields are both
+mandatory - newly created bounding boxes have no metadata, so all of the
+bounding boxes are shaded pink</li>
+</ul>
+<p><img alt="Moths with metadata validation failures" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/moths_template1.jpg" /></p>
+<p>Click on any of the bounding boxes. The <code>Location</code> and <code>Taxonomy</code> fields are
+both coloured pink.</p>
+<p><img alt="Moths with single box selected" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/moths_template2.jpg" /></p>
+<ul>
+<li>Set <code>Location</code> to Drawer 1</li>
+<li>Set <code>Taxonomy</code> to <em>Scopelodes</em></li>
+<li>The pink shading is removed from the fields and box</li>
+</ul>
+<p><img alt="Moths with single box selected" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/moths_template3.jpg" /></p>
+<p>Let's set the metadata for all boxes</p>
+<ul>
+<li><code>CTRL + A</code> to select all boxes</li>
+<li>The field both contain a '*' to indicate multiple values among boxes</li>
+<li>Set <code>Location</code> to Drawer 1 and <code>Location</code> to <em>Scopelodes</em></li>
+</ul>
+<p><img alt="Moths with all boxes valid" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/moths_template4.jpg" /></p>
+<h2>Metadata panel</h2>
+<p>The metadata panel on the right shows
+<a href="http://rs.tdwg.org/dwc/terms/simple/">Simple Darwin Core</a> fields along with
+links to definitions.</p>
+<h2>Creating and editing metadata templates</h2>
+<p>Files are in a format called YAML
+(<a href="http://yaml.org/">YAML Ain't a Markup Language</a>) - a structured text format.
+A reference and examples template files are at
+<a href="https://github.com/NaturalHistoryMuseum/inselect-templates">https://github.com/NaturalHistoryMuseum/inselect-templates</a> -
+open this page in a new browser tab and have a quick look through it.</p>
+<p>Open <code>limacodidae.inselect_template</code> in your text editor:</p>
+<div class="highlight"><pre><span></span><span class="n">Name</span><span class="o">:</span> <span class="n">Limacodidae</span>
+<span class="n">Object</span> <span class="n">label</span><span class="o">:</span> <span class="s1">&#39;{Taxonomy}-{Location}-{ItemNumber}&#39;</span>
+<span class="n">Fields</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">Name</span><span class="o">:</span> <span class="n">Taxonomy</span>
+      <span class="n">Mandatory</span><span class="o">:</span> <span class="kc">true</span>
+      <span class="n">Choices</span><span class="o">:</span>
+          <span class="o">-</span> <span class="n">Anaxidia</span>
+          <span class="o">-</span> <span class="n">Anepopsia</span>
+          <span class="o">-</span> <span class="n">Apodecta</span>
+          <span class="o">-</span> <span class="n">Birthamoides</span>
+          <span class="o">-</span> <span class="n">Calcarifera</span>
+          <span class="o">-</span> <span class="n">Chalcocelis</span>
+          <span class="o">-</span> <span class="n">Comana</span>
+          <span class="o">-</span> <span class="n">Comanula</span>
+          <span class="o">-</span> <span class="n">Doratifera</span>
+          <span class="o">-</span> <span class="n">Ecnomoctena</span>
+          <span class="o">-</span> <span class="n">Elassoptila</span>
+          <span class="o">-</span> <span class="n">Eloasa</span>
+          <span class="o">-</span> <span class="n">Hedraea</span>
+          <span class="o">-</span> <span class="n">Hydroclada</span>
+          <span class="o">-</span> <span class="n">Lamprolepida</span>
+          <span class="o">-</span> <span class="n">Limacochara</span>
+          <span class="o">-</span> <span class="n">Mambara</span>
+          <span class="o">-</span> <span class="n">Mecytha</span>
+          <span class="o">-</span> <span class="n">Parasoidea</span>
+          <span class="o">-</span> <span class="n">Praesusica</span>
+          <span class="o">-</span> <span class="n">Pseudanapaea</span>
+          <span class="o">-</span> <span class="n">Pygmaeomorpha</span>
+          <span class="o">-</span> <span class="n">Scopelodes</span>
+          <span class="o">-</span> <span class="n">Squamosa</span>
+          <span class="o">-</span> <span class="n">Thosea</span>
+    <span class="o">-</span> <span class="n">Name</span><span class="o">:</span> <span class="n">Location</span>
+      <span class="n">Mandatory</span><span class="o">:</span> <span class="kc">true</span>
+      <span class="n">Choices</span><span class="o">:</span>
+          <span class="o">-</span> <span class="n">Drawer</span> <span class="mi">1</span>
+          <span class="o">-</span> <span class="n">Drawer</span> <span class="mi">2</span>
+          <span class="o">-</span> <span class="n">Drawer</span> <span class="mi">3</span>
+          <span class="o">-</span> <span class="n">Drawer</span> <span class="mi">4</span>
+</pre></div>
+
+
+<p>When you come to create your own <code>.inselect_template</code> files, it is best to
+modify an existing template to suit your needs.</p>
+<h2>Editing the template</h2>
+<p>You will append a new, optional free-text field - <code>Notes</code> - to the template.</p>
+<ul>
+<li>Use your text editor to add the field to the template</li>
+<li>Click on the 'Limacoididae' button in Inselect and select 'Reload'</li>
+</ul>
+<h2>Export metadata and bounding boxes to a CSV file</h2>
+<p>Click 'Export CSV' in the toolbar and open the <code>CSV</code> file in Excel, 
+OpenOffice or similar.</p>
+<p>Columns are</p>
+<ul>
+<li><code>Cropped_image_name</code> - the filename of the crop</li>
+<li><code>ItemNumber</code> - the number of the bounding box</li>
+<li>
+<p>Locations of the bounding boxes in</p>
+<ul>
+<li>normalised (i.e., between 0 and 1) coordinates - <code>NormalisedLeft</code>,
+  <code>NormalisedTop</code>, <code>NormalisedRight</code>, <code>NormalisedBottom</code></li>
+<li>coordinates of the thumbnail image - <code>ThumbnailLeft</code>, <code>ThumbnailTop</code>,
+  <code>ThumbnailRight</code>, <code>ThumbnailBottom</code></li>
+<li>coordinates of the original full-resolution image - <code>OriginalLeft</code>,
+  <code>OriginalTop</code>, <code>OriginalRight</code>, <code>OriginalBottom</code></li>
+</ul>
+</li>
+<li>
+<p>A column for each of the metadata fields defined in the template</p>
+<ul>
+<li><code>Taxonomy</code></li>
+<li><code>Location</code></li>
+<li><code>Notes</code></li>
+</ul>
+</li>
+</ul>
+        </div>
+    </section>
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="https://github.com/NaturalHistoryMuseum/inselect/"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+              </ul>
+            </li>
+
+
+
+
+
+    <li class="list-group-item"><h4><i class="fa fa-external-link-square fa-lg"></i><span class="icon-label">Links</span></h4>
+      <ul class="list-group" id="links">
+        <li class="list-group-item">
+            <a href="http://www.synthesys.info/" target="_blank">
+                SYNTHESYS
+            </a>
+        </li>
+      </ul>
+    </li>
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2016 Trustees of the Natural History Museum, London
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>              <p><small>  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+    &quot;<span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Inselect</span>&quot; by <a xmlns:cc="http://creativecommons.org/ns#" href="https://naturalhistorymuseum.github.io/inselect" property="cc:attributionName" rel="cc:attributionURL">Trustees of the Natural History Museum, London</a> is
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/respond.min.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Barcode reading - Inselect</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <link href="https://naturalhistorymuseum.github.io/inselect/images/favicon.png" rel="icon">
+
+<link rel="canonical" href="https://naturalhistorymuseum.github.io/inselect/pages/barcode-reading.html">
+
+        <meta name="author" content="Trustees of the Natural History Museum, London" />
+        <meta name="description" content="This example uses an image of microscope slides arranged in a template. Each of the slides contains a DataMatrix barcode. Objective: to read barcodes on microscope slides, rotate each slide to be in the correct orientation and to export cropped images. This example will cover barcode reading, the Objects view ..." />
+
+    <meta property="og:site_name" content="Inselect" />
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Barcode reading"/>
+    <meta property="og:url" content="https://naturalhistorymuseum.github.io/inselect/pages/barcode-reading.html"/>
+    <meta property="og:description" content="This example uses an image of microscope slides arranged in a template. Each of the slides contains a DataMatrix barcode. Objective: to read barcodes on microscope slides, rotate each slide to be in the correct orientation and to export cropped images. This example will cover barcode reading, the Objects view ..." />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://naturalhistorymuseum.github.io/inselect/theme/css/bootstrap.readable.min.css" type="text/css"/>
+    <link href="https://naturalhistorymuseum.github.io/inselect/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="https://naturalhistorymuseum.github.io/inselect/theme/css/pygments/friendly.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://naturalhistorymuseum.github.io/inselect/theme/css/style.css" type="text/css"/>
+
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="https://naturalhistorymuseum.github.io/inselect/" class="navbar-brand">
+<img class="img-responsive pull-left gap-right" src="https://naturalhistorymuseum.github.io/inselect/images/inselect128.png" width="32"/> Inselect            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/gallery.html">Gallery</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/install.html">Install</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/documentation.html">Documentation</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/category/news.html">News</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/newsletter.html">Newsletter</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/faqs.html">FAQs</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content" class="body">
+        <h1 class="entry-title">Barcode reading</h1>
+        
+        <div class="entry-content">
+            <p>This example uses an image of microscope slides arranged in a template.
+Each of the slides contains a DataMatrix barcode.</p>
+<p><strong>Objective</strong>: to read barcodes on microscope slides, rotate each slide to be in
+the correct orientation and to export cropped images.</p>
+<p>This example will cover</p>
+<ul>
+<li>barcode reading,</li>
+<li>the <code>Objects</code> view,</li>
+<li>rotating objects and</li>
+<li>sorting boxes into rows and columns.</li>
+</ul>
+<h2>Preamble</h2>
+<ul>
+<li>
+<p>Open <code>Templates/sialidae.inselect_template</code></p>
+<ul>
+<li>Specifies a higher-resolution thumbnail than used in previous examples -
+useful for reading and transcribing labels on slides</li>
+<li>Exported crops are saved to <code>TIFF</code> files</li>
+<li>More complex metadata validation</li>
+</ul>
+</li>
+<li>
+<p>Load <code>4.Barcodes/Drawer_40b_w45a_45b_46_47a.inselect</code></p>
+</li>
+<li>
+<p>Select 'Light background' in the 'Box colours' section of the toolbar</p>
+<ul>
+<li>This alters the colours of the bounding boxes</li>
+<li>We hope to automate this in a future release</li>
+</ul>
+</li>
+<li>
+<p>Segment</p>
+</li>
+</ul>
+<h2>Refine</h2>
+<p>There are 100 sockets but automatic segmentation has created 102 boxes.
+The two extra boxes are around small stickers at the top left and top right
+of the image. Some of the sockets do not contain slides but contain red markers
+that indicate the location:</p>
+<p><img alt="Microscope slides" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/slides_detail.jpg" /></p>
+<ul>
+<li>Remove the boxes around the stickers at the top left and top right</li>
+<li>Remove the boxes around the red markers</li>
+</ul>
+<p>Once refined, we have 95 bounding boxes:</p>
+<p><img alt="Microscope slides" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/slides_refined.jpg" /></p>
+<h2>Metadata template</h2>
+<p>Open <code>Templates/sialidae.inselect_template</code> in your text editor</p>
+<ul>
+<li>
+<p>The <code>catalogNumber</code> field contains <code>Regex parser: '^[0-9]{9}$'</code></p>
+</li>
+<li>
+<p>This is a regular expression that specifies the field should contain
+  exactly nine digits with no letters or punctuation</p>
+</li>
+<li>If you do not know what a regular expression is, do not worry</li>
+</ul>
+<h2>Setup barcode reading</h2>
+<p>Select 'Configure' from the 'Barcodes' section of the toolbar:</p>
+<p><img alt="Barcode reading options" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/barcodes_config.jpg" /></p>
+<ul>
+<li>Inselect comes with two open source options</li>
+<li>The Commercial Inlite ClearImage is faster and is more reliable at reading barcodes<ul>
+<li>Windows only</li>
+<li>Costly but you can run it for a short time with an evaluation license</li>
+<li>If you are on Windows<ul>
+<li>Open <a href="https://www.inliteresearch.com/barcode-recognition-sdk.php">https://www.inliteresearch.com/barcode-recognition-sdk.php</a></li>
+<li>Click 'Download ClearImage SDK' and install</li>
+<li>Start the 'Inlite control centre' program - this will give you an evaluation
+license</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>Read barcodes</h2>
+<p>Read barcodes with <code>F7</code>.</p>
+<ul>
+<li>Takes a few minutes to complete</li>
+<li>We are asking quite a lot of the barcode reader - the barcodes make up about 1%
+of the area of each crop</li>
+<li>Values of barcodes are always put into <code>catalogNumber</code> field</li>
+</ul>
+<h2>Other metadata</h2>
+<p>You will select the relevant groups of slides and set their values of location
+and genus.</p>
+<p>Reminders</p>
+<ul>
+<li>You can select bounding boxes with left-click and drag</li>
+<li>You can add / remove individual boxes to / from the selection by holding down
+<code>CTRL</code> and left-clicking</li>
+</ul>
+<p>Once completed, all metadata should be valid with all boxes clear:</p>
+<p><img alt="Completed slides" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/slides_finished.jpg" /></p>
+<h2>Sorting boxes</h2>
+<p>You can sort boxes either by rows or columns.</p>
+<ul>
+<li>Press <code>CTRL + N</code> a few times and see how selected box changes</li>
+<li>Now click 'Into columns' in the 'Sort boxes' section of the toolbar</li>
+<li>Press <code>CTRL + N</code> a few times again</li>
+</ul>
+<p>The selected sort option is applied when you segment an image.</p>
+<h2>Objects view</h2>
+<p>Switch to the Objects view.</p>
+<p>Some relevant shortcuts</p>
+<ul>
+<li><code>CTRL + 1</code> / <code>CTRL + B</code> - selects the Boxes view</li>
+<li><code>CTRL + 2</code> / <code>CTRL + J</code> - selects the Objects view</li>
+<li>Can switch between views using<ul>
+<li><code>CTRL + PgUp</code> / <code>CTRL + PgDown</code> on Windows</li>
+<li><code>CMD + [</code> / <code>CMD + ]</code> on Mac</li>
+</ul>
+</li>
+</ul>
+<p>This view shows crops on a grid with a square for each bounding box, along with
+each box's number and object label:</p>
+<p><img alt="Completed slides" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/slides_objects.jpg" /></p>
+<ul>
+<li>
+<p>You can expand a single box</p>
+<ul>
+<li>press <code>Enter</code></li>
+<li>double click</li>
+<li><code>CTRL + E</code></li>
+</ul>
+</li>
+<li>
+<p>Move forwards and backwards through boxes</p>
+<ul>
+<li>up and down arrows</li>
+<li><code>CTRL + N</code> and <code>CTRL + P</code> - Next / Previous</li>
+</ul>
+</li>
+<li>
+<p>You can go back to the grid</p>
+<ul>
+<li>Press <code>Enter</code></li>
+<li>Double click</li>
+<li><code>CTRL + G</code></li>
+</ul>
+</li>
+</ul>
+<h2>Selection</h2>
+<ul>
+<li>You can select icons with left-click and drag of the mouse</li>
+<li>You can select icon using <code>SHIFT +</code> arrow keys</li>
+<li>As you might expect <code>CTRL + A</code> and <code>CTRL + D</code> - the standard shortcuts for
+Select all and Select none - also work here</li>
+<li>Just as before, the metadata fields reflect the selection</li>
+</ul>
+<h2>Rotation</h2>
+<p>You will rotate each crop so that labels are in the correct orientation.</p>
+<ul>
+<li><code>CTRL + R</code> to rotate right</li>
+<li><code>CTRL + L</code> to rotate left</li>
+<li>Rotation is applied to the current selection, so you can block-select and rotate</li>
+<li>Very uuseful for reading labels</li>
+<li>Rotation is applied to crops so when they are saved</li>
+</ul>
+<p><img alt="Rotated slides" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/slides_rotated.jpg" /></p>
+<h2>Export crops</h2>
+<p>Click 'Save crops' and open the directory containing the crops.</p>
+<ul>
+<li>The format of the filenames is defined from metadata template</li>
+<li>Crops are saved to <code>TIFF</code> files, as specified in the metadata template</li>
+<li>Crops are saved with the rotation the you specified</li>
+</ul>
+<!-- ## Document-level validation
+
+* Select the first three boxes in the first row
+* Set the 'Catalog number' for these boxes to the same valid value - '010000000'
+* Click 'Export crops'
+
+What does Inselect do?
+* Do both boxes contain valid metadata?
+* Do you understand the message that Inselect shows you?
+* Answer 'Yes' to the 'Would you like to save the object images?' question
+ - look at the names of the first three exported crops - how has Inselect treated the filenames of the first three boxes?
+ -->
+        </div>
+    </section>
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="https://github.com/NaturalHistoryMuseum/inselect/"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+              </ul>
+            </li>
+
+
+
+
+
+    <li class="list-group-item"><h4><i class="fa fa-external-link-square fa-lg"></i><span class="icon-label">Links</span></h4>
+      <ul class="list-group" id="links">
+        <li class="list-group-item">
+            <a href="http://www.synthesys.info/" target="_blank">
+                SYNTHESYS
+            </a>
+        </li>
+      </ul>
+    </li>
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2016 Trustees of the Natural History Museum, London
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>              <p><small>  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+    &quot;<span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Inselect</span>&quot; by <a xmlns:cc="http://creativecommons.org/ns#" href="https://naturalhistorymuseum.github.io/inselect" property="cc:attributionName" rel="cc:attributionURL">Trustees of the Natural History Museum, London</a> is
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/respond.min.js"></script>
+
+
+</body>
+</html>

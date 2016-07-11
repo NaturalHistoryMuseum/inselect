@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns# fb: https://www.facebook.com/2008/fbml">
+<head>
+    <title>Command-line tools - Inselect</title>
+    <!-- Using the latest rendering mode for IE -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <link href="https://naturalhistorymuseum.github.io/inselect/images/favicon.png" rel="icon">
+
+<link rel="canonical" href="https://naturalhistorymuseum.github.io/inselect/pages/command-line-tools.html">
+
+        <meta name="author" content="Trustees of the Natural History Museum, London" />
+        <meta name="description" content="If you expect to be working on batches of hundreds or thousands of images An advanced topic If you have never worked with the Windows command line or the Mac terminal then we recommend that you get training from your IT staff or someone who has relevant experience. Objective: to ..." />
+
+    <meta property="og:site_name" content="Inselect" />
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="Command-line tools"/>
+    <meta property="og:url" content="https://naturalhistorymuseum.github.io/inselect/pages/command-line-tools.html"/>
+    <meta property="og:description" content="If you expect to be working on batches of hundreds or thousands of images An advanced topic If you have never worked with the Windows command line or the Mac terminal then we recommend that you get training from your IT staff or someone who has relevant experience. Objective: to ..." />
+
+
+    <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://naturalhistorymuseum.github.io/inselect/theme/css/bootstrap.readable.min.css" type="text/css"/>
+    <link href="https://naturalhistorymuseum.github.io/inselect/theme/css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="https://naturalhistorymuseum.github.io/inselect/theme/css/pygments/friendly.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://naturalhistorymuseum.github.io/inselect/theme/css/style.css" type="text/css"/>
+
+
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="https://naturalhistorymuseum.github.io/inselect/" class="navbar-brand">
+<img class="img-responsive pull-left gap-right" src="https://naturalhistorymuseum.github.io/inselect/images/inselect128.png" width="32"/> Inselect            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/gallery.html">Gallery</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/install.html">Install</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/documentation.html">Documentation</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/category/news.html">News</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/newsletter.html">Newsletter</a></li>
+                    <li><a href="https://naturalhistorymuseum.github.io/inselect/pages/faqs.html">FAQs</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+</div> <!-- /.navbar -->
+<!-- Banner -->
+<!-- End Banner -->
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+    <section id="content" class="body">
+        <h1 class="entry-title">Command-line tools</h1>
+        
+        <div class="entry-content">
+            <ul>
+<li>If you expect to be working on batches of hundreds or thousands of images</li>
+<li>An advanced topic</li>
+</ul>
+<p>If you have never worked with the Windows command line or the Mac terminal then
+we recommend that you get training from your IT staff or someone who has
+relevant experience.</p>
+<p><strong>Objective</strong>: to ingest the five example image files in <code>6.CommandLineTools</code> and
+apply the cookie cutter that you previously created.</p>
+<p>This example will provide an introduction to Inselect's command line tools.</p>
+<h2>Workflow</h2>
+<p><img alt="Inselect workflow" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/workflow.svg" /></p>
+<p>Each of the operations shown in blue has an associated command-line tool.
+You can pick and choose the relevant command-line tools together with cookie
+cutters and metadata templates to integrate Inselect into your existing
+workflows.
+Descriptions of each tool are below.</p>
+<h3><code>ingest</code></h3>
+<ul>
+<li>You provide the paths to an input directory and on output directory; these can
+be the same</li>
+<li>For each image file in the input directory<ul>
+<li>Moves the image to the output directory</li>
+<li>Creates the <code>.inselect</code> file</li>
+<li>Create the thumbnail <code>JPG</code>; you can provide the resolution</li>
+<li>Optionally applies a cookie cutter</li>
+</ul>
+</li>
+</ul>
+<h3><code>segment</code></h3>
+<ul>
+<li>You provide the path to a directory</li>
+<li>For each <code>.inselect</code> file in the directory<ul>
+<li>Runs automatic segmentation</li>
+<li>You can specify whether to sort boxes by columns or by rows</li>
+<li>Ignores <code>.inselect</code> files that already have bounding boxes</li>
+</ul>
+</li>
+</ul>
+<h3><code>read_barcodes</code></h3>
+<ul>
+<li>You provide the path to a directory</li>
+<li>For each <code>.inselect</code> file in the directory<ul>
+<li>Reads barcodes using the reader that you specify</li>
+</ul>
+</li>
+</ul>
+<h3><code>export_metadata</code></h3>
+<ul>
+<li>You provide the path to a directory</li>
+<li>For each <code>.inselect</code> file in the directory<ul>
+<li>Writes a <code>CSV</code> file of metadata</li>
+<li>You can specify an Inselect template file</li>
+<li>Files with validations errors are ignored</li>
+</ul>
+</li>
+</ul>
+<h3><code>save_crops</code></h3>
+<ul>
+<li>You provide the path to a directory</li>
+<li>For each <code>.inselect</code> file in the directory<ul>
+<li>Writes cropped images</li>
+<li>You specify an optional Inselect template file that will be used to format the
+crop filenames</li>
+<li>Files with validations errors are ignored</li>
+</ul>
+</li>
+</ul>
+<h2>Test that you can run tools</h2>
+<p>Start the Windows command prompt.
+The following code fragments assume that you installed Inselect to the default
+location of <code>C:\Program Files\inselect</code>. You should alter the paths as required,
+if you installed the program to a different directory.</p>
+<p>Each tool supports the <code>--help</code> argument:</p>
+<div class="highlight"><pre><span></span>C:\Program Files\inselect\ingest.exe --help
+</pre></div>
+
+
+<p>You should see</p>
+<div class="highlight"><pre><span></span><span class="n">usage</span><span class="o">:</span> <span class="n">ingest</span><span class="o">.</span><span class="na">exe</span> <span class="o">[-</span><span class="n">h</span><span class="o">]</span> <span class="o">[-</span><span class="n">c</span> <span class="n">COOKIE_CUTTER</span><span class="o">]</span> <span class="o">[-</span><span class="n">w</span> <span class="n">THUMBNAIL_WIDTH</span><span class="o">]</span> <span class="o">[--</span><span class="n">debug</span><span class="o">]</span> <span class="o">[-</span><span class="n">v</span><span class="o">]</span>
+                  <span class="n">inbox</span> <span class="n">docs</span>
+
+<span class="n">Ingests</span> <span class="n">images</span> <span class="n">into</span> <span class="n">Inselect</span>
+
+<span class="n">positional</span> <span class="k">arguments</span><span class="o">:</span>
+  <span class="n">inbox</span>                 <span class="n">Source</span> <span class="n">directory</span> <span class="n">containing</span> <span class="n">scanned</span> <span class="n">images</span>
+  <span class="n">docs</span>                  <span class="n">Destination</span> <span class="n">directory</span> <span class="n">to</span> <span class="n">which</span> <span class="n">images</span> <span class="n">will</span> <span class="n">be</span> <span class="n">moved</span>
+                        <span class="n">and</span> <span class="k">in</span> <span class="n">which</span> <span class="n">Inselect</span> <span class="n">documents</span> <span class="n">will</span> <span class="n">be</span> <span class="n">created</span><span class="o">.</span> <span class="n">Can</span>
+                        <span class="n">be</span> <span class="n">the</span> <span class="n">same</span> <span class="k">as</span> <span class="n">inbox</span><span class="o">.</span>
+
+<span class="n">optional</span> <span class="k">arguments</span><span class="o">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="o">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="k">this</span> <span class="n">help</span> <span class="n">message</span> <span class="n">and</span> <span class="n">exit</span>
+  <span class="o">-</span><span class="n">c</span> <span class="n">COOKIE_CUTTER</span><span class="o">,</span> <span class="o">--</span><span class="n">cookie</span><span class="o">-</span><span class="n">cutter</span> <span class="n">COOKIE_CUTTER</span>
+                        <span class="n">Path</span> <span class="n">to</span> <span class="n">a</span> <span class="s1">&#39;.inselect_cookie_cutter&#39;</span> <span class="n">file</span> <span class="n">that</span> <span class="n">will</span> <span class="n">be</span>
+                        <span class="n">applied</span> <span class="n">to</span> <span class="k">new</span> <span class="n">Inselect</span> <span class="n">documents</span>
+  <span class="o">-</span><span class="n">w</span> <span class="n">THUMBNAIL_WIDTH</span><span class="o">,</span> <span class="o">--</span><span class="n">thumbnail</span><span class="o">-</span><span class="n">width</span> <span class="n">THUMBNAIL_WIDTH</span>
+                        <span class="n">The</span> <span class="n">width</span> <span class="n">of</span> <span class="n">the</span> <span class="n">thumbnail</span> <span class="k">in</span> <span class="n">pixels</span><span class="o">;</span> <span class="n">defaults</span> <span class="n">to</span> <span class="mi">4096</span>
+  <span class="o">--</span><span class="n">debug</span>
+  <span class="o">-</span><span class="n">v</span><span class="o">,</span> <span class="o">--</span><span class="n">version</span>         <span class="n">show</span> <span class="n">program</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">version</span> <span class="n">number</span> <span class="n">and</span> <span class="n">exit</span>
+</pre></div>
+
+
+<h2>Ingest images</h2>
+<p>The <code>6.CommandLineTools</code> directory contains five <code>JPG</code> files. Run</p>
+<div class="highlight"><pre><span></span>C:\Program Files\inselect\ingest.exe --thumbnail-width 8000 \
+    --cookie-cutter &lt;path to the inselect_cookie_cutter file&gt; \
+    &lt;path to the 6.CommandLineTools directory&gt; \
+    &lt;path to the 6.CommandLineTools directory&gt;
+</pre></div>
+
+
+<ul>
+<li>What did the <code>ingest</code> tool report?</li>
+<li>One of the image files has a deliberate error - how did the <code>ingest</code> tool
+behave?</li>
+</ul>
+        </div>
+    </section>
+        </div>
+        <div class="col-sm-3" id="sidebar">
+            <aside>
+
+<section class="well well-sm">
+    <ul class="list-group list-group-flush">
+            <li class="list-group-item"><h4><i class="fa fa-home fa-lg"></i><span class="icon-label">Social</span></h4>
+              <ul class="list-group" id="social">
+                <li class="list-group-item"><a href="https://github.com/NaturalHistoryMuseum/inselect/"><i class="fa fa-github-square fa-lg"></i> github</a></li>
+              </ul>
+            </li>
+
+
+
+
+
+    <li class="list-group-item"><h4><i class="fa fa-external-link-square fa-lg"></i><span class="icon-label">Links</span></h4>
+      <ul class="list-group" id="links">
+        <li class="list-group-item">
+            <a href="http://www.synthesys.info/" target="_blank">
+                SYNTHESYS
+            </a>
+        </li>
+      </ul>
+    </li>
+    </ul>
+</section>
+            </aside>
+        </div>
+    </div>
+</div>
+<footer>
+   <div class="container">
+      <hr>
+      <div class="row">
+         <div class="col-xs-10">&copy; 2016 Trustees of the Natural History Museum, London
+            &middot; Powered by <a href="https://github.com/getpelican/pelican-themes/tree/master/pelican-bootstrap3" target="_blank">pelican-bootstrap3</a>,
+            <a href="http://docs.getpelican.com/" target="_blank">Pelican</a>,
+            <a href="http://getbootstrap.com" target="_blank">Bootstrap</a>              <p><small>  <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="//i.creativecommons.org/l/by/4.0/80x15.png" /></a>
+    &quot;<span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Inselect</span>&quot; by <a xmlns:cc="http://creativecommons.org/ns#" href="https://naturalhistorymuseum.github.io/inselect" property="cc:attributionName" rel="cc:attributionURL">Trustees of the Natural History Museum, London</a> is
+  licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>, except where indicated otherwise.
+</small></p>
+         </div>
+         <div class="col-xs-2"><p class="pull-right"><i class="fa fa-arrow-up"></i> <a href="#">Back to top</a></p></div>
+      </div>
+   </div>
+</footer>
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/jquery.min.js"></script>
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/bootstrap.min.js"></script>
+
+<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+<script src="https://naturalhistorymuseum.github.io/inselect/theme/js/respond.min.js"></script>
+
+
+</body>
+</html>
