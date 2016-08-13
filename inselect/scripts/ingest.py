@@ -16,7 +16,6 @@ from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.user_template import UserTemplate
 
 
 # TODO Recursive option
