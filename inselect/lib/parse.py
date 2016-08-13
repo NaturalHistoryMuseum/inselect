@@ -289,6 +289,7 @@ def parse_in_choices(choices, value):
     else:
         return value
 
+# Populate dict {name: parse function}.
 PARSERS = inspect.getmembers(sys.modules[__name__], inspect.isfunction)
 PARSERS = ifilter(lambda v: re.match(r'^parse_.+$', v[0]), PARSERS)
 PARSERS = ifilter(lambda v: ['value'] == inspect.getargspec(v[1]).args, PARSERS)
