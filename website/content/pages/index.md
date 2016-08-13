@@ -11,10 +11,11 @@ open-source.
 
 ## The problem
 
-Natural history collections are vast and varied, providing quite a few
-challenges when digitising them. At the
-[Natural History Museum, London](https://www.nhm.ac.uk), for example, there are
-an estimated 33 million insect specimens, housed in 130 thousand drawers:
+Natural history collections are vast and varied and present many subtantial
+challenges to digitisation.
+At the [Natural History Museum, London](https://www.nhm.ac.uk),
+for example, there are an estimated 33 million insect specimens, housed in 130
+thousand drawers:
 
 ![Drawers of pinned beetles at Natural History Museum, London]({filename}/images/pinned_fisheye.jpg)
 
