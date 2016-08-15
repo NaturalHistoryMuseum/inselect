@@ -5,7 +5,7 @@ from pathlib import Path
 
 from PySide.QtGui import QFileDialog
 
-from gui_test import GUITest
+from .gui_test import GUITest
 from inselect.gui.main_window import MainWindow
 from inselect.tests.utils import temp_directory_with_files
 

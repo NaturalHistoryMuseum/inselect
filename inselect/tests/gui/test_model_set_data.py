@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PySide.QtCore import Qt, QRect
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.lib.document import InselectDocument
 from inselect.gui.model import Model

@@ -39,7 +39,7 @@ class UserTemplateChoice(QObject):
             try:
                 self._current = self._load(previous)
             except Exception:
-                debug_print(u'Error loading user template [{0}]'.format(previous))
+                debug_print('Error loading user template [{0}]'.format(previous))
 
     @classmethod
     def last_directory(cls):
@@ -59,7 +59,7 @@ class UserTemplateChoice(QObject):
         debug_print('UserTemplateChoice.load [{0}]'.format(path))
         self._current = self._load(path)
         QSettings().setValue(self.PATH_KEY, str(path))
-        QSettings().setValue(self.DIRECTORY_KEY, unicode(Path(path).parent))
+        QSettings().setValue(self.DIRECTORY_KEY, str(Path(path).parent))
         self.template_changed.emit()
 
     def select_default(self):

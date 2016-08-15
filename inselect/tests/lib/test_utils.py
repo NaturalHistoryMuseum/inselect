@@ -53,7 +53,7 @@ class TestUtils(unittest.TestCase):
     @patch.object(win32api, 'GetDateFormat', return_value='Sonntag, 1. M\xe4rz 2015')
     def format_dt_display_windows(self, mock_get_time_format, mock_get_date_format):
         self.assertEqual(
-            u'Sonntag, 1. M\xe4rz 2015', format_dt_display(datetime.now())
+            'Sonntag, 1. M\xe4rz 2015', format_dt_display(datetime.now())
         )
 
 

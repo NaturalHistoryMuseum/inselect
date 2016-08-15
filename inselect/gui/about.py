@@ -79,7 +79,7 @@ def _machine_summary():
 def show_about_box(parent=None):
     """Shows a modal about box
     """
-    body = u"""<h1>{application} {version}</h1>
+    body = """<h1>{application} {version}</h1>
 
        <p>
          Segmentation, validation and annotation of images of museum objects.

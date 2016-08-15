@@ -9,7 +9,7 @@ from cv2 import imread
 
 from PySide.QtGui import QFileDialog
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'

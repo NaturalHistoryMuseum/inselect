@@ -13,7 +13,8 @@ from PySide.QtGui import (QColor, QFrame, QIcon, QImage, QItemSelection,
                           QItemSelectionModel, QLabel, QMessageBox, QPainter,
                           QPixmap, QWidget)
 
-from copy_box import copy_details_box
+from .copy_box import copy_details_box
+from functools import reduce
 
 # Warning: lazy load of cv2 and numpy via local imports
 
@@ -86,7 +87,7 @@ def contiguous(values):
     (25, 4)
     """
     # Taken from http://stackoverflow.com/a/2361991
-    for k, g in groupby(enumerate(values), lambda (i, x): i - x):
+    for k, g in groupby(enumerate(values), lambda i_x: i_x[0] - i_x[1]):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1
@@ -132,14 +133,14 @@ def _report_exception_to_user(exc):
         details = BytesIO()
         traceback.print_exc(file=details)
         copy_details_box(
-            QMessageBox.Critical, u'An error occurred',
-            u'An error occurred:\n{0}'.format(exc),
+            QMessageBox.Critical, 'An error occurred',
+            'An error occurred:\n{0}'.format(exc),
             details.getvalue().encode('utf8')
         )
     except:
         # Wah! Exception showing the details box.
         QMessageBox.critical(
-            None, u'An error occurred', u'An error occurred:\n{0}'.format(exc)
+            None, 'An error occurred', 'An error occurred:\n{0}'.format(exc)
         )
 
 
@@ -210,12 +211,12 @@ def reveal_path(path):
     # http://stackoverflow.com/a/3546503
     path = path.resolve()
     if sys.platform.startswith("win"):
-        res = subprocess.call(["explorer.exe", u"/select,{0}".format(path)])
+        res = subprocess.call(["explorer.exe", "/select,{0}".format(path)])
         if 1 != res:
             raise ValueError('Unexpected exit code [{0}]'.format(res))
     elif 'Darwin' == platform.system():
-        reveal = u'tell application "Finder" to reveal POSIX file "{0}"'
-        activate = u'tell application "Finder" to activate "{0}"'
+        reveal = 'tell application "Finder" to reveal POSIX file "{0}"'
+        activate = 'tell application "Finder" to activate "{0}"'
         args = ['/usr/bin/osascript', '-e']
         subprocess.check_call(args + [reveal.format(path)])
         subprocess.check_call(args + [activate.format(path)])

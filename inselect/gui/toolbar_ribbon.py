@@ -42,7 +42,7 @@ class ToolbarRibbon(Ribbon):
             button.setPopupMode(QToolButton.InstantPopup)
         if tooltip:
             button.setToolTip(tooltip)
-        for key, value in properties.iteritems():
+        for key, value in properties.items():
             button.setProperty(key, value)
 
         button.setAutoRaise(True)

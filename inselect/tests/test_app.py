@@ -19,8 +19,7 @@ class TestApp(unittest.TestCase):
     @classmethod
     def tearDown(self):
         "Close the top-level window that was created in main()"
-        for w in filter(lambda o: isinstance(o, MainWindow),
-                        QApplication.topLevelWidgets()):
+        for w in [o for o in QApplication.topLevelWidgets() if isinstance(o, MainWindow)]:
             w.close()
 
     @patch.object(QApplication, 'exec_', return_value=0)

@@ -35,9 +35,9 @@ class DocumentExport(object):
         for base_fname in fnames:
             fname = base_fname
             while fname in seen:
-                fname = u'{0}-{1}'.format(base_fname, next(suffix[base_fname]))
+                fname = '{0}-{1}'.format(base_fname, next(suffix[base_fname]))
             seen.add(fname)
-            yield u'{0}{1}'.format(fname, self._template.cropped_file_suffix)
+            yield '{0}{1}'.format(fname, self._template.cropped_file_suffix)
 
     def crops_dir(self, document):
         return document.crops_dir
@@ -55,7 +55,7 @@ class DocumentExport(object):
             prefix=document.scanned.path.stem + '_temp_crops'
         )
         tempdir = Path(tempdir)
-        debug_print(u'Saving crops to to temp dir [{0}]'.format(tempdir))
+        debug_print('Saving crops to to temp dir [{0}]'.format(tempdir))
 
         crop_fnames = self.crop_fnames(document)
 
@@ -70,13 +70,13 @@ class DocumentExport(object):
             shutil.rmtree(str(crops_dir), ignore_errors=True)
 
             # Rename temp dir
-            debug_print(u'Moving temp crops dir [{0}] to [{1}]'.format(
+            debug_print('Moving temp crops dir [{0}] to [{1}]'.format(
                 tempdir, crops_dir
             ))
             tempdir.rename(crops_dir)
             tempdir = None
 
-            debug_print(u'Saved [{0}] crops to [{1}]'.format(
+            debug_print('Saved [{0}] crops to [{1}]'.format(
                 document.n_items, crops_dir
             ))
 
@@ -97,7 +97,7 @@ class DocumentExport(object):
         else:
             path = Path(path)
 
-        debug_print(u'DocumentExport.export_csv to [{0}]'.format(path))
+        debug_print('DocumentExport.export_csv to [{0}]'.format(path))
 
         # Field names
         fields = list(self._template.field_names())

@@ -11,7 +11,7 @@ from inselect.gui.plugins import barcode_settings
 from inselect.gui.roles import MetadataRole
 from inselect.tests.utils import temp_directory_with_files
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 try:
@@ -42,7 +42,7 @@ class TestReadBarcodes(GUITest):
         # User should not have been warned about missing scanned image
         self.assertFalse(mock_warning.called)
 
-        indexes = [model.index(row, 0) for row in xrange(3)]
+        indexes = [model.index(row, 0) for row in range(3)]
         self.assertEqual(
             ['1681107', '1681110', '1681112'],
             sorted(model.data(i, MetadataRole).get('catalogNumber') for i in indexes)
@@ -74,7 +74,7 @@ class TestReadBarcodes(GUITest):
             model = self.window.model
 
             # Metadata should be unaltered
-            indexes = (model.index(row, 0) for row in xrange(3))
+            indexes = (model.index(row, 0) for row in range(3))
             self.assertEqual(
                 [None, None, None],
                 [model.data(i, MetadataRole).get('catalogNumber') for i in indexes]

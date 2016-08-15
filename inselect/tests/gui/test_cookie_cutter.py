@@ -7,7 +7,7 @@ from pathlib import Path
 from PySide.QtCore import QSettings
 from PySide.QtGui import QFileDialog, QMessageBox
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.cookie_cutter import CookieCutter

@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 from datetime import datetime
-from itertools import izip
+
 from pathlib import Path
 
 import numpy as np
@@ -68,18 +68,18 @@ class TestDocument(unittest.TestCase):
 
     def test_image_validation(self):
         "Try to create documents with illegal image settings"
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             InselectError,
             'Either scanned or scanned_path should be given',
             InselectDocument
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             InselectError,
             'scanned should be an instance of InselectImage',
             InselectDocument,
             scanned='hello'
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             InselectError,
             'thumbnail should be an instance of InselectImage',
             InselectDocument,
@@ -137,7 +137,7 @@ class TestDocument(unittest.TestCase):
         with temp_directory_with_files(TESTDATA / 'shapes.inselect',
                                        TESTDATA / 'shapes.png') as tempdir:
             items = [{
-                'fields': {'type': u'インセクト'},
+                'fields': {'type': 'インセクト'},
                 'rect': Rect(0.1, 0.2, 0.5, 0.5),
             }]
 
@@ -168,7 +168,7 @@ class TestDocument(unittest.TestCase):
 
         # Check the contents of each crop
         boxes = doc.scanned.from_normalised([i['rect'] for i in doc.items])
-        for box, crop in izip(boxes, doc.crops):
+        for box, crop in zip(boxes, doc.crops):
             x0, y0, x1, y1 = box.coordinates
             self.assertTrue(np.all(doc.scanned.array[y0:y1, x0:x1] == crop))
 
@@ -222,15 +222,15 @@ class TestDocument(unittest.TestCase):
     def test_thumbnail_silly_size(self):
         "Can't create thumbnail with a silly size"
         with temp_directory_with_files(TESTDATA / 'shapes.png') as tempdir:
-            self.assertRaisesRegexp(
+            self.assertRaisesRegex(
                 InselectError, "width should be between",
                 InselectDocument.new_from_scan, tempdir / 'shapes.png', -1
             )
-            self.assertRaisesRegexp(
+            self.assertRaisesRegex(
                 InselectError, "width should be between",
                 InselectDocument.new_from_scan, tempdir / 'shapes.png', 50
             )
-            self.assertRaisesRegexp(
+            self.assertRaisesRegex(
                 InselectError, "width should be between",
                 InselectDocument.new_from_scan, tempdir / 'shapes.png',
                 20000

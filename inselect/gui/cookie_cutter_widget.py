@@ -13,7 +13,7 @@ class CookieCutterWidget(QObject):
     shows a popup menu when pressed.
     """
 
-    FILE_FILTER = u'Inselect cookie cutter (*{0})'.format(
+    FILE_FILTER = 'Inselect cookie cutter (*{0})'.format(
         CookieCutter.EXTENSION
     )
 
@@ -62,7 +62,7 @@ class CookieCutterWidget(QObject):
         debug_print('CookieCutterWidget.choose_cookie_cutter')
         path, selectedFilter = QFileDialog.getOpenFileName(
             None, "Choose cookie cutter",
-            unicode(cookie_cutter_choice().last_directory()),
+            str(cookie_cutter_choice().last_directory()),
             self.FILE_FILTER
         )
 

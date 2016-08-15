@@ -64,7 +64,7 @@ def main(args):
     # likely that the QApplication will have been created by a unittest.
     app = QtGui.qApp if QtGui.qApp else QtGui.QApplication(args)
 
-    debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
+    debug_print('Settings stored in [{0}]'.format(QSettings().fileName()))
 
     if parsed.locale:
         debug_print('Will set locale to [{0}]'.format(parsed.locale))
@@ -74,7 +74,7 @@ def main(args):
         # Set Python's locale module to the user's default locale
         locale.setlocale(locale.LC_ALL, '')
 
-    debug_print(u'Locale is [{0}]'.format(QLocale().name()))
+    debug_print('Locale is [{0}]'.format(QLocale().name()))
 
     # Application icon
     icon = QtGui.QIcon()

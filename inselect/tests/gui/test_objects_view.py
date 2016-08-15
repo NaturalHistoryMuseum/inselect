@@ -2,7 +2,7 @@ import unittest
 
 from pathlib import Path
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -40,7 +40,7 @@ class TestObjectsView(GUITest):
         # than it is tall) selected and at all rotations
         # all rotations
         w.sort_boxes(by_columns=False)
-        for iteration in xrange(2):
+        for iteration in range(2):
             w.select_next_prev(next=True)
             self.run_event_loop()
 

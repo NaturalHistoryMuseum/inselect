@@ -11,7 +11,7 @@ from PySide.QtGui import QMessageBox
 from inselect.lib.templates.dwc import DWC
 from inselect.tests.utils import temp_directory_with_files
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'

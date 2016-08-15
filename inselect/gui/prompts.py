@@ -23,13 +23,13 @@ OBJECTS_VIEW_TIP = ('CTRL + N / P or arrow keys to move between objects  |  '
 
 
 def _format_action_shortcuts(action):
-    return u' / '.join(s.toString() for s in action.shortcuts())
+    return ' / '.join(s.toString() for s in action.shortcuts())
 
 
 if 'darwin' == sys.platform:
     # Replace 'Ctrl' with the Apple command key
     def command_key(msg):
-        return msg.replace('Ctrl', u'⌘')
+        return msg.replace('Ctrl', '⌘')
     BOXES_VIEW_SHORTCUTS = [
         (text, command_key(shortcut)) for text, shortcut in BOXES_VIEW_SHORTCUTS
     ]

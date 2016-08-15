@@ -21,7 +21,7 @@ class TestUtils(unittest.TestCase):
             reveal_path(path)
             expected = [
                 "explorer.exe",
-                u"/select,{0}".format(str(path.resolve()))
+                "/select,{0}".format(str(path.resolve()))
             ]
             mock_subprocess.assert_called_once_with(expected)
 
@@ -35,7 +35,7 @@ class TestUtils(unittest.TestCase):
             expected = [
                 '/usr/bin/osascript',
                 '-e',
-                u'tell application "Finder" to reveal POSIX file "{0}"'.format(str(path.resolve()))
+                'tell application "Finder" to reveal POSIX file "{0}"'.format(str(path.resolve()))
             ]
             mock_subprocess.assert_any_call(expected)
 

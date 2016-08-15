@@ -1,6 +1,6 @@
 import unittest
 
-from itertools import izip, count
+from itertools import count
 from mock import patch
 from pathlib import Path
 
@@ -8,7 +8,7 @@ import unicodecsv
 
 from PySide.QtGui import QMessageBox
 
-from gui_test import GUITest
+from .gui_test import GUITest
 from inselect.lib.persist_user_template import BOUNDING_BOX_FIELD_NAMES
 from inselect.lib.templates.dwc import DWC
 from inselect.tests.utils import temp_directory_with_files
@@ -27,13 +27,13 @@ class TestExportCSV(GUITest):
         # Check CSV contents
         with csv.open('rb') as f:
             res = unicodecsv.DictReader(f, encoding='utf-8')
-            for index, item, row in izip(count(), doc.items, res):
+            for index, item, row in zip(count(), doc.items, res):
                 expected = item['fields']
                 expected.update({
                     'ItemNumber': '{0}'.format(1 + index),
                     'Cropped_image_name': '{0:04}.jpg'.format(1 + index),
                 })
-                actual = {k: v for k, v in row.items() if v and k not in BOUNDING_BOX_FIELD_NAMES}
+                actual = {k: v for k, v in list(row.items()) if v and k not in BOUNDING_BOX_FIELD_NAMES}
                 self.assertEqual(expected, actual)
 
         # Expect 4 rows
@@ -55,7 +55,7 @@ class TestExportCSV(GUITest):
 
             # User should have been told about the export
             self.assertTrue(mock_information.called)
-            expected = u"Data for 5 boxes written to {0}"
+            expected = "Data for 5 boxes written to {0}"
             expected = expected.format(tempdir / 'shapes.csv')
             self.assertTrue(expected in mock_information.call_args[0])
 
@@ -79,7 +79,7 @@ class TestExportCSV(GUITest):
 
             # User should have been told about the export
             self.assertTrue(mock_information.called)
-            expected = u"Data for 5 boxes written to {0}"
+            expected = "Data for 5 boxes written to {0}"
             expected = expected.format(tempdir / 'shapes.csv')
             self.assertTrue(expected in mock_information.call_args[0])
 

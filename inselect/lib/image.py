@@ -1,6 +1,6 @@
 import warnings
 
-from itertools import izip, count, chain, repeat
+from itertools import count, chain, repeat
 from pathlib import Path
 
 from PIL import Image
@@ -91,11 +91,11 @@ class InselectImage(object):
 
         if not rotation:
             rotation = repeat(0)
-        elif isinstance(rotation, (int, long)):
+        elif isinstance(rotation, int):
             rotation = repeat(rotation)
 
         h, w = self.array.shape[:2]
-        for box, rotate in izip(self.from_normalised(normalised), rotation):
+        for box, rotate in zip(self.from_normalised(normalised), rotation):
             x0, y0, x1, y1 = box.coordinates
             x_in_bounds = [0 <= x0 <= w, 0 <= x1 <= w]
             y_in_bounds = [0 <= y0 <= h, 0 <= y1 <= h]
@@ -143,7 +143,7 @@ class InselectImage(object):
         # TODO Make read-only?
         import cv2
         self.assert_is_file()
-        for index, crop, path in izip(count(), self.crops(normalised, rotation), paths):
+        for index, crop, path in zip(count(), self.crops(normalised, rotation), paths):
             if progress:
                 progress('Writing crop {0}'.format(1 + index))
             if not cv2.imwrite(str(path), crop):

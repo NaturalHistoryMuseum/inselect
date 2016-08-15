@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Saves cropped object images
 """
-from __future__ import print_function
+
 
 import argparse
 import sys
@@ -32,25 +32,25 @@ def save_crops(dir, overwrite_existing, template):
             validation = export.validation_problems(doc)
             if validation.any_problems:
                 print(
-                    u'Not saving crops for [{0}] because there are validation '
-                    u'problems'.format(p)
+                    'Not saving crops for [{0}] because there are validation '
+                    'problems'.format(p)
                 )
                 for msg in format_validation_problems(validation):
                     print(msg)
             elif not overwrite_existing and doc.crops_dir.is_dir():
-                print(u'Crops dir [{0}] exists - skipping'.format(doc.crops_dir))
+                print('Crops dir [{0}] exists - skipping'.format(doc.crops_dir))
             else:
-                print(u'Will save crops for [{0}] to [{1}]'.format(p, doc.crops_dir))
+                print('Will save crops for [{0}] to [{1}]'.format(p, doc.crops_dir))
 
-                debug_print(u'Loading full-resolution scanned image')
+                debug_print('Loading full-resolution scanned image')
                 doc.scanned.array
 
-                debug_print(u'Saving crops')
+                debug_print('Saving crops')
                 export.save_crops(doc)
         except KeyboardInterrupt:
             raise
         except Exception:
-            print(u'Error saving crops from [{0}]'.format(p))
+            print('Error saving crops from [{0}]'.format(p))
             traceback.print_exc()
 
 

@@ -6,7 +6,7 @@ from PySide.QtCore import QSettings
 
 from inselect.gui.plugins.barcode_dialog import BarcodeDialog
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 class TestBarcodeDialog(GUITest):

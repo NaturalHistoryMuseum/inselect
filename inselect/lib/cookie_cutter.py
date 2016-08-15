@@ -24,7 +24,7 @@ class CookieCutter(object):
             raise ValueError('Must be a list of numeric coordinates')
         else:
             self._boxes = deepcopy(boxes)
-            self.name = u'{0} ({1} boxes)'.format(
+            self.name = '{0} ({1} boxes)'.format(
                 name, len(self._boxes)
             )
 
@@ -53,7 +53,7 @@ class CookieCutter(object):
             'boxes': self._boxes,
         }
         with Path(path).open('w', encoding='utf8') as outfile:
-            outfile.write(unicode(json.dumps(doc, indent=4)))
+            outfile.write(str(json.dumps(doc, indent=4)))
 
     @property
     def document_items(self):
