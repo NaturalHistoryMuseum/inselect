@@ -24,14 +24,8 @@ conda update --yes conda
 # Inselect env
 
 ```
-conda env create -f inselect.yml
+conda env create -f inselect-osx.yml
 source activate inselect
-
-# Conda packages specific to OS X
-conda install --name inselect --file inselect-osx-64.txt
-
-# PyPi packages that can't be specified in a conda environment yml file
-pip install -r requirements.txt
 ```
 
 ## LibDMTX barcode reading library

@@ -1,20 +1,20 @@
 name: inselect
 dependencies:
-- freetype=2.5.5=0
+- freetype=2.5.5=1
+- https://conda.binstar.org/jjhelmus::opencv=2.4.12=np110py27_0
 - jbig=2.1=0
 - jpeg=8d=1
 - libpng=1.6.17=0
 - libtiff=4.0.6=1
 - mkl=11.3.3=0
 - numpy=1.10.1=py27_0
-- openssl=1.0.2h=0
+- openssl=1.0.2h=1
 - pillow=3.2.0=py27_0
 - pip=8.1.2=py27_0
 - pyside=1.1.2=py27_1
 - python=2.7.11=0
 - python.app=1.2=py27_4
 - qt=4.8.7=1
-- qtawesome=0.3.3=py27_0
 - qtpy=1.0.1=py27_0
 - readline=6.2=2
 - scikit-learn=0.17.1=np110py27_1
@@ -22,65 +22,34 @@ dependencies:
 - setuptools=19.2=py27_0    # A [bug in PyInstaller 3.1.1](https://github.com/pyinstaller/pyinstaller/issues/1773) keeps us on setupools 19.2
 - shiboken=1.1.2=py27_0
 - six=1.10.0=py27_0
-- sqlite=3.9.2=0
+- sqlite=3.13.0=0
 - tk=8.5.18=0
 - wheel=0.29.0=py27_0
-- xz=5.0.5=0
+- xz=5.0.5=1
 - zlib=1.2.8=0
 - pip:
-  - astroid==1.4.4
-  - caniusepython3==3.4.0
-  - colorama==0.3.6
   - coverage==4.0.3
   - coveralls==1.1
   - distlib==0.2.3
   - docopt==0.6.2
-  - dodgy==0.1.9
-  - ecdsa==0.13
   - exifread==2.1.2
-  - flake8==2.5.4
-  - funcsigs==0.4
-  - future==0.15.2
-  - futures==3.0.5
+  - funcsigs==1.0.2
   - https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.6/gouda-0.1.6.tar.gz 
   - humanize==0.5.1
-  - jinja2==2.8
-  - lazy-object-proxy==1.2.1
-  - logilab-common==1.2.0
-  - markupsafe==0.23
-  - mccabe==0.4.0
   - mock==1.3.0
-  - modernize==0.5
   - nose==1.3.7
   - packaging==16.7
-  - paramiko==1.16.0
   - pathlib==1.0.1
-  - pbr==1.8.1
-  - pep257==0.7.0
-  - pep8==1.7.0
-  - pep8-naming==0.3.3
-  - pluggy==0.3.1
-  - prospector==0.11.7
+  - pbr==1.10.0
   - psutil==4.0.0
   - py==1.4.31
   - pycrypto==2.6.1
   # - pydmtx
-  - pyflakes==1.0.0
-  - pylint==1.5.4
-  - pylint-celery==0.3
-  - pylint-common==0.2.2
-  - pylint-django==0.7.1
-  - pylint-flask==0.3
-  - pylint-plugin-utils==0.2.3
+  - pyinstaller==3.1.1
   - pyparsing==2.1.5
   - python-dateutil==2.3    # 2.5.0 causes problems for PyInstaller builds on Mac OS X
   - pytz==2015.7
   - pyyaml==3.11
-  - requests==2.9.1
-  - requirements-detector==0.5.1
   - schematics==1.1.1
-  - setoptconf==0.2.0
-  - tox==2.3.1
   - unicodecsv==0.14.1
-  - virtualenv==15.0.2
-  - wrapt==1.10.6
+  - https://github.com/NaturalHistoryMuseum/zbar-python-patched/archive/v0.10.tar.gz
