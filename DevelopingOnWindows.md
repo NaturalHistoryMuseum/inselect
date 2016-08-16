@@ -60,6 +60,8 @@ conda update --yes conda
 conda env create -f inselect-win.yml
 activate inselect
 
+pip install -r requirements.pip
+
 # For 64-bit
 pip install -r requirements.win64
 

@@ -1,0 +1,39 @@
+# Installed via conda / manually: PySide, Pillow, numpy, opencv, pywin32
+exifread==2.1.2
+humanize==0.5.1
+pathlib==1.0.1
+psutil==4.0.0
+python-dateutil==2.3    # 2.5.0 causes problems for PyInstaller builds on Mac OS X
+pytz==2015.7
+PyYAML==3.11
+schematics==1.1.1
+unicodecsv==0.14.1
+
+# Indirect dependencies
+distlib==0.2.3
+docopt==0.6.2
+exifread==2.1.2
+funcsigs==1.0.2
+packaging==16.7
+pbr==1.10.0
+py==1.4.31
+pycrypto==2.6.1
+pyparsing==2.1.5
+requests==2.11.0
+six==1.10.0
+
+# Not from PyPI
+https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.6.tar.gz
+https://github.com/NaturalHistoryMuseum/zbar-python-patched/archive/v0.10.tar.gz ; sys_platform != 'win32'
+
+# Development
+coveralls>=0.4.1
+mock>=1.0.1
+nose>=1.3.4
+pyinstaller==3.1.1 ; sys_platform == 'darwin'
+
+# cx_Freeze 4.3.2 introduced a bug that prevents python win32com wrappers
+# generated using makepy.py from being frozen.
+# https://bitbucket.org/anthony_tuininga/cx_freeze/issue/44/win32com-relies-on-modules-with-non
+# This bug has been fixed but the fix has not yet been released.
+https://bitbucket.org/anthony_tuininga/cx_freeze/get/aebc9c32615c.zip ; sys_platform == 'win32'

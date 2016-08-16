@@ -1,7 +1,10 @@
 name: inselect
 dependencies:
 - freetype=2.5.5=1
-- https://conda.binstar.org/jjhelmus::opencv=2.4.12=np110py27_0
+# The following is a valid package, asspecified by 'conda env export' but
+# conda raises an error 'Package missing in current osx-64 channels' so
+# opencv must be installed manually
+# - jjhelmus::opencv=2.4.12=np110py27_0
 - jbig=2.1=0
 - jpeg=8d=1
 - libpng=1.6.17=0
@@ -27,29 +30,3 @@ dependencies:
 - wheel=0.29.0=py27_0
 - xz=5.0.5=1
 - zlib=1.2.8=0
-- pip:
-  - coverage==4.0.3
-  - coveralls==1.1
-  - distlib==0.2.3
-  - docopt==0.6.2
-  - exifread==2.1.2
-  - funcsigs==1.0.2
-  - https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.6/gouda-0.1.6.tar.gz 
-  - humanize==0.5.1
-  - mock==1.3.0
-  - nose==1.3.7
-  - packaging==16.7
-  - pathlib==1.0.1
-  - pbr==1.10.0
-  - psutil==4.0.0
-  - py==1.4.31
-  - pycrypto==2.6.1
-  # - pydmtx
-  - pyinstaller==3.1.1
-  - pyparsing==2.1.5
-  - python-dateutil==2.3    # 2.5.0 causes problems for PyInstaller builds on Mac OS X
-  - pytz==2015.7
-  - pyyaml==3.11
-  - schematics==1.1.1
-  - unicodecsv==0.14.1
-  - https://github.com/NaturalHistoryMuseum/zbar-python-patched/archive/v0.10.tar.gz

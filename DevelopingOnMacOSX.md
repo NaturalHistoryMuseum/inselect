@@ -26,6 +26,8 @@ conda update --yes conda
 ```
 conda env create -f inselect-osx.yml
 source activate inselect
+conda install --channel https://conda.anaconda.org/jjhelmus --yes opencv=2.4.12=np110py27_0
+pip install -r requirements.pip
 ```
 
 ## LibDMTX barcode reading library
