@@ -1,0 +1,3 @@
+# platform: osx-64
+@EXPLICIT
+https://conda.binstar.org/jjhelmus/osx-64/opencv-2.4.12-np110py27_0.tar.bz2
