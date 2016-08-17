@@ -151,7 +151,7 @@ def user_name():
             except pywintypes.error:
                 try:
                     # Returns MBCS
-                    return unicode(win32api.GetUserName(), 'mcbs')
+                    return unicode(win32api.GetUserName(), 'mbcs')
                 except pywintypes.error:
                     return ''
 
