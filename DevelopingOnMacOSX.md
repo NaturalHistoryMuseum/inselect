@@ -24,32 +24,10 @@ conda update --yes conda
 # Inselect env
 
 ```
-conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.1.2 numpy=1.10.1 scipy==0.17.1 scikit-learn=0.17.1
+conda env create -f inselect-osx.yml
 source activate inselect
-```
-
-# Dependencies
-
-```
-cd ~/projects/inselect
-pip install -r requirements.txt
-```
-
-## OpenCV
-`jjhelmus` provides versions after `2.4.10` but these make the Mac build
-extremely problematic by introducing many `dylib` dependencies that are
-troublesome to freeze.
-```
-conda install --yes -c https://conda.binstar.org/jjhelmus opencv=2.4.10
-conda install --yes numpy=1.10.1
-```
-
-## setuptools
-A [bug in PyInstaller 3.1.1](https://github.com/pyinstaller/pyinstaller/issues/1773)
-means that we need to use setupools 19.2:
-
-```
-conda install --yes setuptools=19.2
+conda install --channel https://conda.anaconda.org/jjhelmus --yes opencv=2.4.12=np110py27_0
+pip install -r requirements.pip
 ```
 
 ## LibDMTX barcode reading library
@@ -115,10 +93,11 @@ python -m bin.freeze_icons
 
 # Build
 
-The build script freezes icons.
+The build script freezes icons, runs tests, freezes python and assembles files
+into a `.dmg` file.
 
 ```
 ./build.sh
 ```
 
-Installer will be in `dist`.
+The `.dmg` file will be in `dist`.
