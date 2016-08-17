@@ -27,7 +27,7 @@ def _do_kde(values):
     bins = np.append(samples[minima], RESCALE)
 
     # Cut data
-    return (v[0] for v in np.digitize(values, bins, right=True).tolist())
+    return np.digitize(values.reshape(len(values)), bins, right=True)
 
 
 def sort_document_items(items, by_columns):
@@ -36,6 +36,9 @@ def sort_document_items(items, by_columns):
     if not items:
         # Algorithm is not tolerant of empty values
         return []
+    elif 1 == len(items):
+        # Breaks algorithm when using older numpy (< 10.1)
+        return items
     else:
         rects = [i['rect'] for i in items]
         x_bins = _do_kde(r.x_centre for r in rects)
