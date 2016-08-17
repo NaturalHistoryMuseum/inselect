@@ -25,7 +25,7 @@ source /usr/local/bin/virtualenvwrapper.sh
 
 # Install system dependencies
 ```
-sudo apt-get install python-pyside pyside-tools python-numpy python-scipy python-sklearn python-opencv libdmtx-dev libzbar-dev
+sudo apt-get install python-pyside pyside-tools python-numpy python-scipy python-sklearn python-opencv python-pil libdmtx-dev libzbar-dev
 ```
 
 # Create virtual environment for Inselect and install dependencies from pip
