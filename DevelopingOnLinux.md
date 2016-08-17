@@ -47,8 +47,9 @@ pip2 install -r requirements.pip
 * Install Python library
 
     ```
-    cd python
+    cd dmtx-wrappers/python
     python2 setup.py install
+    cd ~/projects/inselect
     ```
 
 ## Test barcode reading libraries
@@ -92,4 +93,3 @@ Run inselect:
 ```
 ./inselect.py
 ```
-
