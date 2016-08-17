@@ -1,3 +1,4 @@
+#!/bin/sh
 # Temporary solution until I get round to writing a makefile
 
 set -e  # Exit on failure
