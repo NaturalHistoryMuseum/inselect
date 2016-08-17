@@ -1,4 +1,5 @@
-# Installed via conda / manually: PySide, Pillow, numpy, opencv, pywin32
+# Dependencies provided by conda: PySide, Pillow, numpy, opencv, scipy,
+# scikit-learn, pywin32
 exifread==2.1.2
 humanize==0.5.1
 pathlib==1.0.1
