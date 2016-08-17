@@ -30,7 +30,7 @@ before_install:
   - python setup.py install
 
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements.pip
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - python -m bin.freeze_icons

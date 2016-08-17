@@ -33,6 +33,21 @@ MISSING_DYLIBS = (
     'libQtGui.4.dylib',
     'libpng16.16.dylib',
     'libz.1.dylib',
+    'libopencv_contrib.2.4.dylib',
+    'libopencv_nonfree.2.4.dylib',
+    'libopencv_gpu.2.4.dylib',
+    'libopencv_legacy.2.4.dylib',
+    'libopencv_photo.2.4.dylib',
+    'libopencv_ocl.2.4.dylib',
+    'libopencv_calib3d.2.4.dylib',
+    'libopencv_features2d.2.4.dylib',
+    'libopencv_flann.2.4.dylib',
+    'libopencv_ml.2.4.dylib',
+    'libopencv_video.2.4.dylib',
+    'libopencv_objdetect.2.4.dylib',
+    'libopencv_highgui.2.4.dylib',
+    'libopencv_imgproc.2.4.dylib',
+    'libopencv_core.2.4.dylib',
 )
 
 # The lib directory associated with this environment

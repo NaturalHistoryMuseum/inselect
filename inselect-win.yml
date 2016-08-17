@@ -1,0 +1,22 @@
+name: inselect
+dependencies:
+- bzip2=1.0.6=vc9_3
+- freetype=2.5.5=vc9_1
+- jpeg=8d=vc9_0
+- libpng=1.6.22=vc9_0
+- libtiff=4.0.6=vc9_2
+- mkl=11.3.3=1
+- numpy=1.11.0=py27_2
+- openssl=1.0.2h=vc9_0
+- pillow=3.2.0=py27_1
+- pip=8.1.2=py27_0
+- pyside=1.2.1=py27_0
+- python=2.7.12=0
+- pywin32=220=py27_1
+- qt=4.8.7=vc9_9
+- scikit-learn=0.17.1=np111py27_1
+- scipy=0.17.1=np111py27_1
+- setuptools=25.1.6=py27_0
+- vs2008_runtime=9.00.30729.1=2
+- wheel=0.29.0=py27_0
+- zlib=1.2.8=vc9_3

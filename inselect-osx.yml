@@ -1,0 +1,32 @@
+name: inselect
+dependencies:
+- freetype=2.5.5=1
+# The following is a valid package, asspecified by 'conda env export' but
+# conda raises an error 'Package missing in current osx-64 channels' so
+# opencv must be installed manually
+# - jjhelmus::opencv=2.4.12=np110py27_0
+- jbig=2.1=0
+- jpeg=8d=1
+- libpng=1.6.17=0
+- libtiff=4.0.6=1
+- mkl=11.3.3=0
+- numpy=1.10.1=py27_0
+- openssl=1.0.2h=1
+- pillow=3.2.0=py27_0
+- pip=8.1.2=py27_0
+- pyside=1.1.2=py27_1
+- python=2.7.11=0
+- python.app=1.2=py27_4
+- qt=4.8.7=1
+- qtpy=1.0.1=py27_0
+- readline=6.2=2
+- scikit-learn=0.17.1=np110py27_1
+- scipy=0.17.1=np110py27_0
+- setuptools=19.2=py27_0    # A [bug in PyInstaller 3.1.1](https://github.com/pyinstaller/pyinstaller/issues/1773) keeps us on setupools 19.2
+- shiboken=1.1.2=py27_0
+- six=1.10.0=py27_0
+- sqlite=3.13.0=0
+- tk=8.5.18=0
+- wheel=0.29.0=py27_0
+- xz=5.0.5=1
+- zlib=1.2.8=0

@@ -23,7 +23,7 @@ setup_data = {
     'package_data': {'inselect': ['data/inselect.qss']},
     'test_suite': 'inselect.tests',
     'scripts': ['inselect/scripts/{0}.py'.format(script) for script in SCRIPTS],
-    'install_requires': open('requirements.txt').readlines(),
+    'install_requires': open('requirements.pip').readlines(),
     'entry_points': {
         'console_scripts': [
             'inselect = inselect.app:launch'

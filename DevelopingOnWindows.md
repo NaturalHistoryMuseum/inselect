@@ -53,14 +53,14 @@ Download from http://aka.ms/vcpython27 and install with defaults.
 ## Inselect environment
 
 ```
-conda update --yes conda
-conda create --yes --name inselect pillow=3.2.0 qt=4.8.7 pyside=1.2.1 pywin32=220 numpy=1.11.0 scipy==0.17.1 scikit-learn=0.17.1
-activate inselect
-python -m pip install --upgrade pip
-
 # Visual C++ is required to build cx_Freeze
 "%HOMEPATH%\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat"
-pip install -r requirements.txt
+
+conda update --yes conda
+conda env create -f inselect-win.yml
+activate inselect
+
+pip install -r requirements.pip
 
 # For 64-bit
 pip install -r requirements.win64
@@ -75,7 +75,7 @@ Don't worry about the "Can't install shortcuts..." message when you run the
 `pywin32_postinstall` step.
 
 ## Install OpenCV
-* Download [OpenCV 2.4.11](http://opencv.org/)
+* Download [OpenCV 2.4.12](http://opencv.org/)
 * Extract OpenCV to `c:\opencv\`
 * Copy the extension module to the Anaconda environment; for 64-bit:
 
@@ -93,7 +93,7 @@ Don't worry about the "Can't install shortcuts..." message when you run the
 * Test
 
     ```
-    python -c "import cv2; print cv2"
+    python -c "import cv2; print cv2.__version__"
     ```
 
 ### Inlite barcode reading library
@@ -122,10 +122,11 @@ python -m bin.freeze_icons
 
 # Build
 
-The build script freezes icons.
+The build script freezes icons, runs tests, freezes python and assembles files
+into an installer.
 
 ```
-build.sh
+build.bat
 ```
 
-Installer will be in `dist`.
+The installer will be in `dist`.
