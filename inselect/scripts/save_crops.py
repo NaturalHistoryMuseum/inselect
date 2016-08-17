@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """Saves cropped object images
 """
 from __future__ import print_function

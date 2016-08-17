@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import sys
 
 if sys.platform == 'win32' and hasattr(sys, 'frozen'):
