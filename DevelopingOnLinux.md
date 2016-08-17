@@ -79,16 +79,14 @@ nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-pack
 
 Ubuntu 16.04 appears to come with `nose` already installed so the
 `pip2 install -r requirements.pip` step above will not install `nose` within
-the virtual env so `nosetests` will not find the packages within the
+the virtual env. `nosetests` will not find the packages within the
 virtualenv and you will see lots of `ImportErrors`. If this is the case, run
 
 ```
 python -m nose --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
 ```
 
-Run `nosetests` as shown above.
-
-Run inselect:
+Run inselect
 
 ```
 ./inselect.py
