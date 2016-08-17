@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """Ingests scanned images
 """
 from __future__ import print_function
