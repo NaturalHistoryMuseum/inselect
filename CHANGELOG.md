@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.34
 -------------
+- #349 Linux instructions
 - #347 Explicitly reference python2 in scripts
 - #342 Conda environment files
 - #333 Ugly error message when opening or saving a file
