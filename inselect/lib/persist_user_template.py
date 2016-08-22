@@ -125,6 +125,7 @@ class _FieldModel(Model):
     label = StringType(serialized_name='Label')
     group = StringType(serialized_name='Group')
     uri = URLType(serialized_name='URI')
+    fixed_value = StringType(serialized_name='Fixed value')
     mandatory = BooleanType(default=False, serialized_name='Mandatory')
     choices = _UniqueListType(StringType, serialized_name='Choices')
     choices_with_data = OrderedDictType(
@@ -148,10 +149,15 @@ class _FieldModel(Model):
             msg = u"Should not be one of {0}."
             raise ValidationError(msg.format(RESERVED_FIELD_NAMES))
 
+    def validate_fixed_value(self, data, value):
+        pass
+
     def validate_choices(self, data, value):
-        "'Choices' and 'Choices with data' are mutually exclusive"
-        if data.get('choices') and data.get('choices_with_data'):
-            msg = "'Choices' and 'Choices with data' are mutually exclusive."
+        "'Choices', 'Choices with data' and 'Fixed value' are mutually exclusive"
+        if 1 < sum(bool(data.get(field)) for field in
+                   ('choices', 'choices_with_data', 'fixed_value')):
+            msg = ("'Choices', 'Choices with data' and 'Fixed value' are "
+                   "mutually exclusive.")
             raise ValidationError(msg)
 
     def validate_parser(self, data, value):
@@ -259,7 +265,7 @@ def validated_specification(spec):
         try:
             field = _FieldModel(f)
             field.validate()
-        except (ModelConversionError, ValidationError), e:
+        except (ModelConversionError, ValidationError) as e:
             failures += _extract_validation_error(e, prompt=f.get('Name'))
         else:
             model.fields.append(field)

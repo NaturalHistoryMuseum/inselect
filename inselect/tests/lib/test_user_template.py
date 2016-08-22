@@ -125,10 +125,20 @@ class TestUserTemplate(unittest.TestCase):
         self.assertEqual(doc.name, "Test user template")
         self.assertEqual(doc.cropped_file_suffix, '.jpg')
         self.assertEqual(doc.thumbnail_width_pixels, 4096)
-        self.assertEqual(3, len(doc.fields))
-        self.assertEqual('catalogNumber', doc.fields[0].name)
-        self.assertEqual('Location', doc.fields[1].name)
-        self.assertEqual('Taxonomy', doc.fields[2].name)
+        self.assertEqual(4, len(doc.fields))
+        self.assertEqual('Department', doc.fields[0].name)
+        self.assertEqual('Palaeontology', doc.fields[0].fixed_value)
+        self.assertEqual('catalogNumber', doc.fields[1].name)
+        self.assertEqual('Catalog number', doc.fields[1].label)
+        self.assertEqual(
+            'http://rs.tdwg.org/dwc/terms/catalogNumber', doc.fields[1].uri
+        )
+        self.assertTrue(doc.fields[1].mandatory)
+        self.assertEqual('Catalog number', doc.fields[1].label)
+        self.assertEqual('Location', doc.fields[2].name)
+        self.assertTrue(doc.fields[2].mandatory)
+        self.assertEqual('Taxonomy', doc.fields[3].name)
+        self.assertTrue(doc.fields[3].mandatory)
 
 
 if __name__ == '__main__':

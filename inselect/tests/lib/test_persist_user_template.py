@@ -73,6 +73,19 @@ class TestValidateUserTemplate(unittest.TestCase):
         res = self._invalid_specification(spec)
         self.assertIn('Fields: Labels must be unique', res)
 
+    def test_choices_and_fixed_value(self):
+        "Both Choices and Fixed value given"
+        spec = {'Fields': [{
+            'Name': 'F', 'Choices': ['1', '2'],
+            'Fixed value': 'Entomology',
+        }]}
+        res = self._invalid_specification(spec)
+        expected = (
+            "F: Choices: 'Choices', 'Choices with data' and 'Fixed value' are "
+            "mutually exclusive."
+        )
+        self.assertIn(expected, res)
+
     def test_choices_and_choices_with_data(self):
         "Both Choices and Choices with data given"
         spec = {'Fields': [{
@@ -80,7 +93,10 @@ class TestValidateUserTemplate(unittest.TestCase):
             'Choices with data': [('1', 1), ('2', 2)],
         }]}
         res = self._invalid_specification(spec)
-        expected = "F: Choices: 'Choices' and 'Choices with data' are mutually exclusive."
+        expected = (
+            "F: Choices: 'Choices', 'Choices with data' and 'Fixed value' are "
+            "mutually exclusive."
+        )
         self.assertIn(expected, res)
 
     def test_duplicated_choices(self):
