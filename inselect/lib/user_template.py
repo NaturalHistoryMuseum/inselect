@@ -9,11 +9,12 @@ from pathlib import Path
 
 import persist_user_template
 from inselect.lib.parse import parse_matches_regex
-from inselect.lib.utils import debug_print, FormatDefault
+from inselect.lib.utils import FormatDefault
 
 
 _Field = namedtuple('_Field', ('name', 'label', 'group', 'uri', 'mandatory',
-                               'choices', 'choices_with_data', 'parse_fn'))
+                               'fixed_value', 'choices', 'choices_with_data',
+                               'parse_fn'))
 
 
 class UserTemplate(object):
@@ -58,6 +59,7 @@ class UserTemplate(object):
                                  group=field.get('Group'),
                                  uri=field.get('URI'),
                                  mandatory=field.get('Mandatory', False),
+                                 fixed_value=field.get('Fixed value'),
                                  choices=field.get('Choices'),
                                  choices_with_data=choices_with_data,
                                  parse_fn=parse_fn))
@@ -66,6 +68,9 @@ class UserTemplate(object):
 
         # Map from field name to a instance of _Field
         self.fields_mapping = {f.name: f for f in fields}
+
+        # Map from field name to value
+        self.fixed_value_mapping = {f.name: f.fixed_value for f in fields if f.fixed_value}
 
         # Map from field name to choices list
         self.choices_mapping = {f.name: f.choices for f in fields if f.choices}
@@ -121,10 +126,14 @@ class UserTemplate(object):
         md = metadata.copy()
         md['ItemNumber'] = index
 
-        # Consider fields with a 'Choices with data'
+        # Fields with a 'Choices with data'
         for field, choices in self.choices_with_data_mapping.iteritems():
             if field in md:
                 md[u'{0}-value'.format(field)] = choices.get(md[field], '')
+
+        # Fixed value fields
+        for field, value in self.fixed_value_mapping.iteritems():
+            md[field] = value
         return md
 
     def export_items(self, crop_fnames, document):
