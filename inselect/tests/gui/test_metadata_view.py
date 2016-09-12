@@ -25,7 +25,8 @@ class TestMetadataViewControls(GUITest):
     def test_controls(self):
         controls = self.window.view_metadata._form_container.controls
         # controls is a dict { control: field name }
-        self.assertEqual(3, len(controls))
+        self.assertEqual(4, len(controls))
+        self.assertIn('Department', controls.values())
         self.assertIn('catalogNumber', controls.values())
         self.assertIn('Location', controls.values())
         self.assertIn('Taxonomy', controls.values())
@@ -39,6 +40,10 @@ class TestMetadataViewControls(GUITest):
                 return key
         else:
             raise ValueError('No field [{0}]'.format(field))
+
+    def test_department(self):
+        department = self._control_for_field('Department')
+        self.assertEqual('Palaeontology', department.text())
 
     def test_catalog_number(self):
         catalog_number = self._control_for_field('catalogNumber')

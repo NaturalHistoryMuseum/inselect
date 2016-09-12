@@ -1,5 +1,7 @@
 Name: Test user template
 Fields:
+    - Name: Department
+      Fixed value: Palaeontology
     - Name: catalogNumber
       Label: Catalog number
       URI: http://rs.tdwg.org/dwc/terms/catalogNumber

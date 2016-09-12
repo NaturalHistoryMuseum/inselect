@@ -29,6 +29,10 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                 'Name': 'catalogNumber',
             },
             {
+                'Name': 'Department',
+                'Fixed value': 'Entomology',
+            },
+            {
                 'Name': 'scientificName',
                 'Choices with data': [(u'A',         1),
                                       (u'B',         2),
@@ -115,42 +119,43 @@ class TestDocumentExportWithTemplate(unittest.TestCase):
                     'NormalisedBottom', 'ThumbnailLeft', 'ThumbnailTop',
                     'ThumbnailRight', 'ThumbnailBottom', 'OriginalLeft',
                     'OriginalTop', 'OriginalRight', 'OriginalBottom',
-                    'catalogNumber', 'scientificName', 'scientificName-value'
+                    'catalogNumber', 'Department', 'scientificName',
+                    'scientificName-value'
                 ]
                 self.assertEqual(headers, reader.next())
 
                 # Check only the metadata columns and 'original' coordinates
                 # columns, ignoring thumbnail (which doesn't exist)
                 # and normalised (which are floating point) coordinates
-                metadata_cols = itemgetter(0, 1, 10, 11, 12, 13, 14, 15, 16)
+                metadata_cols = itemgetter(0, 1, 10, 11, 12, 13, 14, 15, 16, 17)
                 self.assertEqual(
                     (u'01_1.png', u'1',
                      u'0', u'0', u'189', u'189',
-                     u'1', u'A', u'1'),
+                     u'1', u'Entomology', u'A', u'1'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'02_2.png', u'2',
                      u'271', u'0', u'459', u'189',
-                     u'2', u'B', u'2'),
+                     u'2', u'Entomology', u'B', u'2'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'03_10.png', u'3',
                      u'194', u'196', u'257', u'232',
-                     u'3', u'インセクト', u'10'),
+                     u'3', u'Entomology', u'インセクト', u'10'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'04_3.png', u'4',
                      u'0', u'248', u'189', u'437',
-                     u'4', u'Elsinoë', u'3'),
+                     u'4', u'Entomology', u'Elsinoë', u'3'),
                     metadata_cols(reader.next())
                 )
                 self.assertEqual(
                     (u'05_4.png', u'5',
                      u'271', u'248', u'459', u'437',
-                     u'5', u'D', u'4'),
+                     u'5', u'Entomology', u'D', u'4'),
                     metadata_cols(reader.next())
                 )
                 self.assertIsNone(next(reader, None))

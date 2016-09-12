@@ -208,6 +208,8 @@ class FormContainer(QWidget):
             return CountryComboBox(template)
         elif 'language' == field.name:
             return LanguageComboBox(template)
+        elif field.fixed_value:
+            return FixedValueControl(field.fixed_value)
         elif field.choices:
             combo = ChoicesFieldComboBox(field.name, template,
                                          labels=field.choices)
@@ -235,10 +237,31 @@ class URLLabel(QLabel):
         self.setOpenExternalLinks(True)
 
 
-class FieldEdit(QLineEdit):
-    """Updates the relevant model field when _editing_finished is called.
+class FixedValueControl(QLabel):
+    """A read-only value that is stored only in the template.
     """
+    def __init__(self, fixed_value, parent=None, flags=0):
+        super(FixedValueControl, self).__init__(fixed_value, parent, flags)
 
+    def update_model(self):
+        pass
+
+    def clear_selection(self):
+        pass
+
+    def clear_value(self, selected):
+        pass
+
+    def set_multiple(self, selected):
+        pass
+
+    def set_value(self, selected, value):
+        pass
+
+
+class FieldEdit(QLineEdit):
+    """Updates the relevant model field when _text_edited is called.
+    """
     def __init__(self, field, template, parent=None):
         super(FieldEdit, self).__init__(parent)
 
