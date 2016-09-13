@@ -1,7 +1,7 @@
 # Install
 ```
 cd website
-mkvirtualenv --python=/Users/lawrence/local/python-3.5.2/bin/python3 inselect-pages
+mkvirtualenv --python=/Users/lawh/local/python-3.5.2/bin/python3 inselect-pages
 pip install -r requirements.pip
 git clone git@github.com:quicklizard99/pelican-themes.git ../../pelican-themes/
 ```
