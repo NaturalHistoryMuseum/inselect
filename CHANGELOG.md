@@ -6,6 +6,7 @@ Version 0.1.34
 - #349 Linux instructions
 - #347 Explicitly reference python2 in scripts
 - #342 Conda environment files
+- #331 Box resize doing crazy things - emergency fix: restrict max zoom level
 - #333 Ugly error message when opening or saving a file
 - #330 libdmtx URL incorrect
 - #328 Menu commands to show cookie cutter and metadata template files
