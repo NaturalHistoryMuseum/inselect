@@ -11,6 +11,7 @@ class BoxesView(QtGui.QGraphicsView):
     """
 
     # self.absolute_zoom limited to be <= MAXIMUM_ZOOM
+    # 1.8 was chosen through experimentation to fix #331
     MAXIMUM_ZOOM = 1.8
 
     viewport_changed = Signal(QRectF)
