@@ -1,5 +1,5 @@
+import errno
 import shutil
-import tempfile
 
 from collections import defaultdict
 from functools import partial
@@ -44,46 +44,30 @@ class DocumentExport(object):
 
     def save_crops(self, document, progress=None):
         """Saves images cropped from document.scanned to document.crops_dir.
-        Crops are first written to a tempdir in the same directory as document.
-        If it exists, document.crops_dir is unlinked, and the tempdir is
-        renamed to document.crops_dir. Any existing data in document.crops_dir
-        is therefore lost.
+        If document.crops_dir already exists, it is unlinked first.
         """
-        # Create temp dir alongside scan
-        tempdir = tempfile.mkdtemp(
-            dir=str(document.scanned.path.parent),
-            prefix=document.scanned.path.stem + '_temp_crops'
-        )
-        tempdir = Path(tempdir)
-        debug_print(u'Saving crops to to temp dir [{0}]'.format(tempdir))
+        if progress:
+            progress('Removing existing saved crops')
+
+        crops_dir = self.crops_dir(document)
+        try:
+            shutil.rmtree(unicode(crops_dir))
+        except OSError as e:
+            if errno.ENOENT == e.errno:
+                # Directory does not exist - do nothing
+                pass
+            else:
+                # Some other error
+                raise
 
         crop_fnames = self.crop_fnames(document)
-
-        try:
-            # Save crops
-            document.save_crops_from_image(document.scanned,
-                                           (tempdir / fn for fn in crop_fnames),
-                                           progress)
-
-            # rm existing crops dir
-            crops_dir = self.crops_dir(document)
-            shutil.rmtree(str(crops_dir), ignore_errors=True)
-
-            # Rename temp dir
-            debug_print(u'Moving temp crops dir [{0}] to [{1}]'.format(
-                tempdir, crops_dir
-            ))
-            tempdir.rename(crops_dir)
-            tempdir = None
-
-            debug_print(u'Saved [{0}] crops to [{1}]'.format(
-                document.n_items, crops_dir
-            ))
-
-            return crops_dir
-        finally:
-            if tempdir:
-                shutil.rmtree(str(tempdir))
+        crops_dir.mkdir()
+        document.save_crops_from_image(
+            document.scanned,
+            (crops_dir / fn for fn in crop_fnames),
+            progress
+        )
+        return crops_dir
 
     def csv_path(self, document):
         return document.document_path.with_suffix('.csv')
