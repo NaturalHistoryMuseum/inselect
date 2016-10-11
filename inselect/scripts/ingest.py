@@ -55,7 +55,10 @@ def ingest_from_directory(inbox, docs,
             print(u'Ingested [{0}]'.format(source))
 
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(description='Ingests images into Inselect')
     parser.add_argument("inbox", type=Path,
                         help='Source directory containing scanned images')
@@ -87,4 +90,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

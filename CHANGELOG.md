@@ -1,5 +1,10 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.35
+-------------
+- #273 Inselect as a package
+- #83 Architecture and code organisation
+
 Version 0.1.34
 -------------
 - #353 Error 5

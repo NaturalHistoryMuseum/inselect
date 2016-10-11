@@ -50,7 +50,10 @@ def export_csv(dir, overwrite_existing, template):
             traceback.print_exc()
 
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(description='Exports metadata from Inselect documents')
     parser.add_argument("dir", type=Path,
                         help='Directory containing Inselect documents')
@@ -71,4 +74,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

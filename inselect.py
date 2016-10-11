@@ -11,5 +11,11 @@ if sys.platform == 'win32' and hasattr(sys, 'frozen'):
     from pathlib import Path
     windll.kernel32.SetDllDirectoryW(unicode(Path(sys.executable).parent))
 
-from inselect import app
-app.main(sys.argv)
+
+def main():
+    from inselect import app
+    app.main()
+
+
+if __name__ == "__main__":
+    main()
