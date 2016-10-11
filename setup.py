@@ -82,7 +82,7 @@ setup_data = {
             ('{site_packages}/sklearn', 'sklearn'),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
-            ('{project_root}/inselect.qss', 'inselect/inselect.qss'),
+            ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
