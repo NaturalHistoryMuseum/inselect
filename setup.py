@@ -6,16 +6,16 @@ import inselect
 
 
 REQUIREMENTS = [
-    #'cv2>=2.4.12,<3',
+#    'cv2>=2.4.8,<3',
     'pathlib>=1.0.1,<1.1',
     'Pillow>=3.2.0,<3.4',
     'python-dateutil>=2.3,<=2.6',
     'pytz>=2015.7',
     'PyYAML>=3.10,<=3.12',
-    'numpy>=1.10.1,<=1.11.1',
+    'numpy>=1.8.2,<=1.11.1',
     'schematics>=1.1.1,<1.2',
-    'scipy>=0.17.1,<=0.19',
-    'scikit-learn>=0.17.1,<0.18',
+    'scikit-learn>=0.14.1,<0.18',
+    'scipy>=0.13.3,<=0.19',
     'unicodecsv>=0.14.1,<0.15',
 ]
 
@@ -37,18 +37,15 @@ setup_data = {
         'inselect.gui.views', 'inselect.gui.views.boxes', 'inselect.lib',
         'inselect.lib.templates', 'inselect.scripts',
     ],
-    # 'package_data': {"": ['inselect/inselect.qss',]},
-    # data_files = [('', ['libzbar64-0.dll', 'libiconv.dll'])],
-    # 'package_data': {"": ['data/*',]},
     'include_package_data': True,
     'test_suite': 'inselect.tests',
     'scripts': ['inselect/scripts/{0}.py'.format(script) for script in SCRIPTS],
     'install_requires': REQUIREMENTS,
     'extras_require': {
-        'GUI':  ['exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0', 'PySide>=1.2.1'],
-        'Barcodes': ['gouda>=0.1.6', 'ppydmtx>=0.7.4b1', 'zbar>=0.10'],
-        'Inlite barcode reader': ['win32com>=220'],
-        'Richer UI on Windows': ['win32com>=220'],
+        'gui':  ['exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0', 'PySide>=1.2.1'],
+        'barcodes': ['gouda>=0.1.6', 'pydmtx>=0.7.4b1', 'zbar>=0.10'],
+        'windows': ['pywin32>=220'],
+        'development': ['coveralls>=0.4.1', 'mock>=1.0.1', 'nose>=1.3.4'],
     },
     'entry_points': {
         'gui_scripts':
@@ -56,6 +53,12 @@ setup_data = {
         'console_scripts':
             ['{0} = inselect.scripts.{0}:main'.format(script) for script in SCRIPTS],
     },
+    'classifiers': [
+        'Development Status :: 4 - Beta',
+        'Topic :: Utilities',
+        'Topic :: Scientific/Engineering :: Bio-Informatics'
+        'Programming Language :: Python :: 2.7',
+    ],
     'win32': {
         'executables': [
             {
@@ -139,8 +142,11 @@ def cx_setup():
     )
 
 
-# User cx_Freeze to build Windows installers, and distutils otherwise.
-if 'bdist_msi' in sys.argv:
-    cx_setup()
+if not (2, 7) < sys.version_info < (3, 0):
+    sys.exit('Only Python 2.7 is supported')
 else:
-    setuptools_setup()
+    # User cx_Freeze to build Windows installers, and distutils otherwise.
+    if 'bdist_msi' in sys.argv:
+        cx_setup()
+    else:
+        setuptools_setup()
