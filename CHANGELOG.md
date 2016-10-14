@@ -2,6 +2,10 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.34
 -------------
+- #362 Command-line option to print elapsed time for which document was open
+
+Version 0.1.34
+-------------
 - #353 Error 5
 - #351 Metadata templates to allow fields with fixed values
 - #349 Linux instructions

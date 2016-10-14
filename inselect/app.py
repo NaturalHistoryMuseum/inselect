@@ -39,11 +39,16 @@ def main(args):
     parser.add_argument(
         '-q', '--quit', action='store_true',
         help='Exit immediately after showing the main window; intended for dev '
-              'purposes only'
+             'purposes only'
     )
     parser.add_argument(
         '-s', '--stylesheet', action='store', type=Path,
         help='Use stylesheet; intended for dev purposes only'
+    )
+    parser.add_argument(
+        '-t', '--print-time', action='store_true',
+        help='Will print, when a document is closed, the elapsed time for '
+             'which the document was open'
     )
     parser.add_argument(
         '-v', '--version', action='version',
@@ -86,7 +91,7 @@ def main(args):
     # Stylesheet
     app.setStyleSheet(_stylesheet(parsed.stylesheet))
 
-    window = MainWindow(app)
+    window = MainWindow(app, parsed.print_time)
     if parsed.window_size:
         window.show_with_size(parsed.window_size)
     else:
