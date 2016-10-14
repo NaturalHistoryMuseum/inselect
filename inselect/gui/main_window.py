@@ -1,5 +1,7 @@
+from __future__ import print_function
 import sys
 
+from datetime import datetime
 from functools import partial
 from itertools import count, izip
 from pathlib import Path
@@ -58,9 +60,15 @@ class MainWindow(QtGui.QMainWindow):
 
     IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
 
-    def __init__(self, app):
+    def __init__(self, app, print_time=False):
+        """if print_time is True, will print, when a document is closed, the
+        elapsed time for which the document was open.
+        """
         super(MainWindow, self).__init__()
         self.app = app
+
+        self.print_time = print_time
+        self.time_doc_opened = None
 
         # self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
 
@@ -415,6 +423,8 @@ class MainWindow(QtGui.QMainWindow):
         self.document_path = path
         self.model.from_document(self.document)
 
+        self.time_doc_opened = datetime.utcnow()
+
         self.setWindowTitle('')
         self.setWindowFilePath(str(self.document_path))
         self.info_widget.set_document(self.document)
@@ -695,6 +705,12 @@ class MainWindow(QtGui.QMainWindow):
         """Creates an empty document
         """
         debug_print('MainWindow.empty_document')
+
+        if self.time_doc_opened and self.print_time:
+            elapsed = datetime.utcnow() - self.time_doc_opened
+            self.time_doc_opened = None
+            print(u'{0},{1}s'.format(self.document_path, elapsed.total_seconds()))
+
         # Clear selection before closing for performance reasons
         self.select_none()
         self.document = None

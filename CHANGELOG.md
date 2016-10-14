@@ -7,6 +7,10 @@ Version 0.1.35
 
 Version 0.1.34
 -------------
+- #362 Command-line option to print elapsed time for which document was open
+
+Version 0.1.34
+-------------
 - #353 Error 5
 - #351 Metadata templates to allow fields with fixed values
 - #349 Linux instructions
