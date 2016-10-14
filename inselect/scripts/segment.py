@@ -42,7 +42,10 @@ def segment(dir, sort_by_columns):
             print(u'Skipping [{0}] as it already contains items'.format(p))
 
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(description='Segments Inselect documents')
     parser.add_argument("dir", help='Directory containing Inselect documents')
     parser.add_argument('--debug', action='store_true')
@@ -61,4 +64,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

@@ -22,7 +22,10 @@ QCoreApplication.setApplicationVersion(inselect.__version__)
 QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(
         description='Runs the inselect user-interface'
     )
@@ -53,7 +56,7 @@ def main(args):
         '-w', '--window-size', action='store', type=_window_size,
         help='Set window size to WxH'
     )
-    parsed = parser.parse_args(args[1:])
+    parsed = parser.parse_args(args)
 
     # TODO LH A command-line switch to clear all QSettings
 
@@ -111,8 +114,8 @@ def _stylesheet(user_stylesheet):
         if hasattr(sys, 'frozen'):
             root = Path(sys.executable).parent
         else:
-            root = Path(__file__).parent.parent
-        path = root.joinpath('data/inselect.qss')
+            root = Path(__file__).parent
+        path = root.joinpath('inselect.qss')
 
     with path.open() as infile:
         return infile.read()

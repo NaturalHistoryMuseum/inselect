@@ -54,7 +54,10 @@ def save_crops(dir, overwrite_existing, template):
             traceback.print_exc()
 
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(
         description='Writes cropped object images from Inselect documents'
     )
@@ -77,4 +80,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

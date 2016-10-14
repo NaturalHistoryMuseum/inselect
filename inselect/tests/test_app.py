@@ -35,7 +35,7 @@ class TestApp(unittest.TestCase):
     def test_app_load_file(self, mock_open_file, mock_exec_):
         "User starts the application with a file"
         path = str(TESTDATA / 'shapes.inselect')
-        self.assertRaises(SystemExit, main, ['path to executable', path])
+        self.assertRaises(SystemExit, main, [path])
         self.assertTrue(mock_exec_.called)
         mock_open_file.assert_called_once_with(path)
 
@@ -47,7 +47,7 @@ class TestApp(unittest.TestCase):
         # Python's locale.setlocale raises an exception if the locale is
         # unrecognised, so it is mocked.
         loc = 'ja_JP'
-        self.assertRaises(SystemExit, main, ['path to executable', '-l', loc])
+        self.assertRaises(SystemExit, main, ['-l', loc])
         self.assertTrue(mock_exec_.called)
         mock_set_default.assert_called_once_with(loc)
         # Other actions inside main might cause setlocale to be called so

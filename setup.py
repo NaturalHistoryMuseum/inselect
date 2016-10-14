@@ -1,34 +1,64 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import sys
 
 import inselect
 
-# Generic setup data used for both the distutils setup and the cx_Freeze setup.
-# win32.extra_packages and win32.include_files indicate extra packages/files
-# that are not automatically detected by cx_Freeze. If running into problems,
-# try including the whole of numpy/scipy.
+
+REQUIREMENTS = [
+#    'cv2>=2.4.8,<3',
+    'pathlib>=1.0.1,<1.1',
+    'Pillow>=3.2.0,<3.4',
+    'python-dateutil>=2.3,<=2.6',
+    'pytz>=2015.7',
+    'PyYAML>=3.10,<=3.12',
+    'numpy>=1.8.2,<=1.11.1',
+    'schematics>=1.1.1,<1.2',
+    'scikit-learn>=0.14.1,<0.18',
+    'scipy>=0.13.3,<=0.19',
+    'unicodecsv>=0.14.1,<0.15',
+]
 
 SCRIPTS = ('export_metadata', 'ingest', 'read_barcodes', 'save_crops', 'segment')
 
 setup_data = {
     'name': 'inselect',
     'version': inselect.__version__,
+    'author': u'Lawrence Hudson, Alice Heaton, Pieter Holtzhausen, Stéfan van der Walt',
+    'author_email': 'l.hudson@nhm.ac.uk',
     'maintainer': 'Lawrence Hudson',
     'maintainer_email': 'l.hudson@nhm.ac.uk',
     'url': 'https://github.com/NaturalHistoryMuseum/inselect/',
+    'license': 'Modified BSD',
     'description': inselect.__doc__,
-    'packages': ['inselect', 'inselect.gui.plugins', 'inselect.gui.views',
-                 'inselect.gui.views.boxes', 'inselect.lib',
-                 'inselect.lib.templates', 'inselect.scripts'],
-    'package_data': {'inselect': ['data/inselect.qss']},
+    'long_description': inselect.__doc__,
+    'packages': [
+        'inselect', 'inselect.gui', 'inselect.gui.plugins',
+        'inselect.gui.views', 'inselect.gui.views.boxes', 'inselect.lib',
+        'inselect.lib.templates', 'inselect.scripts',
+    ],
+    'include_package_data': True,
     'test_suite': 'inselect.tests',
     'scripts': ['inselect/scripts/{0}.py'.format(script) for script in SCRIPTS],
-    'install_requires': open('requirements.pip').readlines(),
-    'entry_points': {
-        'console_scripts': [
-            'inselect = inselect.app:launch'
-        ]
+    'install_requires': REQUIREMENTS,
+    'extras_require': {
+        'gui':  ['exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0', 'PySide>=1.2.1'],
+        'barcodes': ['gouda>=0.1.6', 'pydmtx>=0.7.4b1', 'zbar>=0.10'],
+        'windows': ['pywin32>=220'],
+        'development': ['coveralls>=0.4.1', 'mock>=1.0.1', 'nose>=1.3.4'],
     },
+    'entry_points': {
+        'gui_scripts':
+            ['inselect = inselect.app:main'],
+        'console_scripts':
+            ['{0} = inselect.scripts.{0}:main'.format(script) for script in SCRIPTS],
+    },
+    'classifiers': [
+        'Development Status :: 4 - Beta',
+        'Topic :: Utilities',
+        'Topic :: Scientific/Engineering :: Bio-Informatics'
+        'Programming Language :: Python :: 2.7',
+    ],
     'win32': {
         'executables': [
             {
@@ -55,7 +85,7 @@ setup_data = {
             ('{site_packages}/sklearn', 'sklearn'),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
-            ('{project_root}/data/inselect.qss', 'data/inselect.qss'),
+            ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
@@ -67,19 +97,10 @@ setup_data = {
 }
 
 
-def distutils_setup():
-    """disttutils setup"""
-    from distutils.core import setup
-
-    setup(
-        name=setup_data['name'],
-        version=setup_data['version'],
-        packages=setup_data['packages'],
-        scripts=setup_data['scripts'],
-        maintainer=setup_data['maintainer'],
-        maintainer_email=setup_data['maintainer_email'],
-        url=setup_data['url'],
-    )
+def setuptools_setup():
+    """setuptools setup"""
+    from setuptools import setup
+    setup(**{k: v for k, v in setup_data.iteritems() if 'win32' != k})
 
 
 def cx_setup():
@@ -121,8 +142,11 @@ def cx_setup():
     )
 
 
-# User cx_Freeze to build Windows installers, and distutils otherwise.
-if 'bdist_msi' in sys.argv:
-    cx_setup()
+if not (2, 7) < sys.version_info < (3, 0):
+    sys.exit('Only Python 2.7 is supported')
 else:
-    distutils_setup()
+    # User cx_Freeze to build Windows installers, and distutils otherwise.
+    if 'bdist_msi' in sys.argv:
+        cx_setup()
+    else:
+        setuptools_setup()

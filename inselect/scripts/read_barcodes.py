@@ -74,7 +74,10 @@ def read_barcodes(engine, dir):
     BarcodeReader(engine).process_dir(dir)
 
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+
     if not gouda:
         raise InselectError('Barcode decoding not available')
     options = engine_options()
@@ -101,4 +104,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
