@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #367 Reveal file doesn't work on Windows
 - #273 Inselect as a package
 - #83 Architecture and code organisation
 
