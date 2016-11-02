@@ -18,11 +18,12 @@ from inselect.lib.inselect_error import InselectError
 
 try:
     import gouda
+except ImportError:
+    gouda = engine_options = resize = roi = None
+else:
     from gouda.engines.options import engine_options
     from gouda.strategies.resize import resize
     from gouda.strategies.roi.roi import roi
-except ImportError:
-    gouda = engine_options = resize = roi = None
 
 
 class BarcodeReader(object):

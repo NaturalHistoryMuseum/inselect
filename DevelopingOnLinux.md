@@ -35,23 +35,6 @@ mkvirtualenv --system-site-packages inselect
 pip2 install -r requirements.pip
 ```
 
-## LibDMTX barcode reading library
-
-* Get source for the wrappers
-
-    ```
-    cd ~/projects
-    git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/dmtx-wrappers
-    ```
-
-* Install Python library
-
-    ```
-    cd dmtx-wrappers/python
-    python2 setup.py install
-    cd ~/projects/inselect
-    ```
-
 ## Test barcode reading libraries
 
 Inselect has optional barcode reading capabilities. The dependent libraries

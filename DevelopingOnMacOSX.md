@@ -32,44 +32,16 @@ pip install -r requirements.pip
 
 ## LibDMTX barcode reading library
 
-* Get source for the library and the wrappers
+* Install the `libdmtx` shared lib
 
     ```
-    cd ~/projects
-    git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/libdmtx
-    git clone git://libdmtx.git.sourceforge.net/gitroot/libdmtx/dmtx-wrappers
-    ```
-
-* Build library
-
-    ```
-    cd libdmtx
-    git checkout v0.7.4
-    ./autogen.sh
-    ./configure
-    make
-    ```
-
-* Build Python library
-
-    ```
-    cd ../dmtx-wrappers/
-    ./autogen.sh
-    ./configure
-    make
-    ```
-
-* Install Python library
-
-    ```
-    cd python
-    python setup.py install
+    brew install libdmtx
     ```
 
 * Test
 
     ```
-    python -c "import pydmtx; print(pydmtx)"
+    python -c "import libdmtx; print(libdmtx)"
     ```
 
 ## Test barcode reading libraries

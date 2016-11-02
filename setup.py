@@ -43,7 +43,7 @@ setup_data = {
     'install_requires': REQUIREMENTS,
     'extras_require': {
         'gui':  ['exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0', 'PySide>=1.2.1'],
-        'barcodes': ['gouda>=0.1.6', 'pydmtx>=0.7.4b1', 'zbar>=0.10'],
+        'barcodes': ['gouda>=0.1.8', 'pylibdmtx>=0.1.0', 'zbar>=0.10'],
         'windows': ['pywin32>=220'],
         'development': ['coveralls>=0.4.1', 'mock>=1.0.1', 'nose>=1.3.4'],
     },
