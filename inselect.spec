@@ -10,7 +10,7 @@ a = Analysis(['inselect.py'],
              pathex=[str(Path('.').absolute())],
              binaries=[],
              datas=[('inselect/inselect.qss', '')],
-             hiddenimports=['sklearn.neighbors.typedefs', 'libdmtx'],
+             hiddenimports=['sklearn.neighbors.typedefs'],
              hookspath=[],
              runtime_hooks=[],
              excludes=['Tkinter'],
@@ -19,12 +19,13 @@ a = Analysis(['inselect.py'],
              cipher=block_cipher)
 
 
-# libdmtx dylib is not detected because it is loaded by a ctypes call
+# libdmtx dylib is not detected because it is loaded by a ctypes call in
+# pylibdmtx
 a.binaries += TOC([
     ('libdmtx.dylib', '/usr/local/Cellar/libdmtx/0.7.4/lib/libdmtx.dylib', 'BINARY'),
 ])
 
-# PyInstaller does not detect some dylibs, I think in some cases because they
+# PyInstaller does not detect some dylibs, in some cases (I think) because they
 # are symlinked.
 # See Stack Overflow post http://stackoverflow.com/a/17595149 for example
 # of manipulating Analysis.binaries.

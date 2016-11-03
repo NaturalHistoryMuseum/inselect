@@ -9,7 +9,7 @@ a = Analysis(['inselect/scripts/read_barcodes.py'],
              pathex=[str(Path('.').absolute())],
              binaries=[],
              datas=None,
-             hiddenimports=['numpy', 'libdmtx'],
+             hiddenimports=['numpy'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -18,12 +18,13 @@ a = Analysis(['inselect/scripts/read_barcodes.py'],
              cipher=block_cipher)
 
 
-# libdmtx dylib is not detected because it is loaded by a ctypes call
+# libdmtx dylib is not detected because it is loaded by a ctypes call in
+# pylibdmtx
 a.binaries += TOC([
     ('libdmtx.dylib', '/usr/local/Cellar/libdmtx/0.7.4/lib/libdmtx.dylib', 'BINARY'),
 ])
 
-# PyInstaller does not detect some dylibs, I think in some cases because they
+# PyInstaller does not detect some dylibs, in some cases (I think) because they
 # are symlinked.
 # See Stack Overflow post http://stackoverflow.com/a/17595149 for example
 # of manipulating Analysis.binaries.
