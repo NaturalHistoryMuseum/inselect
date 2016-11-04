@@ -25,7 +25,7 @@ requests==2.11.0
 six==1.10.0
 
 # Not from PyPI
-https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.6.tar.gz
+https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.8.tar.gz
 https://github.com/NaturalHistoryMuseum/zbar-python-patched/archive/v0.10.tar.gz ; sys_platform != 'win32'
 
 # Development
