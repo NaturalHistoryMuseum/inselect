@@ -6,7 +6,7 @@ import inselect
 
 
 REQUIREMENTS = [
-#    'cv2>=2.4.8,<3',
+    # TODO How to specify OpenCV? 'cv2>=2.4.8,<3',
     'pathlib>=1.0.1,<1.1',
     'Pillow>=3.2.0,<3.4',
     'python-dateutil>=2.3,<=2.6',
@@ -24,7 +24,8 @@ SCRIPTS = ('export_metadata', 'ingest', 'read_barcodes', 'save_crops', 'segment'
 setup_data = {
     'name': 'inselect',
     'version': inselect.__version__,
-    'author': u'Lawrence Hudson, Alice Heaton, Pieter Holtzhausen, Stéfan van der Walt',
+    'author': (u'Lawrence Hudson, Alice Heaton, Pieter Holtzhausen, '
+               u'Stéfan van der Walt'),
     'author_email': 'l.hudson@nhm.ac.uk',
     'maintainer': 'Lawrence Hudson',
     'maintainer_email': 'l.hudson@nhm.ac.uk',
@@ -42,7 +43,10 @@ setup_data = {
     'scripts': ['inselect/scripts/{0}.py'.format(script) for script in SCRIPTS],
     'install_requires': REQUIREMENTS,
     'extras_require': {
-        'gui':  ['exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0', 'PySide>=1.2.1'],
+        'gui': [
+            'exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0',
+            'PySide>=1.2.1'
+        ],
         'barcodes': ['gouda>=0.1.8', 'pylibdmtx>=0.1.0', 'zbar>=0.10'],
         'windows': ['pywin32>=220'],
         'development': ['coveralls>=0.4.1', 'mock>=1.0.1', 'nose>=1.3.4'],
@@ -121,12 +125,10 @@ def cx_setup():
         'environment_root': Path(sys.executable).parent,
         'project_root': Path(__file__).parent,
     }
-    include_files = []
-    for i in setup_data['win32']['include_files']:
-        include_files.append((
-            i[0].format(**format_strings),
-            i[1]
-        ))
+    include_files = [
+        (source.format(**format_strings), destination)
+        for source, destination in setup_data['win32']['include_files']
+    ]
 
     # Setup
     setup(
@@ -134,7 +136,10 @@ def cx_setup():
         version=setup_data['version'],
         options={
             'build_exe': {
-                'packages': setup_data['packages'] + setup_data['win32']['extra_packages'],
+                'packages': (
+                    setup_data['packages'] +
+                    setup_data['win32']['extra_packages']
+                ),
                 'excludes': setup_data['win32']['excludes'],
                 'include_files': include_files,
                 'include_msvcr': True,
@@ -144,7 +149,9 @@ def cx_setup():
                 'upgrade_code': '{fe2ed61d-cd5e-45bb-9d16-146f725e522f}'
             }
         },
-        executables=[Executable(**i) for i in setup_data['win32']['executables']]
+        executables=[
+            Executable(**i) for i in setup_data['win32']['executables']
+        ]
     )
 
 
