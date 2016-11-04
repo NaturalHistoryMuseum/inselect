@@ -83,6 +83,12 @@ setup_data = {
             ('{site_packages}/numpy', 'numpy'),
             ('{site_packages}/scipy', 'scipy'),
             ('{site_packages}/sklearn', 'sklearn'),
+            (
+                '{environment_root}/' + 'libdmtx-{0}.dll'.format(
+                    '64' if sys.maxsize > 2**32 else '32'
+                ),
+                'libdmtx-{0}.dll'.format('64' if sys.maxsize > 2**32 else '32')
+            ),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
             ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
