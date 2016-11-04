@@ -9,7 +9,7 @@ virtualenv:
 before_install:
   - sudo apt-get update
   - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-      sudo apt-get install -y --fix-missing libzbar-dev pyside-tools;
+      sudo apt-get install -y --fix-missing libdmtx0a pyside-tools;
     fi
 
   # We do this conditionally because it saves us some downloading if the
