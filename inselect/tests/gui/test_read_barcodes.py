@@ -56,7 +56,7 @@ class TestReadBarcodes(GUITest):
                      "LibDMTXEngine not available")
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_read_barcodes_no_scanned_image(self, mock_warning):
-        """The user is informed that barcodes cxannot be read without the
+        """The user is informed that barcodes cannot be read without the
         scanned image
         """
         with temp_directory_with_files(TESTDATA / 'barcodes.inselect') as tempdir:
