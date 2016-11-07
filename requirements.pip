@@ -4,7 +4,7 @@ exifread==2.1.2
 humanize==0.5.1
 pathlib==1.0.1
 psutil==4.0.0
-pylibdmtx==0.1.1
+pylibdmtx==0.1.2
 python-dateutil==2.3    # 2.5.0 causes problems for PyInstaller builds on Mac OS X
 pytz==2015.7
 PyYAML==3.11
