@@ -87,12 +87,6 @@ setup_data = {
             ('{site_packages}/numpy', 'numpy'),
             ('{site_packages}/scipy', 'scipy'),
             ('{site_packages}/sklearn', 'sklearn'),
-            (
-                '{environment_root}/' + 'libdmtx-{0}.dll'.format(
-                    '64' if sys.maxsize > 2**32 else '32'
-                ),
-                'libdmtx-{0}.dll'.format('64' if sys.maxsize > 2**32 else '32')
-            ),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
             ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
@@ -128,6 +122,14 @@ def cx_setup():
     include_files = [
         (source.format(**format_strings), destination)
         for source, destination in setup_data['win32']['include_files']
+    ]
+
+    # DLLs that are not detected because they are loaded by ctypes
+    from pylibdmtx import pylibdmtx
+    from pyzbar import pyzbar
+    include_files += [
+        (dep._name, Path(dep._name).name)
+        for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
     ]
 
     # Setup

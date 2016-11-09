@@ -1,6 +1,12 @@
+# For PyInstaller build on Mac
+
 import sys
 
 from pathlib import Path
+
+from pylibdmtx import pylibdmtx
+from pyzbar import pyzbar
+
 
 block_cipher = None
 
@@ -18,11 +24,12 @@ a = Analysis(['inselect/scripts/read_barcodes.py'],
              cipher=block_cipher)
 
 
-# libdmtx dylib is not detected because it is loaded by a ctypes call in
-# pylibdmtx
+# dylibs not detected because they are loaded by ctypes
 a.binaries += TOC([
-    ('libdmtx.dylib', '/usr/local/Cellar/libdmtx/0.7.4/lib/libdmtx.dylib', 'BINARY'),
+    (Path(dep._name).name, dep._name, 'BINARY')
+    for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
 ])
+
 
 # PyInstaller does not detect some dylibs, in some cases (I think) because they
 # are symlinked.
