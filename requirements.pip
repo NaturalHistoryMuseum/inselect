@@ -26,7 +26,7 @@ requests==2.11.0
 six==1.10.0
 
 # Not from PyPI
-https://github.com/NaturalHistoryMuseum/gouda/archive/v0.1.9.tar.gz
+https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.9/gouda-0.1.9-py2-none-any.whl
 
 # Development
 coveralls>=0.4.1
