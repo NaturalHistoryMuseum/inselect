@@ -136,7 +136,7 @@ def user_name():
     """
     if pwd:
         # Strip trailing commas seen on Linux
-        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
+        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',').decode('utf8')
     else:
         try:
             import pywintypes
