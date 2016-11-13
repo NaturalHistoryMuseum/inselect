@@ -1,3 +1,6 @@
+# -*- coding: utf8 -*-
+import os
+import pwd
 import sys
 import tempfile
 import unittest
@@ -15,7 +18,7 @@ except ImportError:
 
 
 from inselect.lib.utils import (format_dt_display, is_writable, make_readonly,
-                                rmtree_readonly)
+                                rmtree_readonly, user_name)
 
 
 class TestUtils(unittest.TestCase):
@@ -51,11 +54,21 @@ class TestUtils(unittest.TestCase):
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
     @patch.object(win32api, 'GetTimeFormat', return_value='01:01:01')
     @patch.object(win32api, 'GetDateFormat', return_value='Sonntag, 1. M\xe4rz 2015')
-    def format_dt_display_windows(self, mock_get_time_format, mock_get_date_format):
+    def test_format_dt_display_windows(self, mock_get_time_format, mock_get_date_format):
         self.assertEqual(
             u'Sonntag, 1. M\xe4rz 2015', format_dt_display(datetime.now())
         )
 
+    @unittest.skipIf(sys.platform.startswith("win"), "requires Unix-like OS")
+    def test_user_name(self):
+        USERNAME = u'ローレンス　ハドソン'
+
+        class MockPWD(object):
+            pw_gecos = USERNAME.encode('utf8')
+
+        with patch.object(pwd, 'getpwuid', return_value=MockPWD()) as mock_getpwuid:
+            self.assertEqual(USERNAME, user_name())
+            mock_getpwuid.assert_called_once_with(os.getuid())
 
 if __name__ == '__main__':
     unittest.main()
