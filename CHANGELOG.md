@@ -6,6 +6,7 @@ Version 0.1.35
 - #374 Support pyzbar
 - #372 Support pydmtxlib
 - #368 Ugly error message when creating a new inselect document on Mac OS X
+- #367 Reveal file doesn't work on Windows
 - #273 Inselect as a package
 - #83 Architecture and code organisation
 

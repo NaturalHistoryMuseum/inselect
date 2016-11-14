@@ -210,7 +210,7 @@ def reveal_path(path):
     # http://stackoverflow.com/a/3546503
     path = path.resolve()
     if sys.platform.startswith("win"):
-        res = subprocess.call(["explorer.exe", u"/select,{0}".format(path)])
+        res = subprocess.call(u"explorer.exe /select,{0}".format(path))
         if 1 != res:
             raise ValueError('Unexpected exit code [{0}]'.format(res))
     elif 'Darwin' == platform.system():
