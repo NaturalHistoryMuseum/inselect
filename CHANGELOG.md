@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #377 Windows non-latin username test
 - #374 Support pyzbar
 - #372 Support pydmtxlib
 - #368 Ugly error message when creating a new inselect document on Mac OS X

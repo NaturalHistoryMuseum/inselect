@@ -20,8 +20,9 @@ except ImportError:
 
 try:
     import win32api
+    import pywintypes
 except ImportError:
-    win32api = None
+    win32api = pywintypes = None
 
 
 DEBUG_PRINT = False
@@ -137,25 +138,19 @@ def user_name():
     if pwd:
         # Strip trailing commas seen on Linux
         return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',').decode('utf8')
-    else:
+    elif win32api and pywintypes:
+        NameDisplay = 3
         try:
-            import pywintypes
-            import win32api
-        except ImportError:
-            pass
-        else:
-            NameDisplay = 3
+            # Returns Unicode
+            return win32api.GetUserNameEx(NameDisplay)
+        except pywintypes.error:
             try:
-                # Returns Unicode
-                return win32api.GetUserNameEx(NameDisplay)
+                # Returns MBCS
+                return unicode(win32api.GetUserName(), 'mbcs')
             except pywintypes.error:
-                try:
-                    # Returns MBCS
-                    return unicode(win32api.GetUserName(), 'mbcs')
-                except pywintypes.error:
-                    return ''
-
-    return ''
+                return ''
+    else:
+        return ''
 
 
 def format_dt_display(dt):
