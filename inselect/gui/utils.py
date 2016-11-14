@@ -23,7 +23,7 @@ HTML_LINK_STYLE = """<style type=text/css>
 </style>
 """
 
-HTML_LINK_TEMPLATE = """<html><head>{0}</head><body>
+HTML_LINK_TEMPLATE = u"""<html><head>{0}</head><body>
     {{0}}
 </body></html>
 """.format(HTML_LINK_STYLE)

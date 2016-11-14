@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 """About box
 """
 import platform
@@ -8,7 +9,8 @@ import PySide
 import PySide.QtCore
 
 from PySide import QtGui
-from PySide.QtGui import QMessageBox
+from PySide.QtCore import Qt
+from PySide.QtGui import QDialog, QLabel, QPushButton, QSizePolicy, QVBoxLayout
 
 from inselect.gui.utils import HTML_LINK_TEMPLATE
 
@@ -45,7 +47,7 @@ def _environment():
         ('SciPy', scipy.__version__),
     ]
 
-    return '\n'.join(['<p>{0}: {1}</p>'.format(i, v) for i, v in versions])
+    return '\n'.join(['{0}: {1}<br/>'.format(i, v) for i, v in versions])
 
 
 def _machine_summary():
@@ -90,11 +92,15 @@ def show_about_box(parent=None):
          to report problems and provide suggestions.
        </p>
 
-       Inselect is Copyright (c) 2014-2016, The Trustees of the Natural History
-       Museum, London and licensed under the
-       <a href="https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md">
-         Modified BSD License
-       </a>.
+       <p>
+         Copyright (c) 2014-2016, The Trustees of the Natural History
+         Museum, London and licensed under the
+         <a href="https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md">
+           Modified BSD License
+         </a>.
+         Inselect was developed by Alice Heaton, Lawrence Hudson, Pieter
+         Holtzhausen and Stéfan van der Walt.
+       </p>
 
        <h2>Acknowledgements</h2>
        <p>
@@ -105,29 +111,33 @@ def show_about_box(parent=None):
         312253), and from the U.K. Natural Environment Research Council.
        </p>
 
-       <h2>Contributors</h2>
-       <p>
-           <strong>Alice Heaton</strong>: Application development
-       </p>
-       <p>
-           <strong>Lawrence Hudson</strong>: Application development
-       </p>
-       <p>
-           <strong>Pieter Holtzhausen</strong>: Application development
-           and segmentation algorithm
-       </p>
-       <p>
-           <strong>Stefan van der Walt</strong>: Application development
-           and segmentation algorithm
-       </p>
-
        <h2>Environment</h2>
-       {environment}
+       <p>
+         {environment}
+       </p>
     """
 
     # TODO LH Button to copy to clipboard
-    body = body.format(application=QtGui.qApp.applicationName(),
-                       version=QtGui.qApp.applicationVersion(),
-                       environment=_environment())
-    QMessageBox.about(parent, 'About {0}'.format(QtGui.qApp.applicationName()),
-                      HTML_LINK_TEMPLATE.format(body))
+    body = body.format(
+        application=QtGui.qApp.applicationName(),
+        version=QtGui.qApp.applicationVersion(),
+        environment=_environment()
+    )
+    box = QDialog(parent)
+    box.setWindowTitle('About {0}'.format(QtGui.qApp.applicationName()))
+
+    vlayout = QVBoxLayout()
+
+    label = QLabel(HTML_LINK_TEMPLATE.format(body))
+    label.setWordWrap(True)
+    vlayout.addWidget(label)
+
+    close = QPushButton('OK')
+    close.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    close.setDefault(True)
+    close.clicked.connect(box.close)
+    vlayout.addWidget(close, alignment=Qt.AlignHCenter)
+
+    box.setLayout(vlayout)
+
+    box.exec_()
