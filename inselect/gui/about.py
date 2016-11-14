@@ -47,7 +47,7 @@ def _environment():
         ('SciPy', scipy.__version__),
     ]
 
-    return '\n'.join(['{0}: {1}<br/>'.format(i, v) for i, v in versions])
+    return '\n'.join(['{0} {1}<br/>'.format(i, v) for i, v in versions])
 
 
 def _machine_summary():
