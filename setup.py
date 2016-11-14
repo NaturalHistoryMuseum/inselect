@@ -47,7 +47,7 @@ setup_data = {
             'exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0',
             'PySide>=1.2.1'
         ],
-        'barcodes': ['gouda>=0.1.8', 'pylibdmtx>=0.1.1', 'zbar>=0.10'],
+        'barcodes': ['gouda>=0.1.10', 'pylibdmtx>=0.1.4', 'pyzbar>=0.1.2'],
         'windows': ['pywin32>=220'],
         'development': ['coveralls>=0.4.1', 'mock>=1.0.1', 'nose>=1.3.4'],
     },
