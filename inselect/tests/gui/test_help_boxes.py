@@ -12,7 +12,7 @@ from gui_test import GUITest
 class TestHelpBoxes(GUITest):
     """Help boxes are shown
     """
-    @patch.object(QMessageBox, 'about', return_value=QMessageBox.Yes)
+    @patch.object(QDialog, 'exec_', return_value=QMessageBox.Yes)
     def test_about(self, mock_about):
         "Help box is shown"
         self.window.about()
