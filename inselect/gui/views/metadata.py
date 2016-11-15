@@ -1,6 +1,7 @@
 from itertools import izip, repeat
 
 from qtpy import QtWidgets
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (QAbstractItemView, QWidget, QGroupBox, QLabel,
                             QLineEdit, QComboBox, QFormLayout, QSizePolicy,
                             QVBoxLayout)
@@ -229,7 +230,7 @@ class FormContainer(QWidget):
 class URLLabel(QLabel):
     """A label that displays a clickable URL in grey.
     """
-    def __init__(self, url, label, parent=None, f=0):
+    def __init__(self, url, label, parent=None, f=Qt.WindowFlags(0)):
         html = HTML_LINK_TEMPLATE.format(
             '<a href="{0}">{1}</a>'.format(url, label)
         )

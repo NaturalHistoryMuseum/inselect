@@ -109,6 +109,9 @@ def report_to_user(f):
     @wraps(f)
     def wrapper(self, *args, **kwargs):
         try:
+            print(f, repr(self), repr(args), repr(kwargs))
+            if 1 == len(args):
+                args = args[1:]
             return f(self, *args, **kwargs)
         except Exception as e:
             # Grotesque hack :-(

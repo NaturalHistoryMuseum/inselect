@@ -6,7 +6,7 @@ On other OSes, this tool expects pyside-rcc to be on the path.
 
 On OS X and Linux, the freeze could be implemented in bash simply as:
 
-    pyside-rcc icons.qrc > inselect/gui/icons.py
+    pyrcc4 icons.qrc > inselect/gui/icons.py
 """
 import subprocess
 import sys
@@ -14,11 +14,11 @@ import sys
 from pathlib import Path
 
 if 'win32' == sys.platform:
-    # PySide-rcc is tucked away on Windows and is not on the path
+    # pyrcc4 is tucked away on Windows and is not on the path
     import PySide
     rcc = Path(PySide.__file__).parent.joinpath('PySide-rcc.exe')
 else:
-    rcc = 'pyside-rcc'
+    rcc = 'pyrcc4'
 
 with Path('inselect/gui/icons.py').open('w') as outfile:
     subprocess.call([str(rcc), 'icons.qrc'], stdout=outfile)

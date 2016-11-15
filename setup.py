@@ -45,7 +45,7 @@ setup_data = {
     'extras_require': {
         'gui': [
             'exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0',
-            'PySide>=1.2.1', 'qtpy>=1.1.2'
+            'qtpy>=1.1.2', 'PyQt>=4.11.4'
         ],
         'barcodes': ['gouda>=0.1.10', 'pylibdmtx>=0.1.4', 'pyzbar>=0.1.2'],
         'windows': ['pywin32>=220'],
@@ -95,7 +95,6 @@ setup_data = {
         'excludes': [
             'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
             'future.moves',    # Errors from urllib otherwise
-            'PySide.QtNetwork',
         ]
     }
 }
@@ -159,9 +158,7 @@ def cx_setup():
 
 if not (2, 7) < sys.version_info < (3, 0):
     sys.exit('Only Python 2.7 is supported')
+elif 'bdist_msi' in sys.argv:
+    cx_setup()
 else:
-    # User cx_Freeze to build Windows installers, and distutils otherwise.
-    if 'bdist_msi' in sys.argv:
-        cx_setup()
-    else:
-        setuptools_setup()
+    setuptools_setup()

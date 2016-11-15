@@ -14,7 +14,7 @@ class ToggleWidgetLabel(QWidget):
     DOWN = None
 
     def __init__(self, label, widget, initially_visible=True, parent=None,
-                 flags=0):
+                 flags=Qt.WindowFlags(0)):
         super(ToggleWidgetLabel, self).__init__(parent, flags)
         self.widget = widget
 
