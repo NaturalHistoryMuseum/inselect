@@ -29,7 +29,7 @@ def _add_header(layout, text):
     layout.addWidget(HeaderLabel(text), row, 0, 1, 2)
 
 
-def _add_hline(layout, row_minimum_height=20):
+def _add_hline(layout, row_minimum_height=7):
     """Adds a HorizontalLine to layout
     """
     row = layout.rowCount()
