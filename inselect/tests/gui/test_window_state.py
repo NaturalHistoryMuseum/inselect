@@ -1,6 +1,6 @@
 import unittest
 
-from PySide.QtCore import QCoreApplication, QSize
+from qtpy.QtCore import QCoreApplication, QSize
 
 from gui_test import GUITest
 

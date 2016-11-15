@@ -1,6 +1,6 @@
 import locale
-from PySide import QtCore
-from PySide.QtGui import QAbstractItemView, QHBoxLayout, QLabel, QWidget
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print
 
@@ -36,7 +36,7 @@ class SummaryView(QAbstractItemView):
         self.info.setText(template.format(
             locale.format("%d", n, grouping=True),
             locale.format("%d", len(selected), grouping=True),
-            selected[0].data(QtCore.Qt.DisplayRole) if 1 == len(selected) else ''
+            selected[0].data(Qt.DisplayRole) if 1 == len(selected) else ''
         ))
 
     def reset(self):

@@ -5,8 +5,9 @@ import sys
 
 from pathlib import Path
 
-from PySide import QtGui
-from PySide.QtCore import QCoreApplication, QLocale, QSettings, QSize, QTimer
+from qtpy import QtWidgets
+from qtpy.QtCore import QCoreApplication, QLocale, QSettings, QSize, QTimer
+from qtpy.QtGui import QIcon
 
 import inselect
 
@@ -68,9 +69,10 @@ def main(args=None):
     inselect.lib.utils.DEBUG_PRINT = parsed.debug
 
     # Only one instance of QApplication can be created per process. The single
-    # instance is stored in QtGui.qApp. When test plans are being run it is
+    # instance is stored in QtWidgets.qApp. When test plans are being run it is
     # likely that the QApplication will have been created by a unittest.
-    app = QtGui.qApp if QtGui.qApp else QtGui.QApplication(args)
+    app = QtWidgets.qApp if QtWidgets.qApp else QtWidgets.QApplication(args)
+    QtWidgets.qApp = app
 
     debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
 
@@ -85,7 +87,7 @@ def main(args=None):
     debug_print(u'Locale is [{0}]'.format(QLocale().name()))
 
     # Application icon
-    icon = QtGui.QIcon()
+    icon = QIcon()
     path = ':/icons/inselect{0}.png'
     for size in (16, 24, 32, 48, 64, 128, 256, 512):
         icon.addFile(path.format(size), QSize(size, size))

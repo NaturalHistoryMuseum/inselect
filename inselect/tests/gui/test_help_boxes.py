@@ -2,7 +2,7 @@ import unittest
 
 from mock import patch
 
-from PySide.QtGui import QDialog, QMessageBox
+from qtpy.QtWidgets import QDialog, QMessageBox
 
 from inselect.gui import shortcuts_help
 

@@ -1,4 +1,4 @@
-from PySide.QtGui import QAction, QFileDialog, QMenu, QPushButton
+from qtpy.QtWidgets import QAction, QFileDialog, QMenu, QPushButton
 
 from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import unicodecsv
 
-from PySide.QtGui import QMessageBox
+from qtpy.QtWidgets import QMessageBox
 
 from gui_test import GUITest
 from inselect.lib.persist_user_template import BOUNDING_BOX_FIELD_NAMES

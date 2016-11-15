@@ -1,5 +1,5 @@
-from PySide.QtGui import QGraphicsItem
-from PySide.QtCore import Qt, QRectF
+from qtpy.QtCore import Qt, QRectF
+from qtpy.QtWidgets import QGraphicsItem
 
 from inselect.lib.utils import debug_print
 

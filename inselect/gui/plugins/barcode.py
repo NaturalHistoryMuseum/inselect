@@ -1,6 +1,6 @@
 from itertools import count, izip
 
-from PySide.QtGui import QMessageBox
+from qtpy.QtWidgets import QMessageBox
 
 import inselect.lib.utils
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide.QtCore import QSettings
+from qtpy.QtCore import QSettings
 
 from inselect.lib.utils import debug_print
 

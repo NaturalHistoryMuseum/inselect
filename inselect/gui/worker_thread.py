@@ -1,6 +1,6 @@
 import traceback
 
-from PySide import QtCore
+from qtpy import QtCore
 
 from inselect.lib.utils import debug_print
 

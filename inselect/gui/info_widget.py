@@ -1,7 +1,7 @@
 import humanize
 import locale
-from PySide.QtCore import Qt
-from PySide.QtGui import QFormLayout, QLabel, QWidget
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QFormLayout, QLabel, QWidget
 
 from inselect.lib.utils import format_dt_display
 from inselect.gui.utils import BoldLabel, HorizontalLine, reveal_path
@@ -13,7 +13,7 @@ from .utils import report_to_user
 class RevealPathLabel(QLabel):
     """A QLabel that, when clicked, reveals a path in Finder / Explorer
     """
-    def __init__(self, parent=None, flags=0):
+    def __init__(self, parent=None, flags=Qt.WindowFlags(0)):
         super(RevealPathLabel, self).__init__('', parent, flags)
         self.path = None
         self.setCursor(Qt.PointingHandCursor)

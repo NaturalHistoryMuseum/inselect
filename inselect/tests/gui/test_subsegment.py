@@ -4,8 +4,8 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
-from PySide.QtCore import QPointF, QRect
-from PySide.QtGui import QMessageBox
+from qtpy.QtCore import QPointF, QRect
+from qtpy.QtWidgets import QMessageBox
 
 from inselect.gui.roles import MetadataRole, RectRole
 from inselect.gui.sort_document_items import SortDocumentItems

@@ -1,5 +1,5 @@
-from PySide.QtGui import (QDialog, QRadioButton, QVBoxLayout, QLabel, QWidget,
-                          QDialogButtonBox)
+from qtpy.QtWidgets import (QDialog, QRadioButton, QVBoxLayout, QLabel, QWidget,
+                            QDialogButtonBox)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import HTML_LINK_TEMPLATE, HorizontalLine

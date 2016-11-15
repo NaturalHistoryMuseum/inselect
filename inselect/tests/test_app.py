@@ -4,8 +4,8 @@ import unittest
 from mock import patch
 from pathlib import Path
 
-from PySide.QtCore import QLocale
-from PySide.QtGui import QApplication
+from qtpy.QtCore import QLocale
+from qtpy.QtWidgets import QApplication
 
 from inselect.app import main
 from inselect.gui.main_window import MainWindow

@@ -1,8 +1,8 @@
 from itertools import chain
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt, QRect, QRectF
-from PySide.QtGui import QPen, QBrush, QGraphicsItem
+from qtpy.QtCore import Qt, QRect, QRectF
+from qtpy.QtGui import QPen, QBrush
+from qtpy.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
@@ -12,7 +12,7 @@ from .resize_handle import ResizeHandle
 from .reticle import Reticle
 
 
-class BoxItem(QtGui.QGraphicsRectItem):
+class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
@@ -92,7 +92,7 @@ class BoxItem(QtGui.QGraphicsRectItem):
 
         return outline, fill
 
-    def update(self, rect=QtCore.QRectF()):
+    def update(self, rect=QRectF()):
         """QGraphicsRectItem function
         """
         # TODO LH QGraphicsRectItem::update is not a virtual function - is it

@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from PySide.QtCore import QObject, QSettings, Signal
-from PySide.QtGui import QDesktopServices
+from qtpy.QtCore import QObject, QSettings, Signal
+from qtpy.QtGui import QDesktopServices
 
 from inselect.lib.templates.dwc import DWC
 from inselect.lib.user_template import UserTemplate

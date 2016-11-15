@@ -1,5 +1,6 @@
-from PySide.QtCore import QPoint, QRectF, Qt
-from PySide.QtGui import QBrush, QColor, QGraphicsItem, QPainter, QPen
+from qtpy.QtCore import QPoint, QRectF, Qt
+from qtpy.QtGui import QBrush, QColor, QPainter, QPen
+from qtpy.QtWidgets import QGraphicsItem
 
 from inselect.gui.utils import painter_state
 

@@ -6,11 +6,13 @@ from functools import partial
 from itertools import count, izip
 from pathlib import Path
 
-from PySide import QtGui
-from PySide.QtCore import Qt, QEvent, QSettings
-from PySide.QtGui import (QAction, QActionGroup, QDesktopServices, QIcon,
-                          QLabel, QMenu, QMessageBox, QSizePolicy, QVBoxLayout,
-                          QWidget)
+from qtpy.QtCore import (Qt, QEvent, QItemSelection, QItemSelectionModel,
+                         QSettings)
+from qtpy.QtGui import (QColor, QDesktopServices, QFont, QIcon, QImageWriter,
+                        QKeySequence, QPixmap)
+from qtpy.QtWidgets import (QAction, QActionGroup, QFileDialog, QLabel,
+                            QMainWindow, QMenu, QMessageBox, QSizePolicy,
+                            QSplitter, QStackedWidget, QVBoxLayout, QWidget)
 
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa
@@ -21,7 +23,7 @@ from inselect.lib.ingest import ingest_image, IMAGE_PATTERNS, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, is_writable
 
-import prompts
+from . import prompts
 
 from .about import show_about_box
 from .colours import colour_scheme_choice
@@ -50,7 +52,7 @@ from .views.summary import SummaryView
 from .worker_thread import WorkerThread
 
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QMainWindow):
     """The application's main window
     """
     DOCUMENT_FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
@@ -174,15 +176,15 @@ class MainWindow(QtGui.QMainWindow):
         # Ribbon of toolbars - populated in self._create_toolbars
         # TODO get these colours from stylesheet
         self.ribbon = ToolbarRibbon(
-            QtGui.QColor(0x4f, 0x4f, 0x4f),
-            QtGui.QColor(0xdd, 0xdd, 0xdd)
+            QColor(0x4f, 0x4f, 0x4f),
+            QColor(0xdd, 0xdd, 0xdd)
         )
         font = self.ribbon.font()
-        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+        font.setStyleStrategy(QFont.PreferAntialias)
         font = self.ribbon.setFont(font)
 
         # Views in a stack
-        self.views = QtGui.QStackedWidget()
+        self.views = QStackedWidget()
         self.views.addWidget(self.boxes_view)
         self.views.addWidget(self.view_object)
 
@@ -222,7 +224,7 @@ class MainWindow(QtGui.QMainWindow):
         status_bar.addPermanentWidget(self.status_message, stretch=1)
 
         # Stack of views, side bar
-        self.splitter = QtGui.QSplitter()
+        self.splitter = QSplitter()
         self.splitter.addWidget(self.views)
         self.splitter.addWidget(sidebar)
         self.splitter.setSizes([600, 200])
@@ -280,7 +282,7 @@ class MainWindow(QtGui.QMainWindow):
                 QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
             )
 
-            path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
+            path, selectedFilter = QFileDialog.getOpenFileName(
                 self, "Open", folder, self.DOCUMENT_FILE_FILTER)
 
         # path will be None if user cancelled getOpenFileName
@@ -459,7 +461,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         box = QMessageBox(QMessageBox.Question, title, '',
                           QMessageBox.No | QMessageBox.Yes)
-        box.setDefaultButton(QtGui.QMessageBox.No)
+        box.setDefaultButton(QMessageBox.No)
 
         SHOW_AT_MOST = 5
         report_problems = problems[:SHOW_AT_MOST]
@@ -587,7 +589,7 @@ class MainWindow(QtGui.QMainWindow):
         # Investigate https://pypi.python.org/pypi/qimage2ndarray/0.2
 
         # Work out the supported image file extensions
-        extensions = QtGui.QImageWriter.supportedImageFormats()
+        extensions = QImageWriter.supportedImageFormats()
         extensions = sorted([str(e).lower() for e in extensions])
         extensions = ['*.{0}'.format(e) for e in extensions]
 
@@ -621,18 +623,18 @@ class MainWindow(QtGui.QMainWindow):
 
         debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
         debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
-        path, selected_filter = QtGui.QFileDialog.getSaveFileName(
+        path, selected_filter = QFileDialog.getSaveFileName(
             self, "Save image file of boxes view",
             unicode(Path(default_dir) / default_fname),
             filter=filter
         )
 
         if path:
-            pm = QtGui.QPixmap.grabWidget(self)
+            pm = QPixmap.grabWidget(self)
 
             # Write using QImageWriter, which makes richer error information
             # avaible than QPixmap.save()
-            writer = QtGui.QImageWriter(path)
+            writer = QImageWriter(path)
             if not writer.write(pm.toImage()):
                 msg = 'An error occurred writing to [{0}]: [{1}]'
                 raise InselectError(msg.format(path, writer.errorString()))
@@ -852,7 +854,7 @@ class MainWindow(QtGui.QMainWindow):
         if hasattr(operation, 'display'):
             # An image that can be displayed instead of the main image
             display = operation.display
-            self.plugin_image = QtGui.QPixmap.fromImage(qimage_of_bgr(display))
+            self.plugin_image = QPixmap.fromImage(qimage_of_bgr(display))
             self.update_boxes_display_pixmap()
 
     @report_to_user
@@ -861,13 +863,13 @@ class MainWindow(QtGui.QMainWindow):
         """
         sm = self.view_object.selectionModel()
         m = self.model
-        sm.select(QtGui.QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
-                  QtGui.QItemSelectionModel.Select)
+        sm.select(QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
+                  QItemSelectionModel.Select)
 
     @report_to_user
     def select_none(self):
         sm = self.view_object.selectionModel()
-        sm.select(QtGui.QItemSelection(), QtGui.QItemSelectionModel.Clear)
+        sm.select(QItemSelection(), QItemSelectionModel.Clear)
 
     @report_to_user
     def delete_selected(self):
@@ -907,9 +909,11 @@ class MainWindow(QtGui.QMainWindow):
 
         debug_print('Will move selection [{0}] from [{1}]'.format(current, select))
         select = self.model.index(select, 0)
-        sm.select(QtGui.QItemSelection(select, select),
-                  QtGui.QItemSelectionModel.ClearAndSelect)
-        sm.setCurrentIndex(select, QtGui.QItemSelectionModel.Current)
+        sm.select(
+            QItemSelection(select, select),
+            QItemSelectionModel.ClearAndSelect
+        )
+        sm.setCurrentIndex(select, QItemSelectionModel.Current)
 
     @report_to_user
     def select_by_size_step(self, larger=False):
@@ -948,7 +952,7 @@ class MainWindow(QtGui.QMainWindow):
         # File menu
         self.open_action = QAction(
             "&Open...", self,
-            shortcut=QtGui.QKeySequence.Open, triggered=self.open_file,
+            shortcut=QKeySequence.Open, triggered=self.open_file,
             icon=load_icon(':/icons/open.png')
         )
         self.copy_to_new_document_action = QAction(
@@ -958,7 +962,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.save_action = QAction(
             "&Save", self,
-            shortcut=QtGui.QKeySequence.Save, triggered=self.save_document,
+            shortcut=QKeySequence.Save, triggered=self.save_document,
             icon=load_icon(':/icons/save.png')
         )
         self.save_crops_action = QAction(
@@ -975,12 +979,12 @@ class MainWindow(QtGui.QMainWindow):
         )
         self.close_action = QAction(
             "&Close", self,
-            shortcut=QtGui.QKeySequence.Close, triggered=self.close_document,
+            shortcut=QKeySequence.Close, triggered=self.close_document,
             icon=load_icon(':/icons/close.png')
         )
         self.exit_action = QAction(
             "E&xit", self,
-            shortcut=QtGui.QKeySequence.Quit, triggered=self.close
+            shortcut=QKeySequence.Quit, triggered=self.close
         )
 
         if 'win32' == sys.platform:
@@ -1001,7 +1005,7 @@ class MainWindow(QtGui.QMainWindow):
         # Edit menu
         self.select_all_action = QAction(
             "Select &All", self,
-            shortcut=QtGui.QKeySequence.SelectAll, triggered=self.select_all
+            shortcut=QKeySequence.SelectAll, triggered=self.select_all
         )
         # QT does not provide a 'select none' key sequence
         self.select_none_action = QAction(
@@ -1028,7 +1032,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.delete_action = QAction(
             "&Delete", self,
-            shortcut=QtGui.QKeySequence.Delete,
+            shortcut=QKeySequence.Delete,
             triggered=self.delete_selected
         )
         # CMD + backspace is the Mac OS X shortcut for delete. Some Mac
@@ -1105,13 +1109,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # FullScreen added in Qt 5.something
         # https://qt.gitorious.org/qt/qtbase-miniak/commit/1ef8a6d
-        if not hasattr(QtGui.QKeySequence, 'FullScreen'):
+        if not hasattr(QKeySequence, 'FullScreen'):
             if 'darwin' == sys.platform:
                 KeySequenceFullScreen = 'shift+ctrl+f'
             else:
                 KeySequenceFullScreen = 'f11'
         else:
-            KeySequenceFullScreen = QtGui.QKeySequence.FullScreen
+            KeySequenceFullScreen = QKeySequence.FullScreen
         self.full_screen_action = QAction(
             "&Full screen", self, shortcut=KeySequenceFullScreen,
             checkable=True,
@@ -1119,18 +1123,18 @@ class MainWindow(QtGui.QMainWindow):
         )
 
         self.zoom_in_action = QAction(
-            "Zoom &In", self, shortcut=QtGui.QKeySequence.ZoomIn,
+            "Zoom &In", self, shortcut=QKeySequence.ZoomIn,
             triggered=self.zoom_in,
             icon=load_icon(':/icons/zoom_in.png')
         )
         self.zoom_out_action = QAction(
-            "Zoom &Out", self, shortcut=QtGui.QKeySequence.ZoomOut,
+            "Zoom &Out", self, shortcut=QKeySequence.ZoomOut,
             triggered=self.zoom_out,
             icon=load_icon(':/icons/zoom_out.png')
         )
         self.zoom_home_action = QAction(
             "&Whole image", self,
-            shortcut=QtGui.QKeySequence.MoveToStartOfDocument,
+            shortcut=QKeySequence.MoveToStartOfDocument,
             triggered=self.zoom_home, checkable=True,
             icon=load_icon(':/icons/zoom_home.png')
         )
@@ -1474,7 +1478,7 @@ class MainWindow(QtGui.QMainWindow):
     def save_to_cookie_cutter(self):
         "Saves bounding boxes to a new 'cookie cutter' file"
         folder = unicode(cookie_cutter_choice().last_directory())
-        path, selectedFilter = QtGui.QFileDialog.getSaveFileName(
+        path, selectedFilter = QFileDialog.getSaveFileName(
             self, "New cookie cutter", folder,
             CookieCutterWidget.FILE_FILTER
         )
@@ -1519,7 +1523,7 @@ class MainWindow(QtGui.QMainWindow):
             QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
         )
 
-        path, selectedFilter = QtGui.QFileDialog.getOpenFileName(
+        path, selectedFilter = QFileDialog.getOpenFileName(
             self, "Open", folder, self.IMAGE_FILE_FILTER)
 
         # path will be None if user cancelled getOpenFileName

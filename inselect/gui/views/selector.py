@@ -1,5 +1,5 @@
-from PySide.QtCore import Qt
-from PySide.QtGui import QAbstractItemView, QSizePolicy, QSlider
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QAbstractItemView, QSizePolicy, QSlider
 
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import RectRole

@@ -4,8 +4,8 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
-from PySide.QtCore import QSettings
-from PySide.QtGui import QFileDialog, QMessageBox
+from qtpy.QtCore import QSettings
+from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from gui_test import GUITest
 

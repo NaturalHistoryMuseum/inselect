@@ -1,4 +1,4 @@
-from PySide.QtCore import QSettings
+from qtpy.QtCore import QSettings
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print

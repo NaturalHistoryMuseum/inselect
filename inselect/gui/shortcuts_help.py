@@ -1,8 +1,9 @@
 """Dialog showing a list of shortcuts
 """
-from PySide.QtCore import Qt, QSettings
-from PySide.QtGui import (QCheckBox, QDialog, QGridLayout, QHBoxLayout, QLabel,
-                          QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+from qtpy.QtCore import Qt, QSettings
+from qtpy.QtWidgets import (QCheckBox, QDialog, QGridLayout, QHBoxLayout,
+                            QLabel, QPushButton, QSizePolicy, QVBoxLayout,
+                            QWidget)
 
 
 from inselect.gui.utils import HorizontalLine, VerticalLine

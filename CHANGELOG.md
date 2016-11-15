@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #386 qtpy
 - #382 About box too tall
 - #379 Gouda v0.1.10
 - #377 Windows non-latin username test
