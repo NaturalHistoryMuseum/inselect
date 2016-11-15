@@ -8,10 +8,9 @@ from functools import wraps
 from io import BytesIO
 from itertools import groupby
 
-from PySide.QtCore import Qt
-from PySide.QtGui import (QColor, QFrame, QIcon, QImage, QItemSelection,
-                          QItemSelectionModel, QLabel, QMessageBox, QPainter,
-                          QPixmap, QWidget)
+from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel
+from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
+from qtpy.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
 
 from copy_box import copy_details_box
 
@@ -150,8 +149,10 @@ def relayout_widget(widget, new_layout):
 
     # Reparent the old layout to a temporary widget
     old_layout = widget.layout()
-    QWidget().setLayout(old_layout)
-    del old_layout
+    if old_layout:
+        # Reparent the old layout to a temporary widget
+        QWidget().setLayout(old_layout)
+        del old_layout
 
     widget.setLayout(new_layout)
 

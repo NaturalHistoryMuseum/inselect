@@ -4,11 +4,11 @@ import platform
 
 import humanize
 import psutil
-import PySide
-import PySide.QtCore
+import qtpy
+import qtpy.QtCore
 
-from PySide import QtGui
-from PySide.QtGui import QMessageBox
+from qtpy import QtWidgets
+from qtpy.QtWidgets import QMessageBox
 
 from inselect.gui.utils import HTML_LINK_TEMPLATE
 
@@ -39,8 +39,12 @@ def _environment():
         ('Python', '{0} ({1})'.format(platform.python_version(), python_bit_depth)),
         ('Numpy', np.version.version),
         ('OpenCV', cv2.__version__),
-        ('PySide', PySide.__version__),
-        ('Qt', PySide.QtCore.__version__),  # Version compiled against
+        (qtpy.API_NAME, 
+            qtpy.PYQT_VERSION
+            if (qtpy.PYQT4 or qtpy.PYQT5) else
+            qtpy.PYSIDE_VERSION
+        ),
+        ('Qt',  qtpy.QT_VERSION),
         ('scikit-learn', sklearn.__version__),
         ('SciPy', scipy.__version__),
     ]
@@ -126,8 +130,10 @@ def show_about_box(parent=None):
     """
 
     # TODO LH Button to copy to clipboard
-    body = body.format(application=QtGui.qApp.applicationName(),
-                       version=QtGui.qApp.applicationVersion(),
+    body = body.format(application=QtWidgets.qApp.applicationName(),
+                       version=QtWidgets.qApp.applicationVersion(),
                        environment=_environment())
-    QMessageBox.about(parent, 'About {0}'.format(QtGui.qApp.applicationName()),
-                      HTML_LINK_TEMPLATE.format(body))
+    QMessageBox.about(
+        parent, 'About {0}'.format(QtWidgets.qApp.applicationName()),
+        HTML_LINK_TEMPLATE.format(body)
+    )

@@ -2,8 +2,8 @@ import unittest
 
 from mock import MagicMock, patch
 
-from PySide import QtCore, QtGui
-from PySide.QtGui import QMessageBox
+from qtpy import QtCore, QtWidgets
+from qtpy.QtWidgets import QMessageBox
 
 from inselect.gui import shortcuts_help
 from inselect.gui.main_window import MainWindow
@@ -21,10 +21,10 @@ class GUITest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Only one QApplication can be constructed
-        if not QtGui.qApp:
-            QtGui.QApplication([])
+        if not QtWidgets.qApp:
+            QtWidgets.qApp = QtWidgets.QApplication([])
 
-        cls.window = MainWindow(QtGui.qApp)
+        cls.window = MainWindow(QtWidgets.qApp)
 
         # Crude way of ensuring that the shortcuts help box is not shown at
         # startup

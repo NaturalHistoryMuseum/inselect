@@ -3,7 +3,7 @@ import unittest
 from mock import patch
 from pathlib import Path
 
-from PySide.QtGui import QMessageBox
+from qtpy.QtWidgets import QMessageBox
 
 from gui_test import GUITest
 

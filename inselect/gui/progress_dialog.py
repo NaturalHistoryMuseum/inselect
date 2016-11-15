@@ -1,4 +1,4 @@
-from PySide.QtGui import QProgressDialog
+from qtpy.QtWidgets import QProgressDialog
 
 from inselect.lib.utils import debug_print
 

@@ -1,9 +1,9 @@
 from itertools import izip, repeat
 
-from PySide import QtGui
-from PySide.QtGui import (QAbstractItemView, QWidget, QGroupBox, QLabel,
-                          QLineEdit, QComboBox, QFormLayout, QSizePolicy,
-                          QVBoxLayout)
+from qtpy import QtWidgets
+from qtpy.QtWidgets import (QAbstractItemView, QWidget, QGroupBox, QLabel,
+                            QLineEdit, QComboBox, QFormLayout, QSizePolicy,
+                            QVBoxLayout)
 
 from inselect.lib.countries import COUNTRIES
 from inselect.lib.languages import LANGUAGES
@@ -97,8 +97,8 @@ class MetadataView(QAbstractItemView):
 
         # If one of our controls has focus, update the model before refreshing
         # the UI
-        if QtGui.qApp.focusWidget() in self._form_container.controls:
-            QtGui.qApp.focusWidget().update_model()
+        if QtWidgets.qApp.focusWidget() in self._form_container.controls:
+            QtWidgets.qApp.focusWidget().update_model()
         self._populate_controls()
 
 

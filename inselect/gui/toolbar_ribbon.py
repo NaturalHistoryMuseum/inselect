@@ -1,6 +1,6 @@
-from PySide.QtCore import Qt, QSize
-from PySide.QtGui import (QGridLayout, QSizePolicy, QToolBar, QToolButton,
-                          QWidget)
+from qtpy.QtCore import Qt, QSize
+from qtpy.QtWidgets import (QGridLayout, QSizePolicy, QToolBar, QToolButton,
+                            QWidget)
 
 from .ribbon import Ribbon
 

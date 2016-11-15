@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from PySide import QtGui
-from PySide.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect, Signal
+from qtpy.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect, Signal
+from qtpy.QtGui import QPixmap
 
 from inselect.lib.utils import debug_print
 
@@ -61,8 +61,10 @@ class Model(QAbstractItemModel):
             debug_print('Model will work on full-res scan')
             image_array = document.scanned.array
 
-        pixmap = QtGui.QPixmap.fromImage(qimage_of_bgr(image_array))
-        data = self._boxes_from_items(document.items, pixmap.width(), pixmap.height())
+        pixmap = QPixmap.fromImage(qimage_of_bgr(image_array))
+        data = self._boxes_from_items(
+            document.items, pixmap.width(), pixmap.height()
+        )
 
         # Inform views
         self.beginResetModel()

@@ -1,4 +1,4 @@
-from PySide.QtGui import QMessageBox
+from qtpy.QtWidgets import QMessageBox
 
 from inselect.lib.segment_document import SegmentDocument
 from inselect.lib.utils import debug_print

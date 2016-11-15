@@ -1,5 +1,5 @@
-from PySide.QtCore import Qt
-from PySide.QtGui import QScrollArea, QSizePolicy
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QScrollArea, QSizePolicy
 
 
 class SideBar(QScrollArea):

@@ -1,5 +1,5 @@
-from PySide.QtCore import QObject, QSettings, Signal
-from PySide.QtGui import QColor
+from qtpy.QtCore import QObject, QSettings, Signal
+from qtpy.QtGui import QColor
 
 
 LIGHT_BACKGROUND = {

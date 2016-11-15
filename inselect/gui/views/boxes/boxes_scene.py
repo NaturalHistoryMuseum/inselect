@@ -1,15 +1,15 @@
 from __future__ import print_function
 from itertools import ifilter
 
-from PySide import QtGui
-from PySide.QtCore import Qt
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsPixmapItem
 
 from inselect.lib.utils import debug_print
 
 from .box_item import BoxItem
 
 
-class BoxesScene(QtGui.QGraphicsScene):
+class BoxesScene(QGraphicsScene):
     """Boxes on an image of objects
     """
     def __init__(self, source, parent=None):
@@ -31,7 +31,7 @@ class BoxesScene(QtGui.QGraphicsScene):
         if pixmap:
             debug_print('New scene [{0}] [{1}]'.format(pixmap.width(), pixmap.height()))
             self.setSceneRect(0, 0, pixmap.width(), pixmap.height())
-            self.addItem(QtGui.QGraphicsPixmapItem(pixmap))
+            self.addItem(QGraphicsPixmapItem(pixmap))
             self.pixmap = pixmap
             for v in self.views():
                 v.updateSceneRect(self.sceneRect())
@@ -55,7 +55,7 @@ class BoxesScene(QtGui.QGraphicsScene):
         if not items:
             return None
         else:
-            items = ifilter(lambda i: isinstance(i, QtGui.QGraphicsPixmapItem), items)
+            items = ifilter(lambda i: isinstance(i, QGraphicsPixmapItem), items)
             pixmap = items.next()
 
             # There should be only one pixmap item

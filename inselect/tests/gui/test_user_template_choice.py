@@ -3,8 +3,8 @@ import unittest
 from mock import patch
 from pathlib import Path
 
-from PySide.QtCore import QSettings
-from PySide.QtGui import QFileDialog
+from qtpy.QtCore import QSettings
+from qtpy.QtWidgets import QFileDialog
 
 from gui_test import GUITest
 

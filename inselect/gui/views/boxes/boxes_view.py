@@ -1,12 +1,13 @@
-from PySide import QtGui
-from PySide.QtCore import Qt, QRectF, QSizeF, Signal
+from qtpy.QtCore import Qt, QRectF, QSizeF, Signal
+from qtpy.QtGui import QCursor, QTransform
+from qtpy.QtWidgets import QGraphicsView
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
 from inselect.gui.colours import colour_scheme_choice
 
 
-class BoxesView(QtGui.QGraphicsView):
+class BoxesView(QGraphicsView):
     """Zoomable image with bounding boxes
     """
 
@@ -19,7 +20,7 @@ class BoxesView(QtGui.QGraphicsView):
     def __init__(self, scene, parent=None):
         super(BoxesView, self).__init__(scene, parent)
         self.setCursor(Qt.CrossCursor)
-        self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
+        self.setDragMode(QGraphicsView.RubberBandDrag)
 
         # If 'whole_scene', resizeEvent() will cause the scale to be updated to
         # fit the scene within the view.
@@ -240,7 +241,7 @@ class BoxesView(QtGui.QGraphicsView):
         scene_rect = self.scene().sceneRect()   # Scene
         view_rect = self.viewport().rect()      # Available space
         # The size of the scene if the new transform is applied
-        t_scene_rect = QtGui.QTransform.fromScale(f, f).mapRect(scene_rect)
+        t_scene_rect = QTransform.fromScale(f, f).mapRect(scene_rect)
 
         if (t_scene_rect.width() < view_rect.width() and
                 t_scene_rect.height() < view_rect.height()):
@@ -257,13 +258,13 @@ class BoxesView(QtGui.QGraphicsView):
                 # No selection so we want to centre on the mouse cursor, if it
                 # is within the view. We need to get the mouse position in
                 # scene coords before applying the zoom.
-                mouse_pos = self.mapFromGlobal(QtGui.QCursor.pos())
+                mouse_pos = self.mapFromGlobal(QCursor.pos())
                 if self.rect().contains(mouse_pos, proper=True):
                     mouse_pos = self.mapToScene(mouse_pos)
                 else:
                     mouse_pos = None
 
-            self.setTransform(QtGui.QTransform.fromScale(f, f))
+            self.setTransform(QTransform.fromScale(f, f))
 
             if selected:
                 # Centre on selected items

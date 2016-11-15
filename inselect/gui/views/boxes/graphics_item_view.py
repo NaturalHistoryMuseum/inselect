@@ -1,7 +1,7 @@
 from itertools import izip
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import QRect
+from qtpy.QtCore import QModelIndex, QRect
+from qtpy.QtWidgets import QAbstractItemView
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
@@ -11,7 +11,7 @@ from inselect.gui.utils import unite_rects, update_selection_model
 from .boxes_scene import BoxesScene
 
 
-class GraphicsItemView(QtGui.QAbstractItemView):
+class GraphicsItemView(QAbstractItemView):
     """Qt have used 'view' in two different contexts: the model-view
     architecture and the graphics/view framework, henceforth MV and GV
     respectively.
@@ -46,7 +46,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         super(GraphicsItemView, self).reset()
 
         model = self.model()
-        self.scene.new_document(model.data(QtCore.QModelIndex(), PixmapRole))
+        self.scene.new_document(model.data(QModelIndex(), PixmapRole))
 
         # Build up new mapping
         rows = [None] * model.rowCount()
@@ -64,7 +64,7 @@ class GraphicsItemView(QtGui.QAbstractItemView):
         """
         debug_print('show_alternative_pixmap', pixmap)
         model = self.model()
-        pixmap = pixmap if pixmap else model.data(QtCore.QModelIndex(), PixmapRole)
+        pixmap = pixmap if pixmap else model.data(QModelIndex(), PixmapRole)
         self.scene.set_pixmap(pixmap)
 
     def rowsInserted(self, parent, start, end):

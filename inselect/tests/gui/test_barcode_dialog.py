@@ -2,7 +2,7 @@ import unittest
 
 from mock import patch
 
-from PySide.QtCore import QSettings
+from qtpy.QtCore import QSettings
 
 from inselect.gui.plugins.barcode_dialog import BarcodeDialog
 
