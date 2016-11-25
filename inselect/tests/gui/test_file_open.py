@@ -28,7 +28,7 @@ class TestFileOpen(GUITest):
         deleting all existing boxes
         """
         w = self.window
-        w.open_file(path)
+        w.open_file(path=path)
         self.assertLess(0, w.model.rowCount())
         w.select_all()
         w.delete_selected()
@@ -51,7 +51,7 @@ class TestFileOpen(GUITest):
 
     def test_open_doc(self):
         "Open an inselect document"
-        self.window.open_file(TESTDATA / 'shapes.inselect')
+        self.window.open_file(path=TESTDATA / 'shapes.inselect')
         self.assertEqual(5, self.window.model.rowCount())
         self.assertWindowTitleOpenDocument()
         self.assertFalse(self.window.model.is_modified)
@@ -63,7 +63,7 @@ class TestFileOpen(GUITest):
                                        TESTDATA / 'shapes.png',
                                        ) as tempdir:
             make_readonly(tempdir / 'shapes.inselect')
-            self.window.open_file(tempdir / 'shapes.inselect')
+            self.window.open_file(path=tempdir / 'shapes.inselect')
 
             self.assertTrue(mock_warning.called)
             expected = (u'The file [shapes.inselect] is read-only.\n\n'
@@ -75,7 +75,7 @@ class TestFileOpen(GUITest):
         """Open the scanned image file of an existing inselect document - the
         inselect document should be opened
         """
-        self.window.open_file(TESTDATA / 'shapes.png')
+        self.window.open_file(path=TESTDATA / 'shapes.png')
         self.assertEqual(5, self.window.model.rowCount())
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleOpenDocument()
@@ -92,7 +92,7 @@ class TestFileOpen(GUITest):
             # The test document contains no thumbnail file - create one now
             shutil.copy(str(tempdir / 'shapes.png'), str(thumbnail))
 
-            self.window.open_file(thumbnail)
+            self.window.open_file(path=thumbnail)
             self.assertEqual(5, self.window.model.rowCount())
             self.assertFalse(self.window.model.is_modified)
             self.assertWindowTitleOpenDocument()
@@ -110,7 +110,7 @@ class TestFileOpen(GUITest):
             # not all lower case.
             shutil.copy(str(TESTDATA / 'shapes.png'),
                         str(tempdir / 'shapes.Png'))
-            self.window.open_file(tempdir / 'shapes.Png')
+            self.window.open_file(path=tempdir / 'shapes.Png')
             mock_new_document.assert_called_once_with(tempdir / 'shapes.Png')
 
     @patch.object(QMessageBox, 'information', return_value=QMessageBox.Yes)
@@ -141,7 +141,7 @@ class TestFileOpen(GUITest):
     def test_open_non_existant_image(self, mock_copy_details_box):
         "Try to open a non-existant image file"
         self.assertRaises(InselectError, self.window.open_file,
-                          'I do not exist.png')
+                          path='I do not exist.png')
 
         # User should have been told about the error
         self.assertTrue(mock_copy_details_box.called)
@@ -155,7 +155,7 @@ class TestFileOpen(GUITest):
     @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
     def test_open_non_existant_inselect(self, mock_copy_details_box):
         "Try to open a non-existant inselect file"
-        self.assertRaises(IOError, self.window.open_file, 'I do not exist.inselect')
+        self.assertRaises(IOError, self.window.open_file, path='I do not exist.inselect')
         self.assertTrue(mock_copy_details_box.called)
         expected = (u"An error occurred:\n"
                     u"[Errno 2] No such file or directory: 'I do not exist.inselect'")
@@ -167,7 +167,7 @@ class TestFileOpen(GUITest):
     @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
     def test_open_non_existant_unrecognised(self, mock_copy_details_box):
         "Try to open a non-existant file with an unrecognised extension"
-        self.assertRaises(InselectError, self.window.open_file, 'I do not exist')
+        self.assertRaises(InselectError, self.window.open_file, path='I do not exist')
         self.assertTrue(mock_copy_details_box.called)
         expected = u'An error occurred:\nUnknown file type [I do not exist]'
         self.assertTrue(expected in mock_copy_details_box.call_args[0])
@@ -184,7 +184,7 @@ class TestFileOpen(GUITest):
         self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open another doc - user says not to save
-        w.open_file(TESTDATA / 'pinned.inselect')
+        w.open_file(path=TESTDATA / 'pinned.inselect')
         self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
         self.assertTrue(expected in mock_question.call_args[0])
@@ -192,7 +192,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(1, w.model.rowCount())
 
         # Original document should not have changed
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
         self.assertEqual(5, w.model.rowCount())
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
@@ -210,13 +210,13 @@ class TestFileOpen(GUITest):
             self._load_and_modify(tempdir / 'shapes.inselect')
 
             # Open another doc - user says not to save
-            w.open_file(TESTDATA / 'pinned.inselect')
+            w.open_file(path=TESTDATA / 'pinned.inselect')
             self.assertTrue(mock_question.called)
             expected = "Save the document before closing?"
             self.assertTrue(expected in mock_question.call_args[0])
 
             # Original document should have changed - it should contain no boxes
-            w.open_file(tempdir / 'shapes.inselect')
+            w.open_file(path=tempdir / 'shapes.inselect')
             self.assertEqual(0, w.model.rowCount())
             self.assertFalse(w.model.is_modified)
             self.assertWindowTitleOpenDocument()
@@ -232,7 +232,7 @@ class TestFileOpen(GUITest):
         self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open another document - user says not to save
-        w.open_file(TESTDATA / 'pinned.inselect')
+        w.open_file(path=TESTDATA / 'pinned.inselect')
 
         self.assertTrue(mock_question.called)
         expected = "Save the document before closing?"
@@ -253,7 +253,7 @@ class TestFileOpen(GUITest):
         w = self.window
 
         # Open a file
-        w.open_file(None)
+        w.open_file(path=None)
 
         self.assertEqual(1, mock_gofn.call_count)
 
@@ -271,7 +271,7 @@ class TestFileOpen(GUITest):
         self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open the same document again
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         self.assertTrue(mock_question.called)
         self.assertTrue('Discard changes?' in mock_question.call_args[0])
@@ -290,7 +290,7 @@ class TestFileOpen(GUITest):
         self._load_and_modify(TESTDATA / 'shapes.inselect')
 
         # Open the same document again
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         self.assertTrue(mock_question.called)
         self.assertTrue('Discard changes?' in mock_question.call_args[0])
@@ -310,10 +310,10 @@ class TestFileOpen(GUITest):
         w = self.window
 
         # Open a document again
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Open the document again
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         self.assertTrue(mock_information.called)
         self.assertTrue('Document already open' in mock_information.call_args[0])

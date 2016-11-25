@@ -71,7 +71,10 @@ def main(args=None):
     # Only one instance of QApplication can be created per process. The single
     # instance is stored in QtWidgets.qApp. When test plans are being run it is
     # likely that the QApplication will have been created by a unittest.
-    app = QtWidgets.qApp if QtWidgets.qApp else QtWidgets.QApplication(args)
+    if True:
+        app = QtWidgets.QApplication(args)
+    else:
+        app = QtWidgets.qApp if QtWidgets.qApp else QtWidgets.QApplication(args)
     QtWidgets.qApp = app
 
     debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))

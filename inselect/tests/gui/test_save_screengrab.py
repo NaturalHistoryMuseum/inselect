@@ -20,7 +20,7 @@ class TestSaveScreengrab(GUITest):
     """
     def test_save_screengrab_with_doc(self):
         "User saves a screengrab with a document loaded"
-        self.window.open_file(TESTDATA / 'shapes.inselect')
+        self.window.open_file(path=TESTDATA / 'shapes.inselect')
 
         temp = tempfile.mkdtemp()
         try:

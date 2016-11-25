@@ -8,7 +8,8 @@ from functools import wraps
 from io import BytesIO
 from itertools import groupby
 
-from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel
+from PyQt4.QtGui import QItemSelection, QItemSelectionModel
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 from qtpy.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
 

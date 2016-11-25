@@ -15,7 +15,7 @@ class TestBoxesView(GUITest):
         super(TestBoxesView, self).setUp()
 
         # GUITest's tearDown will close the document
-        self.window.open_file(TESTDATA / 'shapes.inselect')
+        self.window.open_file(path=TESTDATA / 'shapes.inselect')
 
     def test_paint(self):
         "Boxes view is painted"

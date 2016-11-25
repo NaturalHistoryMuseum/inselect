@@ -26,7 +26,7 @@ class TestMetadataValidation(GUITest):
         w = self.window
 
         # This document has 15 validation problems with this template
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
         template = UserTemplate.load(TESTDATA / 'test.inselect_template')
 
         w.save_crops(user_template=template)
@@ -52,7 +52,7 @@ class TestMetadataValidation(GUITest):
         """
         w = self.window
 
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
 
         template = UserTemplate({
             'Name': 'T1',

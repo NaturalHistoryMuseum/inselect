@@ -49,7 +49,7 @@ class TestExportCSV(GUITest):
                                        TESTDATA / 'shapes.png') as tempdir:
 
             # Load document and export CSV file
-            w.open_document(tempdir / 'shapes.inselect')
+            w.open_document(path=tempdir / 'shapes.inselect')
             w.export_csv(user_template=DWC)
             self._test_csv()
 
@@ -73,7 +73,7 @@ class TestExportCSV(GUITest):
             (tempdir / 'shapes.csv').open('w')
 
             # Load document and export CSV file
-            w.open_document(tempdir / 'shapes.inselect')
+            w.open_document(path=tempdir / 'shapes.inselect')
             w.export_csv(user_template=DWC)
             self._test_csv()
 

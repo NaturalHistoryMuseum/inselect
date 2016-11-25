@@ -6,8 +6,8 @@ from functools import partial
 from itertools import count, izip
 from pathlib import Path
 
-from qtpy.QtCore import (Qt, QEvent, QItemSelection, QItemSelectionModel,
-                         QSettings)
+from PyQt4.QtGui import QItemSelection, QItemSelectionModel
+from qtpy.QtCore import Qt, QEvent, QSettings
 from qtpy.QtGui import (QColor, QDesktopServices, QFont, QIcon, QImageWriter,
                         QKeySequence, QPixmap)
 from qtpy.QtWidgets import (QAction, QActionGroup, QFileDialog, QLabel,
@@ -262,7 +262,7 @@ class MainWindow(QMainWindow):
             return super(MainWindow, self).eventFilter(obj, event)
 
     @report_to_user
-    def open_file(self, path=None):
+    def open_file(self, checked=False, path=None):
         """Opens path, which can be None, the path to an inselect document or
         the path to an image file. If None, the user is prompted to select a
         file.
@@ -307,7 +307,7 @@ class MainWindow(QMainWindow):
                     # An image file
                     image_path = path
 
-            if not self.close_document(document_path):
+            if not self.close_document(document_to_open=document_path):
                 # User does not want to close the existing document
                 pass
             else:
@@ -400,10 +400,10 @@ class MainWindow(QMainWindow):
             action.setText('')
 
     @report_to_user
-    def open_recent(self, index):
+    def open_recent(self, index, checked=False):
         debug_print('MainWindow._open_recent [{0}]'.format(index))
         recent = RecentDocuments().read_paths()
-        self.open_file(recent[index])
+        self.open_file(path=recent[index])
 
     def open_document(self, path=None, document=None):
         """Either loads the inselect document from path or uses the existing
@@ -445,7 +445,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Document is read-only", msg)
 
     @report_to_user
-    def save_document(self):
+    def save_document(self, checked=False):
         """Saves the document
         """
         debug_print('MainWindow.save_document')
@@ -489,7 +489,7 @@ class MainWindow(QMainWindow):
         return box.exec_()
 
     @report_to_user
-    def save_crops(self, user_template=None):
+    def save_crops(self, checked=False, user_template=None):
         """Saves cropped object images
         """
         debug_print('MainWindow.save_crops')
@@ -545,7 +545,7 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Crops saved", msg)
 
     @report_to_user
-    def export_csv(self, user_template=None):
+    def export_csv(self, checked=False, user_template=None):
         debug_print('MainWindow.export_csv')
 
         if user_template:
@@ -578,7 +578,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "CSV saved", msg)
 
     @report_to_user
-    def save_screengrab(self):
+    def save_screengrab(self, checked=False):
         """Prompts the user for the image file path to which to a screenshot
         will be saved.
         """
@@ -642,7 +642,7 @@ class MainWindow(QMainWindow):
                 debug_print('BoxesView.save_screengrab [{0}]'.format(path))
 
     @report_to_user
-    def close_document(self, document_to_open=None):
+    def close_document(self, checked=False, document_to_open=None):
         """Closes the document and returns True if not modified or if modified
         and user does not cancel.
 
@@ -703,7 +703,7 @@ class MainWindow(QMainWindow):
         return close
 
     @report_to_user
-    def empty_document(self):
+    def empty_document(self, checked=False):
         """Creates an empty document
         """
         debug_print('MainWindow.empty_document')
@@ -740,23 +740,23 @@ class MainWindow(QMainWindow):
             event.ignore()
 
     @report_to_user
-    def zoom_in(self):
+    def zoom_in(self, checked=False):
         self.boxes_view.zoom_in()
 
     @report_to_user
-    def zoom_out(self):
+    def zoom_out(self, checked=False):
         self.boxes_view.zoom_out()
 
     @report_to_user
-    def toggle_zoom_to_selection(self):
+    def toggle_zoom_to_selection(self, checked=False):
         self.boxes_view.toggle_zoom_to_selection()
 
     @report_to_user
-    def zoom_home(self):
+    def zoom_home(self, checked=False):
         self.boxes_view.zoom_home()
 
     @report_to_user
-    def about(self):
+    def about(self, checked=False):
         show_about_box(self)
 
     @report_to_user
@@ -812,7 +812,7 @@ class MainWindow(QMainWindow):
             self.sync_ui()
 
     @report_to_user
-    def run_plugin(self, plugin_number):
+    def run_plugin(self, plugin_number, checked=False):
         """Passes each cropped object image through plugin
         """
         debug_print("MainWindow.run_plugin")
@@ -834,7 +834,7 @@ class MainWindow(QMainWindow):
                 pass
 
     @report_to_user
-    def show_plugin_config(self, plugin_number):
+    def show_plugin_config(self, plugin_number, checked=False):
         debug_print("MainWindow.show_plugin_config")
 
         if (plugin_number < 0 or plugin_number > len(self.plugins) or
@@ -858,7 +858,7 @@ class MainWindow(QMainWindow):
             self.update_boxes_display_pixmap()
 
     @report_to_user
-    def select_all(self):
+    def select_all(self, checked=False):
         """Selects all boxes in the model
         """
         sm = self.view_object.selectionModel()
@@ -867,12 +867,12 @@ class MainWindow(QMainWindow):
                   QItemSelectionModel.Select)
 
     @report_to_user
-    def select_none(self):
+    def select_none(self, checked=False):
         sm = self.view_object.selectionModel()
         sm.select(QItemSelection(), QItemSelectionModel.Clear)
 
     @report_to_user
-    def delete_selected(self):
+    def delete_selected(self, checked=False):
         """Deletes the selected boxes
         """
         debug_print('MainWindow.delete_selected')
@@ -893,7 +893,7 @@ class MainWindow(QMainWindow):
         self.view_object.scrollTo(self.view_object.currentIndex())
 
     @report_to_user
-    def select_next_prev(self, next):
+    def select_next_prev(self, next, checked=False):
         """Selects the next box in the mode if next is True, the previous
         box in the model if next if False.
         """
@@ -916,13 +916,13 @@ class MainWindow(QMainWindow):
         sm.setCurrentIndex(select, QItemSelectionModel.Current)
 
     @report_to_user
-    def select_by_size_step(self, larger=False):
+    def select_by_size_step(self, larger=False, checked=False):
         """Step the 'select by size' slider
         """
         self.view_selector.single_step(larger)
 
     @report_to_user
-    def rotate90(self, clockwise):
+    def rotate90(self, clockwise, checked=False):
         """Rotates the selected boxes 90 either clockwise or counter-clockwise.
         """
         debug_print('MainWindow.rotate')
@@ -939,7 +939,7 @@ class MainWindow(QMainWindow):
         self.view_graphics_item.show_alternative_pixmap(pixmap)
 
     @report_to_user
-    def toggle_plugin_image(self):
+    def toggle_plugin_image(self, checked=False):
         """Action method to switch between display of the last plugin's
         information image (if any) and the actual image.
         """
@@ -1413,12 +1413,12 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(self._help_menu)
 
     @report_to_user
-    def show_tab(self, index):
+    def show_tab(self, index, checked=False):
         self.ribbon.setCurrentIndex(index)
         self.sync_ui()
 
     @report_to_user
-    def next_previous_tab(self, next):
+    def next_previous_tab(self, next, checked=False):
         """Selects the next (if next if True) or previous (if next if False) tab
         """
         select = self.ribbon.currentIndex()
@@ -1448,7 +1448,7 @@ class MainWindow(QMainWindow):
         self.sync_ui()
 
     @report_to_user
-    def toggle_full_screen(self):
+    def toggle_full_screen(self, checked=False):
         """Toggles between full screen and normal
         """
         if self.isFullScreen():
@@ -1464,7 +1464,7 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
 
     @report_to_user
-    def set_colour_scheme(self, name):
+    def set_colour_scheme(self, name, checked=False):
         "Sets the colour scheme"
         colour_scheme_choice().set_colour_scheme(name)
 
@@ -1475,7 +1475,7 @@ class MainWindow(QMainWindow):
         self.sync_ui()
 
     @report_to_user
-    def save_to_cookie_cutter(self):
+    def save_to_cookie_cutter(self, checked=False):
         "Saves bounding boxes to a new 'cookie cutter' file"
         folder = unicode(cookie_cutter_choice().last_directory())
         path, selectedFilter = QFileDialog.getSaveFileName(
@@ -1492,7 +1492,7 @@ class MainWindow(QMainWindow):
             )
 
     @report_to_user
-    def apply_cookie_cutter(self):
+    def apply_cookie_cutter(self, checked=False):
         """Replaces existing boxes with those in cookie_cutter_choice.
         """
         debug_print('MainWindow.apply_cookie_cutter')
@@ -1511,7 +1511,7 @@ class MainWindow(QMainWindow):
             )
 
     @report_to_user
-    def copy_to_new_document(self):
+    def copy_to_new_document(self, checked=False):
         """Prompts the user to choose an image, creates an inselect document
         for the selected image, copies metadata from the currently open
         document to the new document and finally opens the new document
@@ -1540,7 +1540,7 @@ class MainWindow(QMainWindow):
                 self.new_document(path, default_metadata_items=items)
 
     @report_to_user
-    def sort_boxes(self, by_columns):
+    def sort_boxes(self, by_columns, checked=False):
         """Sorts boxes either by columns or by rows.
         """
         if self.document:
@@ -1583,7 +1583,7 @@ class MainWindow(QMainWindow):
         res = self._accept_drag_drop(event)
         if res:
             event.acceptProposedAction()
-            self.open_file(res)
+            self.open_file(file=res)
         else:
             super(MainWindow, self).dropEvent(event)
 

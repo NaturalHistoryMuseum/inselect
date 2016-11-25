@@ -1,6 +1,7 @@
 from itertools import izip, repeat
 
 from qtpy import QtWidgets
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (QAbstractItemView, QWidget, QGroupBox, QLabel,
                             QLineEdit, QComboBox, QFormLayout, QSizePolicy,
                             QVBoxLayout)
@@ -229,7 +230,7 @@ class FormContainer(QWidget):
 class URLLabel(QLabel):
     """A label that displays a clickable URL in grey.
     """
-    def __init__(self, url, label, parent=None, f=0):
+    def __init__(self, url, label, parent=None, f=Qt.WindowFlags(0)):
         html = HTML_LINK_TEMPLATE.format(
             '<a href="{0}">{1}</a>'.format(url, label)
         )
@@ -240,7 +241,7 @@ class URLLabel(QLabel):
 class FixedValueControl(QLabel):
     """A read-only value that is stored only in the template.
     """
-    def __init__(self, fixed_value, parent=None, flags=0):
+    def __init__(self, fixed_value, parent=None, flags=Qt.WindowFlags(0)):
         super(FixedValueControl, self).__init__(fixed_value, parent, flags)
 
     def update_model(self):

@@ -31,7 +31,7 @@ class TestSegment(GUITest):
         w.plugin_image = None
 
         # Load document with five boxes
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
         self.assertEqual(5, w.model.rowCount())
 
         # Get the rects of the existing boxes
@@ -75,7 +75,7 @@ class TestSegment(GUITest):
         w = self.window
 
         # Open document and remove existing boxes
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
         w.select_all()
         w.delete_selected()
 
