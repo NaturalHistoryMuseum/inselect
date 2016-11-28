@@ -17,7 +17,6 @@ dependencies:
 - pyqt=4.11.4=py27_4
 - python=2.7.11=0
 - python.app=1.2=py27_4
-- pyqt=4.11.4=py27_4
 - qt=4.8.7=1
 - qtpy=1.0.1=py27_0
 - readline=6.2=2
