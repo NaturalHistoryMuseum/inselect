@@ -7,7 +7,7 @@
 * Install dependencies `UPX` and `zbar`:
 
 ```
-brew install upx zbar
+brew install upx zbar libdmtx
 ```
 
 # Install Miniconda
@@ -29,20 +29,6 @@ source activate inselect
 conda install --channel https://conda.anaconda.org/jjhelmus --yes opencv=2.4.12=np110py27_0
 pip install -r requirements.pip
 ```
-
-## LibDMTX barcode reading library
-
-* Install the `libdmtx` shared lib
-
-    ```
-    brew install libdmtx
-    ```
-
-* Test
-
-    ```
-    python -c "import libdmtx; print(libdmtx)"
-    ```
 
 ## Test barcode reading libraries
 
