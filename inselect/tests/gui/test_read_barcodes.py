@@ -30,7 +30,7 @@ class TestReadBarcodes(GUITest):
     @patch.object(barcode_settings, 'current_settings',
                   return_value={'engine': 'libdmtx'})
     def test_read_barcodes(self, current_settings, mock_warning):
-        self.window.open_document(TESTDATA / 'barcodes.inselect')
+        self.window.open_document(path=TESTDATA / 'barcodes.inselect')
 
         model = self.window.model
         self.assertFalse(model.is_modified)
@@ -63,7 +63,7 @@ class TestReadBarcodes(GUITest):
             # Create thumbnail file
             shutil.copy(str(TESTDATA.joinpath('barcodes.jpg')),
                         str(tempdir.joinpath('barcodes_thumbnail.jpg')))
-            self.window.open_document(tempdir / 'barcodes.inselect')
+            self.window.open_document(path=tempdir / 'barcodes.inselect')
 
             self.window.run_plugin(2)
 

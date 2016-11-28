@@ -21,7 +21,7 @@ class GUITest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Only one QApplication can be constructed
-        if not QtWidgets.qApp:
+        if True or not QtWidgets.qApp:
             QtWidgets.qApp = QtWidgets.QApplication([])
 
         cls.window = MainWindow(QtWidgets.qApp)

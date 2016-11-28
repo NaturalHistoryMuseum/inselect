@@ -13,7 +13,11 @@ class ResizeHandle(QGraphicsItem):
     def __init__(self, corner, parent=None):
         super(ResizeHandle, self).__init__(parent)
 
-        if corner not in Qt.Corner.values.values():
+        corners = (
+            Qt.TopLeftCorner, Qt.TopRightCorner, Qt.BottomLeftCorner,
+            Qt.BottomRightCorner
+        )
+        if corner not in corners:
             raise ValueError('Bad corner [{0}]'.format(corner))
         else:
             self._corner = corner

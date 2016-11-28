@@ -17,7 +17,7 @@ class TestSelection(GUITest):
         sm = w.view_object.selectionModel()
 
         # Open a document
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Five boxes, none selected
         self.assertEqual(5, self.window.model.rowCount())
@@ -40,7 +40,7 @@ class TestSelection(GUITest):
         sm = w.view_object.selectionModel()
 
         # Open a document
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Select the first box
         w.select_next_prev(next=True)

@@ -241,7 +241,7 @@ class URLLabel(QLabel):
 class FixedValueControl(QLabel):
     """A read-only value that is stored only in the template.
     """
-    def __init__(self, fixed_value, parent=None, flags=0):
+    def __init__(self, fixed_value, parent=None, flags=Qt.WindowFlags(0)):
         super(FixedValueControl, self).__init__(fixed_value, parent, flags)
 
     def update_model(self):

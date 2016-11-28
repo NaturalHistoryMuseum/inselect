@@ -24,11 +24,13 @@ class TestSaveCrops(GUITest):
         "The user saves crops using DWC template"
         with temp_directory_with_files(TESTDATA / 'shapes.inselect',
                                        TESTDATA / 'shapes.png') as tempdir:
-            self.window.open_document(tempdir / 'shapes.inselect')
+            self.window.open_document(path=tempdir / 'shapes.inselect')
 
             crops_dir = tempdir / 'shapes_crops'
             self.assertFalse(crops_dir.is_dir())
-            self.run_async_operation(partial(self.window.save_crops, DWC))
+            self.run_async_operation(
+                partial(self.window.save_crops, user_template=DWC)
+            )
 
             self.assertTrue(crops_dir.is_dir())
             self.assertEqual(5, len(list(crops_dir.iterdir())))
@@ -46,7 +48,7 @@ class TestSaveCrops(GUITest):
         "The user is prompted to overwrite existing crops"
         with temp_directory_with_files(TESTDATA / 'shapes.inselect',
                                        TESTDATA / 'shapes.png') as tempdir:
-            self.window.open_document(tempdir / 'shapes.inselect')
+            self.window.open_document(path=tempdir / 'shapes.inselect')
 
             crops_dir = tempdir / 'shapes_crops'
             crops_dir.mkdir()
@@ -55,7 +57,7 @@ class TestSaveCrops(GUITest):
             # Answer with 'no'
             with patch.object(QMessageBox, 'question',
                               return_value=QMessageBox.No) as mock_question:
-                self.window.save_crops(DWC)
+                self.window.save_crops(user_template=DWC)
                 expected = 'Overwrite the existing object images?'
                 self.assertTrue(expected in mock_question.call_args[0])
 
@@ -69,7 +71,9 @@ class TestSaveCrops(GUITest):
             # Answer with 'no'
             with patch.object(QMessageBox, 'question',
                               return_value=QMessageBox.Yes) as mock_question:
-                self.run_async_operation(partial(self.window.save_crops, DWC))
+                self.run_async_operation(
+                    partial(self.window.save_crops, user_template=DWC)
+                )
                 expected = 'Overwrite the existing object images?'
                 self.assertTrue(expected in mock_question.call_args[0])
 
@@ -90,12 +94,12 @@ class TestSaveCrops(GUITest):
             # Create thumbnail file
             img = cv2.imread(str(TESTDATA.joinpath('shapes.png')))
             cv2.imwrite(str(tempdir.joinpath('shapes_thumbnail.jpg')), img)
-            self.window.open_document(tempdir / 'shapes.inselect')
+            self.window.open_document(path=tempdir / 'shapes.inselect')
 
             crops_dir = tempdir / 'shapes_crops'
             self.assertFalse(crops_dir.is_dir())
 
-            self.window.save_crops(DWC)
+            self.window.save_crops(user_template=DWC)
 
             expected = ('Unable to save crops because the original '
                         'full-resolution image file does not exist.')

@@ -77,7 +77,7 @@ class TestActionState(GUITest):
         self.window.close_document()
         self._test_no_document()
 
-        self.window.open_document(TESTDATA / 'shapes.inselect')
+        self.window.open_document(path=TESTDATA / 'shapes.inselect')
         self.assertEqual(5, w.model.rowCount())
         self._test_document_open()
 
@@ -88,7 +88,7 @@ class TestActionState(GUITest):
         "Enabled state for actions that depend upon what is selected"
         w = self.window
 
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
 
         # Select all boxes
         w.select_all()

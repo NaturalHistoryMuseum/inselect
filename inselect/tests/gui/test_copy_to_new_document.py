@@ -25,7 +25,7 @@ class TestCopyToNewDocument(GUITest):
         # This test checks that new_document is called as expected.
         w = self.window
 
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Take a copy of the metadata
         expected_metadata = w.document.items

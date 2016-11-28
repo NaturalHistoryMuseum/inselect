@@ -73,7 +73,7 @@ class TestCookieCutterChoice(GUITest):
     def test_save_to_cookie_cutter(self, mock_setvalue):
         "Create a new cookie cutter"
         w = self.window
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
 
         with temp_directory_with_files() as tempdir:
             path = tempdir / 'My new cookie cutter{0}'.format(
@@ -119,7 +119,7 @@ class TestCookieCutterChoice(GUITest):
     def test_apply_cookie_cutter(self, mock_setvalue):
         "Applies the cookie cutter to the open document"
         w = self.window
-        w.open_document(TESTDATA / 'shapes.inselect')
+        w.open_document(path=TESTDATA / 'shapes.inselect')
 
         # Document has 5 boxes
         self.assertEqual(5, w.model.rowCount())
