@@ -59,7 +59,7 @@ class UserTemplatePopupButton(QPushButton):
         menu.addAction(self._default_action)
 
     @report_to_user
-    def default(self):
+    def default(self, checked=False):
         "Sets the default template"
         user_template_choice().select_default()
 
