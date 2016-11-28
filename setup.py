@@ -95,6 +95,7 @@ setup_data = {
         'excludes': [
             'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
             'future.moves',    # Errors from urllib otherwise
+            'PyQt4.QtNetwork',
         ]
     }
 }
