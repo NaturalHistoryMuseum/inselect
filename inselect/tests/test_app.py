@@ -16,20 +16,12 @@ TESTDATA = Path(__file__).parent.parent / 'test_data'
 class TestApp(unittest.TestCase):
     """Start and exit the application
     """
-    @classmethod
-    def tearDown(self):
-        "Close the top-level window that was created in main()"
-        for w in filter(lambda o: isinstance(o, MainWindow),
-                        QApplication.topLevelWidgets()):
-            w.close()
-
     @patch.object(QApplication, 'exec_', return_value=0)
     def test_app(self, mock_exec_):
         "User starts the application"
         self.assertRaises(SystemExit, main, [])
         self.assertTrue(mock_exec_.called)
 
-    @unittest.skip('Causes segfault')
     @patch.object(QApplication, 'exec_', return_value=0)
     @patch.object(MainWindow, 'open_file')
     def test_app_load_file(self, mock_open_file, mock_exec_):
@@ -37,7 +29,7 @@ class TestApp(unittest.TestCase):
         path = str(TESTDATA / 'shapes.inselect')
         self.assertRaises(SystemExit, main, [path])
         self.assertTrue(mock_exec_.called)
-        mock_open_file.assert_called_once_with(path)
+        mock_open_file.assert_called_once_with(Path(path))
 
     @patch.object(QApplication, 'exec_', return_value=0)
     @patch.object(QLocale, 'setDefault')
@@ -49,7 +41,7 @@ class TestApp(unittest.TestCase):
         loc = 'ja_JP'
         self.assertRaises(SystemExit, main, ['-l', loc])
         self.assertTrue(mock_exec_.called)
-        mock_set_default.assert_called_once_with(loc)
+        mock_set_default.assert_called_once_with(QLocale(loc))
         # Other actions inside main might cause setlocale to be called so
         # should not assert number of calls.
         mock_setlocale.assert_any_call(locale.LC_ALL, loc)

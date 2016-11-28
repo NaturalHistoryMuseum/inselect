@@ -232,14 +232,14 @@ class ObjectView(QListView):
         super(ObjectView, self).selectionChanged(selected, deselected)
 
     @report_to_user
-    def show_grid(self):
+    def show_grid(self, checked=False):
         """Shows the list as a grid of squares
         """
         debug_print('ObjectView.show_grid')
         self._refresh()
 
     @report_to_user
-    def show_expanded(self):
+    def show_expanded(self, checked=False):
         """Shows the first item of the selection expanded to fill the viewport.
         If the selection is empty, the first item in the list is selected.
         """

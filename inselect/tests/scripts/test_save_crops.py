@@ -42,6 +42,7 @@ class TestSaveCrops(unittest.TestCase):
                   u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
 
             # nose hooks up stdout to a file-like object
+            # TODO this is not true if nosetests is run with '--nocapture'
             stdout = sys.stdout.getvalue()
             self.assertIn('because there are validation problems', stdout)
             self.assertIn('Box [1] [0001] lacks mandatory field [Taxonomy]', stdout)

@@ -1,3 +1,4 @@
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QProgressDialog
 
 from inselect.lib.utils import debug_print
@@ -6,7 +7,7 @@ from inselect.lib.utils import debug_print
 class ProgressDialog(QProgressDialog):
     """A QProgressDialog that does not hide itself when cancel is pressed
     """
-    def __init__(self, parent=0, f=0):
+    def __init__(self, parent=0, f=Qt.WindowFlags(0)):
         super(ProgressDialog, self).__init__(parent, f)
 
         # The QProgressDialog::cancel() slot hides the dialog - disconnect it

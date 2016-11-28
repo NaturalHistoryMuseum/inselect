@@ -8,6 +8,8 @@ from functools import wraps
 from io import BytesIO
 from itertools import groupby
 
+import sip
+
 from PyQt4.QtGui import QItemSelection, QItemSelectionModel
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
@@ -110,9 +112,6 @@ def report_to_user(f):
     @wraps(f)
     def wrapper(self, *args, **kwargs):
         try:
-            print(f, repr(self), repr(args), repr(kwargs))
-            if 1 == len(args):
-                args = args[1:]
             return f(self, *args, **kwargs)
         except Exception as e:
             # Grotesque hack :-(
@@ -152,13 +151,14 @@ def relayout_widget(widget, new_layout):
     # http://stackoverflow.com/a/10439207/1773758
 
     # Reparent the old layout to a temporary widget
-    old_layout = widget.layout()
-    if old_layout:
-        # Reparent the old layout to a temporary widget
-        QWidget().setLayout(old_layout)
-        del old_layout
+    if not sip.isdeleted(widget):
+        old_layout = widget.layout()
+        if old_layout:
+            # Reparent the old layout to a temporary widget
+            QWidget().setLayout(old_layout)
+            del old_layout
 
-    widget.setLayout(new_layout)
+        widget.setLayout(new_layout)
 
 
 def update_selection_model(model, sm, new_selection):

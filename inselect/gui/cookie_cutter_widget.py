@@ -53,15 +53,15 @@ class CookieCutterWidget(QObject):
         menu.addAction(self.save_to_new_action)
 
     @report_to_user
-    def clear(self):
+    def clear(self, checked=False):
         "Clears the choice of cookie cutter"
         cookie_cutter_choice().clear()
 
     @report_to_user
-    def choose(self):
+    def choose(self, checked=False):
         "Shows a 'choose cookie cutter' file dialog"
         debug_print('CookieCutterWidget.choose_cookie_cutter')
-        path, selectedFilter = QFileDialog.getOpenFileName(
+        path = QFileDialog.getOpenFileName(
             None, "Choose cookie cutter",
             unicode(cookie_cutter_choice().last_directory()),
             self.FILE_FILTER
@@ -72,7 +72,7 @@ class CookieCutterWidget(QObject):
             cookie_cutter_choice().load(path)
 
     @report_to_user
-    def reveal(self):
+    def reveal(self, checked=False):
         reveal_path(cookie_cutter_choice().current_path)
 
     def sync_ui(self, button, has_document, has_rows):

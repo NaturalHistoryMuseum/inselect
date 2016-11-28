@@ -64,10 +64,10 @@ class UserTemplatePopupButton(QPushButton):
         user_template_choice().select_default()
 
     @report_to_user
-    def choose(self):
+    def choose(self, checked=False):
         "Shows a 'choose template' file dialog"
         debug_print('UserTemplateWidget.choose')
-        path, selectedFilter = QFileDialog.getOpenFileName(
+        path = QFileDialog.getOpenFileName(
             self, "Choose user template",
             unicode(user_template_choice().last_directory()),
             self.FILE_FILTER
@@ -78,12 +78,12 @@ class UserTemplatePopupButton(QPushButton):
             user_template_choice().load(path)
 
     @report_to_user
-    def refresh(self):
+    def refresh(self, checked=False):
         debug_print('UserTemplateWidget.refresh')
         user_template_choice().refresh()
 
     @report_to_user
-    def reveal(self):
+    def reveal(self, checked=False):
         reveal_path(user_template_choice().current_path)
 
     def changed(self):

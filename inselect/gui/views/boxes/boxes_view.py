@@ -1,5 +1,5 @@
 from qtpy.QtCore import Qt, QRectF, QSizeF, Signal
-from qtpy.QtGui import QCursor, QTransform
+from qtpy.QtGui import QCursor, QPen, QTransform
 from qtpy.QtWidgets import QGraphicsView
 
 from inselect.lib.utils import debug_print
@@ -82,8 +82,10 @@ class BoxesView(QGraphicsView):
                 # to provide feedback as the user drags the mouse
                 # TODO LH Escape key cancels new box
                 tl = self.mapToScene(event.pos())
-                r = self.scene().addRect(QRectF(tl, QSizeF(0, 0)),
-                                         Qt.DotLine)
+                r = self.scene().addRect(
+                    QRectF(tl, QSizeF(0, 0)),
+                    QPen(Qt.DotLine)
+                )
                 r.setZValue(3)  # Above all other items
                 r.update()
                 self._pending_box = r

@@ -7,6 +7,7 @@ from itertools import count, izip
 from pathlib import Path
 
 from PyQt4.QtGui import QItemSelection, QItemSelectionModel
+from qtpy import QtWidgets
 from qtpy.QtCore import Qt, QEvent, QSettings
 from qtpy.QtGui import (QColor, QDesktopServices, QFont, QIcon, QImageWriter,
                         QKeySequence, QPixmap)
@@ -62,14 +63,23 @@ class MainWindow(QMainWindow):
 
     IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
 
-    def __init__(self, app, print_time=False):
+    def __init__(self, print_time=False):
         """if print_time is True, will print, when a document is closed, the
         elapsed time for which the document was open.
         """
+        # Document
+        self.document = None
+        self.document_path = None
+
         super(MainWindow, self).__init__()
-        self.app = app
 
         self.print_time = print_time
+
+        # self.setAttribute(Qt.WA_DeleteOnClose)
+
+        # Long-running operations are run in their own thread
+        self.running_operation = None
+
         self.time_doc_opened = None
 
         # self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
@@ -119,13 +129,6 @@ class MainWindow(QMainWindow):
 
         # Main window layout
         self.setCentralWidget(self.central)
-
-        # Document
-        self.document = None
-        self.document_path = None
-
-        # Long-running operations are run in their own thread
-        self.running_operation = None
 
         # Event filters, for handling drag and drop
         self.ribbon.installEventFilter(self)
@@ -262,7 +265,7 @@ class MainWindow(QMainWindow):
             return super(MainWindow, self).eventFilter(obj, event)
 
     @report_to_user
-    def open_file(self, checked=False, path=None):
+    def open_file(self, path=None):
         """Opens path, which can be None, the path to an inselect document or
         the path to an image file. If None, the user is prompted to select a
         file.
@@ -282,8 +285,9 @@ class MainWindow(QMainWindow):
                 QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
             )
 
-            path, selectedFilter = QFileDialog.getOpenFileName(
-                self, "Open", folder, self.DOCUMENT_FILE_FILTER)
+            path = QFileDialog.getOpenFileName(
+                self, "Open", folder, self.DOCUMENT_FILE_FILTER
+            )
 
         # path will be None if user cancelled getOpenFileName
         if path:
@@ -312,7 +316,7 @@ class MainWindow(QMainWindow):
                 pass
             else:
                 # Process messages after closing to redraw the UI.
-                self.app.processEvents()
+                QtWidgets.qApp.processEvents()
 
                 if document_path:
                     # Open the .inselect document
@@ -400,7 +404,7 @@ class MainWindow(QMainWindow):
             action.setText('')
 
     @report_to_user
-    def open_recent(self, index, checked=False):
+    def open_recent(self, checked=False, index=0):
         debug_print('MainWindow._open_recent [{0}]'.format(index))
         recent = RecentDocuments().read_paths()
         self.open_file(path=recent[index])
@@ -623,7 +627,7 @@ class MainWindow(QMainWindow):
 
         debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
         debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
-        path, selected_filter = QFileDialog.getSaveFileName(
+        path = QFileDialog.getSaveFileName(
             self, "Save image file of boxes view",
             unicode(Path(default_dir) / default_fname),
             filter=filter
@@ -893,7 +897,7 @@ class MainWindow(QMainWindow):
         self.view_object.scrollTo(self.view_object.currentIndex())
 
     @report_to_user
-    def select_next_prev(self, next, checked=False):
+    def select_next_prev(self, checked=False, next=False):
         """Selects the next box in the mode if next is True, the previous
         box in the model if next if False.
         """
@@ -916,13 +920,13 @@ class MainWindow(QMainWindow):
         sm.setCurrentIndex(select, QItemSelectionModel.Current)
 
     @report_to_user
-    def select_by_size_step(self, larger=False, checked=False):
+    def select_by_size_step(self, checked=False, larger=False):
         """Step the 'select by size' slider
         """
         self.view_selector.single_step(larger)
 
     @report_to_user
-    def rotate90(self, clockwise, checked=False):
+    def rotate90(self, checked=False, clockwise=False):
         """Rotates the selected boxes 90 either clockwise or counter-clockwise.
         """
         debug_print('MainWindow.rotate')
@@ -998,7 +1002,7 @@ class MainWindow(QMainWindow):
         for index in xrange(RecentDocuments.MAX_RECENT_DOCS):
             self.recent_doc_actions[index] = QAction(
                 'Recent document', self,
-                triggered=partial(self.open_recent, index)
+                triggered=partial(self.open_recent, index=index)
             )
         self._sync_recent_documents_actions()
 
@@ -1098,12 +1102,13 @@ class MainWindow(QMainWindow):
         # the application exits on linux. It also means that exceptions will be
         # silently swallowed.
         self.boxes_view_action = QAction(
-            "&Boxes", self, checkable=True, triggered=partial(self.show_tab, 0),
+            "&Boxes", self, checkable=True,
+            triggered=partial(self.show_tab, index=0),
         )
         self.boxes_view_action.setShortcuts(['ctrl+1', 'ctrl+b'])
         self.objects_view_action = QAction(
             "Ob&jects", self, checkable=True,
-            triggered=partial(self.show_tab, 1)
+            triggered=partial(self.show_tab, index=1)
         )
         self.objects_view_action.setShortcuts(['ctrl+2', 'ctrl+j'])
 
@@ -1155,8 +1160,10 @@ class MainWindow(QMainWindow):
         group = QActionGroup(self)
         current_colour_scheme = colour_scheme_choice().current['Name']
         for name in colour_scheme_choice().colour_scheme_names():
-            action = QAction(name, self, checkable=True,
-                             triggered=partial(self.set_colour_scheme, name))
+            action = QAction(
+                name, self, checkable=True,
+                triggered=partial(self.set_colour_scheme, name=name)
+            )
             action.setChecked(current_colour_scheme == action.text())
             self.colour_scheme_actions.append(action)
             group.addAction(action)
@@ -1179,11 +1186,13 @@ class MainWindow(QMainWindow):
         # Menu-less actions
         # Shortcuts for next / previous tab
         self.previous_tab_action = QAction(
-            "Previous tab", self, triggered=partial(self.next_previous_tab, False),
+            "Previous tab", self,
+            triggered=partial(self.next_previous_tab, next=False),
             shortcut='ctrl+PgDown'
         )
         self.next_tab_action = QAction(
-            "Next tab", self, triggered=partial(self.next_previous_tab, True),
+            "Next tab", self,
+            triggered=partial(self.next_previous_tab, next=True),
             shortcut='ctrl+PgUp'
         )
 
@@ -1413,12 +1422,12 @@ class MainWindow(QMainWindow):
         self.menuBar().addMenu(self._help_menu)
 
     @report_to_user
-    def show_tab(self, index, checked=False):
+    def show_tab(self, checked=False, index=0):
         self.ribbon.setCurrentIndex(index)
         self.sync_ui()
 
     @report_to_user
-    def next_previous_tab(self, next, checked=False):
+    def next_previous_tab(self, checked=False, next=False):
         """Selects the next (if next if True) or previous (if next if False) tab
         """
         select = self.ribbon.currentIndex()
@@ -1464,7 +1473,7 @@ class MainWindow(QMainWindow):
             self.showFullScreen()
 
     @report_to_user
-    def set_colour_scheme(self, name, checked=False):
+    def set_colour_scheme(self, checked=False, name=None):
         "Sets the colour scheme"
         colour_scheme_choice().set_colour_scheme(name)
 
@@ -1478,7 +1487,7 @@ class MainWindow(QMainWindow):
     def save_to_cookie_cutter(self, checked=False):
         "Saves bounding boxes to a new 'cookie cutter' file"
         folder = unicode(cookie_cutter_choice().last_directory())
-        path, selectedFilter = QFileDialog.getSaveFileName(
+        path = QFileDialog.getSaveFileName(
             self, "New cookie cutter", folder,
             CookieCutterWidget.FILE_FILTER
         )
@@ -1523,8 +1532,9 @@ class MainWindow(QMainWindow):
             QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
         )
 
-        path, selectedFilter = QFileDialog.getOpenFileName(
-            self, "Open", folder, self.IMAGE_FILE_FILTER)
+        path = QFileDialog.getOpenFileName(
+            self, "Open", folder, self.IMAGE_FILE_FILTER
+        )
 
         # path will be None if user cancelled getOpenFileName
         if path:
@@ -1540,7 +1550,7 @@ class MainWindow(QMainWindow):
                 self.new_document(path, default_metadata_items=items)
 
     @report_to_user
-    def sort_boxes(self, by_columns, checked=False):
+    def sort_boxes(self, checked=False, by_columns=False):
         """Sorts boxes either by columns or by rows.
         """
         if self.document:

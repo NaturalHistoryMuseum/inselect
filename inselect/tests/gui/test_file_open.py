@@ -247,7 +247,7 @@ class TestFileOpen(GUITest):
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
 
-    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None, None))
+    @patch.object(QFileDialog, 'getOpenFileName', return_value=None)
     def test_cancel_file_choose(self, mock_gofn):
         "User cancels the 'choose a file to open' box"
         w = self.window
