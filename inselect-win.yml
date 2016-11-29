@@ -10,14 +10,14 @@ dependencies:
 - openssl=1.0.2h=vc9_0
 - pillow=3.2.0=py27_1
 - pip=9.0.1=py27_0
-- pyqt=4.11.4=py27_4
+- pyqt=4.11.4
 - python=2.7.12=0
 - pywin32=220=py27_1
 - qt=4.8.7=vc9_9
 - scikit-learn=0.17.1=np111py27_1
 - scipy=0.17.1=np111py27_1
 - setuptools=25.1.6=py27_0
-- sip=4.18=py27_0
+- sip=4.16.9
 - vs2008_runtime=9.00.30729.1=2
 - wheel=0.29.0=py27_0
 - zlib=1.2.8=vc9_3
