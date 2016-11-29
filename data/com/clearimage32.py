@@ -1,10 +1,10 @@
 # -*- coding: mbcs -*-
 # Created by makepy.py version 0.5.01
-# By python version 2.7.11 |Continuum Analytics, Inc.| (default, Dec  7 2015, 14:13:17) [MSC v.1500 32 bit (Intel)]
-# On Wed Jan 27 18:53:20 2016
+# By python version 2.7.12 |Continuum Analytics, Inc.| (default, Jun 29 2016, 11:42:13) [MSC v.1500 32 bit (Intel)]
+# On Tue Nov 29 11:00:29 2016
 'ClearImage COM Server'
 makepy_version = '0.5.01'
-python_version = 0x2070bf0
+python_version = 0x2070cf0
 
 import win32com.client.CLSIDToClass, pythoncom, pywintypes
 import win32com.client.util
@@ -45,6 +45,7 @@ class constants:
 	cibCode32                     =12         # from enum EBarcodeType
 	cibCode39                     =2          # from enum EBarcodeType
 	cibCode93                     =7          # from enum EBarcodeType
+	cibDataBarLimited             =38         # from enum EBarcodeType
 	cibDataMatrix                 =30         # from enum EBarcodeType
 	cibDatalogic2of5              =14         # from enum EBarcodeType
 	cibEan13                      =9          # from enum EBarcodeType
@@ -207,6 +208,7 @@ class constants:
 	cibfCode32                    =8388608    # from enum FBarcodeType
 	cibfCode39                    =2          # from enum FBarcodeType
 	cibfCode93                    =64         # from enum FBarcodeType
+	cibfDataBar                   =134217728  # from enum FBarcodeType
 	cibfDatalogic2of5             =131072     # from enum FBarcodeType
 	cibfEan13                     =256        # from enum FBarcodeType
 	cibfEan8                      =32         # from enum FBarcodeType
