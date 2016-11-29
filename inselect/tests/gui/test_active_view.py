@@ -7,15 +7,16 @@ class TestActiveView(GUITest):
     """Basic tests of the MainWindow's active view.
     """
 
-    def test_select_boxes_view(self):
-        "Boxes view is selected"
-        self.window.show_tab(0)
+    def test_select_view(self):
+        "Different views are selected"
+        self.window.show_tab(index=0)
         self.assertEqual(0, self.window.views.currentIndex())
 
-    def test_select_objects_view(self):
-        "Objects view is selected"
-        self.window.show_tab(1)
+        self.window.show_tab(index=1)
         self.assertEqual(1, self.window.views.currentIndex())
+
+        self.window.show_tab(index=0)
+        self.assertEqual(0, self.window.views.currentIndex())
 
     def test_select_next_tab(self):
         "Next tab is selected"

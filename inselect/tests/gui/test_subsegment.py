@@ -27,7 +27,7 @@ class TestSubsegment(GUITest):
         w.plugin_image = None
 
         # Open document for subsegmentation
-        w.open_document(TESTDATA / 'pinned.inselect')
+        w.open_document(path=TESTDATA / 'pinned.inselect')
         self.assertEqual(1, w.model.rowCount())
 
         # Select a box and add sub-segmentation seed points
@@ -78,7 +78,7 @@ class TestSubsegment(GUITest):
         w = self.window
 
         # Open document for subsegmentation
-        w.open_document(TESTDATA / 'pinned.inselect')
+        w.open_document(path=TESTDATA / 'pinned.inselect')
         self.assertEqual(1, w.model.rowCount())
 
         # Attempt subsegment

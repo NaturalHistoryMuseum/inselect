@@ -25,13 +25,13 @@ source /usr/local/bin/virtualenvwrapper.sh
 
 # Install system dependencies
 ```
-sudo apt-get install python-pyside pyside-tools python-numpy python-scipy python-sklearn python-opencv python-pil libdmtx-dev libzbar-dev
+sudo apt-get install python-qt4 pyqt4-dev-tools python-numpy python-scipy python-sklearn python-opencv python-pil libdmtx-dev libzbar-dev
 ```
 
 # Create virtual environment for Inselect and install dependencies from pip
 
 ```
-mkvirtualenv --system-site-packages inselect
+mkvirtualenv --system-site-packages --python=/usr/bin/python2 inselect
 pip2 install -r requirements.pip
 ```
 
@@ -51,7 +51,7 @@ Icons are stored as individual files in `icons`. They are frozen into
 a python file `inselect/gui/icons.py` by running
 
 ```
-python2 -m bin.freeze_icons
+pyrcc4 icons.qrc > inselect/gui/icons.py
 ```
 
 # Test and run

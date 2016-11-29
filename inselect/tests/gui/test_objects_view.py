@@ -17,14 +17,14 @@ class TestObjectsView(GUITest):
         w = self.window
         # Test using barcodes.inselect because it contains bounding boxes with
         # aspect ratios both > 1 and < 1
-        w.open_file(TESTDATA / 'barcodes.inselect')
+        w.open_file(path=TESTDATA / 'barcodes.inselect')
         w.show_tab(1)
         if expanded:
             w.view_object.show_expanded()
         else:
             w.view_object.show_grid()
         w.showFullScreen()
-        self.run_event_loop()
+        #self.run_event_loop()
 
     def test_objects_view_grid_paint(self):
         "Objects expanded view is painted"

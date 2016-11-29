@@ -1,6 +1,7 @@
 from itertools import izip, repeat
 
 from qtpy import QtWidgets
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (QAbstractItemView, QWidget, QGroupBox, QLabel,
                             QLineEdit, QComboBox, QFormLayout, QSizePolicy,
                             QVBoxLayout)
@@ -28,7 +29,7 @@ class MetadataView(QAbstractItemView):
 
     def __init__(self, parent=None):
         # This view is never made visible
-        super(MetadataView, self).__init__()
+        super(MetadataView, self).__init__(parent)
 
         user_template_choice().template_changed.connect(self.refresh_user_template)
 
@@ -50,14 +51,24 @@ class MetadataView(QAbstractItemView):
         # Widget containing toggle label and container
         self.widget = PopupPanel('Metadata', container)
 
+    def close(self):
+        debug_print('MetadataView.close')
+        return super(MetadataView, self).close()
+
+    def closeEvent(self, event):
+        # virtual protected
+        debug_print('MetadataView.closeEvent')
+
     def refresh_user_template(self):
         "Refreshes the UI with the currently selected UserTemplate"
+
         self._create_controls()
         self._populate_controls()
 
     def _populate_controls(self):
         "Populates the controls with metadata values in the selection"
-        selected = self.selectionModel().selectedIndexes()
+        sm = self.selectionModel()
+        selected = sm.selectedIndexes() if sm else []
 
         if 0 == len(selected):
             # No boxes selected
@@ -111,6 +122,14 @@ class FormContainer(QWidget):
 
         # Mapping { control: field name }
         self.controls = {}
+
+    def close(self):
+        debug_print('FormContainer.close')
+        return super(FormContainer, self).close()
+
+    def closeEvent(self, event):
+        # virtual protected
+        debug_print('FormContainer.closeEvent')
 
     def controls_from_template(self, template):
         "Create new controls and layout"
@@ -229,7 +248,7 @@ class FormContainer(QWidget):
 class URLLabel(QLabel):
     """A label that displays a clickable URL in grey.
     """
-    def __init__(self, url, label, parent=None, f=0):
+    def __init__(self, url, label, parent=None, f=Qt.WindowFlags(0)):
         html = HTML_LINK_TEMPLATE.format(
             '<a href="{0}">{1}</a>'.format(url, label)
         )
@@ -240,7 +259,7 @@ class URLLabel(QLabel):
 class FixedValueControl(QLabel):
     """A read-only value that is stored only in the template.
     """
-    def __init__(self, fixed_value, parent=None, flags=0):
+    def __init__(self, fixed_value, parent=None, flags=Qt.WindowFlags(0)):
         super(FixedValueControl, self).__init__(fixed_value, parent, flags)
 
     def update_model(self):

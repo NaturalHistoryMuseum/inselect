@@ -7,7 +7,10 @@ from qtpy.QtWidgets import QMessageBox
 
 from inselect.gui import shortcuts_help
 from inselect.gui.main_window import MainWindow
+from inselect.app import qapplication
 
+
+APP = None
 
 class GUITest(unittest.TestCase):
     """Base class for GUI tests, which require a MainWindow.
@@ -21,10 +24,7 @@ class GUITest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Only one QApplication can be constructed
-        if not QtWidgets.qApp:
-            QtWidgets.qApp = QtWidgets.QApplication([])
-
-        cls.window = MainWindow(QtWidgets.qApp)
+        cls.window = MainWindow(qapplication())
 
         # Crude way of ensuring that the shortcuts help box is not shown at
         # startup

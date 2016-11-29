@@ -8,7 +8,10 @@ from functools import wraps
 from io import BytesIO
 from itertools import groupby
 
-from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel
+import sip
+
+from PyQt4.QtGui import QItemSelection, QItemSelectionModel
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 from qtpy.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
 
@@ -148,13 +151,14 @@ def relayout_widget(widget, new_layout):
     # http://stackoverflow.com/a/10439207/1773758
 
     # Reparent the old layout to a temporary widget
-    old_layout = widget.layout()
-    if old_layout:
-        # Reparent the old layout to a temporary widget
-        QWidget().setLayout(old_layout)
-        del old_layout
+    if not sip.isdeleted(widget):
+        old_layout = widget.layout()
+        if old_layout:
+            # Reparent the old layout to a temporary widget
+            QWidget().setLayout(old_layout)
+            del old_layout
 
-    widget.setLayout(new_layout)
+        widget.setLayout(new_layout)
 
 
 def update_selection_model(model, sm, new_selection):

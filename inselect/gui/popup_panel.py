@@ -7,7 +7,7 @@ from .toggle_widget_label import ToggleWidgetLabel
 class PanelContainer(QFrame):
     """Container for panels. Exists so that panels can be styled.
     """
-    def __init__(self, widget, parent=None, flags=0):
+    def __init__(self, widget, parent=None, flags=Qt.WindowFlags(0)):
         super(PanelContainer, self).__init__(parent, flags)
         layout = QVBoxLayout()
         layout.addWidget(widget)
@@ -18,9 +18,8 @@ class PanelContainer(QFrame):
 class PopupPanel(QGroupBox):
     """Container for a ToggleWidgetLabel and a QWidget
     """
-    def __init__(self, label, widget, initially_visible=True, parent=None,
-                 flags=0):
-        super(PopupPanel, self).__init__(parent, flags)
+    def __init__(self, label, widget, initially_visible=True, parent=None):
+        super(PopupPanel, self).__init__(parent)
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignTop)
         layout.setSpacing(0)

@@ -13,7 +13,7 @@ find . -name "*pyc" -print0 | xargs -0 rm -rf
 find . -name __pycache__ -print0 | xargs -0 rm -rf
 
 echo Freeze icons
-python -m bin.freeze_icons
+pyrcc4 icons.qrc > inselect/gui/icons.py
 
 echo Check for presence of barcode engines
 python -c "from gouda.engines import ZbarEngine; assert ZbarEngine.available()"

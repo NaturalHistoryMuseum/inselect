@@ -25,7 +25,7 @@ class TestCopyToNewDocument(GUITest):
         # This test checks that new_document is called as expected.
         w = self.window
 
-        w.open_file(TESTDATA / 'shapes.inselect')
+        w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Take a copy of the metadata
         expected_metadata = w.document.items
@@ -34,9 +34,7 @@ class TestCopyToNewDocument(GUITest):
             image = tempdir / 'other_image.png'
             (tempdir / 'shapes.png').rename(image)
 
-            retval = str(image), w.IMAGE_FILE_FILTER
-
-            with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
+            with patch.object(QFileDialog, 'getOpenFileName', return_value=str(image)) as mock_gofn:
                 w.copy_to_new_document()
                 self.assertEqual(1, mock_gofn.call_count)
 

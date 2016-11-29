@@ -2,6 +2,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QPixmap
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QWidget
 
+
 class ToggleWidgetLabel(QWidget):
     """A QLabel that, when clicked, toggles the visibility of a widget
     """
@@ -14,7 +15,7 @@ class ToggleWidgetLabel(QWidget):
     DOWN = None
 
     def __init__(self, label, widget, initially_visible=True, parent=None,
-                 flags=0):
+                 flags=Qt.WindowFlags(0)):
         super(ToggleWidgetLabel, self).__init__(parent, flags)
         self.widget = widget
 

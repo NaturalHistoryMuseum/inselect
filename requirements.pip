@@ -1,4 +1,4 @@
-# Dependencies provided by conda: PySide, Pillow, numpy, opencv, scipy,
+# Dependencies provided by conda: PyQt, Pillow, numpy, opencv, scipy,
 # scikit-learn, pywin32
 exifread==2.1.2
 humanize==0.5.1

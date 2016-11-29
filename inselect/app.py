@@ -22,6 +22,17 @@ QCoreApplication.setApplicationName('Inselect')
 QCoreApplication.setApplicationVersion(inselect.__version__)
 QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
+APP = None
+
+
+def qapplication(args=None):
+    """Returns the QApplication for this instance
+    """
+    global APP
+    if not APP:
+        APP = QtWidgets.qApp = QtWidgets.QApplication(args if args else [])
+    return APP
+
 
 def main(args=None):
     if args is None:
@@ -71,8 +82,7 @@ def main(args=None):
     # Only one instance of QApplication can be created per process. The single
     # instance is stored in QtWidgets.qApp. When test plans are being run it is
     # likely that the QApplication will have been created by a unittest.
-    app = QtWidgets.qApp if QtWidgets.qApp else QtWidgets.QApplication(args)
-    QtWidgets.qApp = app
+    QtWidgets.qApp = qapplication(args)
 
     debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
 
@@ -91,12 +101,12 @@ def main(args=None):
     path = ':/icons/inselect{0}.png'
     for size in (16, 24, 32, 48, 64, 128, 256, 512):
         icon.addFile(path.format(size), QSize(size, size))
-    app.setWindowIcon(icon)
+    QtWidgets.qApp.setWindowIcon(icon)
 
     # Stylesheet
-    app.setStyleSheet(_stylesheet(parsed.stylesheet))
+    QtWidgets.qApp.setStyleSheet(_stylesheet(parsed.stylesheet))
 
-    window = MainWindow(app, parsed.print_time)
+    window = MainWindow(parsed.print_time)
     if parsed.window_size:
         window.show_with_size(parsed.window_size)
     else:
@@ -104,14 +114,14 @@ def main(args=None):
 
     if parsed.file:
         # Process messages before loading document
-        app.processEvents()
+        QtWidgets.qApp.processEvents()
         window.open_file(parsed.file)
 
     if parsed.quit:
         sys.exit(0)
     else:
         QTimer.singleShot(100, window.show_shortcuts_post_startup)
-        sys.exit(app.exec_())
+        sys.exit(QtWidgets.qApp.exec_())
 
 
 def _stylesheet(user_stylesheet):
