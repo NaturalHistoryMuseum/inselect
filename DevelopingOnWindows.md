@@ -117,7 +117,7 @@ Icons are stored as individual files in `icons`. They are frozen into
 a python file `inselect/gui/icons.py` by running
 
 ```
-python -m bin.freeze_icons
+pyrcc4 icons.qrc > inselect/gui/icons.py
 ```
 
 # Build
