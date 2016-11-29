@@ -19,10 +19,7 @@ class TestUtils(unittest.TestCase):
             path = tempdir / 'xyz'
             path.open('w')
             reveal_path(path)
-            expected = [
-                "explorer.exe",
-                u"/select,{0}".format(str(path.resolve()))
-            ]
+            expected = "explorer.exe /select,{0}".format(path.resolve())
             mock_subprocess.assert_called_once_with(expected)
 
     @unittest.skipUnless('Darwin' == platform.system(), "requires OS X")
