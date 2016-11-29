@@ -62,12 +62,6 @@ activate inselect
 
 pip install -r requirements.pip
 
-# For 64-bit
-pip install -r requirements.win64
-
-# For 32-bit
-pip install -r requirements.win32
-
 FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\Scripts\pywin32_postinstall.py -install
 ```
 
@@ -75,18 +69,18 @@ Don't worry about the "Can't install shortcuts..." message when you run the
 `pywin32_postinstall` step.
 
 ## Install OpenCV
-* Download [OpenCV 2.4.12](http://opencv.org/)
-* Extract OpenCV to `c:\opencv\`
+* Download [OpenCV 2.4.13](http://opencv.org/)
+* Extract OpenCV to `c:\opencv-2.4.13\`
 * Copy the extension module to the Anaconda environment; for 64-bit:
 
     ```
-    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv\build\python\2.7\x64\cv2.pyd %a\DLLs
+    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-2.4.13\build\python\2.7\x64\cv2.pyd %a\DLLs
     ```
 
     For 32-bit:
 
     ```
-    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv\build\python\2.7\x86\cv2.pyd %a\DLLs
+    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-2.4.13\build\python\2.7\x86\cv2.pyd %a\DLLs
     ```
 
 
