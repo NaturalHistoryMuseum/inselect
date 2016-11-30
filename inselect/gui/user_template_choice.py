@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from qtpy.QtCore import QObject, QSettings, Signal
-from qtpy.QtGui import QDesktopServices
+from qtpy.QtCore import QObject, QSettings, Signal, QStandardPaths
 
 from inselect.lib.templates.dwc import DWC
 from inselect.lib.user_template import UserTemplate
@@ -46,7 +45,7 @@ class UserTemplateChoice(QObject):
         "Path the the most recently used directory"
         return Path(QSettings().value(
             cls.DIRECTORY_KEY,
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+            QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
         ))
 
     def _load(self, path):

@@ -53,7 +53,7 @@ class SummaryView(QAbstractItemView):
                     model.columnCount())
         super(SummaryView, self).setModel(model)
 
-    def dataChanged(self, topLeft, bottomRight):
+    def dataChanged(self, topLeft, bottomRight, roles=[]):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.dataChanged')

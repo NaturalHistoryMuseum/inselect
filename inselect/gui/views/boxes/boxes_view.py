@@ -141,7 +141,7 @@ class BoxesView(QGraphicsView):
         if Qt.ControlModifier == event.modifiers() and not self.scene().is_empty:
             event.accept()
             # Wheel event delta is in units of 1/8 of a degree
-            degrees = 8 * event.delta()
+            degrees = 8 * event.angleDelta().y()
 
             # Compute a relative scale factor
             # Multiplier determined by experimenting with a mac trackpad and a

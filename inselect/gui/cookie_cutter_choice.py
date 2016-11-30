@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from qtpy.QtCore import QObject, QSettings, Signal
-from qtpy.QtGui import QDesktopServices
+from qtpy.QtCore import QObject, QSettings, Signal, QStandardPaths
 
 from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
@@ -45,7 +44,7 @@ class CookieCutterChoice(QObject):
         "Path the the most recently used directory"
         return Path(QSettings().value(
             cls.DIRECTORY_KEY,
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+            QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
         ))
 
     def _load(self, path):

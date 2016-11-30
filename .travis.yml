@@ -33,7 +33,7 @@ install:
   - pip install -r requirements.pip
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - pyrcc4 icons.qrc > inselect/gui/icons.py
+  - pyrcc5 icons.qrc > inselect/gui/icons.py
 
 script:
   - nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect

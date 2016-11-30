@@ -51,7 +51,7 @@ Icons are stored as individual files in `icons`. They are frozen into
 a python file `inselect/gui/icons.py` by running
 
 ```
-pyrcc4 icons.qrc > inselect/gui/icons.py
+pyrcc5 icons.qrc > inselect/gui/icons.py
 ```
 
 # Test and run

@@ -61,7 +61,7 @@ class CookieCutterWidget(QObject):
     def choose(self, checked=False):
         "Shows a 'choose cookie cutter' file dialog"
         debug_print('CookieCutterWidget.choose_cookie_cutter')
-        path = QFileDialog.getOpenFileName(
+        path, selectedFilter = QFileDialog.getOpenFileName(
             None, "Choose cookie cutter",
             unicode(cookie_cutter_choice().last_directory()),
             self.FILE_FILTER

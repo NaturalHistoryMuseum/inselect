@@ -67,7 +67,7 @@ class UserTemplatePopupButton(QPushButton):
     def choose(self, checked=False):
         "Shows a 'choose template' file dialog"
         debug_print('UserTemplateWidget.choose')
-        path = QFileDialog.getOpenFileName(
+        path, selectedFilter = QFileDialog.getOpenFileName(
             self, "Choose user template",
             unicode(user_template_choice().last_directory()),
             self.FILE_FILTER

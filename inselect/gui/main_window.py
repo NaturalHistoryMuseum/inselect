@@ -6,11 +6,11 @@ from functools import partial
 from itertools import count, izip
 from pathlib import Path
 
-from PyQt4.QtGui import QItemSelection, QItemSelectionModel
 from qtpy import QtWidgets
-from qtpy.QtCore import Qt, QEvent, QSettings
-from qtpy.QtGui import (QColor, QDesktopServices, QFont, QIcon, QImageWriter,
-                        QKeySequence, QPixmap)
+from qtpy.QtCore import (Qt, QEvent, QSettings, QItemSelection,
+                         QItemSelectionModel, QStandardPaths)
+from qtpy.QtGui import (QColor, QFont, QIcon, QImageWriter, QKeySequence,
+                        QPixmap, QScreen)
 from qtpy.QtWidgets import (QAction, QActionGroup, QFileDialog, QLabel,
                             QMainWindow, QMenu, QMessageBox, QSizePolicy,
                             QSplitter, QStackedWidget, QVBoxLayout, QWidget)
@@ -282,10 +282,10 @@ class MainWindow(QMainWindow):
         if not path:
             folder = QSettings().value(
                 'working_directory',
-                QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+                QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
             )
 
-            path = QFileDialog.getOpenFileName(
+            path, selectedFilter = QFileDialog.getOpenFileName(
                 self, "Open", folder, self.DOCUMENT_FILE_FILTER
             )
 
@@ -621,23 +621,25 @@ class MainWindow(QMainWindow):
         default_fname = Path(default_fname).with_suffix(default_extension)
 
         # Default folder is the user's documents folder
-        default_dir = QDesktopServices.storageLocation(
-            QDesktopServices.DocumentsLocation
+        default_dir = QStandardPaths.writableLocation(
+            QStandardPaths.DocumentsLocation
         )
 
         debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
         debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
-        path = QFileDialog.getSaveFileName(
+        path, selectedFilter = QFileDialog.getSaveFileName(
             self, "Save image file of boxes view",
             unicode(Path(default_dir) / default_fname),
             filter=filter
         )
 
         if path:
-            pm = QPixmap.grabWidget(self)
+            pm = QtWidgets.qApp.primaryScreen().grabWindow(self.winId())
 
             # Write using QImageWriter, which makes richer error information
             # avaible than QPixmap.save()
+            from pprint import pprint
+            pprint(path)
             writer = QImageWriter(path)
             if not writer.write(pm.toImage()):
                 msg = 'An error occurred writing to [{0}]: [{1}]'
@@ -1487,7 +1489,7 @@ class MainWindow(QMainWindow):
     def save_to_cookie_cutter(self, checked=False):
         "Saves bounding boxes to a new 'cookie cutter' file"
         folder = unicode(cookie_cutter_choice().last_directory())
-        path = QFileDialog.getSaveFileName(
+        path, selectedFilter = QFileDialog.getSaveFileName(
             self, "New cookie cutter", folder,
             CookieCutterWidget.FILE_FILTER
         )
@@ -1529,10 +1531,10 @@ class MainWindow(QMainWindow):
 
         folder = QSettings().value(
             'working_directory',
-            QDesktopServices.storageLocation(QDesktopServices.DocumentsLocation)
+            QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
         )
 
-        path = QFileDialog.getOpenFileName(
+        path, selectedFilter = QFileDialog.getOpenFileName(
             self, "Open", folder, self.IMAGE_FILE_FILTER
         )
 

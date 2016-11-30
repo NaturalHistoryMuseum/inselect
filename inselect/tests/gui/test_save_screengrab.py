@@ -25,8 +25,9 @@ class TestSaveScreengrab(GUITest):
         temp = tempfile.mkdtemp()
         try:
             img_path = Path(temp) / 'shapes_screengrab.png'
+            retval = (str(img_path), self.window.IMAGE_FILE_FILTER)
             with patch.object(QFileDialog, 'getSaveFileName',
-                              return_value=str(img_path)) as mock_file_dialog:
+                              return_value=retval) as mock_file_dialog:
                 self.window.save_screengrab()
                 self.assertTrue(mock_file_dialog.called)
                 self.assertTrue(img_path.is_file())
@@ -42,8 +43,9 @@ class TestSaveScreengrab(GUITest):
         temp = tempfile.mkdtemp()
         try:
             img_path = Path(temp) / 'inselect_screengrab.png'
+            retval = (str(img_path), self.window.IMAGE_FILE_FILTER)
             with patch.object(QFileDialog, 'getSaveFileName',
-                              return_value=str(img_path)) as mock_file_dialog:
+                              return_value=retval) as mock_file_dialog:
                 self.window.save_screengrab()
                 self.assertTrue(mock_file_dialog.called)
                 self.assertTrue(img_path.is_file())
@@ -59,7 +61,7 @@ class TestSaveScreengrab(GUITest):
         try:
             img_path = Path(temp) / 'inselect_screengrab.png'
             with patch.object(QFileDialog, 'getSaveFileName',
-                              return_value='') as mock_file_dialog:
+                              return_value=(None, None)) as mock_file_dialog:
                 self.window.save_screengrab()
                 self.assertTrue(mock_file_dialog.called)
                 self.assertFalse(img_path.is_file())

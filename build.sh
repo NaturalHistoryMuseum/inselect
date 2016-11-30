@@ -5,7 +5,7 @@ set -e  # Exit on failure
 
 # Icons needs to be frozen before running inselect.py
 echo Freeze icons
-pyrcc4 icons.qrc > inselect/gui/icons.py
+pyrcc5 icons.qrc > inselect/gui/icons.py
 
 VERSION=`python inselect.py --version 2>&1 | sed 's/inselect.py //g'`
 

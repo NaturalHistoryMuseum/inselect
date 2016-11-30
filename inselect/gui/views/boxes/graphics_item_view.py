@@ -82,7 +82,7 @@ class GraphicsItemView(QAbstractItemView):
             new[row] = self.scene.add_box(rect, False)
         self._rows[start:start] = new
 
-    def dataChanged(self, topLeft, bottomRight):
+    def dataChanged(self, topLeft, bottomRight, roles=[]):
         """QAbstractItemView virtual
         """
         debug_print('GraphicsItemView.dataChanged', topLeft.row(), bottomRight.row())

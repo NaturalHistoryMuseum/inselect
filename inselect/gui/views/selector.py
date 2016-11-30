@@ -81,7 +81,7 @@ class SelectorView(QAbstractItemView):
         super(SelectorView, self).reset()
         self._update_slider(self.model().rowCount())
 
-    def dataChanged(self, topLeft, bottomRight):
+    def dataChanged(self, topLeft, bottomRight, roles=[]):
         """QAbstractItemView virtual
         """
         debug_print('SelectorView.dataChanged')

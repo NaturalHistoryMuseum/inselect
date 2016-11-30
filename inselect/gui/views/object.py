@@ -1,5 +1,4 @@
-from PyQt4.QtGui import QItemSelection, QItemSelectionModel
-from qtpy.QtCore import QRect, QSize, QPoint, Qt
+from qtpy.QtCore import QRect, QSize, QPoint, Qt, QItemSelection, QItemSelectionModel
 from qtpy.QtGui import QBrush, QColor, QPen, QFont, QTransform
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QListView,
                             QStyle, QStyledItemDelegate)

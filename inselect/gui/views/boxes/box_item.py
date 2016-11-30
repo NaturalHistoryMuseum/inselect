@@ -16,8 +16,8 @@ class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
-        super(BoxItem, self).__init__(x, y, w, h, parent, scene)
+    def __init__(self, x, y, w, h, isvalid, parent=None):
+        super(BoxItem, self).__init__(x, y, w, h, parent)
         self.setFlags(QGraphicsItem.ItemIsFocusable |
                       QGraphicsItem.ItemIsSelectable |
                       QGraphicsItem.ItemSendsGeometryChanges |
