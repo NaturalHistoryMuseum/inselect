@@ -8,18 +8,18 @@ import sys
 BOXES_VIEW_SHORTCUTS = [
     ('Create box', 'Right click & drag'),
     ('Move selected boxes', 'Arrow keys'),
-    ('Adjust selected box', 'Shift / Alt+arrow keys'),
-    ('Move between boxes', 'Ctrl+N / P'),
-    ('Zoom', 'Ctrl+mouse wheel / trackpad swipe'),
+    ('Adjust selected box', 'Shift / Alt + arrow keys'),
+    ('Move between boxes', 'Ctrl + N / P'),
+    ('Zoom', 'Ctrl + mouse wheel / trackpad swipe'),
 ]
 
 BOXES_VIEW_TIP = ('Right click + drag to create box  |  '
-                  'CTRL + N / P to move between boxes  |  '
-                  'SHIFT / ALT + arrow keys to adjust selected box')
+                  'Ctrl + N / P to move between boxes  |  '
+                  'Shift / Alt + arrow keys to adjust selected box')
 
-OBJECTS_VIEW_TIP = ('CTRL + N / P or arrow keys to move between objects  |  '
-                    'CTRL + G to show objects in a grid  |  '
-                    'CTRL + E to view a single object expanded')
+OBJECTS_VIEW_TIP = ('Ctrl + N / P or arrow keys to move between objects  |  '
+                    'Ctrl + G to show objects in a grid  |  '
+                    'Ctrl + E to view a single object expanded')
 
 
 def _format_action_shortcuts(action):
