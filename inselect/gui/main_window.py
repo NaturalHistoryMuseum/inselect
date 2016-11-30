@@ -764,13 +764,13 @@ class MainWindow(QMainWindow):
         show_about_box(self)
 
     @report_to_user
-    def show_shortcuts(self):
+    def show_shortcuts(self, checked=False):
         """Shows a modal QDialog of shortcuts.
         """
         show_shortcuts(self)
 
     @report_to_user
-    def show_shortcuts_post_startup(self):
+    def show_shortcuts_post_startup(self, checked=False):
         """Shows a modal QDialog of shortcuts, if this appropriate.
         """
         show_shortcuts_post_startup(self)
