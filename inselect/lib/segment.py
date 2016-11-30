@@ -10,6 +10,15 @@ from .utils import debug_print
 USE_OPENCV_WATERSHED = True
 
 
+def _find_contours(*args, **kwargs):
+    """Wrapper around cv2.findContours. Returns a tuple (contours, hierarchy).
+    """
+    # OpenCV 2.x returns (contours, hierarchy).
+    # OpenCV 3.x returns (image, contours, hierarchy).
+    import cv2
+    res = cv2.findContours(*args, **kwargs)
+    return res[-2:]
+
 def _right_sized(contour, image, container_filter=True, size_filter=True):
     """Checks if contour size and shape is that of an object of interest.
 
@@ -132,7 +141,7 @@ def remove_lines(image):
     import cv2
     import numpy as np
 
-    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     v_edges = cv2.Sobel(gray, cv2.CV_32F, 1, 0, None, 1)
     h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
     mag = np.abs(v_edges)
@@ -141,20 +150,20 @@ def remove_lines(image):
     linewidth = ((image.shape[0] + image.shape[1]) / 2) / 20
     threshold = 20
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
-    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(mag2.copy(),
-                                           cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_SIMPLE)
+    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.THRESH_BINARY)
+    contours, hierarchy = _find_contours(mag2.copy(),
+                                         cv2.RETR_EXTERNAL,
+                                         cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
         _, _, w, h = cv2.boundingRect(contour)
         if h > image.shape[0] / 4 and w < linewidth:
             cv2.drawContours(mask, [contour], -1, 255, -1)
     mag = np.abs(h_edges)
     mag2 = (255*mag/np.max(mag)).astype(np.uint8)
-    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(mag2.copy(),
-                                           cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_SIMPLE)
+    _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.THRESH_BINARY)
+    contours, hierarchy = _find_contours(mag2.copy(),
+                                         cv2.RETR_EXTERNAL,
+                                         cv2.CHAIN_APPROX_SIMPLE)
     for contour in contours:
         _, _, w, h = cv2.boundingRect(contour)
         if w > image.shape[1] / 4 and h < linewidth:
@@ -213,7 +222,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
 
     callback()
 
-    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (3, 3), 3)
     display = gray.copy()
     if not lab_based:
@@ -221,10 +230,10 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         h_edges = cv2.Sobel(gray, cv2.CV_32F, 0, 1, None, 1)
         mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
         mag2 = (255*mag/np.max(mag)).astype(np.uint8)
-        _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+        _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.THRESH_BINARY)
     else:
         image2 = cv2.GaussianBlur(image, (3, 3), 3)
-        lab_image = cv2.cvtColor(image2, cv2.cv.CV_BGR2Lab)
+        lab_image = cv2.cvtColor(image2, cv2.COLOR_BGR2LAB)
         # L component
 
         callback()
@@ -238,7 +247,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
 
         callback()
 
-        _, mag0 = cv2.threshold(mag0, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+        _, mag0 = cv2.threshold(mag0, threshold, 255, cv2.THRESH_BINARY)
         # B component
         channel = np.array(lab_image[:, :, 2])
         v_edges = cv2.Sobel(channel, cv2.CV_32F, 1, 0, None, 1)
@@ -249,7 +258,7 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
         mag = np.sqrt(v_edges ** 2 + h_edges ** 2)
         mag2 = (255*mag/np.max(mag)).astype(np.uint8)
         threshold = 40
-        _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.cv.CV_THRESH_BINARY)
+        _, mag2 = cv2.threshold(mag2, threshold, 255, cv2.THRESH_BINARY)
         mag2 = mag0 | mag2
     if line_filter:
         mask = remove_lines(image)
@@ -258,9 +267,9 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
     callback('Detecting contours')
 
     display = np.dstack((mag2, mag2, mag2))
-    contours, hierarchy = cv2.findContours(mag2.copy(),
-                                           cv2.RETR_TREE,
-                                           cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = _find_contours(mag2.copy(),
+                                         cv2.RETR_TREE,
+                                         cv2.CHAIN_APPROX_SIMPLE)
 
     callback('Processing contours')
 
@@ -310,14 +319,14 @@ def segment_intensity(image, window=None):
         x, y, w, h = window
         image = subimage[y:y + h, x:x + w]
     mask = remove_lines(image)
-    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (25, 25), 9)
     (k, threshold) = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV |
                                    cv2.THRESH_OTSU)
     threshold[mask == 255] = 0
-    contours, hierarchy = cv2.findContours(threshold.copy(),
-                                           cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = _find_contours(threshold.copy(),
+                                         cv2.RETR_EXTERNAL,
+                                         cv2.CHAIN_APPROX_SIMPLE)
     rects = [cv2.boundingRect(c) for c in contours]
     if window:
         new_rects = []
@@ -357,7 +366,7 @@ def segment_grabcut(image, window=None, seeds=[]):
         image = subimage[y:y + h, x:x + w]
     rects, display = segment_edges(image, variance_threshold=100,
                                    line_filter=0, size_filter=0)
-    gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     (k, mag0) = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV |
                               cv2.THRESH_OTSU)
 
@@ -376,14 +385,15 @@ def segment_grabcut(image, window=None, seeds=[]):
     cv2.grabCut(image, mask, rect, bgmodel, fgmodel, 1, cv2.GC_INIT_WITH_MASK)
     mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
 
-    contours, hierarchy = cv2.findContours(mask2.copy(),
-                                           cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = _find_contours(mask2.copy(),
+                                         cv2.RETR_EXTERNAL,
+                                         cv2.CHAIN_APPROX_SIMPLE)
     rects = [cv2.boundingRect(c) for c in contours]
 
     display = np.dstack(3 * [255 * mask2.astype(np.uint8)])
     if seeds:
-        distance = cv2.distanceTransform(mask2, cv2.cv.CV_DIST_L2, 3)
+        DIST_L2 = cv2.cv.CV_DIST_L2 if hasattr(cv2, 'cv') else cv2.DIST_L2
+        distance = cv2.distanceTransform(mask2, DIST_L2, 3)
         markers = np.zeros(mask2.shape, dtype=np.int32)
         markers[mask2 == 0] = 255
         for i, seed in enumerate(seeds):
@@ -396,9 +406,9 @@ def segment_grabcut(image, window=None, seeds=[]):
         new_rects = []
         for i, seed in enumerate(seeds):
             mask = np.array(markers == i + 1, dtype=np.uint8)
-            contours, _ = cv2.findContours(mask,
-                                           cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_SIMPLE)
+            contours, _ = _find_contours(mask,
+                                         cv2.RETR_EXTERNAL,
+                                         cv2.CHAIN_APPROX_SIMPLE)
             if contours:
                 contours.sort(lambda x, y:
                               cmp(cv2.contourArea(y), cv2.contourArea(x)))
@@ -408,7 +418,7 @@ def segment_grabcut(image, window=None, seeds=[]):
         rects = new_rects
     if window:
         new_rects = []
-        gray = cv2.cvtColor(image, cv2.cv.CV_BGR2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         for rect in rects:
             dx, dy = 0, 0
             new_rect = (rect[0] + x - dx, rect[1] + y - dy,
@@ -461,9 +471,9 @@ def segment_watershed(image, window=None):
         markers[regions == 2] = 2
         cv2.watershed(image, markers)
         display[markers == 2] = 255
-        contours, hierarchy = cv2.findContours(regions.copy(),
-                                               cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = _find_contours(regions.copy(),
+                                             cv2.RETR_EXTERNAL,
+                                             cv2.CHAIN_APPROX_SIMPLE)
         segment_rects.extend([cv2.boundingRect(c) for c in contours])
 
     if window:
@@ -490,7 +500,8 @@ if __name__ == "__main__":
         seeds = [[800, 400], [820, 740], [830, 840], [630, 240], [560, 270]]
         rects, display = segment_grabcut(image, seeds=seeds)
         display = np.array(display[:, :, 0])
-        display = cv2.distanceTransform(display, cv2.cv.CV_DIST_L2, 5)
+        DIST_L2 = cv2.cv.CV_DIST_L2 if hasattr(cv2, 'cv') else cv2.DIST_L2
+        display = cv2.distanceTransform(display, DIST_L2, 5)
         cv2.imshow("disp", (display).astype(np.uint8))
     else:
         rects, display = segment_edges(image,
