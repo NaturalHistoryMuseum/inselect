@@ -3,6 +3,10 @@
 
 set -e  # Exit on failure
 
+# Icons needs to be frozen before running inselect.py
+echo Freeze icons
+pyrcc4 icons.qrc > inselect/gui/icons.py
+
 VERSION=`python inselect.py --version 2>&1 | sed 's/inselect.py //g'`
 
 echo Building Inselect $VERSION
@@ -11,9 +15,6 @@ echo Clean
 rm -rf cover build dist
 find . -name "*pyc" -print0 | xargs -0 rm -rf
 find . -name __pycache__ -print0 | xargs -0 rm -rf
-
-echo Freeze icons
-pyrcc4 icons.qrc > inselect/gui/icons.py
 
 echo Check for presence of barcode engines
 python -c "from gouda.engines import ZbarEngine; assert ZbarEngine.available()"
