@@ -69,18 +69,18 @@ Don't worry about the "Can't install shortcuts..." message when you run the
 `pywin32_postinstall` step.
 
 ## Install OpenCV
-* Download [OpenCV 2.4.13](http://opencv.org/)
-* Extract OpenCV to `c:\opencv-2.4.13\`
+* Download [OpenCV 3.1.0](http://opencv.org/)
+* Extract OpenCV to `c:\opencv-3.1.0\`
 * Copy the extension module to the Anaconda environment; for 64-bit:
 
     ```
-    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-2.4.13\build\python\2.7\x64\cv2.pyd %a\DLLs
+    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-3.1.0\build\python\2.7\x64\cv2.pyd %a\DLLs
     ```
 
     For 32-bit:
 
     ```
-    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-2.4.13\build\python\2.7\x86\cv2.pyd %a\DLLs
+    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-3.1.0\build\python\2.7\x86\cv2.pyd %a\DLLs
     ```
 
 
