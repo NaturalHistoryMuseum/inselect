@@ -49,7 +49,7 @@ class TestSubsegment(GUITest):
         self.assertEqual(3, w.model.rowCount())
         self.assertEqual({'Genus': 'Morganucodon'},
                          w.model.data(w.model.index(0, 0), MetadataRole))
-        self.assertEqual(QRect(11, 31, 502, 278),
+        self.assertEqual(QRect(10, 31, 503, 278),
                          w.model.data(w.model.index(0, 0), RectRole))
         self.assertEqual({'Genus': 'Morganucodon'},
                          w.model.data(w.model.index(1, 0), MetadataRole))
@@ -57,7 +57,7 @@ class TestSubsegment(GUITest):
                          w.model.data(w.model.index(1, 0), RectRole))
         self.assertEqual({'Genus': 'Morganucodon'},
                          w.model.data(w.model.index(2, 0), MetadataRole))
-        self.assertEqual(QRect(18, 370, 510, 209),
+        self.assertEqual(QRect(27, 370, 501, 209),
                          w.model.data(w.model.index(2, 0), RectRole))
         self.assertTrue(w.model.is_modified)
 
