@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #393 Warning from libpng when running tests
 - #391 OpenCV3
 - #389 PyQt4
 - #386 qtpy

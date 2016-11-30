@@ -246,11 +246,11 @@ class TestImage(unittest.TestCase):
 
     def test_size_bytes(self):
         i = InselectImage(TESTDATA / 'shapes.png')
-        self.assertEqual(24197, i.size_bytes)
+        self.assertEqual(18153, i.size_bytes)
 
         # Load the array and check again - different code path
         i.array
-        self.assertEqual(24197, i.size_bytes)
+        self.assertEqual(18153, i.size_bytes)
 
     def test_dimensions(self):
         i = InselectImage(TESTDATA / 'shapes.png')
