@@ -1,12 +1,10 @@
 # For PyInstaller build on Mac
-
 import sys
 
 from pathlib import Path
 
 from pylibdmtx import pylibdmtx
 from pyzbar import pyzbar
-
 
 block_cipher = None
 
@@ -79,7 +77,7 @@ MISSING_DYLIBS = (
     'libopencv_imgcodecs.3.1.dylib',
     'libopencv_imgproc.3.1.dylib',
     'libopencv_core.3.1.dylib',
-    'libtbb.dylib'
+    'libtbb.dylib',
     'libz.1.dylib',
 )
 
