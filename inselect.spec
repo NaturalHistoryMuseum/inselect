@@ -14,7 +14,7 @@ a = Analysis(['inselect.py'],
              datas=[('inselect/inselect.qss', '')],
              hiddenimports=['sklearn.neighbors.typedefs'],
              hookspath=[],
-             runtime_hooks=['rthook_pyqt4.py'],
+             runtime_hooks=[],
              excludes=['Tkinter'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
@@ -34,12 +34,18 @@ a.binaries += TOC([
 # of manipulating Analysis.binaries.
 MISSING_DYLIBS = (
     'libiomp5.dylib',
+    'libicudata.54.1.dylib',
+    'libicudata.54.dylib',
+    'libicudata.dylib',
+    'libicui18n.54.dylib',
+    'libicuuc.54.dylib',
     'libmkl_intel_lp64.dylib',
     'libmkl_intel_thread.dylib',
     'libmkl_core.dylib',
-    'libQtCore.4.dylib',
-    'libQtGui.4.dylib',
-    'libpng16.16.dylib',
+    'libQt5Core.5.dylib',
+    'libQt5Gui.5.dylib',
+    'libQt5PrintSupport.5.dylib',    # Linked to by qt5_plugins/platforms/libqcocoa.dylib
+    'libQt5Widgets.5.dylib',
     'libopencv_hdf.3.1.dylib',
     'libopencv_reg.3.1.dylib',
     'libopencv_surface_matching.3.1.dylib',
@@ -78,7 +84,6 @@ MISSING_DYLIBS = (
     'libopencv_imgproc.3.1.dylib',
     'libopencv_core.3.1.dylib',
     'libtbb.dylib',
-    'libz.1.dylib',
 )
 
 # The lib directory associated with this environment
