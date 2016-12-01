@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #401 Support new pyzbar and pylibdmtx
 - #397 Couple of problems with keyboard shortcuts box
 - #395 PyQt5
 - #393 Warning from libpng when running tests
