@@ -11,8 +11,9 @@ from qtpy.QtGui import QIcon
 
 import inselect
 
-from inselect.lib.utils import debug_print
-from inselect.gui.main_window import MainWindow
+from .lib.utils import debug_print
+from .gui.main_window import MainWindow
+from .gui.utils import report_exception_to_user
 
 
 # Values used by several important parts of Qt's machinery including the GUI
@@ -26,8 +27,7 @@ APP = None
 
 
 def qapplication(args=None):
-    """Returns the QApplication for this instance
-    """
+    "Returns the QApplication for this instance"
     global APP
     if not APP:
         APP = QtWidgets.qApp = QtWidgets.QApplication(args if args else [])
@@ -84,6 +84,9 @@ def main(args=None):
     # likely that the QApplication will have been created by a unittest.
     QtWidgets.qApp = qapplication(args)
 
+    # Install global exception hook only after the application has been created
+    sys.excepthook = report_exception_to_user
+
     debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
 
     if parsed.locale:
@@ -106,6 +109,7 @@ def main(args=None):
     # Stylesheet
     QtWidgets.qApp.setStyleSheet(_stylesheet(parsed.stylesheet))
 
+    # Create and show main windows
     window = MainWindow(parsed.print_time)
     if parsed.window_size:
         window.show_with_size(parsed.window_size)

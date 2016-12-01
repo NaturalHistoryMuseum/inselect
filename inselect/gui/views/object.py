@@ -5,7 +5,7 @@ from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QListView,
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
-from inselect.gui.utils import load_icon, painter_state, report_to_user
+from inselect.gui.utils import load_icon, painter_state
 from inselect.gui.roles import (MetadataValidRole, PixmapRole, RectRole,
                                 RotationRole)
 
@@ -230,14 +230,12 @@ class ObjectView(QListView):
 
         super(ObjectView, self).selectionChanged(selected, deselected)
 
-    @report_to_user
     def show_grid(self, checked=False):
         """Shows the list as a grid of squares
         """
         debug_print('ObjectView.show_grid')
         self._refresh()
 
-    @report_to_user
     def show_expanded(self, checked=False):
         """Shows the first item of the selection expanded to fill the viewport.
         If the selection is empty, the first item in the list is selected.

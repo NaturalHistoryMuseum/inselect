@@ -137,41 +137,22 @@ class TestFileOpen(GUITest):
             self.assertFalse(self.window.model.is_modified)
             self.assertWindowTitleOpenDocument()
 
-    @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
-    def test_open_non_existant_image(self, mock_copy_details_box):
+    def test_open_non_existant_image(self):
         "Try to open a non-existant image file"
         self.assertRaises(InselectError, self.window.open_file,
                           path='I do not exist.png')
-
-        # User should have been told about the error
-        self.assertTrue(mock_copy_details_box.called)
-        expected = (u"An error occurred:\n"
-                    u"Image file [I do not exist.png] does not exist")
-        self.assertTrue(expected in mock_copy_details_box.call_args[0])
-
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
 
-    @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
-    def test_open_non_existant_inselect(self, mock_copy_details_box):
+    def test_open_non_existant_inselect(self):
         "Try to open a non-existant inselect file"
         self.assertRaises(IOError, self.window.open_file, path='I do not exist.inselect')
-        self.assertTrue(mock_copy_details_box.called)
-        expected = (u"An error occurred:\n"
-                    u"[Errno 2] No such file or directory: 'I do not exist.inselect'")
-        self.assertTrue(expected in mock_copy_details_box.call_args[0])
-
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
 
-    @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
-    def test_open_non_existant_unrecognised(self, mock_copy_details_box):
+    def test_open_non_existant_unrecognised(self):
         "Try to open a non-existant file with an unrecognised extension"
         self.assertRaises(InselectError, self.window.open_file, path='I do not exist')
-        self.assertTrue(mock_copy_details_box.called)
-        expected = u'An error occurred:\nUnknown file type [I do not exist]'
-        self.assertTrue(expected in mock_copy_details_box.call_args[0])
-
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
 

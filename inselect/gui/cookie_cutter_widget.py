@@ -6,7 +6,7 @@ from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
 
 from .cookie_cutter_choice import cookie_cutter_choice
-from .utils import report_to_user, load_icon, reveal_path
+from .utils import load_icon, reveal_path
 
 
 class CookieCutterWidget(QObject):
@@ -52,12 +52,10 @@ class CookieCutterWidget(QObject):
         menu.addSeparator()
         menu.addAction(self.save_to_new_action)
 
-    @report_to_user
     def clear(self, checked=False):
         "Clears the choice of cookie cutter"
         cookie_cutter_choice().clear()
 
-    @report_to_user
     def choose(self, checked=False):
         "Shows a 'choose cookie cutter' file dialog"
         debug_print('CookieCutterWidget.choose_cookie_cutter')
@@ -71,7 +69,6 @@ class CookieCutterWidget(QObject):
             # Save the user's choice
             cookie_cutter_choice().load(path)
 
-    @report_to_user
     def reveal(self, checked=False):
         reveal_path(cookie_cutter_choice().current_path)
 

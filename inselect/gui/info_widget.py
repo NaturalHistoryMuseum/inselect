@@ -7,7 +7,6 @@ from inselect.lib.utils import format_dt_display
 from inselect.gui.utils import BoldLabel, HorizontalLine, reveal_path
 
 from .popup_panel import PopupPanel
-from .utils import report_to_user
 
 
 class RevealPathLabel(QLabel):
@@ -26,7 +25,6 @@ class RevealPathLabel(QLabel):
             self.setText('')
             self.path = None
 
-    @report_to_user
     def mouseReleaseEvent(self, event):
         """QLabel virtual
         """

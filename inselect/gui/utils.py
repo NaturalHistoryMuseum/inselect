@@ -14,7 +14,7 @@ from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel
 from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 from qtpy.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
 
-from copy_box import copy_details_box
+import copy_box
 
 # Warning: lazy load of cv2 and numpy via local imports
 
@@ -105,42 +105,20 @@ def painter_state(painter):
         painter.restore()
 
 
-def report_to_user(f):
-    """Decorator that reports exceptions to the user in a modal QDialog
-    """
-    @wraps(f)
-    def wrapper(self, *args, **kwargs):
-        try:
-            return f(self, *args, **kwargs)
-        except Exception as e:
-            # Grotesque hack :-(
-            # Attach a flag to the exception that indicates it has already
-            # been reported to the user, preventing another report_to_user
-            # handler higher up the stack from reporting it again.
-            if not hasattr(e, '_inselect_reported_to_user'):
-                _report_exception_to_user(e)
-                e._inselect_reported_to_user = True
-                raise
-            else:
-                # Exception has been reported to the user
-                raise
-    return wrapper
-
-
-def _report_exception_to_user(exc):
-    "Shows the exception exc and the current traceback in a dialog"
+def report_exception_to_user(type, value, tb):
+    "Shows the exception and traceback in a dialog"
     try:
         details = BytesIO()
-        traceback.print_exc(file=details)
-        copy_details_box(
+        traceback.print_tb(tb, file=details)
+        copy_box.show_copy_details_box(
             QMessageBox.Critical, u'An error occurred',
-            u'An error occurred:\n{0}'.format(exc),
+            u'An error occurred:\n{0}'.format(value),
             details.getvalue().encode('utf8')
         )
     except:
         # Wah! Exception showing the details box.
         QMessageBox.critical(
-            None, u'An error occurred', u'An error occurred:\n{0}'.format(exc)
+            None, u'An error occurred', u'An error occurred:\n{0}'.format(value)
         )
 
 
