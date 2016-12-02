@@ -5,7 +5,7 @@ from pathlib import Path
 
 from qtpy.QtWidgets import QMessageBox
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.gui.roles import MetadataRole
 from inselect.lib.user_template import UserTemplate
@@ -64,7 +64,7 @@ class TestMetadataValidation(GUITest):
 
         # Set the catalogNumber for each box to the same value, creating a
         # single validation problem
-        for index in (w.model.index(row, 0) for row in xrange(5)):
+        for index in (w.model.index(row, 0) for row in range(5)):
             w.model.setData(index, {'catalogNumber': '1234'}, MetadataRole)
 
         w.export_csv(user_template=template)

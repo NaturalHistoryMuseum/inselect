@@ -34,7 +34,7 @@ echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
 echo Source build
-./setup.py sdist
+./setup.py sdist bdist_wheel --universal
 mv dist/inselect-$VERSION.tar.gz .
 
 if [[ "$OSTYPE" == "darwin"* ]]; then

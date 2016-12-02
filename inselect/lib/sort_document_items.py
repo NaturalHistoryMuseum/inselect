@@ -1,4 +1,4 @@
-from itertools import izip
+
 from operator import itemgetter
 
 # Warning: lazy load of scipy and sklearn via local imports
@@ -45,8 +45,8 @@ def sort_document_items(items, by_columns):
         y_bins = _do_kde(r.y_centre for r in rects)
 
         if by_columns:
-            keys = izip(x_bins, y_bins, (r.left for r in rects))
+            keys = zip(x_bins, y_bins, (r.left for r in rects))
         else:
-            keys = izip(y_bins, x_bins, (r.left for r in rects))
-        items_and_keys = sorted(izip(items, keys), key=itemgetter(1))
+            keys = zip(y_bins, x_bins, (r.left for r in rects))
+        items_and_keys = sorted(zip(items, keys), key=itemgetter(1))
         return [v[0] for v in items_and_keys]

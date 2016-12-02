@@ -18,8 +18,8 @@ from inselect.lib.utils import duplicated
 # A dict {name: parse function}. Names are strings that the user
 # can give as 'Parser' for a field.
 # Remove the leading 'parse_' from the names.
-PARSERS = {k: v for k, v in parse.PARSERS.iteritems()}
-PARSERS = {re.sub(r'^parse_', '', k): v for k, v in PARSERS.iteritems()}
+PARSERS = {k: v for k, v in parse.PARSERS.items()}
+PARSERS = {re.sub(r'^parse_', '', k): v for k, v in PARSERS.items()}
 
 # Fields relating to bounding box locations
 BOUNDING_BOX_FIELD_NAMES = (
@@ -54,7 +54,7 @@ class OrderedDictType(MultiType):
             compound_field = kwargs.pop('compound_field', None)
             field = self.init_compound_field(field, compound_field, **kwargs)
 
-        self.coerce_key = coerce_key or unicode
+        self.coerce_key = coerce_key or str
         self.field = field
 
         validators = [self.validate_items] + kwargs.pop("validators", [])
@@ -70,16 +70,16 @@ class OrderedDictType(MultiType):
             # Expect a list of tuples
             value = OrderedDict(value)
         if not isinstance(value, OrderedDict):
-            raise ValidationError(u'Must be a mapping.')
+            raise ValidationError('Must be a mapping.')
         else:
             return OrderedDict(
                 (self.coerce_key(k), self.field.to_native(v, context))
-                for k, v in value.iteritems()
+                for k, v in value.items()
             )
 
     def validate_items(self, items):
         errors = {}
-        for key, value in items.iteritems():
+        for key, value in items.items():
             try:
                 self.field.validate(value)
             except ValidationError as exc:
@@ -96,7 +96,7 @@ class OrderedDictType(MultiType):
         """
         data = OrderedDict()
 
-        for key, value in dict_instance.iteritems():
+        for key, value in dict_instance.items():
             if hasattr(self.field, 'export_loop'):
                 shaped = self.field.export_loop(value, field_converter,
                                                 role=role)
@@ -133,7 +133,7 @@ class _FieldModel(Model):
         serialized_name='Choices with data'
     )
     parser = StringType(
-        choices=list(sorted(PARSERS.iterkeys())),
+        choices=list(sorted(PARSERS.keys())),
         serialized_name='Parser'
     )
     regex_parser = StringType(serialized_name='Regex parser')
@@ -146,7 +146,7 @@ class _FieldModel(Model):
 
     def validate_name(self, data, value):
         if value in RESERVED_FIELD_NAMES:
-            msg = u"Should not be one of {0}."
+            msg = "Should not be one of {0}."
             raise ValidationError(msg.format(RESERVED_FIELD_NAMES))
 
     def validate_fixed_value(self, data, value):
@@ -231,11 +231,11 @@ def _extract_validation_error(e, prompt=None):
     """Given ValidationError e returns a list of strings of validation failures
     """
     # e.messages can be a list, tuple or dict
-    msg = u'{0}: {1}'
+    msg = '{0}: {1}'
     if isinstance(e.messages, dict):
         # Tedious work to unpick the possible formats
         messages = []
-        for field, field_messages in e.messages.iteritems():
+        for field, field_messages in e.messages.items():
             if isinstance(field_messages, list):
                 for field_message in field_messages:
                     messages.append(msg.format(field, field_message))
@@ -257,7 +257,7 @@ def load_specification_from_file(path):
 
 def validated_specification(spec):
     "Returns a validated template specification"
-    model = _UserTemplateModel({k: v for k, v in spec.iteritems() if 'Fields' != k})
+    model = _UserTemplateModel({k: v for k, v in spec.items() if 'Fields' != k})
 
     failures = []
     model.fields = []
@@ -272,11 +272,13 @@ def validated_specification(spec):
 
     try:
         model.validate()
-    except (ModelConversionError, ValidationError), e:
+    except (ModelConversionError, ValidationError) as e:
         failures += _extract_validation_error(e)
 
     if failures:
-        raise InvalidSpecificationError(failures)
+        # TODO Order of error messages varies randomly. The order is dependent
+        # upon (I think) object identities within schematics.
+        raise InvalidSpecificationError(sorted(failures))
     else:
         return model.to_native()
 
@@ -288,6 +290,6 @@ class InvalidSpecificationError(Exception):
             msg = '1 problem:\n{0}'.format(problems[0])
         else:
             msg = '{0} problems:\n{1}'
-            msg = msg.format(len(problems), u'\n'.join(problems))
+            msg = msg.format(len(problems), '\n'.join(problems))
         super(InvalidSpecificationError, self).__init__(msg)
         self.problems = problems

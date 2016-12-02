@@ -6,7 +6,7 @@ from pathlib import Path
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.tests.utils import temp_directory_with_files
@@ -93,7 +93,7 @@ class TestUserTemplateChoice(GUITest):
                              self.window.view_metadata.popup_button.text())
 
             # Write a new template to the file and refresh
-            template = u"""Name: An updated test template
+            template = """Name: An updated test template
 Fields:
     - Name: catalogNumber
 """

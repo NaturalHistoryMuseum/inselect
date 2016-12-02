@@ -28,7 +28,7 @@ from inselect.lib.utils import (format_dt_display, is_writable, make_readonly,
 
 
 class TestUtils(unittest.TestCase):
-    MOCK_USERNAME = u'Alfred Schütz'
+    MOCK_USERNAME = 'Alfred Schütz'
 
     def test_makereadonly_file(self):
         f = tempfile.NamedTemporaryFile()
@@ -69,7 +69,7 @@ class TestUtils(unittest.TestCase):
     def test_format_dt_display_windows(self, mock_get_time_format,
                                        mock_get_date_format):
         self.assertEqual(
-            u'Sonntag, 1. M\xe4rz 2015 01:01:01',
+            'Sonntag, 1. M\xe4rz 2015 01:01:01',
             format_dt_display(datetime.now())
         )
 
@@ -77,9 +77,9 @@ class TestUtils(unittest.TestCase):
     def test_user_name_unix(self):
         # Unix-like OSes should be able to handle more 'exotic' characters,
         # such as Katakana
-        username = u'ローレンス　ハドソン'
+        username = 'ローレンス　ハドソン'
         class MockPWD(object):
-            pw_gecos = username.encode('utf8')
+            pw_gecos = username
 
         with patch.object(
                 pwd, 'getpwuid', return_value=MockPWD()

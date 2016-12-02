@@ -1,5 +1,5 @@
 from collections import Counter, namedtuple
-from itertools import chain, count, izip
+from itertools import chain, count
 
 
 def validate_document(document, template):
@@ -28,14 +28,14 @@ def _visit_box(template, visitor, index, box):
     for field in (f for f in template.mandatory if not md.get(f)):
         visitor.missing_mandatory(index, box_label, field)
 
-    field_choices = chain(template.choices_mapping.iteritems(),
-                          template.choices_with_data_mapping.iteritems())
+    field_choices = chain(iter(template.choices_mapping.items()),
+                          iter(template.choices_with_data_mapping.items()))
     for field, choices in field_choices:
         value = md.get(field)
         if value and value not in choices:
             visitor.not_in_choices(index, box_label, field, value)
 
-    for field, parse in ((k, v) for k, v in template.parse_mapping.iteritems() if k in md):
+    for field, parse in ((k, v) for k, v in template.parse_mapping.items() if k in md):
         try:
             parse(md[field])
         except ValueError:
@@ -49,12 +49,12 @@ def _visit_labels(document, template, visitor):
     ]
 
     # Labels must be given
-    for index in (i for i, l in izip(count(), labels) if not l):
+    for index in (i for i, l in zip(count(), labels) if not l):
         visitor.missing_label(index)
 
     # Non-missing object labels must be unique
     counts = Counter(labels)
-    for label in (v for v, n in counts.iteritems() if v and n > 1):
+    for label in (v for v, n in counts.items() if v and n > 1):
         visitor.duplicated_labels(label)
 
 MissingMandatory = namedtuple('MissingMandatory', ['index', 'label', 'field'])
@@ -114,31 +114,31 @@ class ValidationProblems(object):
 
 
 def format_missing_mandatory(missing_mandatory):
-    msg = u'Box [{0}] [{1}] lacks mandatory field [{2}]'
+    msg = 'Box [{0}] [{1}] lacks mandatory field [{2}]'
     for index, label, field in missing_mandatory:
         yield msg.format(1 + index, label, field)
 
 
 def format_failed_parse(failed_parse):
-    msg = u'Could not parse value of [{0}] [{1}] for box [{2}] [{3}]'
+    msg = 'Could not parse value of [{0}] [{1}] for box [{2}] [{3}]'
     for index, label, field, value in failed_parse:
         yield msg.format(field, value, 1 + index, label)
 
 
 def format_missing_label(missing_label):
-    msg = u'Missing object label for box [{0}]'
+    msg = 'Missing object label for box [{0}]'
     for index in missing_label:
         yield msg.format(1 + index)
 
 
 def format_duplicated_labels(duplicated_labels):
-    msg = u'Duplicated object label [{0}]'
+    msg = 'Duplicated object label [{0}]'
     for duplicated in duplicated_labels:
         yield msg.format(duplicated)
 
 
 def format_not_in_choices(not_in_choices):
-    msg = u'Value of [{0}] [{1}] for box [{2}] [{3}] is not in the list of options'
+    msg = 'Value of [{0}] [{1}] for box [{2}] [{3}] is not in the list of options'
     for index, label, field, value in not_in_choices:
         yield msg.format(field, value, 1 + index, label)
 

@@ -44,10 +44,10 @@ class TestRect(unittest.TestCase):
         self.assertEqual(1, self.R.x_centre)
 
     def test_y_centre(self):
-        self.assertEqual(2, self.R.y_centre)
+        self.assertEqual(2.5, self.R.y_centre)
 
     def test_centre(self):
-        self.assertEqual(Point(1, 2), self.R.centre)
+        self.assertEqual(Point(1, 2.5), self.R.centre)
 
     def test_padded(self):
         r = Rect(0, 0, 100, 100)

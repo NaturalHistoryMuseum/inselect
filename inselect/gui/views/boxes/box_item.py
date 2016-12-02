@@ -126,7 +126,8 @@ class BoxItem(QGraphicsRectItem):
         self.update()
 
     def _set_handles_visible(self, visible):
-        map(lambda i: i.setVisible(visible), self._handles)
+        for handle in self._handles:
+            handle.setVisible(visible)
 
     def _create_handle(self, corner):
         # Creates and returns a new ResizeHandle at the given Qt.Corner

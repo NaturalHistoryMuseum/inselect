@@ -22,7 +22,7 @@ class TestSegment(unittest.TestCase):
             # Create a new document
             ingest_image(tempdir / 'shapes.png', tempdir)
 
-            main([unicode(tempdir)])
+            main([str(tempdir)])
 
             doc_path = tempdir / 'shapes.inselect'
             self.assertTrue(doc_path.is_file())

@@ -1,21 +1,21 @@
 language: python
 
 python:
-  - "2.7"
+  - "3.5"
 
 virtualenv:
   system_site_packages: true
 
 before_install:
   - sudo apt-get update
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then
       sudo apt-get install -y --fix-missing libzbar-dev libdmtx0a;
     fi
 
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.5" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -25,11 +25,8 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda create -y -n test-environment python=$TRAVIS_PYTHON_VERSION pillow pyqt=5.6.0 numpy scikit-learn
+  - conda create -y -n test-environment python=$TRAVIS_PYTHON_VERSION numpy opencv pillow pyqt scikit-learn scipy
   - source activate test-environment
-  # conda's own opencv has all sorts of inexplicable conflicts with other
-  # packages - install menpo's build of opencv
-  - conda install -y --channel https://conda.anaconda.org/menpo opencv
   - python setup.py install
 
 install:
@@ -39,7 +36,7 @@ install:
   - pyrcc5 icons.qrc > inselect/gui/icons.py
 
 script:
-  - nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
+  - nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect --verbose inselect
 
 after_success:
   - coveralls

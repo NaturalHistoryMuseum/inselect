@@ -4,10 +4,10 @@ import re
 
 from collections import namedtuple, OrderedDict
 from functools import partial
-from itertools import count, chain, izip, repeat
+from itertools import count, chain, repeat
 from pathlib import Path
 
-import persist_user_template
+from . import persist_user_template
 from inselect.lib.parse import parse_matches_regex
 from inselect.lib.utils import FormatDefault
 
@@ -115,7 +115,7 @@ class UserTemplate(object):
         for field in self.fields:
             yield field.name
             if field.choices_with_data:
-                yield u'{0}-value'.format(field.name)
+                yield '{0}-value'.format(field.name)
 
     def metadata(self, index, metadata):
         """Returns a dict {field_name: value} for the given box index and
@@ -127,12 +127,12 @@ class UserTemplate(object):
         md['ItemNumber'] = index
 
         # Fields with a 'Choices with data'
-        for field, choices in self.choices_with_data_mapping.iteritems():
+        for field, choices in self.choices_with_data_mapping.items():
             if field in md:
-                md[u'{0}-value'.format(field)] = choices.get(md[field], '')
+                md['{0}-value'.format(field)] = choices.get(md[field], '')
 
         # Fixed value fields
-        for field, value in self.fixed_value_mapping.iteritems():
+        for field, value in self.fixed_value_mapping.items():
             md[field] = value
         return md
 
@@ -156,7 +156,7 @@ class UserTemplate(object):
         else:
             thumbnail_coords = repeat(None)
 
-        items = izip(
+        items = zip(
             count(start=1),
             crop_fnames,
             (b['rect'] for b in document.items),
@@ -190,8 +190,8 @@ class UserTemplate(object):
         if any(not metadata.get(f) for f in self.mandatory):
             return False
 
-        field_choices = chain(self.choices_mapping.iteritems(),
-                              self.choices_with_data_mapping.iteritems())
+        field_choices = chain(iter(self.choices_mapping.items()),
+                              iter(self.choices_with_data_mapping.items()))
         for field, choices in field_choices:
             value = metadata.get(field)
             if value and value not in choices:
@@ -200,7 +200,7 @@ class UserTemplate(object):
                 return False
 
         try:
-            parseable = self.parse_mapping.iteritems()
+            parseable = iter(self.parse_mapping.items())
             parseable = ((k, v) for k, v in parseable if metadata.get(k))
             for field, parse_fn in parseable:
                 parse_fn(metadata[field])

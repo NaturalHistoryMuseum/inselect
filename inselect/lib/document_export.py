@@ -35,9 +35,9 @@ class DocumentExport(object):
         for base_fname in fnames:
             fname = base_fname
             while fname in seen:
-                fname = u'{0}-{1}'.format(base_fname, next(suffix[base_fname]))
+                fname = '{0}-{1}'.format(base_fname, next(suffix[base_fname]))
             seen.add(fname)
-            yield u'{0}{1}'.format(fname, self._template.cropped_file_suffix)
+            yield '{0}{1}'.format(fname, self._template.cropped_file_suffix)
 
     def crops_dir(self, document):
         return document.crops_dir
@@ -51,7 +51,7 @@ class DocumentExport(object):
 
         crops_dir = self.crops_dir(document)
         try:
-            shutil.rmtree(unicode(crops_dir))
+            shutil.rmtree(str(crops_dir))
         except OSError as e:
             if errno.ENOENT == e.errno:
                 # Directory does not exist - do nothing
@@ -81,7 +81,7 @@ class DocumentExport(object):
         else:
             path = Path(path)
 
-        debug_print(u'DocumentExport.export_csv to [{0}]'.format(path))
+        debug_print('DocumentExport.export_csv to [{0}]'.format(path))
 
         # Field names
         fields = list(self._template.field_names())

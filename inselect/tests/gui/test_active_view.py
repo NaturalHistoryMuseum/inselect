@@ -1,6 +1,6 @@
 import unittest
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 class TestActiveView(GUITest):

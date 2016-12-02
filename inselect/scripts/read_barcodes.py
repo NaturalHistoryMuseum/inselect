@@ -1,13 +1,13 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Post-process
 """
-from __future__ import print_function
+
 
 import argparse
 import sys
 import traceback
 
-from itertools import count, izip
+from itertools import count
 from pathlib import Path
 
 import inselect.lib.utils
@@ -41,24 +41,24 @@ class BarcodeReader(object):
             except KeyboardInterrupt:
                 raise
             except Exception:
-                print(u'Error reading barcodes in [{0}]'.format(p))
+                print('Error reading barcodes in [{0}]'.format(p))
                 traceback.print_exc()
 
     def read_barcodes_in_document(self, doc):
         items = doc.items
-        for index, item, crop in izip(count(), items, doc.crops):
+        for index, item, crop in zip(count(), items, doc.crops):
             result = self.decode_barcodes(crop)
             if result:
                 strategy, barcodes = result
-                barcodes = u' '.join(b.data for b in barcodes)
-                debug_print(u'Crop [{0}] - found [{1}]'.format(index, barcodes))
+                barcodes = ' '.join(b.data.decode() for b in barcodes)
+                debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
 
                 # TODO LH This mapping to come from metadata config?
                 # TODO LH Could be more than one object, and hence barcode,
                 #         on a crop
                 item['fields']['catalogNumber'] = barcodes
             else:
-                debug_print(u'Crop [{0}] - no barcodes'.format(index))
+                debug_print('Crop [{0}] - no barcodes'.format(index))
 
         doc.set_items(items)
         doc.save()

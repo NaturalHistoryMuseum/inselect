@@ -48,7 +48,7 @@ class SelectorView(QAbstractItemView):
         else:
             # Order items by increasing / decreasing area and select the first n
             model = self.model()
-            rows = xrange(model.rowCount())
+            rows = range(model.rowCount())
 
             def box_area(row):
                 rect = model.index(row, 0).data(RectRole)

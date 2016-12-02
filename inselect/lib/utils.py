@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import errno
 import locale
@@ -8,7 +8,7 @@ import stat
 import string
 
 from collections import Counter
-from itertools import ifilterfalse
+from itertools import filterfalse
 from pathlib import Path
 
 from dateutil.tz import tzlocal
@@ -90,7 +90,7 @@ def unique_everseen(iterable, key=None):
     seen = set()
     seen_add = seen.add
     if key is None:
-        for element in ifilterfalse(seen.__contains__, iterable):
+        for element in filterfalse(seen.__contains__, iterable):
             seen_add(element)
             yield element
     else:
@@ -105,7 +105,7 @@ def duplicated(v):
     """Returns a generator expression of values within v that appear more than
     once
     """
-    return (x for x, y in Counter(v).items() if y > 1)
+    return (x for x, y in list(Counter(v).items()) if y > 1)
 
 
 class FormatDefault(string.Formatter):
@@ -126,7 +126,7 @@ class FormatDefault(string.Formatter):
         # key will be either an integer or a string. If it is an integer, it
         # represents the index of the positional argument in args; if it is
         # a string, then it represents a named argument in kwargs.
-        if isinstance(key, (int, long)):
+        if isinstance(key, int):
             return super(FormatDefault, self).get_value(key, args, kwds)
         else:
             return kwds.get(key, self.default)
@@ -137,7 +137,7 @@ def user_name():
     """
     if pwd:
         # Strip trailing commas seen on Linux
-        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',').decode('utf8')
+        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
     elif win32api and pywintypes:
         NameDisplay = 3
         try:
@@ -146,7 +146,7 @@ def user_name():
         except pywintypes.error:
             try:
                 # Returns MBCS
-                return unicode(win32api.GetUserName(), 'mbcs')
+                return str(win32api.GetUserName(), 'mbcs')
             except pywintypes.error:
                 return ''
     else:
@@ -172,18 +172,15 @@ def format_dt_display(dt):
         language_code, encoding = get_default_locale()
         # Ignoring errors because I am paranoid about the behaviour of the
         # locale functions
-        if encoding:
-            return unicode(v, encoding, 'ignore')
-        else:
-            return unicode(v, errors='ignore')
+        return v
     elif win32api:
         # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
         LOCALE_USER_DEFAULT = 0x0400
         DATE_LONGDATE = 2
         time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
-        time = unicode(time, "mbcs")
+        time = str(time, "mbcs")
         date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
-        date = unicode(date, "mbcs")
-        return u'{0} {1}'.format(date, time)
+        date = str(date, "mbcs")
+        return '{0} {1}'.format(date, time)
 
     return dt.isoformat()

@@ -11,7 +11,7 @@ from inselect.gui import copy_box
 from inselect.gui.utils import reveal_path, report_exception_to_user
 from inselect.tests.utils import temp_directory_with_files
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 class TestUtils(GUITest):
@@ -39,7 +39,7 @@ class TestUtils(GUITest):
             expected = [
                 '/usr/bin/osascript',
                 '-e',
-                u'tell application "Finder" to reveal POSIX file "{0}"'.format(
+                'tell application "Finder" to reveal POSIX file "{0}"'.format(
                     str(path.resolve())
                 )
             ]

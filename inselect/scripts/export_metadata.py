@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Exports metadata
 """
-from __future__ import print_function
+
 
 import argparse
 import sys
@@ -33,20 +33,20 @@ def export_csv(dir, overwrite_existing, template):
             csv_path = export.csv_path(doc)
             if validation.any_problems:
                 print(
-                    u'Not exporting metadata for [{0}] because there are '
-                    u'validation problems'.format(p)
+                    'Not exporting metadata for [{0}] because there are '
+                    'validation problems'.format(p)
                 )
                 for msg in format_validation_problems(validation):
                     print(msg)
             elif not overwrite_existing and csv_path.is_file():
-                print(u'CSV file [{0}] exists - skipping'.format(csv_path))
+                print('CSV file [{0}] exists - skipping'.format(csv_path))
             else:
-                print(u'Writing CSV for [{0}]'.format(p))
+                print('Writing CSV for [{0}]'.format(p))
                 export.export_csv(doc)
         except KeyboardInterrupt:
             raise
         except Exception:
-            print(u'Error saving CSV from [{0}]'.format(p))
+            print('Error saving CSV from [{0}]'.format(p))
             traceback.print_exc()
 
 

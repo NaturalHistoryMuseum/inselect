@@ -36,7 +36,7 @@ class CookieCutterChoice(QObject):
                 self._current = self._load(previous)
             except Exception:
                 debug_print(
-                    u'Error loading cookie cutter [{0}]'.format(previous)
+                    'Error loading cookie cutter [{0}]'.format(previous)
                 )
 
     @classmethod
@@ -49,17 +49,17 @@ class CookieCutterChoice(QObject):
 
     def _load(self, path):
         "Loads the CookieCutter in path"
-        debug_print(u'CookieCutterChoice._load [{0}]'.format(path))
+        debug_print('CookieCutterChoice._load [{0}]'.format(path))
         return CookieCutter.load(path)
 
     def load(self, path):
         """Loads the CookieCutter in path, updates settings and emits
         cookie_cutter_changed
         """
-        debug_print(u'CookieCutterChoice.load [{0}]'.format(path))
+        debug_print('CookieCutterChoice.load [{0}]'.format(path))
         self._current = self._load(path)
-        QSettings().setValue(self.PATH_KEY, unicode(path))
-        QSettings().setValue(self.DIRECTORY_KEY, unicode(Path(path).parent))
+        QSettings().setValue(self.PATH_KEY, str(path))
+        QSettings().setValue(self.DIRECTORY_KEY, str(Path(path).parent))
         self.cookie_cutter_changed.emit()
 
     def clear(self):
@@ -73,7 +73,7 @@ class CookieCutterChoice(QObject):
         """Creates a new CookieCutter file that contains boxes, writes in to
         path and sets it to be the current choice
         """
-        debug_print(u'CookieCutterChoice.create_and_use to [{0}]'.format(path))
+        debug_print('CookieCutterChoice.create_and_use to [{0}]'.format(path))
         cookie_cutter = CookieCutter('', boxes)
         cookie_cutter.save(path)
         self.load(path)

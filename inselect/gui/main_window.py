@@ -1,9 +1,9 @@
-from __future__ import print_function
+
 import sys
 
 from datetime import datetime
 from functools import partial
-from itertools import count, izip
+from itertools import count
 from pathlib import Path
 
 from qtpy import QtWidgets
@@ -56,12 +56,12 @@ from .worker_thread import WorkerThread
 class MainWindow(QMainWindow):
     """The application's main window
     """
-    DOCUMENT_FILE_FILTER = u'Inselect documents (*{0});;Images ({1})'.format(
+    DOCUMENT_FILE_FILTER = 'Inselect documents (*{0});;Images ({1})'.format(
         InselectDocument.EXTENSION,
-        u' '.join(IMAGE_PATTERNS)
+        ' '.join(IMAGE_PATTERNS)
     )
 
-    IMAGE_FILE_FILTER = u'Images ({0})'.format(u' '.join(IMAGE_PATTERNS))
+    IMAGE_FILE_FILTER = 'Images ({0})'.format(' '.join(IMAGE_PATTERNS))
 
     def __init__(self, print_time=False):
         """if print_time is True, will print, when a document is closed, the
@@ -274,7 +274,7 @@ class MainWindow(QMainWindow):
         the .inselect file is opened
         * If an image file, a new .inselect file is created and opened
         """
-        debug_print(u'MainWindow.open_file [{0}]'.format(path))
+        debug_print('MainWindow.open_file [{0}]'.format(path))
 
         if not path:
             folder = QSettings().value(
@@ -298,7 +298,7 @@ class MainWindow(QMainWindow):
             elif IMAGE_SUFFIXES_RE.match(path.name):
                 # Compute the path to the inselect document (which may or
                 # may not already exist) of the image file
-                doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, u'')
+                doc_of_image = path.name.replace(InselectDocument.THUMBNAIL_SUFFIX, '')
                 doc_of_image = path.parent / doc_of_image
                 doc_of_image = doc_of_image.with_suffix(InselectDocument.EXTENSION)
                 if doc_of_image.is_file():
@@ -320,7 +320,7 @@ class MainWindow(QMainWindow):
                     debug_print('Opening inselect document [{0}]'.format(document_path))
                     self.open_document(path=document_path)
                 elif image_path:
-                    msg = u'Creating new inselect document for image [{0}]'
+                    msg = 'Creating new inselect document for image [{0}]'
                     debug_print(msg.format(image_path))
                     self.new_document(image_path)
                 else:
@@ -334,7 +334,7 @@ class MainWindow(QMainWindow):
 
         path = Path(path)
         if not path.is_file():
-            raise InselectError(u'Image file [{0}] does not exist'.format(path))
+            raise InselectError('Image file [{0}] does not exist'.format(path))
         else:
             # Callable for worker thread
             thumbnail_width = user_template_choice().current.thumbnail_width_pixels
@@ -368,7 +368,7 @@ class MainWindow(QMainWindow):
 
         self.open_document(document=document)
 
-        msg = u'New Inselect document [{0}] created in [{1}]'
+        msg = 'New Inselect document [{0}] created in [{1}]'
         msg = msg.format(document_path.stem, document_path.parent)
         QMessageBox.information(self, "Document created", msg)
 
@@ -388,7 +388,7 @@ class MainWindow(QMainWindow):
             raise ValueError(msg.format(len(recent)))
         else:
             # Show as many actions as there are recent documents
-            for index, path, action in izip(count(), recent, self.recent_doc_actions):
+            for index, path, action in zip(count(), recent, self.recent_doc_actions):
                 action.setEnabled(True)
                 action.setText(path.stem)
                 action.setToolTip(str(path))
@@ -439,8 +439,8 @@ class MainWindow(QMainWindow):
         self.sync_ui()
 
         if not is_writable(path):
-            msg = (u'The file [{0}] is read-only.\n\n'
-                   u'You will not be able to save any changes that you make.')
+            msg = ('The file [{0}] is read-only.\n\n'
+                   'You will not be able to save any changes that you make.')
             msg = msg.format(path.name)
             QMessageBox.warning(self, "Document is read-only", msg)
 
@@ -585,21 +585,22 @@ class MainWindow(QMainWindow):
         # Investigate https://pypi.python.org/pypi/qimage2ndarray/0.2
 
         # Work out the supported image file extensions
-        extensions = QImageWriter.supportedImageFormats()
-        extensions = sorted([str(e).lower() for e in extensions])
-        extensions = ['*.{0}'.format(e) for e in extensions]
+        extensions = {
+            '*.{0}'.format(bytes(e).decode().lower()) for
+            e in QImageWriter.supportedImageFormats()
+        }
 
         # Only some of these make sense. For example, do not offer the user
         # the change to save an eps, which is a format supported by QImageWriter
-        extensions = sorted(set(extensions).intersection(IMAGE_PATTERNS))
+        extensions = sorted(extensions.intersection(IMAGE_PATTERNS))
 
         filter = 'Images ({0})'.format(' '.join(extensions))
 
         if self.document_path:
             # Default name is the name of this document with '_screengrab' appended
-            default_fname = u'{0}_screengrab'.format(self.document_path.stem)
+            default_fname = '{0}_screengrab'.format(self.document_path.stem)
         else:
-            default_fname = u'inselect_screengrab'
+            default_fname = 'inselect_screengrab'
 
         # Default suffix is jpg, if available
         for e in ('.jpg', '.jpeg', '.png'):
@@ -608,6 +609,7 @@ class MainWindow(QMainWindow):
                 break
         else:
             # Use the first available extension
+            print(111, repr(extensions))
             default_extension = extensions[0][1:]
 
         default_fname = Path(default_fname).with_suffix(default_extension)
@@ -617,11 +619,11 @@ class MainWindow(QMainWindow):
             QStandardPaths.DocumentsLocation
         )
 
-        debug_print(u'Default screengrab dir [{0}]'.format(default_dir))
-        debug_print(u'Default screengrab fname [{0}]'.format(default_fname))
+        debug_print('Default screengrab dir [{0}]'.format(default_dir))
+        debug_print('Default screengrab fname [{0}]'.format(default_fname))
         path, selectedFilter = QFileDialog.getSaveFileName(
             self, "Save image file of boxes view",
-            unicode(Path(default_dir) / default_fname),
+            str(Path(default_dir) / default_fname),
             filter=filter
         )
 
@@ -660,18 +662,18 @@ class MainWindow(QMainWindow):
                 self.document_path.resolve() == document_to_open.resolve()):
             if self.model.is_modified:
                 # Ask the user if they work like to revert
-                msg = (u'The document [{0}] is already open and has been '
-                       u'changed. Would you like to discard your changes and '
-                       u'revert to the previous version?')
+                msg = ('The document [{0}] is already open and has been '
+                       'changed. Would you like to discard your changes and '
+                       'revert to the previous version?')
                 msg = msg.format(self.document_path.stem)
-                res = QMessageBox.question(self, u'Discard changes?', msg,
+                res = QMessageBox.question(self, 'Discard changes?', msg,
                                            (QMessageBox.Yes | QMessageBox.No),
                                            QMessageBox.No)
                 close = QMessageBox.Yes == res
             else:
                 # Let the user know that the document is already open and
                 # take no action
-                msg = u'The document [{0}] is already open'
+                msg = 'The document [{0}] is already open'
                 msg = msg.format(self.document_path.stem)
                 QMessageBox.information(self, 'Document already open', msg,
                                         QMessageBox.Ok)
@@ -707,7 +709,7 @@ class MainWindow(QMainWindow):
         if self.time_doc_opened and self.print_time:
             elapsed = datetime.utcnow() - self.time_doc_opened
             self.time_doc_opened = None
-            print(u'{0},{1}s'.format(self.document_path, elapsed.total_seconds()))
+            print('{0},{1}s'.format(self.document_path, elapsed.total_seconds()))
 
         # Clear selection before closing for performance reasons
         self.select_none()
@@ -974,7 +976,7 @@ class MainWindow(QMainWindow):
                                            self.exit_action.shortcut()])
 
         self.recent_doc_actions = [None] * RecentDocuments.MAX_RECENT_DOCS
-        for index in xrange(RecentDocuments.MAX_RECENT_DOCS):
+        for index in range(RecentDocuments.MAX_RECENT_DOCS):
             self.recent_doc_actions[index] = QAction(
                 'Recent document', self,
                 triggered=partial(self.open_recent, index=index)
@@ -1063,7 +1065,7 @@ class MainWindow(QMainWindow):
             self.plugin_actions[index] = action
             if hasattr(plugin, 'config'):
                 ui_action = QAction(
-                    u"Configure '{0}'...".format(plugin.NAME), self,
+                    "Configure '{0}'...".format(plugin.NAME), self,
                     triggered=partial(self.show_plugin_config, index),
                     icon=load_icon(':/icons/configure.png')
                 )
@@ -1449,7 +1451,7 @@ class MainWindow(QMainWindow):
 
     def save_to_cookie_cutter(self, checked=False):
         "Saves bounding boxes to a new 'cookie cutter' file"
-        folder = unicode(cookie_cutter_choice().last_directory())
+        folder = str(cookie_cutter_choice().last_directory())
         path, selectedFilter = QFileDialog.getSaveFileName(
             self, "New cookie cutter", folder,
             CookieCutterWidget.FILE_FILTER

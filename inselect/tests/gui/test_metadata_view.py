@@ -5,7 +5,7 @@ from pathlib import Path
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.gui.views.metadata import FieldEdit, FieldComboBox
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'
 
@@ -26,16 +26,16 @@ class TestMetadataViewControls(GUITest):
         controls = self.window.view_metadata._form_container.controls
         # controls is a dict { control: field name }
         self.assertEqual(4, len(controls))
-        self.assertIn('Department', controls.values())
-        self.assertIn('catalogNumber', controls.values())
-        self.assertIn('Location', controls.values())
-        self.assertIn('Taxonomy', controls.values())
+        self.assertIn('Department', list(controls.values()))
+        self.assertIn('catalogNumber', list(controls.values()))
+        self.assertIn('Location', list(controls.values()))
+        self.assertIn('Taxonomy', list(controls.values()))
 
     def _control_for_field(self, field):
         "Returns the control for the given field"
         f = self.window.view_metadata._form_container
         # f.controls is a dict { control: field name }
-        for key, value in f.controls.iteritems():
+        for key, value in f.controls.items():
             if field == value:
                 return key
         else:

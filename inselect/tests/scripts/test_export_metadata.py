@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from itertools import izip, count
+from itertools import count
 from pathlib import Path
 
 import unicodecsv
@@ -26,9 +26,9 @@ class TestExportCSV(unittest.TestCase):
             # Create CSV file
             csv = tempdir / 'shapes.csv'
             with csv.open('w') as outfile:
-                outfile.write(u'This is only a test\n')
+                outfile.write('This is only a test\n')
 
-            main([unicode(tempdir)])
+            main([str(tempdir)])
 
             # nose hooks up stdout to a file-like object
             stdout = sys.stdout.getvalue()
@@ -49,7 +49,7 @@ class TestExportCSV(unittest.TestCase):
             with csv.open('w'):
                 pass
 
-            main([unicode(tempdir), '--overwrite'])
+            main([str(tempdir), '--overwrite'])
 
             csv = tempdir / 'shapes.csv'
             self.assertTrue(csv.is_file())
@@ -58,21 +58,21 @@ class TestExportCSV(unittest.TestCase):
             doc = InselectDocument.load(tempdir / 'shapes.inselect')
             with csv.open('rb') as f:
                 res = unicodecsv.DictReader(f, encoding='utf-8')
-                for index, item, row in izip(count(), doc.items, res):
+                for index, item, row in zip(count(), doc.items, res):
                     expected = item['fields']
                     expected.update({
                         'ItemNumber': str(1+index),
                         'Cropped_image_name': '{0:04}.jpg'.format(1+index)
                     })
-                    actual = {k: v for k, v in row.items() if v and k not in BOUNDING_BOX_FIELD_NAMES}
+                    actual = {k: v for k, v in list(row.items()) if v and k not in BOUNDING_BOX_FIELD_NAMES}
                     self.assertEqual(expected, actual)
 
     def test_export_csv_with_template(self):
         "Export metadata to CSV using a metadata template"
         with temp_directory_with_files(TESTDATA / 'shapes.inselect',
                                        TESTDATA / 'shapes.png') as tempdir:
-            main([unicode(tempdir),
-                  u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
+            main([str(tempdir),
+                  '--template={0}'.format(TESTDATA / 'test.inselect_template')])
             # nose hooks up stdout to a file-like object
             stdout = sys.stdout.getvalue()
             self.assertIn('because there are validation problems', stdout)

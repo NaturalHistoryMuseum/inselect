@@ -87,7 +87,7 @@ def main(args=None):
     # Install global exception hook only after the application has been created
     sys.excepthook = report_exception_to_user
 
-    debug_print(u'Settings stored in [{0}]'.format(QSettings().fileName()))
+    debug_print('Settings stored in [{0}]'.format(QSettings().fileName()))
 
     if parsed.locale:
         debug_print('Will set locale to [{0}]'.format(parsed.locale))
@@ -97,7 +97,7 @@ def main(args=None):
         # Set Python's locale module to the user's default locale
         locale.setlocale(locale.LC_ALL, '')
 
-    debug_print(u'Locale is [{0}]'.format(QLocale().name()))
+    debug_print('Locale is [{0}]'.format(QLocale().name()))
 
     # Application icon
     icon = QIcon()

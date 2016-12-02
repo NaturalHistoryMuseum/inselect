@@ -35,9 +35,9 @@ def ingest_image(source, dest_dir,
     """
     dest = dest_dir / source.name
     if source != dest and dest.is_file():
-        raise InselectError(u'Destination image [{0}] exists'.format(dest))
+        raise InselectError('Destination image [{0}] exists'.format(dest))
     else:
-        debug_print(u'Ingesting [{0}] to [{1}]'.format(source, dest))
+        debug_print('Ingesting [{0}] to [{1}]'.format(source, dest))
 
         if source != dest:
             source.rename(dest)
@@ -46,7 +46,7 @@ def ingest_image(source, dest_dir,
         doc = InselectDocument.new_from_scan(dest, thumbnail_width_pixels)
 
         if default_metadata_items:
-            debug_print(u'Adding [{0}] default metadata items'.format(
+            debug_print('Adding [{0}] default metadata items'.format(
                 len(default_metadata_items)
             ))
             doc.set_items(default_metadata_items)
@@ -57,6 +57,6 @@ def ingest_image(source, dest_dir,
             doc.save()
 
         # TODO LH Copy EXIF tags?
-        debug_print(u'Ingested [{0}] to [{1}]'.format(source, dest))
+        debug_print('Ingested [{0}] to [{1}]'.format(source, dest))
 
         return doc

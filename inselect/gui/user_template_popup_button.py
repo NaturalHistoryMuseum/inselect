@@ -10,7 +10,7 @@ from .utils import load_icon, reveal_path
 class UserTemplatePopupButton(QPushButton):
     "User template popup button"
 
-    FILE_FILTER = u'Inselect user templates (*{0})'.format(
+    FILE_FILTER = 'Inselect user templates (*{0})'.format(
         UserTemplate.EXTENSION
     )
 
@@ -46,7 +46,7 @@ class UserTemplatePopupButton(QPushButton):
             "Reveal template", self, triggered=self.reveal
         )
         self._default_action = QAction(
-            u"Default ({0})".format(user_template_choice().DEFAULT.name),
+            "Default ({0})".format(user_template_choice().DEFAULT.name),
             self, triggered=self.default, icon=load_icon(':/icons/close.png')
         )
 
@@ -67,7 +67,7 @@ class UserTemplatePopupButton(QPushButton):
         debug_print('UserTemplateWidget.choose')
         path, selectedFilter = QFileDialog.getOpenFileName(
             self, "Choose user template",
-            unicode(user_template_choice().last_directory()),
+            str(user_template_choice().last_directory()),
             self.FILE_FILTER
         )
 

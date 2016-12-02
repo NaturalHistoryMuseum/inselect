@@ -10,7 +10,7 @@ from qtpy.QtWidgets import QMessageBox, QFileDialog
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import make_readonly
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.gui.main_window import MainWindow
 
@@ -46,7 +46,7 @@ class TestFileOpen(GUITest):
         # using a regular expression rather than equality. Not possible to
         # check modified behaviour because MainWindow.modified_changed slot
         # is not called without event loop.
-        self.assertRegexpMatches(self.window.windowTitle(),
+        self.assertRegex(self.window.windowTitle(),
                                  '^shapes\\.inselect.*')
 
     def test_open_doc(self):
@@ -66,8 +66,8 @@ class TestFileOpen(GUITest):
             self.window.open_file(path=tempdir / 'shapes.inselect')
 
             self.assertTrue(mock_warning.called)
-            expected = (u'The file [shapes.inselect] is read-only.\n\n'
-                        u'You will not be able to save any changes that you '
+            expected = ('The file [shapes.inselect] is read-only.\n\n'
+                        'You will not be able to save any changes that you '
                         'make.')
             self.assertTrue(expected in mock_warning.call_args[0])
 
@@ -130,7 +130,7 @@ class TestFileOpen(GUITest):
 
             # User should have been told about the new document
             self.assertTrue(mock_information.called)
-            expected = u'New Inselect document [shapes] created in [{0}]'
+            expected = 'New Inselect document [shapes] created in [{0}]'
             expected = expected.format(tempdir)
             self.assertTrue(expected in mock_information.call_args[0])
 

@@ -5,7 +5,7 @@ import traceback
 
 from contextlib import contextmanager
 from functools import wraps
-from io import BytesIO
+from io import StringIO
 from itertools import groupby
 
 import sip
@@ -14,7 +14,8 @@ from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel
 from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
 from qtpy.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
 
-import copy_box
+from . import copy_box
+from functools import reduce
 
 # Warning: lazy load of cv2 and numpy via local imports
 
@@ -24,7 +25,7 @@ HTML_LINK_STYLE = """<style type=text/css>
 </style>
 """
 
-HTML_LINK_TEMPLATE = u"""<html><head>{0}</head><body>
+HTML_LINK_TEMPLATE = """<html><head>{0}</head><body>
     {{0}}
 </body></html>
 """.format(HTML_LINK_STYLE)
@@ -87,7 +88,7 @@ def contiguous(values):
     (25, 4)
     """
     # Taken from http://stackoverflow.com/a/2361991
-    for k, g in groupby(enumerate(values), lambda (i, x): i - x):
+    for k, g in groupby(enumerate(values), lambda i_x: i_x[0] - i_x[1]):
         g = list(g)
         lower, upper = g[0][1], g[-1][1]
         count = upper - lower + 1
@@ -107,18 +108,21 @@ def painter_state(painter):
 
 def report_exception_to_user(type, value, tb):
     "Shows the exception and traceback in a dialog"
+    if False:
+        traceback.print_tb(tb)
+        print(type, value)
     try:
-        details = BytesIO()
+        details = StringIO()
         traceback.print_tb(tb, file=details)
         copy_box.show_copy_details_box(
-            QMessageBox.Critical, u'An error occurred',
-            u'An error occurred:\n{0}'.format(value),
-            details.getvalue().encode('utf8')
+            QMessageBox.Critical, 'An error occurred',
+            'An error occurred:\n{0}'.format(value),
+            details.getvalue()
         )
     except:
         # Wah! Exception showing the details box.
         QMessageBox.critical(
-            None, u'An error occurred', u'An error occurred:\n{0}'.format(value)
+            None, 'An error occurred', 'An error occurred:\n{0}'.format(value)
         )
 
 
@@ -192,12 +196,12 @@ def reveal_path(path):
     # http://stackoverflow.com/a/3546503
     path = path.resolve()
     if sys.platform.startswith("win"):
-        res = subprocess.call(u"explorer.exe /select,{0}".format(path))
+        res = subprocess.call("explorer.exe /select,{0}".format(path))
         if 1 != res:
             raise ValueError('Unexpected exit code [{0}]'.format(res))
     elif 'Darwin' == platform.system():
-        reveal = u'tell application "Finder" to reveal POSIX file "{0}"'
-        activate = u'tell application "Finder" to activate "{0}"'
+        reveal = 'tell application "Finder" to reveal POSIX file "{0}"'
+        activate = 'tell application "Finder" to activate "{0}"'
         args = ['/usr/bin/osascript', '-e']
         subprocess.check_call(args + [reveal.format(path)])
         subprocess.check_call(args + [activate.format(path)])
