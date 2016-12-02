@@ -54,10 +54,15 @@ class BoxItem(QGraphicsRectItem):
                                self.sceneBoundingRect())
 
         with painter_state(painter):
-            # Zero thickness indicates a cosmetic pen, which is drawn with the
-            # same thickness regardless of the view's scale factor
             outline_colour, fill_colour = self.colours
-            painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
+
+            # Cosmetic pens "...draw strokes that have a constant width
+            # regardless of any transformations applied to the QPainter they are
+            # used with."
+            pen = QPen(outline_colour, 1.5, Qt.SolidLine)
+            pen.setCosmetic(True)
+            painter.setPen(pen)
+
             r = self.boundingRect()
             painter.drawRect(r)
 
