@@ -83,19 +83,13 @@ setup_data = {
         ],
         # Strings in braces within 'include_files' tuples expanded in cx_setup
         'include_files': [
-            ('{site_packages}/numpy', 'numpy'),
-            ('{site_packages}/scipy', 'scipy'),
-            ('{site_packages}/sklearn', 'sklearn'),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
-            ('{environment_root}/Library/plugins/platforms/qwindows.dll', 'platforms/qwindows.dll'),
             ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
             'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
-            'future.moves',    # Errors from urllib otherwise
-            'PyQt4.QtNetwork',
         ]
     }
 }

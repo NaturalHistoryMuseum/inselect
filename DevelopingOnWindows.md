@@ -45,50 +45,18 @@ follows:
 You should run through these for both the 32-bit and 64-bit environments that
 you created above.
 
-## Install Visual C++ compiler for Python 2.7
-
-This is required to build `cx_Freeze`.
-Download from http://aka.ms/vcpython27 and install with defaults.
-
 ## Inselect environment
 
 ```
-# Visual C++ is required to build cx_Freeze
-"%HOMEPATH%\AppData\Local\Programs\Common\Microsoft\Visual C++ for Python\9.0\vcvarsall.bat"
-
 conda update --yes conda
 conda env create -f inselect-win.yml
 activate inselect
-
-pip install -r requirements.pip
-
 FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\Scripts\pywin32_postinstall.py -install
+pip install -r requirements.pip
 ```
 
 Don't worry about the "Can't install shortcuts..." message when you run the
 `pywin32_postinstall` step.
-
-## Install OpenCV
-* Download [OpenCV 3.1.0](http://opencv.org/)
-* Extract OpenCV to `c:\opencv-3.1.0\`
-* Copy the extension module to the Anaconda environment; for 64-bit:
-
-    ```
-    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-3.1.0\build\python\2.7\x64\cv2.pyd %a\DLLs
-    ```
-
-    For 32-bit:
-
-    ```
-    FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO copy C:\opencv-3.1.0\build\python\2.7\x86\cv2.pyd %a\DLLs
-    ```
-
-
-* Test
-
-    ```
-    python -c "import cv2; print cv2.__version__"
-    ```
 
 ### Inlite barcode reading library
 Download and install the [Inlite ClearImage SDK](http://www.inliteresearch.com/).
