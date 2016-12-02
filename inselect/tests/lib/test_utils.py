@@ -95,22 +95,17 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(1, mock_get_user_name_ex.call_count)
 
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
-    def test_user_name_windows_route2(self):
+    @patch.object(win32api, 'GetUserName', return_value=MOCK_USERNAME)
+    def test_user_name_windows_route2(self, mock_get_user_name):
         "Get user name using GetUserName"
         # Creating instance of pywintypes.error so this patch needs to be
         # within the function body
         with patch.object(
             win32api, 'GetUserNameEx', side_effect=pywintypes.error()
         ) as mock_get_user_name_ex:
-            # MBCS encoding only on Windows so this patch needs to be within
-            # the function body.
-            with patch.object(
-                win32api, 'GetUserName',
-                return_value=self.MOCK_USERNAME.encode('mbcs')
-            ) as mock_get_user_name:
-                self.assertEqual(self.MOCK_USERNAME, user_name())
-                mock_get_user_name_ex.assert_called_once_with(3)
-                mock_get_user_name.assert_called_once_with()
+            self.assertEqual(self.MOCK_USERNAME, user_name())
+            mock_get_user_name_ex.assert_called_once_with(3)
+            mock_get_user_name.assert_called_once_with()
 
 
 if __name__ == '__main__':

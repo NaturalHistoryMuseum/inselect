@@ -66,8 +66,8 @@ def rmtree_readonly(path):
     # http://stackoverflow.com/a/9735134
     def handle_remove_readonly(func, path, exc):
         excvalue = exc[1]
-        if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-
+        # PermissionError
+        if func in (os.rmdir, os.remove, os.unlink) and excvalue.errno == errno.EACCES:
             # ensure parent directory is writeable too
             pardir = os.path.abspath(os.path.join(path, os.path.pardir))
             if not os.access(pardir, os.W_OK):
@@ -145,8 +145,7 @@ def user_name():
             return win32api.GetUserNameEx(NameDisplay)
         except pywintypes.error:
             try:
-                # Returns MBCS
-                return str(win32api.GetUserName(), 'mbcs')
+                return win32api.GetUserName()
             except pywintypes.error:
                 return ''
     else:
@@ -178,9 +177,7 @@ def format_dt_display(dt):
         LOCALE_USER_DEFAULT = 0x0400
         DATE_LONGDATE = 2
         time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
-        time = str(time, "mbcs")
         date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
-        date = str(date, "mbcs")
         return '{0} {1}'.format(date, time)
-
-    return dt.isoformat()
+    else:
+        return dt.isoformat()

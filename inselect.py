@@ -9,7 +9,7 @@ if sys.platform == 'win32' and hasattr(sys, 'frozen'):
     # can be found. Shouldn't need to do this.
     from ctypes import windll
     from pathlib import Path
-    windll.kernel32.SetDllDirectoryW(unicode(Path(sys.executable).parent))
+    windll.kernel32.SetDllDirectoryW(str(Path(sys.executable).parent))
 
 
 def main():
