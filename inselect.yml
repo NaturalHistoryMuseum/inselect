@@ -5,5 +5,4 @@ dependencies:
 - numpy=1.11.2
 - pip=9.0.1
 - python=3.5.2
-- pywin32=220
 - scipy=0.18.1    # No binary wheel for Windows at present

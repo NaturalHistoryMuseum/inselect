@@ -1,38 +1,30 @@
 # Inselect on Linux
 
-These instructions use the system's Python and many system python packages.
+These instructions use
+[Continuum's Miniconda](http://conda.pydata.org/miniconda.html)
+Python distribution.
 Tested on Ubuntu 14.04 and 16.04, both with 2GB RAM.
-For an approach using `miniconda` see `.travis.yml`.
+Inselect uses Python 3.4+ and OpenCV 3. Ubuntu does not presently provide a
+system package of OpenCV's Python 3 bindings. To run Inselect with system
+packages, you will need to compile OpenCV.
 
-# Setup Python virtual environment
-
-```
-sudo apt-get install python-pip python-dev build-essential
-sudo pip2 install --upgrade pip
-sudo pip2 install virtualenv virtualenvwrapper
-```
-
-Append to ``~/.bash_profile`
-
+# Install Miniconda
 
 ```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/Miniconda3-latest-Linux-x86_64.sh
+bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda3
+rm /tmp/Miniconda3-latest-Linux-x86_64.sh
 
-## Setup virtualenvwrapper
-export WORKON_HOME=~/Envs/
-source /usr/local/bin/virtualenvwrapper.sh
+export PATH=~/miniconda3/bin:$PATH
+conda update --yes conda
 ```
 
-
-# Install system dependencies
-```
-sudo apt-get install python-qt4 pyqt4-dev-tools python-numpy python-scipy python-sklearn python-opencv python-pil libdmtx-dev libzbar-dev
-```
-
-# Create virtual environment for Inselect and install dependencies from pip
+# Inselect env
 
 ```
-mkvirtualenv --system-site-packages --python=/usr/bin/python2 inselect
-pip2 install -r requirements.pip
+conda env create -f inselect.yml
+source activate inselect
+pip install -r requirements.pip
 ```
 
 ## Test barcode reading libraries

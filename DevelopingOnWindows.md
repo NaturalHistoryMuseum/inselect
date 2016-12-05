@@ -3,38 +3,38 @@
 Windows is complicated by the fact that we provide both 32-bit and 64-bit builds
 of Inselect
 
-# Install Miniconda 64 bit
-* Download and run [Miniconda-latest-Windows-x86_64.exe](https://repo.continuum.io/miniconda/)
+# Install Miniconda3 64 bit
+* Download and run [Miniconda3-latest-Windows-x86_64.exe](https://repo.continuum.io/miniconda/)
 
     * Destination folder should be called Miniconda64
     * Uncheck 'Add Anaconda to my PATH'
     * Uncheck 'Register Anaconda as my default Python 2.7'
 
-## Minicoda64 shortcut
+## Minicoda3-64 shortcut
 
 I find it useful to have a shortcut on the desktop and taskbar, configured as
 follows:
 
     * Target: `C:\Windows\System32\cmd.exe /k "C:\Users\<your Windows username>\Miniconda64\Scripts\activate.bat"`
-    * Name Miniconda64
+    * Name Miniconda3-64
     * Start in: `C:\Users\<your Windows username>\`
     * Font: Consolas, 16
     * Layout: Buffer size, Width: 140
     * Layout: Window size, Width: 140
 
 
-# Install Miniconda 32 bit
-* Download and run [Miniconda-latest-Windows-x86.exe](https://repo.continuum.io/miniconda/)
-    * Destination folder should be called Miniconda32
+# Install Miniconda3 32 bit
+* Download and run [Miniconda3-latest-Windows-x86.exe](https://repo.continuum.io/miniconda/)
+    * Destination folder should be called Miniconda32-3
     * Uncheck 'Add Anaconda to my PATH'
 
-## Miniconda32 shortcut
+## Miniconda3-32 shortcut
 
 I find it useful to have a shortcut on the desktop and taskbar, configured as
 follows:
 
     * Target: `C:\Windows\System32\cmd.exe /k "C:\Users\<your Windows username>\Miniconda32\Scripts\activate.bat"`
-    * Name Miniconda32
+    * Name Miniconda3-32
     * Start in: `C:\Users\<your Windows username>\`
     * Font: Consolas, 16
     * Layout: Buffer size, Width: 140
@@ -49,8 +49,9 @@ you created above.
 
 ```
 conda update --yes conda
-conda env create -f inselect-win.yml
+conda env create -f inselect.yml
 activate inselect
+conda install pywin32=220
 FOR /F %a IN ('python -c "import sys; print(sys.exec_prefix)"') DO %a\python %a\Scripts\pywin32_postinstall.py -install
 pip install -r requirements.pip
 ```

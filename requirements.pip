@@ -1,14 +1,14 @@
 ExifRead==2.1.2
 humanize==0.5.1
 numpy==1.11.2
-#TODO How to specify OpenCV? 'cv2>=2.4.8,<3',
+#TODO How to specify OpenCV? 'cv2==3.1.0',
 Pillow==3.4.2
 psutil==5.0.0
 pylibdmtx==0.1.5
 PyQt5==5.7
 python-dateutil==2.6.0
 pytz==2016.7
-pywin32==220
+pywin32==220; sys_platform == 'win32'
 PyYAML==3.12
 pyzbar==0.1.3
 QtPy==1.1.2
@@ -27,6 +27,6 @@ coveralls>=1.1
 mock>=2.0.0
 nose>=1.3.7
 
-# PyInstaller==3.2 ; sys_platform == 'darwin'
+# PyInstaller==3.2; sys_platform == 'darwin'
 
 cx_Freeze==5.0; sys_platform == 'win32'

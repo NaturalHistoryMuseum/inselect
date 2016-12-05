@@ -13,18 +13,18 @@ brew install upx zbar libdmtx
 # Install Miniconda
 
 ```
-wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -O /tmp/Miniconda-latest-MacOSX-x86_64.sh
-bash /tmp/Miniconda-latest-MacOSX-x86_64.sh -b -p $HOME/miniconda
-rm /tmp/Miniconda-latest-MacOSX-x86_64.sh
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O /tmp/Miniconda3-latest-MacOSX-x86_64.sh
+bash /tmp/Miniconda3-latest-MacOSX-x86_64.sh -b -p $HOME/miniconda3
+rm /tmp/Miniconda3-latest-MacOSX-x86_64.sh
 
-export PATH=~/miniconda/bin:$PATH
+export PATH=~/miniconda3/bin:$PATH
 conda update --yes conda
 ```
 
 # Inselect env
 
 ```
-conda env create -f inselect-osx.yml
+conda env create -f inselect.yml
 source activate inselect
 pip install -r requirements.pip
 ```
