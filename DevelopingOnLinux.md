@@ -3,7 +3,7 @@
 These instructions use
 [Continuum's Miniconda](http://conda.pydata.org/miniconda.html)
 Python distribution.
-Tested on Ubuntu 14.04 and 16.04, both with 2GB RAM.
+Tested on Ubuntu 12.04, 14.04 and 16.04, all with 2GB RAM.
 Inselect uses Python 3.4+ and OpenCV 3. Ubuntu does not presently provide a
 system package of OpenCV's Python 3 bindings. To run Inselect with system
 packages, you will need to compile OpenCV.
@@ -27,10 +27,16 @@ source activate inselect
 pip install -r requirements.pip
 ```
 
-## Test barcode reading libraries
+## Install and test barcode reading libraries
 
 Inselect has optional barcode reading capabilities. The dependent libraries
-should have been installed.
+can be installed with
+
+```
+sudo apt-get install libzbar-dev libdmtx0a
+```
+
+Test
 
 ```
 python -c "from gouda.engines import ZbarEngine; print(ZbarEngine.available())"
