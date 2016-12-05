@@ -5,7 +5,7 @@ virtualenv:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -y --fix-missing libzbar-dev libdmtx0a libx11-xcb1;
+  - sudo apt-get install -y --fix-missing libzbar-dev libdmtx0a libegl1-mesa libx11-xcb1;
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
