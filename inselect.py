@@ -17,5 +17,5 @@ def main():
     app.main()
 
 
-if __name__ == "__main__":
+if __name__ in ('__main__', 'inselect__main__'):
     main()

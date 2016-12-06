@@ -126,6 +126,13 @@ def cx_setup():
         for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
     ]
 
+    # scipy
+    # http://stackoverflow.com/questions/32694052/scipy-and-cx-freeze-error-importing-scipy-you-cannot-import-scipy-while-being
+    import scipy
+    include_files += [
+        str(Path(scipy.__file__).parent),
+    ]
+
     # Setup
     setup(
         name=setup_data['name'],
