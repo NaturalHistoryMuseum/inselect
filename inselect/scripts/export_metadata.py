@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Exports metadata
 """
-
-
 import argparse
 import sys
 import traceback
@@ -73,5 +71,5 @@ def main(args=None):
     export_csv(args.dir, args.overwrite, args.template)
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', 'export_metadata__main__'):
     main()

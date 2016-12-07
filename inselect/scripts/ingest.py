@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Ingests scanned images
 """
-
-
 import argparse
 import sys
 import traceback
@@ -89,5 +87,5 @@ def main(args=None):
                           args.cookie_cutter)
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', 'ingest__main__'):
     main()

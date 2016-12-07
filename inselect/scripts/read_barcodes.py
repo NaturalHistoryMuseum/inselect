@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Post-process
 """
-
-
 import argparse
 import sys
 import traceback
@@ -104,5 +102,5 @@ def main(args=None):
     read_barcodes(engine, args.dir)
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', 'read_barcodes__main__'):
     main()

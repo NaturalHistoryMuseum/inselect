@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Saves cropped object images
 """
-
-
 import argparse
 import sys
 import traceback
@@ -79,5 +77,5 @@ def main(args=None):
     save_crops(args.dir, args.overwrite, args.template)
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', 'save_crops__main__'):
     main()

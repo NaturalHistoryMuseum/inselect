@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Segment documents
 """
-
-
 import argparse
 import sys
 import traceback
@@ -63,5 +61,5 @@ def main(args=None):
     segment(args.dir, args.sort_by_columns)
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', 'segment__main__'):
     main()
