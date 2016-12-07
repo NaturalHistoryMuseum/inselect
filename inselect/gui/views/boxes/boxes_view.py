@@ -215,7 +215,7 @@ class BoxesView(QGraphicsView):
                     self.viewport_changed.emit(self.normalised_scene_rect())
             else:
                 # zoom_mode == fixed
-                self.ensureVisible(united, xmargin=padding, ymargin=padding)
+                self.ensureVisible(united, xMargin=padding, yMargin=padding)
 
     def toggle_zoom_to_selection(self):
         """Toggles between 'whole_scene' and a either 'fixed' with a mild zoom
