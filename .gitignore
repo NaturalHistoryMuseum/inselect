@@ -11,6 +11,7 @@ MANIFEST
 *spec
 !inselect.spec
 !read_barcodes.spec
+!segment.spec
 *tar.gz
 *dmg
 .directory
