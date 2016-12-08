@@ -1,3 +1,5 @@
+import sys
+
 from itertools import chain
 
 from qtpy.QtCore import Qt, QRect, QRectF
@@ -15,6 +17,12 @@ from .reticle import Reticle
 class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
+
+    # The width of the box (in pixels) drawn around the box.
+    # A width of 1 on Mac OS X is too thin. 1.5 on Windows causes artefacts -
+    # the top and left edges might appear thicker than the bottom and right
+    # edges.
+    BOX_WIDTH = 1.5 if 'darwin' == sys.platform else 1
 
     def __init__(self, x, y, w, h, isvalid, parent=None):
         super(BoxItem, self).__init__(x, y, w, h, parent)
@@ -59,7 +67,7 @@ class BoxItem(QGraphicsRectItem):
             # Cosmetic pens "...draw strokes that have a constant width
             # regardless of any transformations applied to the QPainter they are
             # used with."
-            pen = QPen(outline_colour, 1.5, Qt.SolidLine)
+            pen = QPen(outline_colour, self.BOX_WIDTH, Qt.SolidLine)
             pen.setCosmetic(True)
             painter.setPen(pen)
 
