@@ -109,15 +109,19 @@ def painter_state(painter):
 def report_exception_to_user(type, value, tb):
     "Shows the exception and traceback in a dialog"
     if False:
+        # TODO Print if debug printing is enabled
         traceback.print_tb(tb)
         print(type, value)
     try:
         details = StringIO()
         traceback.print_tb(tb, file=details)
         copy_box.show_copy_details_box(
-            QMessageBox.Critical, 'An error occurred',
-            'An error occurred:\n{0}'.format(value),
-            details.getvalue()
+            icon=QMessageBox.Critical,
+            title='An error occurred',
+            text='An error occurred:\n{0}'.format(value),
+            details='{0}\n{1}: {2}'.format(
+                details.getvalue(), type.__name__, value
+            )
         )
     except:
         # Wah! Exception showing the details box.
