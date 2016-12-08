@@ -1,5 +1,7 @@
 import sys
 
+from pathlib import Path
+
 from inselect.gui import app
 
 if sys.platform == 'win32' and hasattr(sys, 'frozen'):
