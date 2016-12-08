@@ -9,7 +9,9 @@ a = Analysis(
     pathex=[str(Path('.').absolute())],
     binaries=[],
     datas=[],
-    hiddenimports=['numpy', 'sklearn.neighbors.typedefs'],
+    hiddenimports=[
+        'numpy', 'sklearn.neighbors.typedefs', 'sklearn.neighbors.dist_metrics'
+    ],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
