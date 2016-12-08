@@ -7,17 +7,19 @@ from pyzbar import pyzbar
 block_cipher = None
 
 
-a = Analysis(['inselect/scripts/read_barcodes.py'],
-             pathex=[str(Path('.').absolute())],
-             binaries=[],
-             datas=[],
-             hiddenimports=['numpy'],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher)
+a = Analysis(
+    ['inselect/scripts/read_barcodes.py'],
+    pathex=[str(Path('.').absolute())],
+    binaries=[],
+    datas=[],
+    hiddenimports=['numpy'],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher
+)
 
 # dylibs not detected because they are loaded by ctypes
 a.binaries += TOC([
@@ -27,13 +29,15 @@ a.binaries += TOC([
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
-exe = EXE(pyz,
-          a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
-          name='read_barcodes',
-          debug=False,
-          strip=False,
-          upx=True,
-          console=True )
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    name='read_barcodes',
+    debug=False,
+    strip=False,
+    upx=True,
+    console=True
+)
