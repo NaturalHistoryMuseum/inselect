@@ -54,7 +54,7 @@ setup_data = {
     },
     'entry_points': {
         'gui_scripts':
-            ['inselect = inselect.app:main'],
+            ['inselect = inselect.gui.app:main'],
         'console_scripts':
             ['{0} = inselect.scripts.{0}:main'.format(script) for script in SCRIPTS],
     },
@@ -67,7 +67,7 @@ setup_data = {
     'win32': {
         'executables': [
             {
-                'script': 'inselect.scripts.inselect.py',
+                'script': 'inselect/scripts/inselect.py',
                 'targetName': 'inselect.exe',
                 'icon': 'icons/inselect.ico',
                 'base': 'Win32GUI',
@@ -88,7 +88,7 @@ setup_data = {
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/mkl_intel_thread.dll', 'mkl_intel_thread.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
-            ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
+            ('{project_root}/inselect/gui/inselect.qss', 'inselect.qss'),
         ],
         'extra_packages': ['win32com.gen_py'],
         'excludes': [
@@ -101,32 +101,32 @@ setup_data = {
 def setuptools_setup():
     """setuptools setup"""
     from setuptools import setup
-    setup(**setup_data)
+    setup(**{k: v for k, v in setup_data.items() if 'win32' != k})
 
 
-def cx_freeze_setup():
-    """cx_Freeze setup. Used for building installers for Mac OS X and for
-    Windows
-    """
-    from itertools import chain
+def cx_setup():
+    """cx_Freeze setup. Used for building Windows installers"""
+    from cx_Freeze import setup, Executable
+    from distutils.sysconfig import get_python_lib
     from pathlib import Path
 
-    from cx_Freeze import setup, Executable
+    # Set paths to include files
+    format_strings = {
+        'site_packages': get_python_lib(),
+        'environment_root': Path(sys.executable).parent,
+        'project_root': Path(__file__).parent,
+    }
+    include_files = [
+        (source.format(**format_strings), destination)
+        for source, destination in setup_data['win32']['include_files']
+    ]
 
+    # DLLs that are not detected because they are loaded by ctypes
     from pylibdmtx import pylibdmtx
     from pyzbar import pyzbar
-
-    # Dependencies that are not automatically detected
-    include_files = [
-        # (str(Path(sys.executable).parent.joinpath('Library/bin/mkl_core.dll')), 'mkl_core.dll'),
-        # (str( Library/bin/libiomp5md.dll')), 'libiomp5md.dll'),
-        (str(Path(__file__).parent.joinpath('inselect/inselect.qss')), 'inselect.qss'),
-    ] + [
-        # DLLs that are not detected because they are loaded by ctypes
+    include_files += [
         (dep._name, Path(dep._name).name)
-        for dep in chain(
-            pylibdmtx.EXTERNAL_DEPENDENCIES, pyzbar.EXTERNAL_DEPENDENCIES
-        )
+        for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
     ]
 
     # scipy
@@ -137,61 +137,33 @@ def cx_freeze_setup():
     ]
 
     # Setup
-#    from pprint import pprint
     setup(
         name=setup_data['name'],
         version=setup_data['version'],
-        description=setup_data['description'],
         options={
             'build_exe': {
                 'packages': (
                     setup_data['packages'] +
-                    (['win32com.gen_py'] if sys.platform == 'win32' else [])
+                    setup_data['win32']['extra_packages']
                 ),
-                'excludes': [
-                    'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
-                    'setuptools', 'pkg_resources',
-                ],
-                'bin_excludes': [
-                    'libqtaudio_coreaudio.dylib',
-                ],
-                'bin_path_excludes': [
-                    '/Library/Frameworks/Python.framework/',
-                    str(Path(sys.executable).parent.parent.joinpath('site-packages/setuptools-27.2.0-py3.5.egg/pkg_resources')),
-                ] + [
-                    str(Path(sys.executable).parent.parent.joinpath('lib', '{0}.framework'.format(section)))
-                    for section in ('QtCore', 'QtGui', 'QtNetwork', 'QtOpenGL', 'QtWidgets', 'QtSql', 'QtSvg', 'QtTest', 'QtXml', 'QtDBus', 'QtPrintSupport')
-                ],
+                'excludes': setup_data['win32']['excludes'],
                 'include_files': include_files,
-                'include_msvcr': sys.platform == 'win32',
+                'include_msvcr': True,
                 'optimize': 2,
             },
             'bdist_msi': {
-                'upgrade_code': '{fe2ed61d-cd5e-45bb-9d16-146f725e522f}',
+                'upgrade_code': '{fe2ed61d-cd5e-45bb-9d16-146f725e522f}'
             }
         },
         executables=[
-            Executable(**exe) for exe in [{
-                'script': 'inselect.scripts.inselect.py',
-                'targetName': 'inselect.exe',
-                'icon': 'icons/inselect.ico',
-                'base': 'Win32GUI' if sys.platform == 'win32' else None,
-                'shortcutName': 'Inselect',     # See http://stackoverflow.com/a/15736406
-                'shortcutDir': 'ProgramMenuFolder',
-            }] + [
-                {
-                    'script': 'inselect/scripts/{0}.py'.format(script),
-                    'targetName': '{0}.exe'.format(script),
-                }
-                for script in SCRIPTS
-            ]
-        ],
+            Executable(**i) for i in setup_data['win32']['executables']
+        ]
     )
 
 
 if (3, 5) <= sys.version_info:
-    if 'bdist_msi' in sys.argv or 'bdist_dmg' in sys.argv or 'bdist_mac' in sys.argv:
-        cx_freeze_setup()
+    if 'bdist_msi' in sys.argv:
+        cx_setup()
     else:
         setuptools_setup()
 else:
