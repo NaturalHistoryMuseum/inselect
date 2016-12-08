@@ -13,8 +13,8 @@ import inselect.lib.utils
 from inselect.lib.document import InselectDocument
 from inselect.lib.document_export import DocumentExport
 from inselect.lib.templates.dwc import DWC
-from inselect.lib.utils import debug_print
 from inselect.lib.user_template import UserTemplate
+from inselect.lib.utils import debug_print, fix_frozen_dll_path
 from inselect.lib.validate_document import format_validation_problems
 
 
@@ -78,4 +78,5 @@ def main(args=None):
 
 
 if __name__ in ('__main__', 'save_crops__main__'):
+    fix_frozen_dll_path()
     main()

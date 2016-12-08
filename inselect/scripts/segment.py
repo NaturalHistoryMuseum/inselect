@@ -11,7 +11,7 @@ import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment_document import SegmentDocument
-from inselect.lib.utils import debug_print
+from inselect.lib.utils import debug_print, fix_frozen_dll_path
 
 
 # TODO Recursive option
@@ -62,4 +62,5 @@ def main(args=None):
 
 
 if __name__ in ('__main__', 'segment__main__'):
+    fix_frozen_dll_path()
     main()

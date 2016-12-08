@@ -6,6 +6,7 @@ import os
 import shutil
 import stat
 import string
+import sys
 
 from collections import Counter
 from itertools import filterfalse
@@ -32,6 +33,16 @@ DEFAULT_LOCALE = None
 def debug_print(*args, **kwargs):
     if DEBUG_PRINT:
         print(*args, **kwargs)
+
+
+def fix_frozen_dll_path():
+    """Fix DLL path when frozen on Windows
+    """
+    if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+        # Patch DLL path so that DLL dependencies of .pyd files in
+        # subdirectories can be found. Shouldn't need to do this.
+        from ctypes import windll
+        windll.kernel32.SetDllDirectoryW(str(Path(sys.executable).parent))
 
 
 def get_default_locale():

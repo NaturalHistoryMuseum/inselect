@@ -14,7 +14,7 @@ from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.document import InselectDocument
 from inselect.lib.ingest import ingest_image, IMAGE_SUFFIXES_RE
 from inselect.lib.inselect_error import InselectError
-
+from inselect.lib.utils import fix_frozen_dll_path
 
 # TODO Recursive option
 
@@ -88,4 +88,5 @@ def main(args=None):
 
 
 if __name__ in ('__main__', 'ingest__main__'):
+    fix_frozen_dll_path()
     main()
