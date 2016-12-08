@@ -18,7 +18,7 @@ class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    # The width of the box (in pixels) drawn around the box.
+    # The width of the line (in pixels) drawn around the box.
     # A width of 1 on Mac OS X is too thin. 1.5 on Windows causes artefacts -
     # the top and left edges might appear thicker than the bottom and right
     # edges.
