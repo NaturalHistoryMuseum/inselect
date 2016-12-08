@@ -48,6 +48,18 @@ a python file `inselect/gui/icons.py` by running
 pyrcc5 icons.qrc > inselect/gui/icons.py
 ```
 
+# Test and run
+
+```
+nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
+```
+
+Run inselect
+
+```
+python -m inselect.scripts.inselect
+```
+
 # Build
 
 The build script freezes icons, runs tests, freezes python and assembles files

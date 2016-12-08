@@ -6,8 +6,8 @@ from qtpy import QtCore, QtWidgets
 from qtpy.QtWidgets import QMessageBox
 
 from inselect.gui import shortcuts_help
+from inselect.gui.app import qapplication
 from inselect.gui.main_window import MainWindow
-from inselect.app import qapplication
 
 
 WINDOW = None

@@ -70,5 +70,5 @@ python -m nose --verbose --with-coverage --cover-inclusive --cover-tests --cover
 Run inselect
 
 ```
-./inselect.py
+python -m inselect.scripts.inselect
 ```

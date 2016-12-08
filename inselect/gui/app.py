@@ -11,9 +11,9 @@ from qtpy.QtGui import QIcon
 
 import inselect
 
-from .lib.utils import debug_print
-from .gui.main_window import MainWindow
-from .gui.utils import report_exception_to_user
+from inselect.lib.utils import debug_print
+from .main_window import MainWindow
+from .utils import report_exception_to_user
 
 
 # Values used by several important parts of Qt's machinery including the GUI
@@ -22,6 +22,7 @@ QCoreApplication.setOrganizationName('NHM')
 QCoreApplication.setApplicationName('Inselect')
 QCoreApplication.setApplicationVersion(inselect.__version__)
 QCoreApplication.setOrganizationDomain('nhm.ac.uk')
+
 
 APP = None
 

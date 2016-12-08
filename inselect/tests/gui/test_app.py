@@ -7,7 +7,7 @@ from pathlib import Path
 from qtpy.QtCore import QLocale
 from qtpy.QtWidgets import QApplication
 
-from inselect.app import main
+from inselect.gui.app import main
 from inselect.gui.main_window import MainWindow
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'

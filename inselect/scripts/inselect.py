@@ -1,5 +1,6 @@
-#!/usr/bin/env python3
 import sys
+
+from inselect.gui import app
 
 if sys.platform == 'win32' and hasattr(sys, 'frozen'):
     from multiprocessing import freeze_support
@@ -8,14 +9,8 @@ if sys.platform == 'win32' and hasattr(sys, 'frozen'):
     # Patch DLL path so that DLL dependencies of .pyd files in subdirectories
     # can be found. Shouldn't need to do this.
     from ctypes import windll
-    from pathlib import Path
     windll.kernel32.SetDllDirectoryW(str(Path(sys.executable).parent))
 
 
-def main():
-    from inselect import app
-    app.main()
-
-
 if __name__ in ('__main__', 'inselect__main__'):
-    main()
+    app.main()

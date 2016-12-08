@@ -5,7 +5,7 @@ numpy==1.11.2
 Pillow==3.4.2
 psutil==5.0.0
 pylibdmtx==0.1.5
-PyQt5==5.7
+PyQt5>=5.6
 python-dateutil==2.6.0
 pytz==2016.7
 pywin32==220; sys_platform == 'win32'
@@ -27,6 +27,8 @@ coveralls>=1.1
 mock>=2.0.0
 nose>=1.3.7
 
-# PyInstaller==3.2; sys_platform == 'darwin'
+# Latest release (3.2) doesn't work so use this zip of master from early
+# December 2016.
+https://github.com/pyinstaller/pyinstaller/archive/483c819d6a256b58db6740696a901bd41c313f0c.zip; sys_platform == 'darwin'
 
 cx_Freeze==5.0; sys_platform == 'win32'
