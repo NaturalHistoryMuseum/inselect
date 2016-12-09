@@ -19,10 +19,8 @@ class BoxItem(QGraphicsRectItem):
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
     # The width of the line (in pixels) drawn around the box.
-    # A width of 1 on Mac OS X is too thin. 1.5 on Windows causes artefacts -
-    # the top and left edges might appear thicker than the bottom and right
-    # edges.
-    BOX_WIDTH = 1.5 if 'darwin' == sys.platform else 1
+    # A width of 1 on Mac OS X is too thin. 2 is too thick on Windows.
+    BOX_WIDTH = 2 if 'darwin' == sys.platform else 1
 
     def __init__(self, x, y, w, h, isvalid, parent=None):
         super(BoxItem, self).__init__(x, y, w, h, parent)
