@@ -92,7 +92,7 @@ class BarcodePlugin(Plugin):
                     b.data.decode() if hasattr(b.data, 'decode') else b.data
                     for b in barcodes
                 )
-                return ' '.join(sorted([value for value in barcodes]))
+                return ' '.join(sorted(barcodes))
         return None
 
     @classmethod

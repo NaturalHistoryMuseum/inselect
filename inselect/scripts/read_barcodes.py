@@ -14,6 +14,7 @@ from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print, fix_frozen_dll_path
 
+# Warning: lazy load of gouda via local imports
 
 class BarcodeReader(object):
     def __init__(self, engine, strategies):
@@ -40,7 +41,12 @@ class BarcodeReader(object):
             result = self.decode_barcodes(crop)
             if result:
                 strategy, barcodes = result
-                barcodes = ' '.join(b.data.decode() for b in barcodes)
+                # data could be either str or bytes
+                barcodes = (
+                    b.data.decode() if hasattr(b.data, 'decode') else b.data
+                    for b in barcodes
+                )
+                barcodes = ' '.join(sorted(barcodes))
                 debug_print('Crop [{0}] - found [{1}]'.format(index, barcodes))
 
                 # TODO LH This mapping to come from metadata config?
