@@ -24,6 +24,7 @@ QCoreApplication.setApplicationVersion(inselect.__version__)
 QCoreApplication.setOrganizationDomain('nhm.ac.uk')
 
 
+# Will contain an instance of QApplication
 APP = None
 
 
