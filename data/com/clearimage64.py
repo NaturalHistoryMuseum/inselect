@@ -1,10 +1,10 @@
 # -*- coding: mbcs -*-
 # Created by makepy.py version 0.5.01
-# By python version 2.7.12 |Continuum Analytics, Inc.| (default, Jun 29 2016, 11:07:13) [MSC v.1500 64 bit (AMD64)]
-# On Tue Nov 29 10:55:09 2016
+# By python version 3.5.2 |Continuum Analytics, Inc.| (default, Jul  5 2016, 11:41:13) [MSC v.1900 64 bit (AMD64)]
+# On Fri Dec  9 00:04:35 2016
 'ClearImage COM Server'
 makepy_version = '0.5.01'
-python_version = 0x2070cf0
+python_version = 0x30502f0
 
 import win32com.client.CLSIDToClass, pythoncom, pywintypes
 import win32com.client.util
@@ -359,7 +359,7 @@ class ICiBarcodeBasic(DispatchBaseClass):
 		'Find first barcode'
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# Result is of type ICiBarcode
@@ -367,7 +367,7 @@ class ICiBarcodeBasic(DispatchBaseClass):
 		'Find another barcode'
 		ret = self._oleobj_.InvokeTypes(3, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	_prop_map_get_ = {
@@ -410,7 +410,7 @@ class ICiBarcodePro(DispatchBaseClass):
 		'Find first barcode'
 		ret = self._oleobj_.InvokeTypes(8, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	def Fx1(self, par1=0, par2=0):
@@ -422,7 +422,7 @@ class ICiBarcodePro(DispatchBaseClass):
 				ret = ret.QueryInterface(pythoncom.IID_IDispatch)
 			except pythoncom.error:
 				return ret
-			ret = Dispatch(ret, u'Fx1', None)
+			ret = Dispatch(ret, 'Fx1', None)
 		return ret
 
 	# Result is of type ICiBarcode
@@ -430,7 +430,7 @@ class ICiBarcodePro(DispatchBaseClass):
 		'Find another barcode'
 		ret = self._oleobj_.InvokeTypes(9, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# The method Setcx2l is actually a property, but must be used as a method to correctly pass the arguments
@@ -500,7 +500,7 @@ class ICiBarcodes(DispatchBaseClass):
 		ret = self._oleobj_.InvokeTypes(0, LCID, 2, (9, 0), ((3, 1),),n
 			)
 		if ret is not None:
-			ret = Dispatch(ret, u'Item', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'Item', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# Result is of type ICiBarcode
@@ -509,7 +509,7 @@ class ICiBarcodes(DispatchBaseClass):
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), ((3, 1),),n
 			)
 		if ret is not None:
-			ret = Dispatch(ret, u'Remove', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'Remove', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	_prop_map_get_ = {
@@ -528,13 +528,8 @@ class ICiBarcodes(DispatchBaseClass):
 			ret = Dispatch(ret, '__call__', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
-	def __unicode__(self, *args):
-		try:
-			return unicode(self.__call__(*args))
-		except pythoncom.com_error:
-			return repr(self)
 	def __str__(self, *args):
-		return str(self.__unicode__(*args))
+		return str(self.__call__(*args))
 	def __int__(self, *args):
 		return int(self.__call__(*args))
 	def __iter__(self):
@@ -566,7 +561,7 @@ class ICiDataMatrix(DispatchBaseClass):
 		'Find first barcode'
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	def Fx1(self, par1=0, par2=0):
@@ -578,7 +573,7 @@ class ICiDataMatrix(DispatchBaseClass):
 				ret = ret.QueryInterface(pythoncom.IID_IDispatch)
 			except pythoncom.error:
 				return ret
-			ret = Dispatch(ret, u'Fx1', None)
+			ret = Dispatch(ret, 'Fx1', None)
 		return ret
 
 	# Result is of type ICiBarcode
@@ -586,7 +581,7 @@ class ICiDataMatrix(DispatchBaseClass):
 		'Find another barcode'
 		ret = self._oleobj_.InvokeTypes(3, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# The method Setcx2l is actually a property, but must be used as a method to correctly pass the arguments
@@ -671,7 +666,7 @@ class ICiImage(DispatchBaseClass):
 		ret = self._oleobj_.InvokeTypes(45, LCID, 1, (9, 0), ((3, 49), (3, 49), (3, 49), (3, 49)),left
 			, top, right, bottom)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateZone', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
+			ret = Dispatch(ret, 'CreateZone', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
 		return ret
 
 	# Result is of type ICiImage
@@ -680,7 +675,7 @@ class ICiImage(DispatchBaseClass):
 		ret = self._oleobj_.InvokeTypes(43, LCID, 1, (9, 0), ((9, 1),),Rect
 			)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateZoneRect', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
+			ret = Dispatch(ret, 'CreateZoneRect', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
 		return ret
 
 	def Crop(self, left=defaultNamedNotOptArg, top=defaultNamedNotOptArg, right=defaultNamedNotOptArg, bottom=defaultNamedNotOptArg):
@@ -693,7 +688,7 @@ class ICiImage(DispatchBaseClass):
 		'Create a duplicate of this CiImage object'
 		ret = self._oleobj_.InvokeTypes(47, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'Duplicate', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
+			ret = Dispatch(ret, 'Duplicate', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
 		return ret
 
 	def Flip(self):
@@ -774,7 +769,7 @@ class ICiImage(DispatchBaseClass):
 
 	def SaveToMemory(self):
 		'Copy image bits to image memory'
-		return self._ApplyTypes_(32, 1, (12, 0), (), u'SaveToMemory', None,)
+		return self._ApplyTypes_(32, 1, (12, 0), (), 'SaveToMemory', None,)
 
 	def ScaleToDIB(self, ScaleX=defaultNamedNotOptArg, ScaleY=defaultNamedNotOptArg):
 		'Moved to Tools'
@@ -1019,7 +1014,7 @@ class ICiPdf417(DispatchBaseClass):
 		'Find first barcode'
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	def Fx1(self, par1=0, par2=0):
@@ -1031,7 +1026,7 @@ class ICiPdf417(DispatchBaseClass):
 				ret = ret.QueryInterface(pythoncom.IID_IDispatch)
 			except pythoncom.error:
 				return ret
-			ret = Dispatch(ret, u'Fx1', None)
+			ret = Dispatch(ret, 'Fx1', None)
 		return ret
 
 	# Result is of type ICiBarcode
@@ -1039,7 +1034,7 @@ class ICiPdf417(DispatchBaseClass):
 		'Find another barcode'
 		ret = self._oleobj_.InvokeTypes(3, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# The method Setcx2l is actually a property, but must be used as a method to correctly pass the arguments
@@ -1119,7 +1114,7 @@ class ICiQR(DispatchBaseClass):
 		'Find first barcode'
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'FirstBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	def Fx1(self, par1=0, par2=0):
@@ -1131,7 +1126,7 @@ class ICiQR(DispatchBaseClass):
 				ret = ret.QueryInterface(pythoncom.IID_IDispatch)
 			except pythoncom.error:
 				return ret
-			ret = Dispatch(ret, u'Fx1', None)
+			ret = Dispatch(ret, 'Fx1', None)
 		return ret
 
 	# Result is of type ICiBarcode
@@ -1139,7 +1134,7 @@ class ICiQR(DispatchBaseClass):
 		'Find another barcode'
 		ret = self._oleobj_.InvokeTypes(3, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'NextBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# The method Setcx2l is actually a property, but must be used as a method to correctly pass the arguments
@@ -1387,14 +1382,14 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiAdvColor object'
 		ret = self._oleobj_.InvokeTypes(17, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateAdvColor', '{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}')
+			ret = Dispatch(ret, 'CreateAdvColor', '{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}')
 		return ret
 
 	# Result is of type ICiBarcode
 	def CreateBarcode(self):
 		ret = self._oleobj_.InvokeTypes(18, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'CreateBarcode', '{4ED88240-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# Result is of type ICiBarcodeBasic
@@ -1402,7 +1397,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiBarcodeBasic object'
 		ret = self._oleobj_.InvokeTypes(8, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateBarcodeBasic', '{21DA65F1-9E63-45E3-B081-F78096F9D6C3}')
+			ret = Dispatch(ret, 'CreateBarcodeBasic', '{21DA65F1-9E63-45E3-B081-F78096F9D6C3}')
 		return ret
 
 	# Result is of type ICiBarcodePro
@@ -1410,14 +1405,14 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiBarcodePro object'
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateBarcodePro', '{BDDB0244-0CFD-11D4-B5F8-B89D57000000}')
+			ret = Dispatch(ret, 'CreateBarcodePro', '{BDDB0244-0CFD-11D4-B5F8-B89D57000000}')
 		return ret
 
 	# Result is of type ICiBarcodes
 	def CreateBarcodes(self):
 		ret = self._oleobj_.InvokeTypes(19, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateBarcodes', '{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')
+			ret = Dispatch(ret, 'CreateBarcodes', '{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')
 		return ret
 
 	# Result is of type ICiDataMatrix
@@ -1425,7 +1420,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiDataMatrix object'
 		ret = self._oleobj_.InvokeTypes(15, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateDataMatrix', '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}')
+			ret = Dispatch(ret, 'CreateDataMatrix', '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}')
 		return ret
 
 	# Result is of type ICiImage
@@ -1433,7 +1428,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiImage object'
 		ret = self._oleobj_.InvokeTypes(1, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateImage', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
+			ret = Dispatch(ret, 'CreateImage', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
 		return ret
 
 	# Result is of type ICiPdf417
@@ -1441,7 +1436,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiPdf417 object'
 		ret = self._oleobj_.InvokeTypes(9, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreatePdf417', '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}')
+			ret = Dispatch(ret, 'CreatePdf417', '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}')
 		return ret
 
 	# Result is of type ICiQR
@@ -1449,7 +1444,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiQR object'
 		ret = self._oleobj_.InvokeTypes(23, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateQR', '{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}')
+			ret = Dispatch(ret, 'CreateQR', '{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}')
 		return ret
 
 	# Result is of type ICiRect
@@ -1458,7 +1453,7 @@ class ICiServer(DispatchBaseClass):
 		ret = self._oleobj_.InvokeTypes(11, LCID, 1, (9, 0), ((3, 49), (3, 49), (3, 49), (3, 49)),left
 			, top, right, bottom)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateRect', '{4ED88244-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'CreateRect', '{4ED88244-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	# Result is of type ICiRepair
@@ -1466,7 +1461,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiRepair object'
 		ret = self._oleobj_.InvokeTypes(5, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateRepair', '{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}')
+			ret = Dispatch(ret, 'CreateRepair', '{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}')
 		return ret
 
 	# Result is of type ICiTools
@@ -1474,7 +1469,7 @@ class ICiServer(DispatchBaseClass):
 		'Create new CiTools object'
 		ret = self._oleobj_.InvokeTypes(6, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'CreateTools', '{316BC128-8995-471D-985D-B3E68E87C084}')
+			ret = Dispatch(ret, 'CreateTools', '{316BC128-8995-471D-985D-B3E68E87C084}')
 		return ret
 
 	# The method GetDevMode is actually a property, but must be used as a method to correctly pass the arguments
@@ -1518,7 +1513,7 @@ class ICiServer(DispatchBaseClass):
 
 	def uncompress(self, DataIn=defaultNamedNotOptArg, Encoding=defaultNamedNotOptArg, DataOut=pythoncom.Missing):
 		'Uncompress Data'
-		return self._ApplyTypes_(22, 1, (3, 0), ((12, 1), (16387, 3), (16396, 2)), u'uncompress', None,DataIn
+		return self._ApplyTypes_(22, 1, (3, 0), ((12, 1), (16387, 3), (16396, 2)), 'uncompress', None,DataIn
 			, Encoding, DataOut)
 
 	_prop_map_get_ = {
@@ -1560,7 +1555,7 @@ class ICiTools(DispatchBaseClass):
 		ret = self._oleobj_.InvokeTypes(6, LCID, 1, (9, 0), ((9, 1),),Object
 			)
 		if ret is not None:
-			ret = Dispatch(ret, u'ExtractObject', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
+			ret = Dispatch(ret, 'ExtractObject', '{F2BCF189-0B27-11D4-B5F5-9CC767000000}')
 		return ret
 
 	def Fatten(self, Pixels=defaultNamedNotOptArg, Direction=defaultNamedNotOptArg):
@@ -1573,7 +1568,7 @@ class ICiTools(DispatchBaseClass):
 		'Find first line'
 		ret = self._oleobj_.InvokeTypes(12, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstLine', '{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')
+			ret = Dispatch(ret, 'FirstLine', '{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')
 		return ret
 
 	# Result is of type ICiObject
@@ -1581,7 +1576,7 @@ class ICiTools(DispatchBaseClass):
 		'Find first object'
 		ret = self._oleobj_.InvokeTypes(1, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'FirstObject', '{59A0E32D-5050-47F5-A21B-F00397A21FCC}')
+			ret = Dispatch(ret, 'FirstObject', '{59A0E32D-5050-47F5-A21B-F00397A21FCC}')
 		return ret
 
 	def MeasureContrast(self, nArea=1):
@@ -1591,14 +1586,14 @@ class ICiTools(DispatchBaseClass):
 
 	def MeasureHorzHistogram(self):
 		'Measure horizontal histogram'
-		return self._ApplyTypes_(25, 1, (12, 0), (), u'MeasureHorzHistogram', None,)
+		return self._ApplyTypes_(25, 1, (12, 0), (), 'MeasureHorzHistogram', None,)
 
 	# Result is of type ICiRect
 	def MeasureMargins(self):
 		'Measure image margins'
 		ret = self._oleobj_.InvokeTypes(14, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'MeasureMargins', '{4ED88244-0BE1-11D4-B5F6-009FC6000000}')
+			ret = Dispatch(ret, 'MeasureMargins', '{4ED88244-0BE1-11D4-B5F6-009FC6000000}')
 		return ret
 
 	def MeasureRotation(self):
@@ -1611,14 +1606,14 @@ class ICiTools(DispatchBaseClass):
 
 	def MeasureVertHistogram(self):
 		'Measure vertical histogram'
-		return self._ApplyTypes_(24, 1, (12, 0), (), u'MeasureVertHistogram', None,)
+		return self._ApplyTypes_(24, 1, (12, 0), (), 'MeasureVertHistogram', None,)
 
 	# Result is of type ICiLine
 	def NextLine(self):
 		'Find another line'
 		ret = self._oleobj_.InvokeTypes(13, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextLine', '{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')
+			ret = Dispatch(ret, 'NextLine', '{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')
 		return ret
 
 	# Result is of type ICiObject
@@ -1626,7 +1621,7 @@ class ICiTools(DispatchBaseClass):
 		'Find another object'
 		ret = self._oleobj_.InvokeTypes(2, LCID, 1, (9, 0), (),)
 		if ret is not None:
-			ret = Dispatch(ret, u'NextObject', '{59A0E32D-5050-47F5-A21B-F00397A21FCC}')
+			ret = Dispatch(ret, 'NextObject', '{59A0E32D-5050-47F5-A21B-F00397A21FCC}')
 		return ret
 
 	def OrImage(self, ImgSrc=defaultNamedNotOptArg, left=0, top=0):
@@ -1977,628 +1972,628 @@ class CiView(CoClassBaseClass): # A CoClass
 
 ICiAdvColor_vtables_dispatch_ = 1
 ICiAdvColor_vtables_ = [
-	(( u'Image' , u'pVal' , ), 1, (1, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 1, (1, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'ConvertToBitonal' , u'mode' , u'Par0' , u'par1' , u'par2' , 
-			), 2, (2, (), [ (3, 49, '2', None) , (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'ConvertToGrayscale' , u'mode' , u'Par0' , u'par1' , u'par2' , 
-			), 3, (3, (), [ (3, 49, '2', None) , (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'ScaleToDpi' , u'mode' , u'Par0' , ), 4, (4, (), [ (3, 49, '1', None) , 
-			(3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 88 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 5, (5, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 5, (5, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
-			(16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
-			(5, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 7, (7, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 7, (7, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 1088 , )),
+	(( 'Image' , 'pVal' , ), 1, (1, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 1, (1, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'ConvertToBitonal' , 'mode' , 'Par0' , 'par1' , 'par2' , 
+			 ), 2, (2, (), [ (3, 49, '2', None) , (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'ConvertToGrayscale' , 'mode' , 'Par0' , 'par1' , 'par2' , 
+			 ), 3, (3, (), [ (3, 49, '2', None) , (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'ScaleToDpi' , 'mode' , 'Par0' , ), 4, (4, (), [ (3, 49, '1', None) , 
+			 (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 88 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 5, (5, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 5, (5, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
+			 (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
+			 (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 7, (7, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 7, (7, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiBarcode_vtables_dispatch_ = 1
 ICiBarcode_vtables_ = [
-	(( u'Rect' , u'pVal' , ), 1, (1, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Type' , u'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Rotation' , u'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Length' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'Text' , u'pVal' , ), 5, (5, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Data' , u'pVal' , ), 6, (6, (), [ (16396, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'ErrorFlags' , u'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'Confidence' , u'pVal' , ), 9, (9, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'ModuleSize' , u'pVal' , ), 12, (12, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'IsBinary' , u'pVal' , ), 15, (15, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'IsChecksumVerified' , u'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'Quality' , u'pVal' , ), 17, (17, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 144 , (3, 0, None, None) , 1088 , )),
-	(( u'Type' , u'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 152 , (3, 0, None, None) , 1024 , )),
-	(( u'Rotation' , u'pVal' , ), 3, (3, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 160 , (3, 0, None, None) , 1024 , )),
-	(( u'Text' , u'pVal' , ), 5, (5, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1024 , )),
-	(( u'Data' , u'pVal' , ), 6, (6, (), [ (12, 1, None, None) , ], 1 , 4 , 4 , 0 , 176 , (3, 0, None, None) , 1024 , )),
-	(( u'ErrorFlags' , u'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 1024 , )),
-	(( u'Confidence' , u'pVal' , ), 9, (9, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 1024 , )),
-	(( u'ModuleSize' , u'pVal' , ), 12, (12, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1024 , )),
-	(( u'IsBinary' , u'pVal' , ), 15, (15, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 208 , (3, 0, None, None) , 1024 , )),
-	(( u'IsChecksumVerified' , u'pVal' , ), 16, (16, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 1024 , )),
-	(( u'Quality' , u'pVal' , ), 17, (17, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 224 , (3, 0, None, None) , 1088 , )),
-	(( u'Info' , u'Type' , u'pVal' , ), 18, (18, (), [ (8, 1, None, None) , 
-			(16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 1088 , )),
-	(( u'Info' , u'Type' , u'pVal' , ), 18, (18, (), [ (8, 1, None, None) , 
-			(8, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 1088 , )),
-	(( u'Skew' , u'pVal' , ), 19, (19, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 248 , (3, 0, None, None) , 1088 , )),
-	(( u'Skew' , u'pVal' , ), 19, (19, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 256 , (3, 0, None, None) , 1088 , )),
-	(( u'Encoding' , u'pVal' , ), 20, (20, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
-	(( u'Encoding' , u'pVal' , ), 20, (20, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 272 , (3, 0, None, None) , 1024 , )),
-	(( u'o' , u'pVal' , ), 21, (21, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 280 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 21, (21, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 288 , (3, 0, None, None) , 1088 , )),
+	(( 'Rect' , 'pVal' , ), 1, (1, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Type' , 'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Rotation' , 'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Length' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'Text' , 'pVal' , ), 5, (5, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Data' , 'pVal' , ), 6, (6, (), [ (16396, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'ErrorFlags' , 'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'Confidence' , 'pVal' , ), 9, (9, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'ModuleSize' , 'pVal' , ), 12, (12, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'IsBinary' , 'pVal' , ), 15, (15, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'IsChecksumVerified' , 'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'Quality' , 'pVal' , ), 17, (17, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 144 , (3, 0, None, None) , 1088 , )),
+	(( 'Type' , 'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 152 , (3, 0, None, None) , 1024 , )),
+	(( 'Rotation' , 'pVal' , ), 3, (3, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 160 , (3, 0, None, None) , 1024 , )),
+	(( 'Text' , 'pVal' , ), 5, (5, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1024 , )),
+	(( 'Data' , 'pVal' , ), 6, (6, (), [ (12, 1, None, None) , ], 1 , 4 , 4 , 0 , 176 , (3, 0, None, None) , 1024 , )),
+	(( 'ErrorFlags' , 'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 1024 , )),
+	(( 'Confidence' , 'pVal' , ), 9, (9, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 1024 , )),
+	(( 'ModuleSize' , 'pVal' , ), 12, (12, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1024 , )),
+	(( 'IsBinary' , 'pVal' , ), 15, (15, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 208 , (3, 0, None, None) , 1024 , )),
+	(( 'IsChecksumVerified' , 'pVal' , ), 16, (16, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 1024 , )),
+	(( 'Quality' , 'pVal' , ), 17, (17, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 224 , (3, 0, None, None) , 1088 , )),
+	(( 'Info' , 'Type' , 'pVal' , ), 18, (18, (), [ (8, 1, None, None) , 
+			 (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 1088 , )),
+	(( 'Info' , 'Type' , 'pVal' , ), 18, (18, (), [ (8, 1, None, None) , 
+			 (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 1088 , )),
+	(( 'Skew' , 'pVal' , ), 19, (19, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 248 , (3, 0, None, None) , 1088 , )),
+	(( 'Skew' , 'pVal' , ), 19, (19, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 256 , (3, 0, None, None) , 1088 , )),
+	(( 'Encoding' , 'pVal' , ), 20, (20, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
+	(( 'Encoding' , 'pVal' , ), 20, (20, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 272 , (3, 0, None, None) , 1024 , )),
+	(( 'o' , 'pVal' , ), 21, (21, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 280 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 21, (21, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 288 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiBarcodeBasic_vtables_dispatch_ = 1
 ICiBarcodeBasic_vtables_ = [
-	(( u'FirstBarcode' , u'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'NextBarcode' , u'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'Type' , u'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Type' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'AutoDetect1D' , u'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'AutoDetect1D' , u'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'ValidateOptChecksum' , u'pVal' , ), 9, (9, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'ValidateOptChecksum' , u'pVal' , ), 9, (9, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'Barcodes' , u'pVal' , ), 10, (10, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'Find' , u'MaxBarcodes' , u'pVal' , ), 11, (11, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 12, (12, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 12, (12, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
+	(( 'FirstBarcode' , 'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'NextBarcode' , 'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'Type' , 'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Type' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'AutoDetect1D' , 'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'AutoDetect1D' , 'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'ValidateOptChecksum' , 'pVal' , ), 9, (9, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'ValidateOptChecksum' , 'pVal' , ), 9, (9, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'Barcodes' , 'pVal' , ), 10, (10, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'Find' , 'MaxBarcodes' , 'pVal' , ), 11, (11, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 12, (12, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 12, (12, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiBarcodePro_vtables_dispatch_ = 1
 ICiBarcodePro_vtables_ = [
-	(( u'Type' , u'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Type' , u'pVal' , ), 1, (1, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'AutoDetect1D' , u'pVal' , ), 10, (10, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'AutoDetect1D' , u'pVal' , ), 10, (10, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'ValidateOptChecksum' , u'pVal' , ), 11, (11, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'ValidateOptChecksum' , u'pVal' , ), 11, (11, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'Barcodes' , u'pVal' , ), 12, (12, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 5, (5, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 5, (5, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 6, (6, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 6, (6, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
-	(( u'FirstBarcode' , u'pVal' , ), 8, (8, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
-	(( u'NextBarcode' , u'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'Find' , u'MaxBarcodes' , u'pVal' , ), 13, (13, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
-	(( u'Fx1' , u'par1' , u'par2' , u'ppRet' , ), 14, (14, (), [ 
-			(3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 15, (15, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 208 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 15, (15, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 1088 , )),
-	(( u'Encodings' , u'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
-	(( u'Encodings' , u'pVal' , ), 16, (16, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 17, (17, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 240 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 17, (17, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 248 , (3, 0, None, None) , 1088 , )),
+	(( 'Type' , 'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Type' , 'pVal' , ), 1, (1, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'AutoDetect1D' , 'pVal' , ), 10, (10, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'AutoDetect1D' , 'pVal' , ), 10, (10, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'ValidateOptChecksum' , 'pVal' , ), 11, (11, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'ValidateOptChecksum' , 'pVal' , ), 11, (11, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'Barcodes' , 'pVal' , ), 12, (12, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 5, (5, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 5, (5, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 6, (6, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 6, (6, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
+	(( 'FirstBarcode' , 'pVal' , ), 8, (8, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
+	(( 'NextBarcode' , 'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'Find' , 'MaxBarcodes' , 'pVal' , ), 13, (13, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
+	(( 'Fx1' , 'par1' , 'par2' , 'ppRet' , ), 14, (14, (), [ 
+			 (3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 15, (15, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 208 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 15, (15, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 1088 , )),
+	(( 'Encodings' , 'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
+	(( 'Encodings' , 'pVal' , ), 16, (16, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 17, (17, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 240 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 17, (17, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 248 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiBarcodes_vtables_dispatch_ = 1
 ICiBarcodes_vtables_ = [
-	(( u'Add' , u'pVal' , ), 1, (1, (), [ (9, 1, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Remove' , u'n' , u'ppVal' , ), 2, (2, (), [ (3, 1, None, None) , 
-			(16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Count' , u'pnCount' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Item' , u'n' , u'ppItem' , ), 0, (0, (), [ (3, 1, None, None) , 
-			(16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'_NewEnum' , u'ppEnum' , ), -4, (-4, (), [ (16397, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 4, (4, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 4, (4, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
-	(( u'AddLocal' , u'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
+	(( 'Add' , 'pVal' , ), 1, (1, (), [ (9, 1, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Remove' , 'n' , 'ppVal' , ), 2, (2, (), [ (3, 1, None, None) , 
+			 (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Count' , 'pnCount' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Item' , 'n' , 'ppItem' , ), 0, (0, (), [ (3, 1, None, None) , 
+			 (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( '_NewEnum' , 'ppEnum' , ), -4, (-4, (), [ (16397, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 4, (4, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 4, (4, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
+	(( 'AddLocal' , 'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiDataMatrix_vtables_dispatch_ = 1
 ICiDataMatrix_vtables_ = [
-	(( u'FirstBarcode' , u'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'NextBarcode' , u'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'Barcodes' , u'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'Find' , u'MaxBarcodes' , u'pVal' , ), 10, (10, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'Fx1' , u'par1' , u'par2' , u'ppRet' , ), 11, (11, (), [ 
-			(3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
-	(( u'Encodings' , u'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
-	(( u'Encodings' , u'pVal' , ), 13, (13, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 14, (14, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 14, (14, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
+	(( 'FirstBarcode' , 'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'NextBarcode' , 'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'Barcodes' , 'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'Find' , 'MaxBarcodes' , 'pVal' , ), 10, (10, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'Fx1' , 'par1' , 'par2' , 'ppRet' , ), 11, (11, (), [ 
+			 (3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
+	(( 'Encodings' , 'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
+	(( 'Encodings' , 'pVal' , ), 13, (13, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 14, (14, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 14, (14, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiImage_vtables_dispatch_ = 1
 ICiImage_vtables_ = [
-	(( u'Create' , u'Width' , u'Height' , ), 1, (1, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Close' , ), 2, (2, (), [ ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Open' , u'FileName' , u'PageNumber' , ), 3, (3, (), [ (8, 1, None, None) , 
-			(3, 49, '1', None) , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Zone' , u'pVal' , ), 4, (4, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'SaveAs' , u'FileName' , u'Format' , ), 5, (5, (), [ (8, 1, None, None) , 
-			(3, 49, '1', None) , ], 1 , 1 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Invert' , ), 6, (6, (), [ ], 1 , 1 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'Clear' , ), 8, (8, (), [ ], 1 , 1 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'FlipVert' , ), 9, (9, (), [ ], 1 , 1 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'FlipHorz' , ), 10, (10, (), [ ], 1 , 1 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'RotateRight' , ), 11, (11, (), [ ], 1 , 1 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'RotateLeft' , ), 12, (12, (), [ ], 1 , 1 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'Flip' , ), 13, (13, (), [ ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'Append' , u'FileName' , u'Format' , ), 14, (14, (), [ (8, 1, None, None) , 
-			(3, 49, '7', None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
-	(( u'Width' , u'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
-	(( u'Height' , u'pVal' , ), 17, (17, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleType' , u'pVal' , ), 33, (33, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleType' , u'pVal' , ), 33, (33, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleThreshold' , u'pVal' , ), 34, (34, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleThreshold' , u'pVal' , ), 34, (34, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1089 , )),
-	(( u'ScaleImage' , u'ScaleX' , u'ScaleY' , ), 35, (35, (), [ (5, 1, None, None) , 
-			(5, 1, None, None) , ], 1 , 1 , 4 , 0 , 208 , (3, 0, None, None) , 1089 , )),
-	(( u'HorzDpi' , u'pVal' , ), 18, (18, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
-	(( u'HorzDpi' , u'pVal' , ), 18, (18, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
-	(( u'VertDpi' , u'pVal' , ), 19, (19, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
-	(( u'VertDpi' , u'pVal' , ), 19, (19, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
-	(( u'Copy' , u'ImageFrom' , ), 20, (20, (), [ (9, 0, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
-	(( u'IsModified' , u'pVal' , ), 21, (21, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
-	(( u'FileName' , u'pVal' , ), 22, (22, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
-	(( u'PageNumber' , u'pVal' , ), 23, (23, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 272 , (3, 0, None, None) , 0 , )),
-	(( u'PageCount' , u'pVal' , ), 24, (24, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 280 , (3, 0, None, None) , 0 , )),
-	(( u'Save' , ), 25, (25, (), [ ], 1 , 1 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
-	(( u'CopyToClipboard' , ), 29, (29, (), [ ], 1 , 1 , 4 , 0 , 296 , (3, 0, None, None) , 0 , )),
-	(( u'SaveToBitmap' , u'hBitmap' , ), 30, (30, (), [ (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 304 , (3, 0, None, None) , 0 , )),
-	(( u'SaveToDIB' , u'hDib' , ), 31, (31, (), [ (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 312 , (3, 0, None, None) , 0 , )),
-	(( u'SaveToMemory' , u'pData' , ), 32, (32, (), [ (16396, 10, None, None) , ], 1 , 1 , 4 , 0 , 320 , (3, 0, None, None) , 0 , )),
-	(( u'OpenFromClipboard' , ), 26, (26, (), [ ], 1 , 1 , 4 , 0 , 328 , (3, 0, None, None) , 0 , )),
-	(( u'OpenFromBitmap' , u'hBitmap' , ), 27, (27, (), [ (20, 1, None, None) , ], 1 , 1 , 4 , 0 , 336 , (3, 0, None, None) , 0 , )),
-	(( u'LoadFromMemory' , u'pData' , ), 28, (28, (), [ (12, 1, None, None) , ], 1 , 1 , 4 , 0 , 344 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpBrightness' , u'pVal' , ), 37, (37, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleBmpBrightness' , u'pVal' , ), 37, (37, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleBmpContrast' , u'pVal' , ), 38, (38, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 368 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleBmpContrast' , u'pVal' , ), 38, (38, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 376 , (3, 0, None, None) , 1089 , )),
-	(( u'pScaleBmpType' , u'pVal' , ), 36, (36, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 384 , (3, 0, None, None) , 1088 , )),
-	(( u'pScaleBmpType' , u'pVal' , ), 36, (36, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 392 , (3, 0, None, None) , 1088 , )),
-	(( u'ScaleToDIB' , u'ScaleX' , u'ScaleY' , u'hBitmap' , ), 40, (40, (), [ 
-			(5, 1, None, None) , (5, 1, None, None) , (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 400 , (3, 0, None, None) , 1088 , )),
-	(( u'Format' , u'pVal' , ), 41, (41, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 408 , (3, 0, None, None) , 0 , )),
-	(( u'Handle' , u'pVal' , ), 42, (42, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 416 , (3, 0, None, None) , 1088 , )),
-	(( u'CreateZoneRect' , u'Rect' , u'ppInt' , ), 43, (43, (), [ (9, 1, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , 
-			(16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 424 , (3, 0, None, None) , 0 , )),
-	(( u'CreateZone' , u'left' , u'top' , u'right' , u'bottom' , 
-			u'ppInt' , ), 45, (45, (), [ (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , 
-			(3, 49, '0', None) , (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 432 , (3, 0, None, None) , 0 , )),
-	(( u'IsZone' , u'pVal' , ), 44, (44, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 440 , (3, 0, None, None) , 0 , )),
-	(( u'Parent' , u'pVal' , ), 46, (46, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 448 , (3, 0, None, None) , 0 , )),
-	(( u'Duplicate' , u'ppInt' , ), 47, (47, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 456 , (3, 0, None, None) , 0 , )),
-	(( u'LogFlags' , u'LogType' , u'pVal' , ), 49, (49, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 464 , (3, 0, None, None) , 1088 , )),
-	(( u'LogFlags' , u'LogType' , u'pVal' , ), 49, (49, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 472 , (3, 0, None, None) , 1088 , )),
-	(( u'LogSignature' , u'pVal' , ), 50, (50, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 480 , (3, 0, None, None) , 1088 , )),
-	(( u'LogSignature' , u'pVal' , ), 50, (50, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 488 , (3, 0, None, None) , 1088 , )),
-	(( u'Crop' , u'left' , u'top' , u'right' , u'bottom' , 
-			), 51, (51, (), [ (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 496 , (3, 0, None, None) , 0 , )),
-	(( u'LineBytes' , u'pVal' , ), 52, (52, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 504 , (3, 0, None, None) , 0 , )),
-	(( u'BitsPerPixel' , u'pVal' , ), 53, (53, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 512 , (3, 0, None, None) , 0 , )),
-	(( u'CreateBpp' , u'Width' , u'Height' , u'BitsPerPixel' , ), 54, (54, (), [ 
-			(3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 520 , (3, 0, None, None) , 0 , )),
-	(( u'Buffer' , u'pVal' , ), 55, (55, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 528 , (3, 0, None, None) , 1088 , )),
-	(( u'IsBitonal' , u'pVal' , ), 57, (57, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 536 , (3, 0, None, None) , 1088 , )),
-	(( u'CiCx' , u'pVal' , ), 58, (58, (), [ (16393, 10, None, None) , ], 1 , 2 , 4 , 0 , 544 , (3, 0, None, None) , 1088 , )),
-	(( u'FileSize' , u'pVal' , ), 59, (59, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 552 , (3, 0, None, None) , 1088 , )),
-	(( u'JpegQuality' , u'pVal' , ), 60, (60, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 560 , (3, 0, None, None) , 0 , )),
-	(( u'JpegQuality' , u'pVal' , ), 60, (60, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 568 , (3, 0, None, None) , 0 , )),
-	(( u'IsValid' , u'pVal' , ), 61, (61, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 576 , (3, 0, None, None) , 0 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 584 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 592 , (3, 0, None, None) , 1088 , )),
-	(( u'Pdf' , u'pVal' , ), 63, (63, (), [ (16393, 10, None, "IID('{70A6F899-6298-447E-951C-07430C0FF812}')") , ], 1 , 2 , 4 , 0 , 600 , (3, 0, None, None) , 0 , )),
-	(( u'ToBitonal' , ), 64, (64, (), [ ], 1 , 1 , 4 , 0 , 608 , (3, 0, None, None) , 0 , )),
-	(( u'ToGrayscale' , ), 65, (65, (), [ ], 1 , 1 , 4 , 0 , 616 , (3, 0, None, None) , 0 , )),
-	(( u'pComprColor' , u'pVal' , ), 66, (66, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 624 , (3, 0, None, None) , 0 , )),
-	(( u'pComprColor' , u'pVal' , ), 66, (66, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 632 , (3, 0, None, None) , 0 , )),
-	(( u'pComprBitonal' , u'pVal' , ), 67, (67, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 640 , (3, 0, None, None) , 0 , )),
-	(( u'pComprBitonal' , u'pVal' , ), 67, (67, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 648 , (3, 0, None, None) , 0 , )),
-	(( u'Info' , u'Type' , u'pVal' , ), 68, (68, (), [ (8, 1, None, None) , 
-			(16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 656 , (3, 0, None, None) , 1088 , )),
-	(( u'Info' , u'Type' , u'pVal' , ), 68, (68, (), [ (8, 1, None, None) , 
-			(8, 1, None, None) , ], 1 , 4 , 4 , 0 , 664 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 69, (69, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 672 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 69, (69, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 680 , (3, 0, None, None) , 1088 , )),
+	(( 'Create' , 'Width' , 'Height' , ), 1, (1, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Close' , ), 2, (2, (), [ ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Open' , 'FileName' , 'PageNumber' , ), 3, (3, (), [ (8, 1, None, None) , 
+			 (3, 49, '1', None) , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Zone' , 'pVal' , ), 4, (4, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'SaveAs' , 'FileName' , 'Format' , ), 5, (5, (), [ (8, 1, None, None) , 
+			 (3, 49, '1', None) , ], 1 , 1 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Invert' , ), 6, (6, (), [ ], 1 , 1 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'Clear' , ), 8, (8, (), [ ], 1 , 1 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'FlipVert' , ), 9, (9, (), [ ], 1 , 1 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'FlipHorz' , ), 10, (10, (), [ ], 1 , 1 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'RotateRight' , ), 11, (11, (), [ ], 1 , 1 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'RotateLeft' , ), 12, (12, (), [ ], 1 , 1 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'Flip' , ), 13, (13, (), [ ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'Append' , 'FileName' , 'Format' , ), 14, (14, (), [ (8, 1, None, None) , 
+			 (3, 49, '7', None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
+	(( 'Width' , 'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
+	(( 'Height' , 'pVal' , ), 17, (17, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleType' , 'pVal' , ), 33, (33, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleType' , 'pVal' , ), 33, (33, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleThreshold' , 'pVal' , ), 34, (34, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleThreshold' , 'pVal' , ), 34, (34, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1089 , )),
+	(( 'ScaleImage' , 'ScaleX' , 'ScaleY' , ), 35, (35, (), [ (5, 1, None, None) , 
+			 (5, 1, None, None) , ], 1 , 1 , 4 , 0 , 208 , (3, 0, None, None) , 1089 , )),
+	(( 'HorzDpi' , 'pVal' , ), 18, (18, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
+	(( 'HorzDpi' , 'pVal' , ), 18, (18, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
+	(( 'VertDpi' , 'pVal' , ), 19, (19, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
+	(( 'VertDpi' , 'pVal' , ), 19, (19, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
+	(( 'Copy' , 'ImageFrom' , ), 20, (20, (), [ (9, 0, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
+	(( 'IsModified' , 'pVal' , ), 21, (21, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
+	(( 'FileName' , 'pVal' , ), 22, (22, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
+	(( 'PageNumber' , 'pVal' , ), 23, (23, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 272 , (3, 0, None, None) , 0 , )),
+	(( 'PageCount' , 'pVal' , ), 24, (24, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 280 , (3, 0, None, None) , 0 , )),
+	(( 'Save' , ), 25, (25, (), [ ], 1 , 1 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
+	(( 'CopyToClipboard' , ), 29, (29, (), [ ], 1 , 1 , 4 , 0 , 296 , (3, 0, None, None) , 0 , )),
+	(( 'SaveToBitmap' , 'hBitmap' , ), 30, (30, (), [ (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 304 , (3, 0, None, None) , 0 , )),
+	(( 'SaveToDIB' , 'hDib' , ), 31, (31, (), [ (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 312 , (3, 0, None, None) , 0 , )),
+	(( 'SaveToMemory' , 'pData' , ), 32, (32, (), [ (16396, 10, None, None) , ], 1 , 1 , 4 , 0 , 320 , (3, 0, None, None) , 0 , )),
+	(( 'OpenFromClipboard' , ), 26, (26, (), [ ], 1 , 1 , 4 , 0 , 328 , (3, 0, None, None) , 0 , )),
+	(( 'OpenFromBitmap' , 'hBitmap' , ), 27, (27, (), [ (20, 1, None, None) , ], 1 , 1 , 4 , 0 , 336 , (3, 0, None, None) , 0 , )),
+	(( 'LoadFromMemory' , 'pData' , ), 28, (28, (), [ (12, 1, None, None) , ], 1 , 1 , 4 , 0 , 344 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpBrightness' , 'pVal' , ), 37, (37, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleBmpBrightness' , 'pVal' , ), 37, (37, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleBmpContrast' , 'pVal' , ), 38, (38, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 368 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleBmpContrast' , 'pVal' , ), 38, (38, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 376 , (3, 0, None, None) , 1089 , )),
+	(( 'pScaleBmpType' , 'pVal' , ), 36, (36, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 384 , (3, 0, None, None) , 1088 , )),
+	(( 'pScaleBmpType' , 'pVal' , ), 36, (36, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 392 , (3, 0, None, None) , 1088 , )),
+	(( 'ScaleToDIB' , 'ScaleX' , 'ScaleY' , 'hBitmap' , ), 40, (40, (), [ 
+			 (5, 1, None, None) , (5, 1, None, None) , (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 400 , (3, 0, None, None) , 1088 , )),
+	(( 'Format' , 'pVal' , ), 41, (41, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 408 , (3, 0, None, None) , 0 , )),
+	(( 'Handle' , 'pVal' , ), 42, (42, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 416 , (3, 0, None, None) , 1088 , )),
+	(( 'CreateZoneRect' , 'Rect' , 'ppInt' , ), 43, (43, (), [ (9, 1, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , 
+			 (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 424 , (3, 0, None, None) , 0 , )),
+	(( 'CreateZone' , 'left' , 'top' , 'right' , 'bottom' , 
+			 'ppInt' , ), 45, (45, (), [ (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , 
+			 (3, 49, '0', None) , (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 432 , (3, 0, None, None) , 0 , )),
+	(( 'IsZone' , 'pVal' , ), 44, (44, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 440 , (3, 0, None, None) , 0 , )),
+	(( 'Parent' , 'pVal' , ), 46, (46, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 448 , (3, 0, None, None) , 0 , )),
+	(( 'Duplicate' , 'ppInt' , ), 47, (47, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 456 , (3, 0, None, None) , 0 , )),
+	(( 'LogFlags' , 'LogType' , 'pVal' , ), 49, (49, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 464 , (3, 0, None, None) , 1088 , )),
+	(( 'LogFlags' , 'LogType' , 'pVal' , ), 49, (49, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 472 , (3, 0, None, None) , 1088 , )),
+	(( 'LogSignature' , 'pVal' , ), 50, (50, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 480 , (3, 0, None, None) , 1088 , )),
+	(( 'LogSignature' , 'pVal' , ), 50, (50, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 488 , (3, 0, None, None) , 1088 , )),
+	(( 'Crop' , 'left' , 'top' , 'right' , 'bottom' , 
+			 ), 51, (51, (), [ (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 496 , (3, 0, None, None) , 0 , )),
+	(( 'LineBytes' , 'pVal' , ), 52, (52, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 504 , (3, 0, None, None) , 0 , )),
+	(( 'BitsPerPixel' , 'pVal' , ), 53, (53, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 512 , (3, 0, None, None) , 0 , )),
+	(( 'CreateBpp' , 'Width' , 'Height' , 'BitsPerPixel' , ), 54, (54, (), [ 
+			 (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 520 , (3, 0, None, None) , 0 , )),
+	(( 'Buffer' , 'pVal' , ), 55, (55, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 528 , (3, 0, None, None) , 1088 , )),
+	(( 'IsBitonal' , 'pVal' , ), 57, (57, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 536 , (3, 0, None, None) , 1088 , )),
+	(( 'CiCx' , 'pVal' , ), 58, (58, (), [ (16393, 10, None, None) , ], 1 , 2 , 4 , 0 , 544 , (3, 0, None, None) , 1088 , )),
+	(( 'FileSize' , 'pVal' , ), 59, (59, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 552 , (3, 0, None, None) , 1088 , )),
+	(( 'JpegQuality' , 'pVal' , ), 60, (60, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 560 , (3, 0, None, None) , 0 , )),
+	(( 'JpegQuality' , 'pVal' , ), 60, (60, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 568 , (3, 0, None, None) , 0 , )),
+	(( 'IsValid' , 'pVal' , ), 61, (61, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 576 , (3, 0, None, None) , 0 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 584 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 592 , (3, 0, None, None) , 1088 , )),
+	(( 'Pdf' , 'pVal' , ), 63, (63, (), [ (16393, 10, None, "IID('{70A6F899-6298-447E-951C-07430C0FF812}')") , ], 1 , 2 , 4 , 0 , 600 , (3, 0, None, None) , 0 , )),
+	(( 'ToBitonal' , ), 64, (64, (), [ ], 1 , 1 , 4 , 0 , 608 , (3, 0, None, None) , 0 , )),
+	(( 'ToGrayscale' , ), 65, (65, (), [ ], 1 , 1 , 4 , 0 , 616 , (3, 0, None, None) , 0 , )),
+	(( 'pComprColor' , 'pVal' , ), 66, (66, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 624 , (3, 0, None, None) , 0 , )),
+	(( 'pComprColor' , 'pVal' , ), 66, (66, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 632 , (3, 0, None, None) , 0 , )),
+	(( 'pComprBitonal' , 'pVal' , ), 67, (67, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 640 , (3, 0, None, None) , 0 , )),
+	(( 'pComprBitonal' , 'pVal' , ), 67, (67, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 648 , (3, 0, None, None) , 0 , )),
+	(( 'Info' , 'Type' , 'pVal' , ), 68, (68, (), [ (8, 1, None, None) , 
+			 (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 656 , (3, 0, None, None) , 1088 , )),
+	(( 'Info' , 'Type' , 'pVal' , ), 68, (68, (), [ (8, 1, None, None) , 
+			 (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 664 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 69, (69, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 672 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 69, (69, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 680 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiLine_vtables_dispatch_ = 1
 ICiLine_vtables_ = [
-	(( u'Direction' , u'pVal' , ), 35, (35, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Thickness' , u'pVal' , ), 36, (36, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Angle' , u'pVal' , ), 37, (37, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Rect' , u'pVal' , ), 38, (38, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'Start' , u'pVal' , ), 39, (39, (), [ (16393, 10, None, "IID('{8C531E23-84B0-431E-B39E-849AB24613AF}')") , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'End' , u'pVal' , ), 40, (40, (), [ (16393, 10, None, "IID('{8C531E23-84B0-431E-B39E-849AB24613AF}')") , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 41, (41, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 41, (41, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
+	(( 'Direction' , 'pVal' , ), 35, (35, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Thickness' , 'pVal' , ), 36, (36, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Angle' , 'pVal' , ), 37, (37, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Rect' , 'pVal' , ), 38, (38, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'Start' , 'pVal' , ), 39, (39, (), [ (16393, 10, None, "IID('{8C531E23-84B0-431E-B39E-849AB24613AF}')") , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'End' , 'pVal' , ), 40, (40, (), [ (16393, 10, None, "IID('{8C531E23-84B0-431E-B39E-849AB24613AF}')") , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 41, (41, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 41, (41, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiObject_vtables_dispatch_ = 1
 ICiObject_vtables_ = [
-	(( u'Pixels' , u'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'Intervals' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Rect' , u'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
-			(16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 1088 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
-			(5, 1, None, None) , ], 1 , 4 , 4 , 0 , 88 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 8, (8, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 8, (8, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 1088 , )),
+	(( 'Pixels' , 'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'Intervals' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Rect' , 'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
+			 (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 1088 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 6, (6, (), [ (3, 1, None, None) , 
+			 (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 88 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 8, (8, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 8, (8, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiPdf_vtables_dispatch_ = 1
 ICiPdf_vtables_ = [
-	(( u'readEnabled' , u'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 1089 , )),
-	(( u'writeEnabled' , u'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 1089 , )),
-	(( u'dpiRasterBw' , u'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'dpiRasterBw' , u'pVal' , ), 3, (3, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'dpiRasterGs' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'dpiRasterGs' , u'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'dpiRasterRgb' , u'pVal' , ), 5, (5, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'dpiRasterRgb' , u'pVal' , ), 5, (5, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'readMode' , u'pVal' , ), 6, (6, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'readMode' , u'pVal' , ), 6, (6, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'rasterColorMode' , u'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'rasterColorMode' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'minImageWidth' , u'pVal' , ), 8, (8, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
-	(( u'minImageWidth' , u'pVal' , ), 8, (8, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
-	(( u'minImageHeight' , u'pVal' , ), 9, (9, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
-	(( u'minImageHeight' , u'pVal' , ), 9, (9, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
-	(( u'useMinImageColors' , u'pVal' , ), 10, (10, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'useMinImageColors' , u'pVal' , ), 10, (10, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
-	(( u'Creator' , u'pVal' , ), 11, (11, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 200 , (3, 0, None, None) , 0 , )),
-	(( u'Creator' , u'pVal' , ), 11, (11, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 208 , (3, 0, None, None) , 0 , )),
-	(( u'CreationDate' , u'pVal' , ), 12, (12, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
-	(( u'CreationDate' , u'pVal' , ), 12, (12, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
-	(( u'Author' , u'pVal' , ), 13, (13, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
-	(( u'Author' , u'pVal' , ), 13, (13, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
-	(( u'Producer' , u'pVal' , ), 14, (14, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
-	(( u'Producer' , u'pVal' , ), 14, (14, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
-	(( u'Title' , u'pVal' , ), 15, (15, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
-	(( u'Title' , u'pVal' , ), 15, (15, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 272 , (3, 0, None, None) , 0 , )),
-	(( u'Subject' , u'pVal' , ), 16, (16, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 280 , (3, 0, None, None) , 0 , )),
-	(( u'Subject' , u'pVal' , ), 16, (16, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
-	(( u'Keywords' , u'pVal' , ), 17, (17, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 296 , (3, 0, None, None) , 0 , )),
-	(( u'Keywords' , u'pVal' , ), 17, (17, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 304 , (3, 0, None, None) , 0 , )),
-	(( u'ModDate' , u'pVal' , ), 18, (18, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 312 , (3, 0, None, None) , 0 , )),
-	(( u'ModDate' , u'pVal' , ), 18, (18, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 320 , (3, 0, None, None) , 0 , )),
-	(( u'Ptr' , u'pVal' , ), 19, (19, (), [ (16408, 10, None, None) , ], 1 , 2 , 4 , 0 , 328 , (3, 0, None, None) , 1089 , )),
-	(( u'PageSize' , u'pVal' , ), 20, (20, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 336 , (3, 0, None, None) , 1089 , )),
-	(( u'PageSize' , u'pVal' , ), 20, (20, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 344 , (3, 0, None, None) , 1089 , )),
-	(( u'PageOrientation' , u'pVal' , ), 21, (21, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 1089 , )),
-	(( u'PageOrientation' , u'pVal' , ), 21, (21, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 1089 , )),
-	(( u'ImageAlignment' , u'pVal' , ), 22, (22, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 368 , (3, 0, None, None) , 1089 , )),
-	(( u'ImageAlignment' , u'pVal' , ), 22, (22, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 376 , (3, 0, None, None) , 1089 , )),
-	(( u'o' , u'pVal' , ), 23, (23, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 384 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 23, (23, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 392 , (3, 0, None, None) , 1088 , )),
+	(( 'readEnabled' , 'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 1089 , )),
+	(( 'writeEnabled' , 'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 64 , (3, 0, None, None) , 1089 , )),
+	(( 'dpiRasterBw' , 'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'dpiRasterBw' , 'pVal' , ), 3, (3, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'dpiRasterGs' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'dpiRasterGs' , 'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'dpiRasterRgb' , 'pVal' , ), 5, (5, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'dpiRasterRgb' , 'pVal' , ), 5, (5, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'readMode' , 'pVal' , ), 6, (6, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'readMode' , 'pVal' , ), 6, (6, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'rasterColorMode' , 'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'rasterColorMode' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'minImageWidth' , 'pVal' , ), 8, (8, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
+	(( 'minImageWidth' , 'pVal' , ), 8, (8, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
+	(( 'minImageHeight' , 'pVal' , ), 9, (9, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
+	(( 'minImageHeight' , 'pVal' , ), 9, (9, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
+	(( 'useMinImageColors' , 'pVal' , ), 10, (10, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'useMinImageColors' , 'pVal' , ), 10, (10, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
+	(( 'Creator' , 'pVal' , ), 11, (11, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 200 , (3, 0, None, None) , 0 , )),
+	(( 'Creator' , 'pVal' , ), 11, (11, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 208 , (3, 0, None, None) , 0 , )),
+	(( 'CreationDate' , 'pVal' , ), 12, (12, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
+	(( 'CreationDate' , 'pVal' , ), 12, (12, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
+	(( 'Author' , 'pVal' , ), 13, (13, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
+	(( 'Author' , 'pVal' , ), 13, (13, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
+	(( 'Producer' , 'pVal' , ), 14, (14, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
+	(( 'Producer' , 'pVal' , ), 14, (14, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
+	(( 'Title' , 'pVal' , ), 15, (15, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
+	(( 'Title' , 'pVal' , ), 15, (15, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 272 , (3, 0, None, None) , 0 , )),
+	(( 'Subject' , 'pVal' , ), 16, (16, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 280 , (3, 0, None, None) , 0 , )),
+	(( 'Subject' , 'pVal' , ), 16, (16, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
+	(( 'Keywords' , 'pVal' , ), 17, (17, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 296 , (3, 0, None, None) , 0 , )),
+	(( 'Keywords' , 'pVal' , ), 17, (17, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 304 , (3, 0, None, None) , 0 , )),
+	(( 'ModDate' , 'pVal' , ), 18, (18, (), [ (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 312 , (3, 0, None, None) , 0 , )),
+	(( 'ModDate' , 'pVal' , ), 18, (18, (), [ (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 320 , (3, 0, None, None) , 0 , )),
+	(( 'Ptr' , 'pVal' , ), 19, (19, (), [ (16408, 10, None, None) , ], 1 , 2 , 4 , 0 , 328 , (3, 0, None, None) , 1089 , )),
+	(( 'PageSize' , 'pVal' , ), 20, (20, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 336 , (3, 0, None, None) , 1089 , )),
+	(( 'PageSize' , 'pVal' , ), 20, (20, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 344 , (3, 0, None, None) , 1089 , )),
+	(( 'PageOrientation' , 'pVal' , ), 21, (21, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 1089 , )),
+	(( 'PageOrientation' , 'pVal' , ), 21, (21, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 1089 , )),
+	(( 'ImageAlignment' , 'pVal' , ), 22, (22, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 368 , (3, 0, None, None) , 1089 , )),
+	(( 'ImageAlignment' , 'pVal' , ), 22, (22, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 376 , (3, 0, None, None) , 1089 , )),
+	(( 'o' , 'pVal' , ), 23, (23, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 384 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 23, (23, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 392 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiPdf417_vtables_dispatch_ = 1
 ICiPdf417_vtables_ = [
-	(( u'FirstBarcode' , u'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'NextBarcode' , u'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'Barcodes' , u'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'Find' , u'MaxBarcodes' , u'pVal' , ), 10, (10, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'Fx1' , u'par1' , u'par2' , u'ppRet' , ), 11, (11, (), [ 
-			(3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
-	(( u'Encodings' , u'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
-	(( u'Encodings' , u'pVal' , ), 13, (13, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 14, (14, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 14, (14, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
+	(( 'FirstBarcode' , 'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'NextBarcode' , 'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'Barcodes' , 'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'Find' , 'MaxBarcodes' , 'pVal' , ), 10, (10, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'Fx1' , 'par1' , 'par2' , 'ppRet' , ), 11, (11, (), [ 
+			 (3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
+	(( 'Encodings' , 'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
+	(( 'Encodings' , 'pVal' , ), 13, (13, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 14, (14, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 14, (14, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiPoint_vtables_dispatch_ = 1
 ICiPoint_vtables_ = [
-	(( u'x' , u'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'x' , u'pVal' , ), 1, (1, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'y' , u'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'y' , u'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 3, (3, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 3, (3, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
+	(( 'x' , 'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'x' , 'pVal' , ), 1, (1, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'y' , 'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'y' , 'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 3, (3, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 3, (3, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiQR_vtables_dispatch_ = 1
 ICiQR_vtables_ = [
-	(( u'FirstBarcode' , u'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'NextBarcode' , u'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Algorithm' , u'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'DiagFlags' , u'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'Barcodes' , u'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'Directions' , u'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 1088 , )),
-	(( u'Directions' , u'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 1088 , )),
-	(( u'Find' , u'MaxBarcodes' , u'pVal' , ), 10, (10, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'Fx1' , u'par1' , u'par2' , u'ppRet' , ), 11, (11, (), [ 
-			(3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
-	(( u'Encodings' , u'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
-	(( u'Encodings' , u'pVal' , ), 13, (13, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 14, (14, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 14, (14, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
+	(( 'FirstBarcode' , 'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'NextBarcode' , 'pVal' , ), 3, (3, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 5, (5, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Algorithm' , 'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 7, (7, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'DiagFlags' , 'pVal' , ), 7, (7, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'Barcodes' , 'pVal' , ), 9, (9, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 2 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'Directions' , 'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 1088 , )),
+	(( 'Directions' , 'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 1088 , )),
+	(( 'Find' , 'MaxBarcodes' , 'pVal' , ), 10, (10, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'Fx1' , 'par1' , 'par2' , 'ppRet' , ), 11, (11, (), [ 
+			 (3, 49, '0', None) , (3, 49, '0', None) , (16397, 10, None, None) , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 12, (12, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
+	(( 'Encodings' , 'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
+	(( 'Encodings' , 'pVal' , ), 13, (13, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 14, (14, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 192 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 14, (14, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiRect_vtables_dispatch_ = 1
 ICiRect_vtables_ = [
-	(( u'top' , u'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'top' , u'pVal' , ), 1, (1, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'bottom' , u'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'bottom' , u'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'left' , u'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'left' , u'pVal' , ), 3, (3, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'right' , u'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'right' , u'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'Empty' , ), 5, (5, (), [ ], 1 , 1 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'IsEmpty' , u'pVal' , ), 6, (6, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 7, (7, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 7, (7, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 144 , (3, 0, None, None) , 1088 , )),
+	(( 'top' , 'pVal' , ), 1, (1, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'top' , 'pVal' , ), 1, (1, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'bottom' , 'pVal' , ), 2, (2, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'bottom' , 'pVal' , ), 2, (2, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'left' , 'pVal' , ), 3, (3, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'left' , 'pVal' , ), 3, (3, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'right' , 'pVal' , ), 4, (4, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'right' , 'pVal' , ), 4, (4, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'Empty' , ), 5, (5, (), [ ], 1 , 1 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'IsEmpty' , 'pVal' , ), 6, (6, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 7, (7, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 136 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 7, (7, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 144 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiRepair_vtables_dispatch_ = 1
 ICiRepair_vtables_ = [
-	(( u'FaxStandardToFine' , ), 1, (1, (), [ ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'FaxRemoveBlankLines' , ), 2, (2, (), [ ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'FaxRemoveHeader' , ), 3, (3, (), [ ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'AutoDeskew' , u'pVal' , ), 36, (36, (), [ (16389, 10, None, None) , ], 1 , 1 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'AutoRotate' , u'pVal' , ), 37, (37, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 39, (39, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 39, (39, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'pMinLineLength' , u'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'pMinLineLength' , u'pVal' , ), 16, (16, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineGap' , u'pVal' , ), 17, (17, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineGap' , u'pVal' , ), 17, (17, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineAngle' , u'pVal' , ), 18, (18, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineAngle' , u'pVal' , ), 18, (18, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
-	(( u'pLineCurvature' , u'pVal' , ), 19, (19, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
-	(( u'pLineCurvature' , u'pVal' , ), 19, (19, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
-	(( u'CleanBorders' , ), 20, (20, (), [ ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 1088 , )),
-	(( u'RemovePunchHoles' , ), 21, (21, (), [ ], 1 , 1 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'RemoveHalftone' , ), 22, (22, (), [ ], 1 , 1 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
-	(( u'SmoothCharacters' , u'Type' , ), 23, (23, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 200 , (3, 0, None, None) , 0 , )),
-	(( u'CleanNoise' , u'NoiseSize' , ), 24, (24, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 208 , (3, 0, None, None) , 0 , )),
-	(( u'AutoInvertImage' , u'Threshold' , ), 25, (25, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
-	(( u'AutoInvertBlocks' , u'MinWidth' , u'MinHeight' , ), 26, (26, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 1 , 4 , 0 , 224 , (3, 0, None, None) , 1088 , )),
-	(( u'ReconstructLines' , u'Direction' , ), 29, (29, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
-	(( u'AutoCrop' , u'NewLeftMargin' , u'NewTopMargin' , u'NewRightMargin' , u'NewBottomMargin' , 
-			), 30, (30, (), [ (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
-	(( u'AutoRegister' , u'NewLeftMargin' , u'NewTopMargin' , ), 31, (31, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 1 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
-	(( u'DeleteLines' , u'Direction' , u'bRepair' , ), 40, (40, (), [ (3, 1, None, None) , 
-			(3, 49, '65535', None) , ], 1 , 1 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
-	(( u'BorderExtract' , u'Flags' , u'Algorithm' , ), 41, (41, (), [ (3, 49, '3', None) , 
-			(3, 49, '2', None) , ], 1 , 1 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
-	(( u'ClearBackground' , u'ThrLevel' , ), 42, (42, (), [ (5, 49, '30.0', None) , ], 1 , 1 , 4 , 0 , 272 , (3, 0, None, None) , 0 , )),
-	(( u'Resize' , u'PageSize' , u'PageOrientation' , u'ImageAlignment' , u'Width' , 
-			u'Height' , u'Unit' , ), 43, (43, (), [ (3, 1, None, None) , (3, 49, '0', None) , 
-			(3, 49, '0', None) , (5, 49, '8.5', None) , (5, 49, '11.0', None) , (3, 49, '1', None) , ], 1 , 1 , 4 , 0 , 280 , (3, 0, None, None) , 0 , )),
-	(( u'IsBlankImage' , u'reserved0' , u'reserved1' , u'reserved2' , u'pVal' , 
-			), 44, (44, (), [ (3, 49, '0', None) , (5, 49, '0.0', None) , (5, 49, '0.0', None) , (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 45, (45, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 296 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 45, (45, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 304 , (3, 0, None, None) , 1088 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 46, (46, (), [ (3, 1, None, None) , 
-			(16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 312 , (3, 0, None, None) , 1088 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 46, (46, (), [ (3, 1, None, None) , 
-			(5, 1, None, None) , ], 1 , 4 , 4 , 0 , 320 , (3, 0, None, None) , 1088 , )),
-	(( u'AdvancedBinarize' , u'targetDpi' , u'reserved1' , u'reserved2' , ), 47, (47, (), [ 
-			(3, 49, '0', None) , (5, 49, '0.0', None) , (5, 49, '0.0', None) , ], 1 , 1 , 4 , 0 , 328 , (3, 0, None, None) , 0 , )),
-	(( u'MinimizeBitsPerPixel' , u'reserved1' , u'reserved2' , ), 48, (48, (), [ (5, 49, '0.0', None) , 
-			(5, 49, '0.0', None) , ], 1 , 1 , 4 , 0 , 336 , (3, 0, None, None) , 1088 , )),
-	(( u'CleanNoiseExt' , u'Flags' , u'maxNoiseSizeHorz' , u'maxNoiseSizeVert' , u'minObjectDistance' , 
-			u'reserved0' , ), 50, (50, (), [ (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , 
-			(3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 344 , (3, 0, None, None) , 0 , )),
-	(( u'o' , u'pVal' , ), 51, (51, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 51, (51, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 1088 , )),
+	(( 'FaxStandardToFine' , ), 1, (1, (), [ ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'FaxRemoveBlankLines' , ), 2, (2, (), [ ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'FaxRemoveHeader' , ), 3, (3, (), [ ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'AutoDeskew' , 'pVal' , ), 36, (36, (), [ (16389, 10, None, None) , ], 1 , 1 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'AutoRotate' , 'pVal' , ), 37, (37, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 39, (39, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 39, (39, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'pMinLineLength' , 'pVal' , ), 16, (16, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'pMinLineLength' , 'pVal' , ), 16, (16, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineGap' , 'pVal' , ), 17, (17, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineGap' , 'pVal' , ), 17, (17, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineAngle' , 'pVal' , ), 18, (18, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineAngle' , 'pVal' , ), 18, (18, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
+	(( 'pLineCurvature' , 'pVal' , ), 19, (19, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
+	(( 'pLineCurvature' , 'pVal' , ), 19, (19, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
+	(( 'CleanBorders' , ), 20, (20, (), [ ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 1088 , )),
+	(( 'RemovePunchHoles' , ), 21, (21, (), [ ], 1 , 1 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'RemoveHalftone' , ), 22, (22, (), [ ], 1 , 1 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
+	(( 'SmoothCharacters' , 'Type' , ), 23, (23, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 200 , (3, 0, None, None) , 0 , )),
+	(( 'CleanNoise' , 'NoiseSize' , ), 24, (24, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 208 , (3, 0, None, None) , 0 , )),
+	(( 'AutoInvertImage' , 'Threshold' , ), 25, (25, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
+	(( 'AutoInvertBlocks' , 'MinWidth' , 'MinHeight' , ), 26, (26, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 224 , (3, 0, None, None) , 1088 , )),
+	(( 'ReconstructLines' , 'Direction' , ), 29, (29, (), [ (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
+	(( 'AutoCrop' , 'NewLeftMargin' , 'NewTopMargin' , 'NewRightMargin' , 'NewBottomMargin' , 
+			 ), 30, (30, (), [ (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
+	(( 'AutoRegister' , 'NewLeftMargin' , 'NewTopMargin' , ), 31, (31, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
+	(( 'DeleteLines' , 'Direction' , 'bRepair' , ), 40, (40, (), [ (3, 1, None, None) , 
+			 (3, 49, '65535', None) , ], 1 , 1 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
+	(( 'BorderExtract' , 'Flags' , 'Algorithm' , ), 41, (41, (), [ (3, 49, '3', None) , 
+			 (3, 49, '2', None) , ], 1 , 1 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
+	(( 'ClearBackground' , 'ThrLevel' , ), 42, (42, (), [ (5, 49, '30.0', None) , ], 1 , 1 , 4 , 0 , 272 , (3, 0, None, None) , 0 , )),
+	(( 'Resize' , 'PageSize' , 'PageOrientation' , 'ImageAlignment' , 'Width' , 
+			 'Height' , 'Unit' , ), 43, (43, (), [ (3, 1, None, None) , (3, 49, '0', None) , 
+			 (3, 49, '0', None) , (5, 49, '8.5', None) , (5, 49, '11.0', None) , (3, 49, '1', None) , ], 1 , 1 , 4 , 0 , 280 , (3, 0, None, None) , 0 , )),
+	(( 'IsBlankImage' , 'reserved0' , 'reserved1' , 'reserved2' , 'pVal' , 
+			 ), 44, (44, (), [ (3, 49, '0', None) , (5, 49, '0.0', None) , (5, 49, '0.0', None) , (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 45, (45, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 296 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 45, (45, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 304 , (3, 0, None, None) , 1088 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 46, (46, (), [ (3, 1, None, None) , 
+			 (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 312 , (3, 0, None, None) , 1088 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 46, (46, (), [ (3, 1, None, None) , 
+			 (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 320 , (3, 0, None, None) , 1088 , )),
+	(( 'AdvancedBinarize' , 'targetDpi' , 'reserved1' , 'reserved2' , ), 47, (47, (), [ 
+			 (3, 49, '0', None) , (5, 49, '0.0', None) , (5, 49, '0.0', None) , ], 1 , 1 , 4 , 0 , 328 , (3, 0, None, None) , 0 , )),
+	(( 'MinimizeBitsPerPixel' , 'reserved1' , 'reserved2' , ), 48, (48, (), [ (5, 49, '0.0', None) , 
+			 (5, 49, '0.0', None) , ], 1 , 1 , 4 , 0 , 336 , (3, 0, None, None) , 1088 , )),
+	(( 'CleanNoiseExt' , 'Flags' , 'maxNoiseSizeHorz' , 'maxNoiseSizeVert' , 'minObjectDistance' , 
+			 'reserved0' , ), 50, (50, (), [ (3, 1, None, None) , (3, 1, None, None) , (3, 1, None, None) , 
+			 (3, 1, None, None) , (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 344 , (3, 0, None, None) , 0 , )),
+	(( 'o' , 'pVal' , ), 51, (51, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 51, (51, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiServer_vtables_dispatch_ = 1
 ICiServer_vtables_ = [
-	(( u'CreateImage' , u'ppInt' , ), 1, (1, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'CreateBarcodePro' , u'ppInt' , ), 2, (2, (), [ (16393, 10, None, "IID('{BDDB0244-0CFD-11D4-B5F8-B89D57000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'OpenExt' , u'hModule' , u'MasterId' , u'pParam' , ), 10, (10, (), [ 
-			(20, 1, None, None) , (3, 1, None, None) , (20, 1, None, None) , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'CreateRect' , u'left' , u'top' , u'right' , u'bottom' , 
-			u'ppInt' , ), 11, (11, (), [ (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , 
-			(3, 49, '0', None) , (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'VerMajor' , u'pVal' , ), 12, (12, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'VerMinor' , u'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'VerRelease' , u'pVal' , ), 14, (14, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'CreateRepair' , u'ppInt' , ), 5, (5, (), [ (16393, 10, None, "IID('{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}')") , ], 1 , 1 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'CreateTools' , u'ppInt' , ), 6, (6, (), [ (16393, 10, None, "IID('{316BC128-8995-471D-985D-B3E68E87C084}')") , ], 1 , 1 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'CreateBarcodeBasic' , u'ppInt' , ), 8, (8, (), [ (16393, 10, None, "IID('{21DA65F1-9E63-45E3-B081-F78096F9D6C3}')") , ], 1 , 1 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'CreatePdf417' , u'ppInt' , ), 9, (9, (), [ (16393, 10, None, "IID('{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}')") , ], 1 , 1 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'CreateDataMatrix' , u'ppInt' , ), 15, (15, (), [ (16393, 10, None, "IID('{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}')") , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'Info' , u'Type' , u'nParam' , u'pVal' , ), 16, (16, (), [ 
-			(3, 1, None, None) , (3, 49, '0', None) , (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
-	(( u'CreateAdvColor' , u'ppInt' , ), 17, (17, (), [ (16393, 10, None, "IID('{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}')") , ], 1 , 1 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
-	(( u'CreateBarcode' , u'ppInt' , ), 18, (18, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
-	(( u'CreateBarcodes' , u'ppInt' , ), 19, (19, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 1088 , )),
-	(( u'DevMode' , u'bGlobalDevMode' , u'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'DevMode' , u'bGlobalDevMode' , u'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'DevMode' , u'bGlobalDevMode' , u'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
-	(( u'DevMode' , u'bGlobalDevMode' , u'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
-	(( u'Var' , u'Name' , u'pVal' , ), 21, (21, (), [ (8, 1, None, None) , 
-			(16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
-	(( u'Var' , u'Name' , u'pVal' , ), 21, (21, (), [ (8, 1, None, None) , 
-			(8, 1, None, None) , ], 1 , 4 , 4 , 0 , 208 , (3, 0, None, None) , 1088 , )),
-	(( u'uncompress' , u'DataIn' , u'Encoding' , u'DataOut' , u'RetCodeLng' , 
-			), 22, (22, (), [ (12, 1, None, None) , (16387, 3, None, None) , (16396, 2, None, None) , (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 216 , (3, 0, None, None) , 1088 , )),
-	(( u'CreateQR' , u'ppInt' , ), 23, (23, (), [ (16393, 10, None, "IID('{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}')") , ], 1 , 1 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
-	(( u'OpenUser' , u'User' , u'key' , u'reserved' , ), 24, (24, (), [ 
-			(8, 1, None, None) , (8, 1, None, None) , (8, 1, None, None) , ], 1 , 1 , 4 , 0 , 232 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 25, (25, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 240 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 25, (25, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 248 , (3, 0, None, None) , 1088 , )),
+	(( 'CreateImage' , 'ppInt' , ), 1, (1, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'CreateBarcodePro' , 'ppInt' , ), 2, (2, (), [ (16393, 10, None, "IID('{BDDB0244-0CFD-11D4-B5F8-B89D57000000}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'OpenExt' , 'hModule' , 'MasterId' , 'pParam' , ), 10, (10, (), [ 
+			 (20, 1, None, None) , (3, 1, None, None) , (20, 1, None, None) , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'CreateRect' , 'left' , 'top' , 'right' , 'bottom' , 
+			 'ppInt' , ), 11, (11, (), [ (3, 49, '0', None) , (3, 49, '0', None) , (3, 49, '0', None) , 
+			 (3, 49, '0', None) , (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'VerMajor' , 'pVal' , ), 12, (12, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'VerMinor' , 'pVal' , ), 13, (13, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'VerRelease' , 'pVal' , ), 14, (14, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'CreateRepair' , 'ppInt' , ), 5, (5, (), [ (16393, 10, None, "IID('{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}')") , ], 1 , 1 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'CreateTools' , 'ppInt' , ), 6, (6, (), [ (16393, 10, None, "IID('{316BC128-8995-471D-985D-B3E68E87C084}')") , ], 1 , 1 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'CreateBarcodeBasic' , 'ppInt' , ), 8, (8, (), [ (16393, 10, None, "IID('{21DA65F1-9E63-45E3-B081-F78096F9D6C3}')") , ], 1 , 1 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'CreatePdf417' , 'ppInt' , ), 9, (9, (), [ (16393, 10, None, "IID('{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}')") , ], 1 , 1 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'CreateDataMatrix' , 'ppInt' , ), 15, (15, (), [ (16393, 10, None, "IID('{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}')") , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'Info' , 'Type' , 'nParam' , 'pVal' , ), 16, (16, (), [ 
+			 (3, 1, None, None) , (3, 49, '0', None) , (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
+	(( 'CreateAdvColor' , 'ppInt' , ), 17, (17, (), [ (16393, 10, None, "IID('{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}')") , ], 1 , 1 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
+	(( 'CreateBarcode' , 'ppInt' , ), 18, (18, (), [ (16393, 10, None, "IID('{4ED88240-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 168 , (3, 0, None, None) , 1088 , )),
+	(( 'CreateBarcodes' , 'ppInt' , ), 19, (19, (), [ (16393, 10, None, "IID('{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}')") , ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 1088 , )),
+	(( 'DevMode' , 'bGlobalDevMode' , 'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'DevMode' , 'bGlobalDevMode' , 'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'DevMode' , 'bGlobalDevMode' , 'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
+	(( 'DevMode' , 'bGlobalDevMode' , 'pVal' , ), 20, (20, (), [ (3, 49, '0', None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
+	(( 'Var' , 'Name' , 'pVal' , ), 21, (21, (), [ (8, 1, None, None) , 
+			 (16392, 10, None, None) , ], 1 , 2 , 4 , 0 , 200 , (3, 0, None, None) , 1088 , )),
+	(( 'Var' , 'Name' , 'pVal' , ), 21, (21, (), [ (8, 1, None, None) , 
+			 (8, 1, None, None) , ], 1 , 4 , 4 , 0 , 208 , (3, 0, None, None) , 1088 , )),
+	(( 'uncompress' , 'DataIn' , 'Encoding' , 'DataOut' , 'RetCodeLng' , 
+			 ), 22, (22, (), [ (12, 1, None, None) , (16387, 3, None, None) , (16396, 2, None, None) , (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 216 , (3, 0, None, None) , 1088 , )),
+	(( 'CreateQR' , 'ppInt' , ), 23, (23, (), [ (16393, 10, None, "IID('{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}')") , ], 1 , 1 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
+	(( 'OpenUser' , 'User' , 'key' , 'reserved' , ), 24, (24, (), [ 
+			 (8, 1, None, None) , (8, 1, None, None) , (8, 1, None, None) , ], 1 , 1 , 4 , 0 , 232 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 25, (25, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 240 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 25, (25, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 248 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiTools_vtables_dispatch_ = 1
 ICiTools_vtables_ = [
-	(( u'FirstObject' , u'pVal' , ), 1, (1, (), [ (16393, 10, None, "IID('{59A0E32D-5050-47F5-A21B-F00397A21FCC}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
-	(( u'NextObject' , u'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{59A0E32D-5050-47F5-A21B-F00397A21FCC}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
-	(( u'ExtractObject' , u'Object' , u'ppInt' , ), 6, (6, (), [ (9, 1, None, "IID('{59A0E32D-5050-47F5-A21B-F00397A21FCC}')") , 
-			(16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
-	(( u'pMinLineLength' , u'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
-	(( u'pMinLineLength' , u'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineGap' , u'pVal' , ), 9, (9, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineGap' , u'pVal' , ), 9, (9, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineAngle' , u'pVal' , ), 10, (10, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
-	(( u'pMaxLineAngle' , u'pVal' , ), 10, (10, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
-	(( u'pLineCurvature' , u'pVal' , ), 11, (11, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
-	(( u'pLineCurvature' , u'pVal' , ), 11, (11, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
-	(( u'FirstLine' , u'pVal' , ), 12, (12, (), [ (16393, 10, None, "IID('{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')") , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
-	(( u'NextLine' , u'pVal' , ), 13, (13, (), [ (16393, 10, None, "IID('{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')") , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
-	(( u'MeasureMargins' , u'pVal' , ), 14, (14, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
-	(( u'MeasureSkew' , u'pVal' , ), 19, (19, (), [ (16389, 10, None, None) , ], 1 , 1 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
-	(( u'MeasureRotation' , u'pVal' , ), 42, (42, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
-	(( u'CountPixels' , u'Pixels' , ), 23, (23, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
-	(( u'MeasureVertHistogram' , u'pData' , ), 24, (24, (), [ (16396, 10, None, None) , ], 1 , 1 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
-	(( u'MeasureHorzHistogram' , u'pData' , ), 25, (25, (), [ (16396, 10, None, None) , ], 1 , 1 , 4 , 0 , 200 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 26, (26, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 208 , (3, 0, None, None) , 0 , )),
-	(( u'Image' , u'pVal' , ), 26, (26, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
-	(( u'rConfidence' , u'pVal' , ), 22, (22, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
-	(( u'pLineDirection' , u'pVal' , ), 41, (41, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
-	(( u'pLineDirection' , u'pVal' , ), 41, (41, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
-	(( u'Skew' , u'Angle' , ), 38, (38, (), [ (5, 1, None, None) , ], 1 , 1 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
-	(( u'Fatten' , u'Pixels' , u'Direction' , ), 54, (54, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 1 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
-	(( u'Trim' , u'Pixels' , u'Direction' , ), 55, (55, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 1 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
-	(( u'Outline' , ), 56, (56, (), [ ], 1 , 1 , 4 , 0 , 272 , (3, 0, None, None) , 1088 , )),
-	(( u'Skeleton' , ), 57, (57, (), [ ], 1 , 1 , 4 , 0 , 280 , (3, 0, None, None) , 1088 , )),
-	(( u'AndImage' , u'ImgSrc' , u'left' , u'top' , ), 58, (58, (), [ 
-			(9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
-	(( u'OrImage' , u'ImgSrc' , u'left' , u'top' , ), 59, (59, (), [ 
-			(9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 296 , (3, 0, None, None) , 0 , )),
-	(( u'XorImage' , u'ImgSrc' , u'left' , u'top' , ), 60, (60, (), [ 
-			(9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 304 , (3, 0, None, None) , 0 , )),
-	(( u'PasteImage' , u'ImgSrc' , u'left' , u'top' , ), 61, (61, (), [ 
-			(9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 312 , (3, 0, None, None) , 0 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
-			(16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 320 , (3, 0, None, None) , 1088 , )),
-	(( u'cx3d' , u'i' , u'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
-			(5, 1, None, None) , ], 1 , 4 , 4 , 0 , 328 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 63, (63, (), [ (3, 1, None, None) , 
-			(16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 336 , (3, 0, None, None) , 1088 , )),
-	(( u'cx2l' , u'i' , u'pVal' , ), 63, (63, (), [ (3, 1, None, None) , 
-			(3, 1, None, None) , ], 1 , 4 , 4 , 0 , 344 , (3, 0, None, None) , 1088 , )),
-	(( u'pScaleType' , u'pVal' , ), 73, (73, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleType' , u'pVal' , ), 73, (73, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleThreshold' , u'pVal' , ), 74, (74, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 368 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleThreshold' , u'pVal' , ), 74, (74, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 376 , (3, 0, None, None) , 0 , )),
-	(( u'ScaleImage' , u'ScaleX' , u'ScaleY' , ), 75, (75, (), [ (5, 1, None, None) , 
-			(5, 1, None, None) , ], 1 , 1 , 4 , 0 , 384 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpBrightness' , u'pVal' , ), 77, (77, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 392 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpBrightness' , u'pVal' , ), 77, (77, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 400 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpContrast' , u'pVal' , ), 78, (78, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 408 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpContrast' , u'pVal' , ), 78, (78, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 416 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpType' , u'pVal' , ), 76, (76, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 424 , (3, 0, None, None) , 0 , )),
-	(( u'pScaleBmpType' , u'pVal' , ), 76, (76, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 432 , (3, 0, None, None) , 0 , )),
-	(( u'ScaleToDIB' , u'ScaleX' , u'ScaleY' , u'hBitmap' , ), 79, (79, (), [ 
-			(5, 1, None, None) , (5, 1, None, None) , (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 440 , (3, 0, None, None) , 0 , )),
-	(( u'MeasureContrast' , u'nArea' , u'pVal' , ), 80, (80, (), [ (3, 49, '1', None) , 
-			(16389, 10, None, None) , ], 1 , 1 , 4 , 0 , 448 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 81, (81, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 456 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 81, (81, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 464 , (3, 0, None, None) , 1088 , )),
+	(( 'FirstObject' , 'pVal' , ), 1, (1, (), [ (16393, 10, None, "IID('{59A0E32D-5050-47F5-A21B-F00397A21FCC}')") , ], 1 , 1 , 4 , 0 , 56 , (3, 0, None, None) , 0 , )),
+	(( 'NextObject' , 'pVal' , ), 2, (2, (), [ (16393, 10, None, "IID('{59A0E32D-5050-47F5-A21B-F00397A21FCC}')") , ], 1 , 1 , 4 , 0 , 64 , (3, 0, None, None) , 0 , )),
+	(( 'ExtractObject' , 'Object' , 'ppInt' , ), 6, (6, (), [ (9, 1, None, "IID('{59A0E32D-5050-47F5-A21B-F00397A21FCC}')") , 
+			 (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 1 , 4 , 0 , 72 , (3, 0, None, None) , 0 , )),
+	(( 'pMinLineLength' , 'pVal' , ), 8, (8, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 80 , (3, 0, None, None) , 0 , )),
+	(( 'pMinLineLength' , 'pVal' , ), 8, (8, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 88 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineGap' , 'pVal' , ), 9, (9, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 96 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineGap' , 'pVal' , ), 9, (9, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 104 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineAngle' , 'pVal' , ), 10, (10, (), [ (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 112 , (3, 0, None, None) , 0 , )),
+	(( 'pMaxLineAngle' , 'pVal' , ), 10, (10, (), [ (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 120 , (3, 0, None, None) , 0 , )),
+	(( 'pLineCurvature' , 'pVal' , ), 11, (11, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 128 , (3, 0, None, None) , 0 , )),
+	(( 'pLineCurvature' , 'pVal' , ), 11, (11, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 136 , (3, 0, None, None) , 0 , )),
+	(( 'FirstLine' , 'pVal' , ), 12, (12, (), [ (16393, 10, None, "IID('{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')") , ], 1 , 1 , 4 , 0 , 144 , (3, 0, None, None) , 0 , )),
+	(( 'NextLine' , 'pVal' , ), 13, (13, (), [ (16393, 10, None, "IID('{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}')") , ], 1 , 1 , 4 , 0 , 152 , (3, 0, None, None) , 0 , )),
+	(( 'MeasureMargins' , 'pVal' , ), 14, (14, (), [ (16393, 10, None, "IID('{4ED88244-0BE1-11D4-B5F6-009FC6000000}')") , ], 1 , 1 , 4 , 0 , 160 , (3, 0, None, None) , 0 , )),
+	(( 'MeasureSkew' , 'pVal' , ), 19, (19, (), [ (16389, 10, None, None) , ], 1 , 1 , 4 , 0 , 168 , (3, 0, None, None) , 0 , )),
+	(( 'MeasureRotation' , 'pVal' , ), 42, (42, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 176 , (3, 0, None, None) , 0 , )),
+	(( 'CountPixels' , 'Pixels' , ), 23, (23, (), [ (16387, 10, None, None) , ], 1 , 1 , 4 , 0 , 184 , (3, 0, None, None) , 0 , )),
+	(( 'MeasureVertHistogram' , 'pData' , ), 24, (24, (), [ (16396, 10, None, None) , ], 1 , 1 , 4 , 0 , 192 , (3, 0, None, None) , 0 , )),
+	(( 'MeasureHorzHistogram' , 'pData' , ), 25, (25, (), [ (16396, 10, None, None) , ], 1 , 1 , 4 , 0 , 200 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 26, (26, (), [ (16393, 10, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 2 , 4 , 0 , 208 , (3, 0, None, None) , 0 , )),
+	(( 'Image' , 'pVal' , ), 26, (26, (), [ (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , ], 1 , 4 , 4 , 0 , 216 , (3, 0, None, None) , 0 , )),
+	(( 'rConfidence' , 'pVal' , ), 22, (22, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 224 , (3, 0, None, None) , 0 , )),
+	(( 'pLineDirection' , 'pVal' , ), 41, (41, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 232 , (3, 0, None, None) , 0 , )),
+	(( 'pLineDirection' , 'pVal' , ), 41, (41, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 240 , (3, 0, None, None) , 0 , )),
+	(( 'Skew' , 'Angle' , ), 38, (38, (), [ (5, 1, None, None) , ], 1 , 1 , 4 , 0 , 248 , (3, 0, None, None) , 0 , )),
+	(( 'Fatten' , 'Pixels' , 'Direction' , ), 54, (54, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 256 , (3, 0, None, None) , 0 , )),
+	(( 'Trim' , 'Pixels' , 'Direction' , ), 55, (55, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 1 , 4 , 0 , 264 , (3, 0, None, None) , 0 , )),
+	(( 'Outline' , ), 56, (56, (), [ ], 1 , 1 , 4 , 0 , 272 , (3, 0, None, None) , 1088 , )),
+	(( 'Skeleton' , ), 57, (57, (), [ ], 1 , 1 , 4 , 0 , 280 , (3, 0, None, None) , 1088 , )),
+	(( 'AndImage' , 'ImgSrc' , 'left' , 'top' , ), 58, (58, (), [ 
+			 (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 288 , (3, 0, None, None) , 0 , )),
+	(( 'OrImage' , 'ImgSrc' , 'left' , 'top' , ), 59, (59, (), [ 
+			 (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 296 , (3, 0, None, None) , 0 , )),
+	(( 'XorImage' , 'ImgSrc' , 'left' , 'top' , ), 60, (60, (), [ 
+			 (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 304 , (3, 0, None, None) , 0 , )),
+	(( 'PasteImage' , 'ImgSrc' , 'left' , 'top' , ), 61, (61, (), [ 
+			 (9, 1, None, "IID('{F2BCF189-0B27-11D4-B5F5-9CC767000000}')") , (3, 49, '0', None) , (3, 49, '0', None) , ], 1 , 1 , 4 , 0 , 312 , (3, 0, None, None) , 0 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
+			 (16389, 10, None, None) , ], 1 , 2 , 4 , 0 , 320 , (3, 0, None, None) , 1088 , )),
+	(( 'cx3d' , 'i' , 'pVal' , ), 62, (62, (), [ (3, 1, None, None) , 
+			 (5, 1, None, None) , ], 1 , 4 , 4 , 0 , 328 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 63, (63, (), [ (3, 1, None, None) , 
+			 (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 336 , (3, 0, None, None) , 1088 , )),
+	(( 'cx2l' , 'i' , 'pVal' , ), 63, (63, (), [ (3, 1, None, None) , 
+			 (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 344 , (3, 0, None, None) , 1088 , )),
+	(( 'pScaleType' , 'pVal' , ), 73, (73, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 352 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleType' , 'pVal' , ), 73, (73, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 360 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleThreshold' , 'pVal' , ), 74, (74, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 368 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleThreshold' , 'pVal' , ), 74, (74, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 376 , (3, 0, None, None) , 0 , )),
+	(( 'ScaleImage' , 'ScaleX' , 'ScaleY' , ), 75, (75, (), [ (5, 1, None, None) , 
+			 (5, 1, None, None) , ], 1 , 1 , 4 , 0 , 384 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpBrightness' , 'pVal' , ), 77, (77, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 392 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpBrightness' , 'pVal' , ), 77, (77, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 400 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpContrast' , 'pVal' , ), 78, (78, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 408 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpContrast' , 'pVal' , ), 78, (78, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 416 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpType' , 'pVal' , ), 76, (76, (), [ (16387, 10, None, None) , ], 1 , 2 , 4 , 0 , 424 , (3, 0, None, None) , 0 , )),
+	(( 'pScaleBmpType' , 'pVal' , ), 76, (76, (), [ (3, 1, None, None) , ], 1 , 4 , 4 , 0 , 432 , (3, 0, None, None) , 0 , )),
+	(( 'ScaleToDIB' , 'ScaleX' , 'ScaleY' , 'hBitmap' , ), 79, (79, (), [ 
+			 (5, 1, None, None) , (5, 1, None, None) , (16404, 10, None, None) , ], 1 , 1 , 4 , 0 , 440 , (3, 0, None, None) , 0 , )),
+	(( 'MeasureContrast' , 'nArea' , 'pVal' , ), 80, (80, (), [ (3, 49, '1', None) , 
+			 (16389, 10, None, None) , ], 1 , 1 , 4 , 0 , 448 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 81, (81, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 456 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 81, (81, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 464 , (3, 0, None, None) , 1088 , )),
 ]
 
 ICiView_vtables_dispatch_ = 1
 ICiView_vtables_ = [
-	(( u'o' , u'pVal' , ), 1, (1, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 1088 , )),
-	(( u'o' , u'pVal' , ), 1, (1, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 1, (1, (), [ (16404, 10, None, None) , ], 1 , 2 , 4 , 0 , 56 , (3, 0, None, None) , 1088 , )),
+	(( 'o' , 'pVal' , ), 1, (1, (), [ (20, 1, None, None) , ], 1 , 4 , 4 , 0 , 64 , (3, 0, None, None) , 1088 , )),
 ]
 
 RecordMap = {
 }
 
 CLSIDToClassMap = {
-	'{90E9D617-A4B1-4DDE-B842-60BECC114254}' : CiDataMatrix,
-	'{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}' : ICiLine,
+	'{BCE12DAC-09D5-4E64-AC70-9C7994B5832C}' : CiView,
+	'{90E9D617-A4B1-4DDE-B842-60BECC114255}' : CiQR,
+	'{F2BCF189-0B27-11D4-B5F5-9CC767000000}' : ICiImage,
+	'{12806B0A-7754-4297-AE05-631C2A1E928D}' : CiBarcodeBasic,
+	'{98AFD5D0-A728-498D-B1DE-0D811D719793}' : ICiView,
+	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}' : ICiPdf417,
 	'{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}' : ICiAdvColor,
 	'{286F56E6-7A78-4541-9D66-92DD901C7DE1}' : CiTools,
 	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}' : ICiDataMatrix,
-	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}' : ICiQR,
+	'{F2BCF18A-0B27-11D4-B5F5-9CC767000000}' : CiImage,
+	'{F2BCF18B-0B27-11D4-B5F5-9CC767000000}' : _ICiImageEvents,
+	'{BDDB0244-0CFD-11D4-B5F8-B89D57000000}' : ICiBarcodePro,
+	'{DAB01618-F817-4662-ADBA-46EE1C94921A}' : CiBarcodes,
+	'{70A6F899-6298-447E-951C-07430C0FF812}' : ICiPdf,
+	'{316BC128-8995-471D-985D-B3E68E87C084}' : ICiTools,
+	'{BDDB0245-0CFD-11D4-B5F8-B89D57000000}' : CiBarcodePro,
 	'{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}' : ICiRepair,
 	'{A7E1D34A-24DA-4D97-AF2E-CE7E4481E1E2}' : CiPoint,
 	'{21DA65F1-9E63-45E3-B081-F78096F9D6C3}' : ICiBarcodeBasic,
 	'{4ED88240-0BE1-11D4-B5F6-009FC6000000}' : ICiBarcode,
 	'{4ED88241-0BE1-11D4-B5F6-009FC6000000}' : CiBarcode,
+	'{90E9D617-A4B1-4DDE-B842-60BECC114254}' : CiDataMatrix,
 	'{4ED88244-0BE1-11D4-B5F6-009FC6000000}' : ICiRect,
 	'{4ED88245-0BE1-11D4-B5F6-009FC6000000}' : CiRect,
+	'{A7A8BF7F-8CB8-49DC-8A76-D0A1A145189C}' : CiLine,
 	'{D836E300-A317-4C7E-BE61-D650CE242589}' : CiServer,
+	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}' : ICiQR,
 	'{CB149079-A739-4178-A4DA-BACA546C3728}' : CiRepair,
 	'{A34FC1A7-C73F-4706-886E-C4A33E37C6E5}' : ICiServer,
+	'{3022D35D-0127-4C24-B1F0-1C66A831807E}' : CiAdvColor,
 	'{FB2E2C05-DB40-4A6F-8E52-0243621D7734}' : CiPdf,
 	'{59A0E32D-5050-47F5-A21B-F00397A21FCC}' : ICiObject,
+	'{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}' : ICiLine,
 	'{8C531E23-84B0-431E-B39E-849AB24613AF}' : ICiPoint,
-	'{90E9D617-A4B1-4DDE-B842-60BECC114255}' : CiQR,
-	'{BCE12DAC-09D5-4E64-AC70-9C7994B5832C}' : CiView,
-	'{12806B0A-7754-4297-AE05-631C2A1E928D}' : CiBarcodeBasic,
-	'{98AFD5D0-A728-498D-B1DE-0D811D719793}' : ICiView,
-	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}' : ICiPdf417,
-	'{F2BCF189-0B27-11D4-B5F5-9CC767000000}' : ICiImage,
-	'{BDDB0244-0CFD-11D4-B5F8-B89D57000000}' : ICiBarcodePro,
-	'{BDDB0245-0CFD-11D4-B5F8-B89D57000000}' : CiBarcodePro,
-	'{F2BCF18A-0B27-11D4-B5F5-9CC767000000}' : CiImage,
-	'{70A6F899-6298-447E-951C-07430C0FF812}' : ICiPdf,
-	'{F2BCF18B-0B27-11D4-B5F5-9CC767000000}' : _ICiImageEvents,
-	'{3022D35D-0127-4C24-B1F0-1C66A831807E}' : CiAdvColor,
-	'{A7A8BF7F-8CB8-49DC-8A76-D0A1A145189C}' : CiLine,
-	'{316BC128-8995-471D-985D-B3E68E87C084}' : ICiTools,
 	'{90E9D617-A4B1-4DDE-B842-60BECC114253}' : CiPdf417,
-	'{DAB01618-F817-4662-ADBA-46EE1C94921A}' : CiBarcodes,
 	'{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}' : ICiBarcodes,
 	'{4BBE294D-3C2A-4698-8B5F-84B1D3A6F621}' : CiObject,
 }
@@ -2608,18 +2603,18 @@ VTablesToPackageMap = {}
 VTablesToClassMap = {
 	'{4ED88244-0BE1-11D4-B5F6-009FC6000000}' : 'ICiRect',
 	'{316BC128-8995-471D-985D-B3E68E87C084}' : 'ICiTools',
-	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}' : 'ICiDataMatrix',
-	'{59A0E32D-5050-47F5-A21B-F00397A21FCC}' : 'ICiObject',
+	'{F2BCF189-0B27-11D4-B5F5-9CC767000000}' : 'ICiImage',
+	'{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}' : 'ICiRepair',
 	'{98AFD5D0-A728-498D-B1DE-0D811D719793}' : 'ICiView',
 	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}' : 'ICiPdf417',
-	'{A34FC1A7-C73F-4706-886E-C4A33E37C6E5}' : 'ICiServer',
+	'{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}' : 'ICiLine',
 	'{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}' : 'ICiAdvColor',
-	'{F2BCF189-0B27-11D4-B5F5-9CC767000000}' : 'ICiImage',
+	'{A34FC1A7-C73F-4706-886E-C4A33E37C6E5}' : 'ICiServer',
 	'{BDDB0244-0CFD-11D4-B5F8-B89D57000000}' : 'ICiBarcodePro',
 	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}' : 'ICiQR',
 	'{70A6F899-6298-447E-951C-07430C0FF812}' : 'ICiPdf',
-	'{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}' : 'ICiRepair',
-	'{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}' : 'ICiLine',
+	'{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}' : 'ICiDataMatrix',
+	'{59A0E32D-5050-47F5-A21B-F00397A21FCC}' : 'ICiObject',
 	'{8C531E23-84B0-431E-B39E-849AB24613AF}' : 'ICiPoint',
 	'{21DA65F1-9E63-45E3-B081-F78096F9D6C3}' : 'ICiBarcodeBasic',
 	'{4ED88240-0BE1-11D4-B5F6-009FC6000000}' : 'ICiBarcode',
@@ -2628,25 +2623,25 @@ VTablesToClassMap = {
 
 
 NamesToIIDMap = {
-	'ICiImage' : '{F2BCF189-0B27-11D4-B5F5-9CC767000000}',
+	'ICiRect' : '{4ED88244-0BE1-11D4-B5F6-009FC6000000}',
+	'ICiAdvColor' : '{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}',
 	'ICiQR' : '{8B79E556-FAD7-4339-8A8F-2C35D5C42C70}',
+	'ICiObject' : '{59A0E32D-5050-47F5-A21B-F00397A21FCC}',
 	'ICiBarcodePro' : '{BDDB0244-0CFD-11D4-B5F8-B89D57000000}',
+	'ICiPdf' : '{70A6F899-6298-447E-951C-07430C0FF812}',
+	'ICiBarcode' : '{4ED88240-0BE1-11D4-B5F6-009FC6000000}',
+	'ICiBarcodeBasic' : '{21DA65F1-9E63-45E3-B081-F78096F9D6C3}',
+	'ICiTools' : '{316BC128-8995-471D-985D-B3E68E87C084}',
+	'ICiRepair' : '{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}',
+	'ICiBarcodes' : '{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}',
+	'_ICiImageEvents' : '{F2BCF18B-0B27-11D4-B5F5-9CC767000000}',
+	'ICiDataMatrix' : '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}',
+	'ICiPdf417' : '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}',
 	'ICiLine' : '{B8E5EE38-BB0D-4561-B8D3-26C18C8817EE}',
 	'ICiView' : '{98AFD5D0-A728-498D-B1DE-0D811D719793}',
-	'ICiTools' : '{316BC128-8995-471D-985D-B3E68E87C084}',
-	'ICiPoint' : '{8C531E23-84B0-431E-B39E-849AB24613AF}',
+	'ICiImage' : '{F2BCF189-0B27-11D4-B5F5-9CC767000000}',
 	'ICiServer' : '{A34FC1A7-C73F-4706-886E-C4A33E37C6E5}',
-	'ICiPdf' : '{70A6F899-6298-447E-951C-07430C0FF812}',
-	'ICiBarcodeBasic' : '{21DA65F1-9E63-45E3-B081-F78096F9D6C3}',
-	'_ICiImageEvents' : '{F2BCF18B-0B27-11D4-B5F5-9CC767000000}',
-	'ICiRect' : '{4ED88244-0BE1-11D4-B5F6-009FC6000000}',
-	'ICiObject' : '{59A0E32D-5050-47F5-A21B-F00397A21FCC}',
-	'ICiPdf417' : '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6E}',
-	'ICiAdvColor' : '{8CBBAECA-9716-40CA-B8F6-0E9FF213522A}',
-	'ICiDataMatrix' : '{8B79E556-FAD7-4339-8A8F-2C35D5C42C6F}',
-	'ICiBarcode' : '{4ED88240-0BE1-11D4-B5F6-009FC6000000}',
-	'ICiBarcodes' : '{41F7F4D4-9FC1-46C6-92E5-2A3457CE3D5E}',
-	'ICiRepair' : '{63F6480C-997E-4FDE-AD63-A24E5F0FFDC7}',
+	'ICiPoint' : '{8C531E23-84B0-431E-B39E-849AB24613AF}',
 }
 
 win32com.client.constants.__dicts__.append(constants.__dict__)
