@@ -87,7 +87,12 @@ class BarcodePlugin(Plugin):
             result = strategy(crop, engine)
             if result:
                 strategy, barcodes = result
-                return ' '.join(sorted([b.data.decode() for b in barcodes]))
+                # data could be either str or bytes
+                barcodes = (
+                    b.data.decode() if hasattr(b.data, 'decode') else b.data
+                    for b in barcodes
+                )
+                return ' '.join(sorted([value for value in barcodes]))
         return None
 
     @classmethod

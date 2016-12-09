@@ -85,12 +85,17 @@ setup_data = {
         ],
         # Strings in braces within 'include_files' tuples expanded in cx_setup
         'include_files': [
+            # Evil, evil, evil
+            # cx_Freeze breaks pywintypes and pythoncom on Python 3.5
+            # https://bitbucket.org/anthony_tuininga/cx_freeze/issues/194/error-with-frozen-executable-using-35-and
+            ('{environment_root}/Lib/site-packages/win32/lib/pywintypes.py', 'pywintypes.py'),
+            ('{environment_root}/Lib/site-packages/pythoncom.py', 'pythoncom.py'),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
             ('{environment_root}/Library/bin/mkl_intel_thread.dll', 'mkl_intel_thread.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
             ('{project_root}/inselect/gui/inselect.qss', 'inselect.qss'),
         ],
-        'extra_packages': ['win32com.gen_py'],
+        'extra_packages': ['win32com.gen_py', 'win32timezone'],
         'excludes': [
             'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
         ]

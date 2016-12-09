@@ -44,6 +44,14 @@ def fix_frozen_dll_path():
         from ctypes import windll
         windll.kernel32.SetDllDirectoryW(str(Path(sys.executable).parent))
 
+        # gencache does not realise that it is frozen and will not have write
+        # access to the dicts.dat file. These hacks are to prevent gencache
+        # from atempting to write to dicts.dat.
+        # Evil, evil, evil
+        import win32com.client.gencache
+        win32com.client.gencache.is_readonly = True
+        win32com.client.gencache.AddModuleToCache.__defaults__ = (1, False)
+
 
 def get_default_locale():
     """Returns cached result of locale.getdefaultlocale()
