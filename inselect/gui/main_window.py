@@ -723,6 +723,9 @@ class MainWindow(QMainWindow):
         self.setWindowFilePath(None)
         self.info_widget.set_document(None)
 
+        # Show view tab
+        self.show_tab(index=0)
+
         self.sync_ui()
 
     def closeEvent(self, event):

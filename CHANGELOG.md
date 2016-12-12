@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #406 Show Boxes view on creating new document
 - #405 Remove qtpy
 - #401 Support new pyzbar and pylibdmtx
 - #397 Couple of problems with keyboard shortcuts box
