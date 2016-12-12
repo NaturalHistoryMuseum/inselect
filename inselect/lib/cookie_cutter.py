@@ -53,7 +53,7 @@ class CookieCutter(object):
             'boxes': self._boxes,
         }
         with Path(path).open('w', encoding='utf8') as outfile:
-            outfile.write(str(json.dumps(doc, indent=4)))
+            outfile.write(json.dumps(doc, indent=4))
 
     @property
     def document_items(self):

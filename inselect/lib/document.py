@@ -249,7 +249,7 @@ class InselectDocument(object):
                 properties = doc.get('properties', {})
 
                 # Parse datetimes
-                for dt in {'Saved on', 'Created on'}.intersection(list(properties.keys())):
+                for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
                     properties[dt] = cls._parse_datetime(properties[dt])
 
                 msg = 'Loaded [{0}] items from [{1}]'
@@ -274,7 +274,7 @@ class InselectDocument(object):
         properties = deepcopy(self.properties)
 
         # Format datetimes
-        for dt in {'Saved on', 'Created on'}.intersection(list(properties.keys())):
+        for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
             properties[dt] = self._format_datetime(properties[dt])
 
         doc = {
@@ -290,8 +290,8 @@ class InselectDocument(object):
         # http://stackoverflow.com/a/20776329/1773758
         # Specify separators to prevent trailing whitespace
         with path.open("w", newline='\n', encoding='utf8') as f:
-            f.write(str(json.dumps(doc, ensure_ascii=False, indent=4,
-                                       separators=(',', ': '), sort_keys=True)))
+            f.write(json.dumps(doc, ensure_ascii=False, indent=4,
+                               separators=(',', ': '), sort_keys=True))
 
         debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 
@@ -336,4 +336,4 @@ class InselectDocument(object):
         """An iterable of metadata field names
         """
         # The union of fields among all items
-        return set(chain(*(list(i['fields'].keys()) for i in self._items)))
+        return set(chain(*(i['fields'].keys() for i in self._items)))
