@@ -46,7 +46,7 @@ setup_data = {
     'extras_require': {
         'gui': [
             'ExifRead>=2.1.2', 'humanize>=0.5.1', 'psutil>=5.0.0',
-            'QtPy>=1.1.2', 'PyQt>=5.6.0'
+            'PyQt5>=5.6.0'
         ],
         'barcodes': ['gouda>=0.1.11', 'pylibdmtx>=0.1.5', 'pyzbar>=0.1.3'],
         'windows': ['pywin32>=220'],
