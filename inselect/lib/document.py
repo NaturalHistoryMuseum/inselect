@@ -290,8 +290,8 @@ class InselectDocument(object):
         # http://stackoverflow.com/a/20776329/1773758
         # Specify separators to prevent trailing whitespace
         with path.open("w", newline='\n', encoding='utf8') as f:
-            f.write(str(json.dumps(doc, ensure_ascii=False, indent=4,
-                                       separators=(',', ': '), sort_keys=True)))
+            f.write(json.dumps(doc, ensure_ascii=False, indent=4,
+                               separators=(',', ': '), sort_keys=True))
 
         debug_print('Saved [{0}] items to [{1}]'.format(len(items), path))
 

@@ -48,7 +48,7 @@ class BoxesScene(QGraphicsScene):
         """The single QGraphicsPixmapItem within this scene, or None if there is
         no open document
         """
-        items = list(self.items())
+        items = self.items()
         if not items:
             return None
         else:
@@ -80,7 +80,7 @@ class BoxesScene(QGraphicsScene):
 
     def box_items(self):
         "Iterable containin just BoxItems"
-        return filter(lambda i: isinstance(i, BoxItem), list(self.items()))
+        return filter(lambda i: isinstance(i, BoxItem), self.items())
 
     def add_box(self, rect, isvalid):
         """Notification from source that a box has been added.

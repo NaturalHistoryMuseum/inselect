@@ -302,11 +302,6 @@ def segment_edges(image, window=None, threshold=12, lab_based=True,
             new_rects.append(new_rect)
         rects = new_rects
 
-    # Reverse order so that boxes at the top left are towards the start
-    # and boxes at the bottom right are towards the end
-    # TODO LH This is crummy - need a way to order rects
-    rects = list(reversed(rects))
-
     return rects, display
 
 

@@ -33,7 +33,10 @@ class TestExportCSV(GUITest):
                     'ItemNumber': '{0}'.format(1 + index),
                     'Cropped_image_name': '{0:04}.jpg'.format(1 + index),
                 })
-                actual = {k: v for k, v in list(row.items()) if v and k not in BOUNDING_BOX_FIELD_NAMES}
+                actual = {
+                    k: v for k, v in row.items()
+                    if v and k not in BOUNDING_BOX_FIELD_NAMES
+                }
                 self.assertEqual(expected, actual)
 
         # Expect 4 rows
