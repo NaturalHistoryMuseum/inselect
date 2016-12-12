@@ -20,6 +20,8 @@ Version 0.1.35
 - #369 Keyboard shortcuts box too tall on some displays
 - #368 Ugly error message when creating a new inselect document on Mac OS X
 - #367 Reveal file doesn't work on Windows
+- #344 Not enough room for toolbar text on Mac retina display
+- #343 Missing resource compiler on Mac
 - #273 Inselect as a package
 - #95 Python 3
 - #83 Architecture and code organisation
