@@ -1,12 +1,13 @@
 # Inselect on Linux
 
-These instructions use
-[Continuum's Miniconda](http://conda.pydata.org/miniconda.html)
-Python distribution.
 Tested on Ubuntu 12.04, 14.04 and 16.04, all with 2GB RAM.
-Inselect uses Python 3.4+ and OpenCV 3. Ubuntu does not presently provide a
-system package of OpenCV's Python 3 bindings. To run Inselect with system
-packages, you will need to compile OpenCV.
+Inselect runs on Python 3.4 or later and OpenCV 3.
+While Ubuntu provides a `deb` package for Python 3, it does not provide
+(at time of writing) a `deb` package of Python 3 bindings for `OpenCV`.
+For these reasons, and to provide a consistent environment among distributions,
+we recommend using
+[Continuum's Miniconda](http://conda.pydata.org/miniconda.html) as shown below.
+To run Inselect with system packages, you will need to compile OpenCV.
 
 # Install Miniconda
 
