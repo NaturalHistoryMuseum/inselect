@@ -3,7 +3,7 @@ import unittest
 from mock import patch
 from pathlib import Path
 
-from qtpy.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog
 
 from .gui_test import GUITest
 from inselect.gui.main_window import MainWindow

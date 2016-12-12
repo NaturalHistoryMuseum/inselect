@@ -1,5 +1,5 @@
-from qtpy.QtCore import Qt, QRectF
-from qtpy.QtWidgets import QGraphicsItem
+from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtWidgets import QGraphicsItem
 
 from inselect.lib.utils import debug_print
 

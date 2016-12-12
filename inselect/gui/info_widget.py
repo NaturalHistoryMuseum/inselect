@@ -1,7 +1,7 @@
 import humanize
 import locale
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QFormLayout, QLabel, QWidget
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QFormLayout, QLabel, QWidget
 
 from inselect.lib.utils import format_dt_display
 from inselect.gui.utils import BoldLabel, HorizontalLine, reveal_path

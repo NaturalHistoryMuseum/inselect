@@ -5,9 +5,9 @@ import sys
 
 from pathlib import Path
 
-from qtpy import QtWidgets
-from qtpy.QtCore import QCoreApplication, QLocale, QSettings, QSize, QTimer
-from qtpy.QtGui import QIcon
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QCoreApplication, QLocale, QSettings, QSize, QTimer
+from PyQt5.QtGui import QIcon
 
 import inselect
 

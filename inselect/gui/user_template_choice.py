@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from qtpy.QtCore import QObject, QSettings, Signal, QStandardPaths
+from PyQt5.QtCore import QObject, QSettings, pyqtSignal, QStandardPaths
 
 from inselect.lib.templates.dwc import DWC
 from inselect.lib.user_template import UserTemplate
@@ -28,7 +28,7 @@ class UserTemplateChoice(QObject):
     DEFAULT = DWC
 
     # Emitted when the user picks a new template
-    template_changed = Signal()
+    template_changed = pyqtSignal()
 
     def __init__(self):
         super(UserTemplateChoice, self).__init__()

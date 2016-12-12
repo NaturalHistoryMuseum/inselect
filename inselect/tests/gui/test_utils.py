@@ -5,7 +5,7 @@ import sys
 
 from mock import patch
 
-from qtpy.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 
 from inselect.gui import copy_box
 from inselect.gui.utils import reveal_path, report_exception_to_user

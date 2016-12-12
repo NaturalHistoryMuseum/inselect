@@ -3,7 +3,7 @@ import unittest
 from mock import create_autospec
 from pathlib import Path
 
-from qtpy.QtCore import QRect
+from PyQt5.QtCore import QRect
 
 from .gui_test import GUITest
 

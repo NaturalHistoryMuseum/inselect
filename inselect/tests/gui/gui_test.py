@@ -2,8 +2,8 @@ import unittest
 
 from mock import MagicMock, patch
 
-from qtpy import QtCore, QtWidgets
-from qtpy.QtWidgets import QMessageBox
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 
 from inselect.gui import shortcuts_help
 from inselect.gui.app import qapplication

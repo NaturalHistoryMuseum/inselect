@@ -1,6 +1,6 @@
-from qtpy.QtCore import QPoint, QRectF, Qt
-from qtpy.QtGui import QBrush, QColor, QPainter, QPen
-from qtpy.QtWidgets import QGraphicsItem
+from PyQt5.QtCore import QPoint, QRectF, Qt
+from PyQt5.QtGui import QBrush, QColor, QPainter, QPen
+from PyQt5.QtWidgets import QGraphicsItem
 
 from inselect.gui.utils import painter_state
 

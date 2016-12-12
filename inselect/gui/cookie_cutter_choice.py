@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from qtpy.QtCore import QObject, QSettings, Signal, QStandardPaths
+from PyQt5.QtCore import QObject, QSettings, pyqtSignal, QStandardPaths
 
 from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print
@@ -25,7 +25,7 @@ class CookieCutterChoice(QObject):
     DIRECTORY_KEY = 'cookie_cutter_last_directory'
 
     # Emitted when the user picks a new file
-    cookie_cutter_changed = Signal()
+    cookie_cutter_changed = pyqtSignal()
 
     def __init__(self):
         super(CookieCutterChoice, self).__init__()

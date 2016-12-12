@@ -1,6 +1,6 @@
-from qtpy.QtCore import QModelIndex, Qt, QRect, QRectF
-from qtpy.QtGui import QBrush, QColor, QPainter, QPen
-from qtpy.QtWidgets import QAbstractItemView, QVBoxLayout, QWidget
+from PyQt5.QtCore import QModelIndex, Qt, QRect, QRectF
+from PyQt5.QtGui import QBrush, QColor, QPainter, QPen
+from PyQt5.QtWidgets import QAbstractItemView, QVBoxLayout, QWidget
 
 from .popup_panel import PopupPanel
 from .roles import PixmapRole

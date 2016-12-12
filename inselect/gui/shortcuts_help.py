@@ -1,10 +1,9 @@
 """Dialog showing a list of shortcuts
 """
-from qtpy.QtCore import Qt, QSettings
-from qtpy.QtWidgets import (QCheckBox, QDialog, QGridLayout, QHBoxLayout,
-                            QLabel, QPushButton, QSizePolicy, QVBoxLayout,
-                            QWidget)
-
+from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtWidgets import (QCheckBox, QDialog, QGridLayout, QHBoxLayout,
+                             QLabel, QPushButton, QSizePolicy, QVBoxLayout,
+                             QWidget)
 
 from inselect.gui.utils import HorizontalLine, VerticalLine
 from inselect.gui.prompts import format_action_shortcuts, BOXES_VIEW_SHORTCUTS

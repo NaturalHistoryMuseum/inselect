@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from qtpy.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect, Signal
-from qtpy.QtGui import QPixmap
+from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex, QRect, pyqtSignal
+from PyQt5.QtGui import QPixmap
 
 from inselect.lib.utils import debug_print
 
@@ -19,7 +19,7 @@ class Model(QAbstractItemModel):
     # TODO LH Plugins should operate on Model, not InselectDocument
 
     # Emitted when modified status changes
-    modified_changed = Signal()
+    modified_changed = pyqtSignal()
 
     DISPLAY_TEMPLATE = '{0} {1}'
     LEADING_ZEROES = '{0:04d}'

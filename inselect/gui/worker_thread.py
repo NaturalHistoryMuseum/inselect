@@ -1,6 +1,6 @@
 import traceback
 
-from qtpy import QtCore
+from PyQt5 import QtCore
 
 from inselect.lib.utils import debug_print
 
@@ -19,10 +19,10 @@ class WorkerThread(QtCore.QThread):
     # Emitted when the operation has either finished or been cancelled, and
     # self.run() is about to exit. Arguments are user cancelled, error that
     # occurred.
-    completed = QtCore.Signal(bool, str)
+    completed = QtCore.pyqtSignal(bool, str)
 
     # Emitted when the callable wants to set a new message- see progress()
-    new_message = QtCore.Signal(str)
+    new_message = QtCore.pyqtSignal(str)
 
     def __init__(self, operation, box_title, parent=None):
         super(WorkerThread, self).__init__(parent)

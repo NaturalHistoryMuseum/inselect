@@ -6,14 +6,14 @@ from functools import partial
 from itertools import count
 from pathlib import Path
 
-from qtpy import QtWidgets
-from qtpy.QtCore import (Qt, QEvent, QSettings, QItemSelection,
-                         QItemSelectionModel, QStandardPaths)
-from qtpy.QtGui import (QColor, QFont, QIcon, QImageWriter, QKeySequence,
-                        QPixmap, QScreen)
-from qtpy.QtWidgets import (QAction, QActionGroup, QFileDialog, QLabel,
-                            QMainWindow, QMenu, QMessageBox, QSizePolicy,
-                            QSplitter, QStackedWidget, QVBoxLayout, QWidget)
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import (Qt, QEvent, QSettings, QItemSelection,
+                          QItemSelectionModel, QStandardPaths)
+from PyQt5.QtGui import (QColor, QFont, QIcon, QImageWriter, QKeySequence,
+                         QPixmap, QScreen)
+from PyQt5.QtWidgets import (QAction, QActionGroup, QFileDialog, QLabel,
+                             QMainWindow, QMenu, QMessageBox, QSizePolicy,
+                             QSplitter, QStackedWidget, QVBoxLayout, QWidget)
 
 # This import is to register our icon resources with QT
 import inselect.gui.icons  # noqa

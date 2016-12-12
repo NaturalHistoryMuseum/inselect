@@ -7,7 +7,7 @@ from pathlib import Path
 
 from cv2 import imread
 
-from qtpy.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog
 
 from .gui_test import GUITest
 

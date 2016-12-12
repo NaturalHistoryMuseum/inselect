@@ -2,7 +2,7 @@ import unittest
 
 from pathlib import Path
 
-from qtpy.QtCore import QRect
+from PyQt5.QtCore import QRect
 
 from .gui_test import GUITest
 

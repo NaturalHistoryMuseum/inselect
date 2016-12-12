@@ -6,7 +6,7 @@ from pathlib import Path
 
 import cv2
 
-from qtpy.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 
 from inselect.lib.templates.dwc import DWC
 from inselect.tests.utils import temp_directory_with_files

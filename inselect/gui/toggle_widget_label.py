@@ -1,6 +1,6 @@
-from qtpy.QtCore import Qt
-from qtpy.QtGui import QPixmap
-from qtpy.QtWidgets import QHBoxLayout, QLabel, QWidget
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 
 class ToggleWidgetLabel(QWidget):

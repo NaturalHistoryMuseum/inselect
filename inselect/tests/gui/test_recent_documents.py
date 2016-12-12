@@ -1,9 +1,8 @@
 import unittest
 
-
 from pathlib import Path
 
-from qtpy.QtCore import QSettings
+from PyQt5.QtCore import QSettings
 
 from inselect.gui.recent_documents import RecentDocuments
 

@@ -1,5 +1,5 @@
-from qtpy.QtGui import QBrush, QPainter, QPen
-from qtpy.QtWidgets import QSizePolicy, QTabBar, QTabWidget
+from PyQt5.QtGui import QBrush, QPainter, QPen
+from PyQt5.QtWidgets import QSizePolicy, QTabBar, QTabWidget
 
 
 class Ribbon(QTabWidget):

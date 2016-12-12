@@ -1,4 +1,4 @@
-from qtpy.QtCore import QSettings
+from PyQt5.QtCore import QSettings
 
 from inselect.lib.sort_document_items import sort_document_items
 

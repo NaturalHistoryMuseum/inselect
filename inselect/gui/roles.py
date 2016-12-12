@@ -1,6 +1,6 @@
 from itertools import count
 
-from qtpy.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 
 _role = count(start=int(Qt.UserRole))

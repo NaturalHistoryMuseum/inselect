@@ -1,5 +1,5 @@
-from qtpy.QtCore import QObject, QSettings, Signal
-from qtpy.QtGui import QColor
+from PyQt5.QtCore import QObject, QSettings, pyqtSignal
+from PyQt5.QtGui import QColor
 
 
 LIGHT_BACKGROUND = {
@@ -38,7 +38,7 @@ class ColourSchemeChoice(QObject):
     KEY = 'colour_scheme'
 
     # Emitted when the user picks a new colour scheme
-    colour_scheme_changed = Signal()
+    colour_scheme_changed = pyqtSignal()
 
     def __init__(self):
         super(ColourSchemeChoice, self).__init__()
