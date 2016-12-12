@@ -1555,7 +1555,7 @@ class MainWindow(QMainWindow):
         res = self._accept_drag_drop(event)
         if res:
             event.acceptProposedAction()
-            self.open_file(file=res)
+            self.open_file(path=res)
         else:
             super(MainWindow, self).dropEvent(event)
 
