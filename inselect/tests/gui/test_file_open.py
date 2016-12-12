@@ -6,7 +6,7 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
-from qtpy.QtWidgets import QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import make_readonly

@@ -1,6 +1,6 @@
-from qtpy.QtCore import Qt, QRectF, QSizeF, Signal
-from qtpy.QtGui import QCursor, QPen, QTransform
-from qtpy.QtWidgets import QGraphicsView
+from PyQt5.QtCore import Qt, QRectF, QSizeF, pyqtSignal
+from PyQt5.QtGui import QCursor, QPen, QTransform
+from PyQt5.QtWidgets import QGraphicsView
 
 from inselect.lib.utils import debug_print
 from inselect.gui.utils import unite_rects
@@ -15,7 +15,7 @@ class BoxesView(QGraphicsView):
     # 1.8 was chosen through experimentation to fix #331
     MAXIMUM_ZOOM = 1.8
 
-    viewport_changed = Signal(QRectF)
+    viewport_changed = pyqtSignal(QRectF)
 
     def __init__(self, scene, parent=None):
         super(BoxesView, self).__init__(scene, parent)

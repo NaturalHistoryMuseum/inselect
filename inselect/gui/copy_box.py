@@ -1,6 +1,6 @@
 from functools import partial
 
-from qtpy.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 
 def copy_to_clipboard(text):

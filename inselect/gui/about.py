@@ -5,12 +5,10 @@ import platform
 
 import humanize
 import psutil
-import qtpy
-import qtpy.QtCore
 
-from qtpy import QtWidgets
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QDialog, QLabel, QPushButton, QSizePolicy, QVBoxLayout
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import (QDialog, QLabel, QPushButton, QSizePolicy,
+                             QVBoxLayout)
 
 from inselect.gui.utils import HTML_LINK_TEMPLATE
 
@@ -41,11 +39,8 @@ def _environment():
         ('Python', '{0} ({1})'.format(platform.python_version(), python_bit_depth)),
         ('Numpy', np.version.version),
         ('OpenCV', cv2.__version__),
-        (
-            qtpy.API_NAME, 
-            qtpy.PYQT_VERSION if (qtpy.PYQT4 or qtpy.PYQT5) else qtpy.PYSIDE_VERSION
-        ),
-        ('Qt',  qtpy.QT_VERSION),
+        ('PyQt5', QtCore.PYQT_VERSION_STR),
+        ('Qt',  QtCore.qVersion()),
         ('scikit-learn', sklearn.__version__),
         ('SciPy', scipy.__version__),
     ]
@@ -139,7 +134,7 @@ def show_about_box(parent=None):
     close.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
     close.setDefault(True)
     close.clicked.connect(box.close)
-    vlayout.addWidget(close, alignment=Qt.AlignHCenter)
+    vlayout.addWidget(close, alignment=QtCore.Qt.AlignHCenter)
 
     box.setLayout(vlayout)
 

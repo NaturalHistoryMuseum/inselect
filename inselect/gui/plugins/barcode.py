@@ -1,6 +1,6 @@
 from itertools import count
 
-from qtpy.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 
 import inselect.lib.utils
 

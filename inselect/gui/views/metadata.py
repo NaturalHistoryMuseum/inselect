@@ -1,10 +1,10 @@
 from itertools import repeat
 
-from qtpy import QtWidgets
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QAbstractItemView, QWidget, QGroupBox, QLabel,
-                            QLineEdit, QComboBox, QFormLayout, QSizePolicy,
-                            QVBoxLayout)
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QAbstractItemView, QWidget, QGroupBox, QLabel,
+                             QLineEdit, QComboBox, QFormLayout, QSizePolicy,
+                             QVBoxLayout)
 
 from inselect.lib.countries import COUNTRIES
 from inselect.lib.languages import LANGUAGES

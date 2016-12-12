@@ -1,7 +1,5 @@
-
-
-from qtpy.QtCore import QModelIndex, QRect
-from qtpy.QtWidgets import QAbstractItemView
+from PyQt5.QtCore import QModelIndex, QRect
+from PyQt5.QtWidgets import QAbstractItemView
 
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print

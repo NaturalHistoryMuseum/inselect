@@ -1,5 +1,5 @@
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QFrame
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGroupBox, QVBoxLayout, QFrame
 
 from .toggle_widget_label import ToggleWidgetLabel
 

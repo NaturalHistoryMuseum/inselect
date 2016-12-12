@@ -1,6 +1,7 @@
 import locale
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QAbstractItemView, QHBoxLayout, QLabel, QWidget
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QAbstractItemView, QHBoxLayout, QLabel, QWidget
 
 from inselect.lib.utils import debug_print
 

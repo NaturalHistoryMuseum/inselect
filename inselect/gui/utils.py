@@ -10,9 +10,9 @@ from itertools import groupby
 
 import sip
 
-from qtpy.QtCore import Qt, QItemSelection, QItemSelectionModel
-from qtpy.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
-from qtpy.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
+from PyQt5.QtCore import Qt, QItemSelection, QItemSelectionModel
+from PyQt5.QtGui import QColor, QIcon, QImage, QPainter, QPixmap
+from PyQt5.QtWidgets import QFrame, QLabel, QMessageBox, QWidget
 
 from . import copy_box
 from functools import reduce

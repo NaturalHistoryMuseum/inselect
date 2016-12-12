@@ -2,9 +2,9 @@ import sys
 
 from itertools import chain
 
-from qtpy.QtCore import Qt, QRect, QRectF
-from qtpy.QtGui import QPen, QBrush
-from qtpy.QtWidgets import QGraphicsItem, QGraphicsRectItem
+from PyQt5.QtCore import Qt, QRect, QRectF
+from PyQt5.QtGui import QPen, QBrush
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice

@@ -1,6 +1,6 @@
-from qtpy.QtCore import Qt, QObject
-from qtpy.QtGui import QFontMetrics
-from qtpy.QtWidgets import QAction, QFileDialog, QMenu
+from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtGui import QFontMetrics
+from PyQt5.QtWidgets import QAction, QFileDialog, QMenu
 
 from inselect.lib.cookie_cutter import CookieCutter
 from inselect.lib.utils import debug_print

@@ -1,7 +1,8 @@
-from qtpy.QtCore import QRect, QSize, QPoint, Qt, QItemSelection, QItemSelectionModel
-from qtpy.QtGui import QBrush, QColor, QPen, QFont, QTransform
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QListView,
-                            QStyle, QStyledItemDelegate)
+from PyQt5.QtCore import (QRect, QSize, QPoint, Qt, QItemSelection,
+                          QItemSelectionModel)
+from PyQt5.QtGui import QBrush, QColor, QPen, QFont, QTransform
+from PyQt5.QtWidgets import (QAbstractItemView, QAction, QActionGroup,
+                             QListView, QStyle, QStyledItemDelegate)
 
 from inselect.lib.utils import debug_print
 from inselect.gui.colours import colour_scheme_choice
