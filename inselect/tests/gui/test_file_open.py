@@ -39,15 +39,17 @@ class TestFileOpen(GUITest):
         """
         self.assertEqual('Inselect', self.window.windowTitle())
 
-    def assertWindowTitleOpenDocument(self):
+    def assertWindowTitleOpenDocument(self, title='shapes'):
         """Asserts that self.window.windowTitle is as expected.
         """
         # Some OSes append ' \u2014 inselect' to the window title, so assert
         # using a regular expression rather than equality. Not possible to
         # check modified behaviour because MainWindow.modified_changed slot
         # is not called without event loop.
-        self.assertRegex(self.window.windowTitle(),
-                                 '^shapes\\.inselect.*')
+        self.assertRegex(
+            self.window.windowTitle(),
+            '^{0}\\.inselect.*'.format(title)
+        )
 
     def test_open_doc(self):
         "Open an inselect document"
@@ -55,6 +57,26 @@ class TestFileOpen(GUITest):
         self.assertEqual(5, self.window.model.rowCount())
         self.assertWindowTitleOpenDocument()
         self.assertFalse(self.window.model.is_modified)
+
+    def test_open_non_ascii(self):
+        "Open an inselect document with non-ascii characters in the filename"
+        # Copy the existing 'shapes' file to a temporary with the a non-latin
+        # name
+        with temp_directory_with_files() as tempdir:
+            stem = 'åland'
+            path = tempdir.joinpath('{0}.inselect'.format(stem))
+
+            shutil.copy(str(TESTDATA.joinpath('shapes.inselect')), str(path))
+            shutil.copy(
+                str(TESTDATA.joinpath('shapes.png')),
+                str(tempdir.joinpath('{0}.png'.format(stem)))
+            )
+
+            # Properties are as expected
+            self.window.open_file(path=path)
+            self.assertEqual(5, self.window.model.rowCount())
+            self.assertWindowTitleOpenDocument(title=stem)
+            self.assertFalse(self.window.model.is_modified)
 
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_open_readonly_doc(self, mock_warning):

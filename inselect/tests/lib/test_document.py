@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 import os
 import pytz
+import shutil
 import sys
 import tempfile
 import unittest
@@ -51,6 +52,23 @@ class TestDocument(unittest.TestCase):
             doc.crops_dir = ''
         with self.assertRaises(AttributeError):
             doc.n_items = 1
+
+    def test_open_non_ascii(self):
+        "Open an inselect document with non-ascii characters in the filename"
+        with temp_directory_with_files() as tempdir:
+            stem = 'åland'
+            path = tempdir.joinpath('{0}.inselect'.format(stem))
+
+            shutil.copy(str(TESTDATA.joinpath('shapes.inselect')), str(path))
+            shutil.copy(
+                str(TESTDATA.joinpath('shapes.png')),
+                str(tempdir.joinpath('{0}.png'.format(stem)))
+            )
+
+            doc = InselectDocument.load(path)
+
+            # Properties are as expected
+            self.assertEqual(doc.document_path, path)
 
     def _test_load_fails(self, contents):
         """Helper that writes contents to a temp file and asserts that
