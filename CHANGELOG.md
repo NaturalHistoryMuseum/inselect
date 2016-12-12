@@ -14,6 +14,7 @@ Version 0.1.35
 - #377 Windows non-latin username test
 - #374 Support pyzbar
 - #372 Support pydmtxlib
+- #371 Ugly error message when opening file with non-ascii characters in name
 - #369 Keyboard shortcuts box too tall on some displays
 - #368 Ugly error message when creating a new inselect document on Mac OS X
 - #367 Reveal file doesn't work on Windows
