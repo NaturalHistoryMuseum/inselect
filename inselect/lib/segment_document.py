@@ -112,7 +112,7 @@ class SegmentDocument(object):
         """Generator of instances of normalised Rect with padding applied
         """
         # Normalised coords and construct instances of Rect
-        rects = list(Rect(*map(lambda v: int(round(v)), rect[:4])) for rect in rects)
+        rects = list(Rect(*[int(round(v)) for v in rect[:4]]) for rect in rects)
         rects = img.to_normalised(rects)
 
         # Apply padding of one percent of height and width

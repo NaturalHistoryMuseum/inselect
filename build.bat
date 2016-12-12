@@ -7,7 +7,7 @@ del /S *pyc
 rmdir /Q /S dist build
 
 echo Freeze icons
-pyrcc4 icons.qrc > inselect/gui/icons.py || exit /b
+pyrcc5 icons.qrc > inselect/gui/icons.py || exit /b
 
 echo Check for presence of barcode engines
 python -c "from gouda.engines import ZbarEngine; assert ZbarEngine.available()" || exit /b

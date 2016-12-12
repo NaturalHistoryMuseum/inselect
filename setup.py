@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
 
@@ -6,20 +6,21 @@ import inselect
 
 
 REQUIREMENTS = [
-    # TODO How to specify OpenCV? 'cv2>=2.4.8,<3',
-    'pathlib>=1.0.1,<1.1',
-    'Pillow>=3.2.0,<3.4',
-    'python-dateutil>=2.3,<=2.6',
-    'pytz>=2015.7',
-    'PyYAML>=3.10,<=3.12',
-    'numpy>=1.8.2,<=1.11.1',
+    # TODO How to specify OpenCV? 'cv2>=3.1.0',
+    'numpy>=1.11.1,<1.12',
+    'Pillow>=3.4.2,<3.5',
+    'python-dateutil>=2.6.0,<2.7',
+    'pytz>=2016.7',
+    'PyYAML>=3.12,<3.2',
     'schematics>=1.1.1,<1.2',
-    'scikit-learn>=0.14.1,<0.18',
-    'scipy>=0.13.3,<=0.19',
+    'scikit-learn>=0.18.1,<0.19',
+    'scipy>=0.18.1,<0.19',
     'unicodecsv>=0.14.1,<0.15',
 ]
 
+
 SCRIPTS = ('export_metadata', 'ingest', 'read_barcodes', 'save_crops', 'segment')
+
 
 setup_data = {
     'name': 'inselect',
@@ -44,16 +45,16 @@ setup_data = {
     'install_requires': REQUIREMENTS,
     'extras_require': {
         'gui': [
-            'exifread>=2.1.2', 'humanize>=0.5.1', 'psutil>=4.0.0',
-            'qtpy>=1.1.2', 'PyQt>=4.11.4'
+            'ExifRead>=2.1.2', 'humanize>=0.5.1', 'psutil>=5.0.0',
+            'QtPy>=1.1.2', 'PyQt>=5.6.0'
         ],
-        'barcodes': ['gouda>=0.1.10', 'pylibdmtx>=0.1.5', 'pyzbar>=0.1.3'],
+        'barcodes': ['gouda>=0.1.11', 'pylibdmtx>=0.1.5', 'pyzbar>=0.1.3'],
         'windows': ['pywin32>=220'],
-        'development': ['coveralls>=0.4.1', 'mock>=1.0.1', 'nose>=1.3.4'],
+        'development': ['coveralls>=1.1', 'mock>=2.0.0', 'nose>=1.3.7'],
     },
     'entry_points': {
         'gui_scripts':
-            ['inselect = inselect.app:main'],
+            ['inselect = inselect.gui.app:main'],
         'console_scripts':
             ['{0} = inselect.scripts.{0}:main'.format(script) for script in SCRIPTS],
     },
@@ -61,12 +62,12 @@ setup_data = {
         'Development Status :: 4 - Beta',
         'Topic :: Utilities',
         'Topic :: Scientific/Engineering :: Bio-Informatics'
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
     ],
     'win32': {
         'executables': [
             {
-                'script': 'inselect.py',
+                'script': 'inselect/scripts/inselect.py',
                 'targetName': 'inselect.exe',
                 'icon': 'icons/inselect.ico',
                 'base': 'Win32GUI',
@@ -84,18 +85,19 @@ setup_data = {
         ],
         # Strings in braces within 'include_files' tuples expanded in cx_setup
         'include_files': [
-            ('{site_packages}/numpy', 'numpy'),
-            ('{site_packages}/scipy', 'scipy'),
-            ('{site_packages}/sklearn', 'sklearn'),
+            # Evil, evil, evil
+            # cx_Freeze breaks pywintypes and pythoncom on Python 3.5
+            # https://bitbucket.org/anthony_tuininga/cx_freeze/issues/194/error-with-frozen-executable-using-35-and
+            ('{environment_root}/Lib/site-packages/win32/lib/pywintypes.py', 'pywintypes.py'),
+            ('{environment_root}/Lib/site-packages/pythoncom.py', 'pythoncom.py'),
             ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
+            ('{environment_root}/Library/bin/mkl_intel_thread.dll', 'mkl_intel_thread.dll'),
             ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
-            ('{project_root}/inselect/inselect.qss', 'inselect.qss'),
+            ('{project_root}/inselect/gui/inselect.qss', 'inselect.qss'),
         ],
-        'extra_packages': ['win32com.gen_py'],
+        'extra_packages': ['win32com.gen_py', 'win32timezone'],
         'excludes': [
             'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
-            'future.moves',    # Errors from urllib otherwise
-            'PyQt4.QtNetwork',
         ]
     }
 }
@@ -104,7 +106,7 @@ setup_data = {
 def setuptools_setup():
     """setuptools setup"""
     from setuptools import setup
-    setup(**{k: v for k, v in setup_data.iteritems() if 'win32' != k})
+    setup(**{k: v for k, v in setup_data.items() if 'win32' != k})
 
 
 def cx_setup():
@@ -132,6 +134,13 @@ def cx_setup():
         for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
     ]
 
+    # scipy
+    # http://stackoverflow.com/questions/32694052/scipy-and-cx-freeze-error-importing-scipy-you-cannot-import-scipy-while-being
+    import scipy
+    include_files += [
+        str(Path(scipy.__file__).parent),
+    ]
+
     # Setup
     setup(
         name=setup_data['name'],
@@ -157,9 +166,10 @@ def cx_setup():
     )
 
 
-if not (2, 7) < sys.version_info < (3, 0):
-    sys.exit('Only Python 2.7 is supported')
-elif 'bdist_msi' in sys.argv:
-    cx_setup()
+if (3, 5) <= sys.version_info:
+    if 'bdist_msi' in sys.argv:
+        cx_setup()
+    else:
+        setuptools_setup()
 else:
-    setuptools_setup()
+    sys.exit('Only Python >= 3.5 is supported')

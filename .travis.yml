@@ -1,22 +1,12 @@
 language: python
 
-python:
-  - "2.7"
-
 virtualenv:
   system_site_packages: true
 
 before_install:
   - sudo apt-get update
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-      sudo apt-get install -y --fix-missing libzbar-dev libdmtx0a;
-    fi
-
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - sudo apt-get install -y --fix-missing libzbar-dev libdmtx0a libegl1-mesa libx11-xcb1;
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -24,19 +14,17 @@ before_install:
   - conda update --yes conda
   # Useful for debugging any issues with conda
   - conda info -a
-
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pillow pyqt numpy scikit-learn opencv
-  - source activate test-environment
-  - python setup.py install
+  - conda env create -f inselect.yml
+  - source activate inselect
 
 install:
   - pip install -r requirements.pip
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  - pyrcc4 icons.qrc > inselect/gui/icons.py
+  - pyrcc5 icons.qrc > inselect/gui/icons.py
 
 script:
-  - nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
+  - nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect --verbose inselect
 
 after_success:
   - coveralls

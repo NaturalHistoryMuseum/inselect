@@ -410,8 +410,7 @@ def segment_grabcut(image, window=None, seeds=[]):
                                          cv2.RETR_EXTERNAL,
                                          cv2.CHAIN_APPROX_SIMPLE)
             if contours:
-                contours.sort(lambda x, y:
-                              cmp(cv2.contourArea(y), cv2.contourArea(x)))
+                contours.sort(key=cv2.contourArea)
                 new_rects.append(cv2.boundingRect(contours[0]))
                 colour = [randint(100, 255), randint(100, 255), 0]
                 cv2.drawContours(display, [contours[0]], -1, colour, -1)

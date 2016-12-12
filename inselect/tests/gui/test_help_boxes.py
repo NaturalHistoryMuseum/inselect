@@ -6,7 +6,7 @@ from qtpy.QtWidgets import QDialog, QMessageBox
 
 from inselect.gui import shortcuts_help
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 class TestHelpBoxes(GUITest):

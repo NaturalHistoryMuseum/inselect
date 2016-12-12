@@ -1,42 +1,34 @@
-# Dependencies provided by conda: PyQt, Pillow, numpy, opencv, scipy,
-# scikit-learn, pywin32
-exifread==2.1.2
+ExifRead==2.1.2
 humanize==0.5.1
-pathlib==1.0.1
-psutil==4.0.0
+numpy==1.11.2
+#TODO How to specify OpenCV? 'cv2==3.1.0',
+Pillow==3.4.2
+psutil==5.0.0
 pylibdmtx==0.1.5
-python-dateutil==2.3    # 2.5.0 causes problems for PyInstaller builds on Mac OS X
-pytz==2015.7
-PyYAML==3.11
+PyQt5>=5.6
+python-dateutil==2.6.0
+pytz==2016.7
+pywin32==220; sys_platform == 'win32'
+PyYAML==3.12
 pyzbar==0.1.3
 QtPy==1.1.2
 schematics==1.1.1
+scikit-learn==0.18.1
+scipy==0.17.1
+sip==4.18.1
+six==1.10.0
 unicodecsv==0.14.1
 
-# Indirect dependencies
-distlib==0.2.3
-docopt==0.6.2
-exifread==2.1.2
-funcsigs==1.0.2
-packaging==16.7
-pbr==1.10.0
-py==1.4.31
-pycrypto==2.6.1
-pyparsing==2.1.5
-requests==2.11.0
-six==1.10.0
-
 # Not from PyPI
-https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.10/gouda-0.1.10-py2-none-any.whl
+https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.11/gouda-0.1.11-py2.py3-none-any.whl
 
 # Development
-coveralls>=0.4.1
-mock>=1.0.1
-nose>=1.3.4
-pyinstaller==3.1.1 ; sys_platform == 'darwin'
+coveralls>=1.1
+mock>=2.0.0
+nose>=1.3.7
 
-# cx_Freeze 4.3.2 introduced a bug that prevents python win32com wrappers
-# generated using makepy.py from being frozen.
-# https://bitbucket.org/anthony_tuininga/cx_freeze/issue/44/win32com-relies-on-modules-with-non
-# This bug has been fixed but the fix has not yet been released.
-https://bitbucket.org/anthony_tuininga/cx_freeze/get/aebc9c32615c.zip ; sys_platform == 'win32'
+# Latest release (3.2) doesn't work so use this zip of master from early
+# December 2016.
+https://github.com/pyinstaller/pyinstaller/archive/483c819d6a256b58db6740696a901bd41c313f0c.zip; sys_platform == 'darwin'
+
+cx_Freeze==5.0; sys_platform == 'win32'

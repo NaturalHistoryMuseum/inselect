@@ -13,18 +13,18 @@ brew install upx zbar libdmtx
 # Install Miniconda
 
 ```
-wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -O /tmp/Miniconda-latest-MacOSX-x86_64.sh
-bash /tmp/Miniconda-latest-MacOSX-x86_64.sh -b -p $HOME/miniconda
-rm /tmp/Miniconda-latest-MacOSX-x86_64.sh
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O /tmp/Miniconda3-latest-MacOSX-x86_64.sh
+bash /tmp/Miniconda3-latest-MacOSX-x86_64.sh -b -p $HOME/miniconda3
+rm /tmp/Miniconda3-latest-MacOSX-x86_64.sh
 
-export PATH=~/miniconda/bin:$PATH
+export PATH=~/miniconda3/bin:$PATH
 conda update --yes conda
 ```
 
 # Inselect env
 
 ```
-conda env create -f inselect-osx.yml
+conda env create -f inselect.yml
 source activate inselect
 pip install -r requirements.pip
 ```
@@ -45,7 +45,19 @@ Icons are stored as individual files in `icons`. They are frozen into
 a python file `inselect/gui/icons.py` by running
 
 ```
-pyrcc4 icons.qrc > inselect/gui/icons.py
+pyrcc5 icons.qrc > inselect/gui/icons.py
+```
+
+# Test and run
+
+```
+nosetests --verbose --with-coverage --cover-inclusive --cover-tests --cover-package=inselect inselect
+```
+
+Run inselect
+
+```
+python -m inselect.scripts.inselect
 ```
 
 # Build

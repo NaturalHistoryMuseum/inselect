@@ -21,7 +21,7 @@ class ResizeHandle(QGraphicsItem):
             raise ValueError('Bad corner [{0}]'.format(corner))
         else:
             self._corner = corner
-            self.setAcceptsHoverEvents(True)
+            self.setAcceptHoverEvents(True)
             if corner in (Qt.TopLeftCorner, Qt.BottomRightCorner):
                 self.setCursor(Qt.SizeFDiagCursor)
             else:

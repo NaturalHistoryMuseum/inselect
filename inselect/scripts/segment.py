@@ -1,8 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Segment documents
 """
-from __future__ import print_function
-
 import argparse
 import sys
 import traceback
@@ -13,7 +11,7 @@ import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment_document import SegmentDocument
-from inselect.lib.utils import debug_print
+from inselect.lib.utils import debug_print, fix_frozen_dll_path
 
 
 # TODO Recursive option
@@ -25,21 +23,21 @@ def segment(dir, sort_by_columns):
     for p in dir.glob('*' + InselectDocument.EXTENSION):
         doc = InselectDocument.load(p)
         if not doc.items:
-            print(u'Segmenting [{0}]'.format(p))
+            print('Segmenting [{0}]'.format(p))
             try:
-                debug_print(u'Will segment [{0}]'.format(p))
+                debug_print('Will segment [{0}]'.format(p))
                 doc, display_image = segment_doc.segment(doc)
                 del display_image    # We don't use this
                 doc.save()
             except KeyboardInterrupt:
                 raise
             except Exception:
-                print(u'Error segmenting [{0}]'.format(p))
+                print('Error segmenting [{0}]'.format(p))
                 traceback.print_exc()
             else:
-                print(u'Segmented [{0}]'.format(doc))
+                print('Segmented [{0}]'.format(doc))
         else:
-            print(u'Skipping [{0}] as it already contains items'.format(p))
+            print('Skipping [{0}] as it already contains items'.format(p))
 
 
 def main(args=None):
@@ -63,5 +61,6 @@ def main(args=None):
     segment(args.dir, args.sort_by_columns)
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', 'segment__main__'):
+    fix_frozen_dll_path()
     main()

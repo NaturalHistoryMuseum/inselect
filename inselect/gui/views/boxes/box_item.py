@@ -1,3 +1,5 @@
+import sys
+
 from itertools import chain
 
 from qtpy.QtCore import Qt, QRect, QRectF
@@ -16,8 +18,12 @@ class BoxItem(QGraphicsRectItem):
     # Might be some relevant stuff here:
     # http://stackoverflow.com/questions/10590881/events-and-signals-in-qts-qgraphicsitem-how-is-this-supposed-to-work
 
-    def __init__(self, x, y, w, h, isvalid, parent=None, scene=None):
-        super(BoxItem, self).__init__(x, y, w, h, parent, scene)
+    # The width of the line (in pixels) drawn around the box.
+    # A width of 1 on Mac OS X is too thin. 2 is too thick on Windows.
+    BOX_WIDTH = 2 if 'darwin' == sys.platform else 1
+
+    def __init__(self, x, y, w, h, isvalid, parent=None):
+        super(BoxItem, self).__init__(x, y, w, h, parent)
         self.setFlags(QGraphicsItem.ItemIsFocusable |
                       QGraphicsItem.ItemIsSelectable |
                       QGraphicsItem.ItemSendsGeometryChanges |
@@ -54,10 +60,15 @@ class BoxItem(QGraphicsRectItem):
                                self.sceneBoundingRect())
 
         with painter_state(painter):
-            # Zero thickness indicates a cosmetic pen, which is drawn with the
-            # same thickness regardless of the view's scale factor
             outline_colour, fill_colour = self.colours
-            painter.setPen(QPen(outline_colour, 0, Qt.SolidLine))
+
+            # Cosmetic pens "...draw strokes that have a constant width
+            # regardless of any transformations applied to the QPainter they are
+            # used with."
+            pen = QPen(outline_colour, self.BOX_WIDTH, Qt.SolidLine)
+            pen.setCosmetic(True)
+            painter.setPen(pen)
+
             r = self.boundingRect()
             painter.drawRect(r)
 
@@ -121,7 +132,8 @@ class BoxItem(QGraphicsRectItem):
         self.update()
 
     def _set_handles_visible(self, visible):
-        map(lambda i: i.setVisible(visible), self._handles)
+        for handle in self._handles:
+            handle.setVisible(visible)
 
     def _create_handle(self, corner):
         # Creates and returns a new ResizeHandle at the given Qt.Corner

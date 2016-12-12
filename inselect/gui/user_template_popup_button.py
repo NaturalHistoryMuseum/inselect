@@ -4,13 +4,13 @@ from inselect.lib.user_template import UserTemplate
 from inselect.lib.utils import debug_print
 
 from .user_template_choice import user_template_choice
-from .utils import report_to_user, load_icon, reveal_path
+from .utils import load_icon, reveal_path
 
 
 class UserTemplatePopupButton(QPushButton):
     "User template popup button"
 
-    FILE_FILTER = u'Inselect user templates (*{0})'.format(
+    FILE_FILTER = 'Inselect user templates (*{0})'.format(
         UserTemplate.EXTENSION
     )
 
@@ -46,7 +46,7 @@ class UserTemplatePopupButton(QPushButton):
             "Reveal template", self, triggered=self.reveal
         )
         self._default_action = QAction(
-            u"Default ({0})".format(user_template_choice().DEFAULT.name),
+            "Default ({0})".format(user_template_choice().DEFAULT.name),
             self, triggered=self.default, icon=load_icon(':/icons/close.png')
         )
 
@@ -58,18 +58,16 @@ class UserTemplatePopupButton(QPushButton):
         menu.addSeparator()
         menu.addAction(self._default_action)
 
-    @report_to_user
     def default(self, checked=False):
         "Sets the default template"
         user_template_choice().select_default()
 
-    @report_to_user
     def choose(self, checked=False):
         "Shows a 'choose template' file dialog"
         debug_print('UserTemplateWidget.choose')
-        path = QFileDialog.getOpenFileName(
+        path, selectedFilter = QFileDialog.getOpenFileName(
             self, "Choose user template",
-            unicode(user_template_choice().last_directory()),
+            str(user_template_choice().last_directory()),
             self.FILE_FILTER
         )
 
@@ -77,12 +75,10 @@ class UserTemplatePopupButton(QPushButton):
             # Save the user's choice
             user_template_choice().load(path)
 
-    @report_to_user
     def refresh(self, checked=False):
         debug_print('UserTemplateWidget.refresh')
         user_template_choice().refresh()
 
-    @report_to_user
     def reveal(self, checked=False):
         reveal_path(user_template_choice().current_path)
 

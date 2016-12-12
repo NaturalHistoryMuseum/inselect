@@ -1,13 +1,13 @@
 import unittest
 
-from itertools import izip
+
 from pathlib import Path
 
 from qtpy.QtCore import QSettings
 
 from inselect.gui.recent_documents import RecentDocuments
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 class TestRecentDocuments(GUITest):
@@ -55,7 +55,7 @@ class TestRecentDocuments(GUITest):
         self.assertEqual(paths, RecentDocuments().read_paths())
 
         self.window._sync_recent_documents_actions()
-        for expected, action in izip(paths, self.window.recent_doc_actions):
+        for expected, action in zip(paths, self.window.recent_doc_actions):
             self.assertTrue(action.isEnabled())
             self.assertTrue(action.isVisible())
             self.assertEqual(str(expected), action.text())

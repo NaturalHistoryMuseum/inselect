@@ -28,7 +28,7 @@ class SubsegmentPlugin(Plugin):
     def can_be_run(self):
         selected = self.parent.view_object.selectedIndexes()
         items_of_indexes = self.parent.view_graphics_item.items_of_indexes
-        item = items_of_indexes(selected).next() if 1 == len(selected) else None
+        item = next(items_of_indexes(selected)) if 1 == len(selected) else None
         seeds = item.points_of_interest if item else None
 
         if not seeds or len(seeds) < 2:

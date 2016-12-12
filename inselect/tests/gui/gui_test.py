@@ -6,11 +6,11 @@ from qtpy import QtCore, QtWidgets
 from qtpy.QtWidgets import QMessageBox
 
 from inselect.gui import shortcuts_help
+from inselect.gui.app import qapplication
 from inselect.gui.main_window import MainWindow
-from inselect.app import qapplication
 
 
-APP = None
+WINDOW = None
 
 class GUITest(unittest.TestCase):
     """Base class for GUI tests, which require a MainWindow.
@@ -23,17 +23,17 @@ class GUITest(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        # Only one QApplication can be constructed
-        cls.window = MainWindow(qapplication())
+        global WINDOW
+        if not WINDOW:
+            # A single window shared by all tests and destroyed when the process
+            # exits
+            WINDOW = MainWindow(qapplication())
+
+        cls.window = WINDOW
 
         # Crude way of ensuring that the shortcuts help box is not shown at
         # startup
         shortcuts_help._show_shortcuts_at_startup = MagicMock(return_value=False)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.window.close()
-        delattr(cls, 'window')
 
     def tearDown(self):
         # Clean up by closing the document

@@ -10,7 +10,7 @@ from qtpy.QtWidgets import QMessageBox, QFileDialog
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import make_readonly
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.gui.main_window import MainWindow
 
@@ -46,7 +46,7 @@ class TestFileOpen(GUITest):
         # using a regular expression rather than equality. Not possible to
         # check modified behaviour because MainWindow.modified_changed slot
         # is not called without event loop.
-        self.assertRegexpMatches(self.window.windowTitle(),
+        self.assertRegex(self.window.windowTitle(),
                                  '^shapes\\.inselect.*')
 
     def test_open_doc(self):
@@ -66,8 +66,8 @@ class TestFileOpen(GUITest):
             self.window.open_file(path=tempdir / 'shapes.inselect')
 
             self.assertTrue(mock_warning.called)
-            expected = (u'The file [shapes.inselect] is read-only.\n\n'
-                        u'You will not be able to save any changes that you '
+            expected = ('The file [shapes.inselect] is read-only.\n\n'
+                        'You will not be able to save any changes that you '
                         'make.')
             self.assertTrue(expected in mock_warning.call_args[0])
 
@@ -130,48 +130,29 @@ class TestFileOpen(GUITest):
 
             # User should have been told about the new document
             self.assertTrue(mock_information.called)
-            expected = u'New Inselect document [shapes] created in [{0}]'
+            expected = 'New Inselect document [shapes] created in [{0}]'
             expected = expected.format(tempdir)
             self.assertTrue(expected in mock_information.call_args[0])
 
             self.assertFalse(self.window.model.is_modified)
             self.assertWindowTitleOpenDocument()
 
-    @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
-    def test_open_non_existant_image(self, mock_copy_details_box):
+    def test_open_non_existant_image(self):
         "Try to open a non-existant image file"
         self.assertRaises(InselectError, self.window.open_file,
                           path='I do not exist.png')
-
-        # User should have been told about the error
-        self.assertTrue(mock_copy_details_box.called)
-        expected = (u"An error occurred:\n"
-                    u"Image file [I do not exist.png] does not exist")
-        self.assertTrue(expected in mock_copy_details_box.call_args[0])
-
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
 
-    @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
-    def test_open_non_existant_inselect(self, mock_copy_details_box):
+    def test_open_non_existant_inselect(self):
         "Try to open a non-existant inselect file"
         self.assertRaises(IOError, self.window.open_file, path='I do not exist.inselect')
-        self.assertTrue(mock_copy_details_box.called)
-        expected = (u"An error occurred:\n"
-                    u"[Errno 2] No such file or directory: 'I do not exist.inselect'")
-        self.assertTrue(expected in mock_copy_details_box.call_args[0])
-
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
 
-    @patch('inselect.gui.utils.copy_details_box', return_values=QMessageBox.Close)
-    def test_open_non_existant_unrecognised(self, mock_copy_details_box):
+    def test_open_non_existant_unrecognised(self):
         "Try to open a non-existant file with an unrecognised extension"
         self.assertRaises(InselectError, self.window.open_file, path='I do not exist')
-        self.assertTrue(mock_copy_details_box.called)
-        expected = u'An error occurred:\nUnknown file type [I do not exist]'
-        self.assertTrue(expected in mock_copy_details_box.call_args[0])
-
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
 
@@ -247,7 +228,7 @@ class TestFileOpen(GUITest):
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
             self.assertTrue(self.window.close_document())
 
-    @patch.object(QFileDialog, 'getOpenFileName', return_value=None)
+    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None, None))
     def test_cancel_file_choose(self, mock_gofn):
         "User cancels the 'choose a file to open' box"
         w = self.window

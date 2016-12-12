@@ -21,8 +21,8 @@ class Model(QAbstractItemModel):
     # Emitted when modified status changes
     modified_changed = Signal()
 
-    DISPLAY_TEMPLATE = u'{0} {1}'
-    LEADING_ZEROES = u'{0:04d}'
+    DISPLAY_TEMPLATE = '{0} {1}'
+    LEADING_ZEROES = '{0:04d}'
 
     def __init__(self, parent=None):
         super(Model, self).__init__(parent)
@@ -233,7 +233,7 @@ class Model(QAbstractItemModel):
                     return True
         elif RotationRole == role:
             # A new rotation for index
-            if not isinstance(value, (int, long)) or 0 != value % 90:
+            if not isinstance(value, int) or 0 != value % 90:
                 raise ValueError('Value is not an integer multiple of 90')
             else:
                 current = self._data[index.row()]['rotation']
@@ -261,7 +261,7 @@ class Model(QAbstractItemModel):
                 new.update(value)
 
                 # Only fields that have a value
-                new = {k: v for k, v in new.iteritems() if '' != v}
+                new = {k: v for k, v in new.items() if '' != v}
 
                 # Update if only if changed
                 if new != self._data[index.row()]['fields']:
@@ -293,7 +293,7 @@ class Model(QAbstractItemModel):
             # this will create the same dict instance repeated 'count' times,
             # not 'count' different dict instances
             new_rows = [None] * count
-            for i in xrange(0, count):
+            for i in range(0, count):
                 new_rows[i] = {"fields": {},
                                "rect": QRect(0, 0, 0, 0),
                                "rotation": 0}

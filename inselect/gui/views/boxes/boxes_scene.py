@@ -1,5 +1,5 @@
-from __future__ import print_function
-from itertools import ifilter
+
+
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsPixmapItem
@@ -51,16 +51,16 @@ class BoxesScene(QGraphicsScene):
         """The single QGraphicsPixmapItem within this scene, or None if there is
         no open document
         """
-        items = self.items()
+        items = list(self.items())
         if not items:
             return None
         else:
-            items = ifilter(lambda i: isinstance(i, QGraphicsPixmapItem), items)
-            pixmap = items.next()
+            items = filter(lambda i: isinstance(i, QGraphicsPixmapItem), items)
+            pixmap = next(items)
 
             # There should be only one pixmap item
             try:
-                items.next()
+                next(items)
             except StopIteration:
                 return pixmap
             else:
@@ -83,7 +83,7 @@ class BoxesScene(QGraphicsScene):
 
     def box_items(self):
         "Iterable containin just BoxItems"
-        return ifilter(lambda i: isinstance(i, BoxItem), self.items())
+        return filter(lambda i: isinstance(i, BoxItem), list(self.items()))
 
     def add_box(self, rect, isvalid):
         """Notification from source that a box has been added.

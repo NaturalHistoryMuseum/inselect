@@ -32,7 +32,7 @@ class TestReadBarcodes(unittest.TestCase):
                 any(v.get('fields', {}).get('catalogNumber') for v in doc.items)
             )
 
-            main([unicode(tempdir), 'libdmtx'])
+            main([str(tempdir), 'libdmtx'])
 
             # Doc should not have expected catalog numbers
             doc = InselectDocument.load(doc_path)

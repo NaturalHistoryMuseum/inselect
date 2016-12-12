@@ -20,7 +20,7 @@ class RecentDocuments(object):
             n_recent = min(n_recent, self.MAX_RECENT_DOCS)
             recent = []
             debug_print('Reading {0} recent document paths'.format(n_recent))
-            for index in xrange(n_recent):
+            for index in range(n_recent):
                 settings.setArrayIndex(index)
                 path = settings.value("path")
                 if path:

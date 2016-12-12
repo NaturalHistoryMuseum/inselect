@@ -189,7 +189,7 @@ class TestImage(unittest.TestCase):
         temp = tempfile.mkdtemp()
         try:
             i.save_crops(repeat(Rect(0, 0, 1, 1), 4),
-                         (Path(temp) / '{0}.png'.format(n) for n in xrange(0, 4)),
+                         (Path(temp) / '{0}.png'.format(n) for n in range(0, 4)),
                          rotation=90)
             crop = cv2.imread(str(Path(temp) / '0.png'))
             self.assertTrue(np.all(cv2.flip(cv2.transpose(i.array), 1) == crop))
@@ -208,7 +208,7 @@ class TestImage(unittest.TestCase):
         temp = tempfile.mkdtemp()
         try:
             i.save_crops(repeat(Rect(0, 0, 1, 1), 4),
-                         (Path(temp) / '{0}.png'.format(n) for n in xrange(0, 4)),
+                         (Path(temp) / '{0}.png'.format(n) for n in range(0, 4)),
                          rotation=[0, 90, 180, -90])
             crop = cv2.imread(str(Path(temp) / '0.png'))
             self.assertTrue(np.all(i.array == crop))

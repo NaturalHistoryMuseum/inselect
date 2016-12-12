@@ -1,4 +1,4 @@
-from itertools import izip, repeat
+from itertools import repeat
 
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
@@ -72,12 +72,12 @@ class MetadataView(QAbstractItemView):
 
         if 0 == len(selected):
             # No boxes selected
-            for control in self._form_container.controls.iterkeys():
+            for control in self._form_container.controls.keys():
                 control.clear_selection()
                 control.setEnabled(False)
         else:
             metadata = [i.data(MetadataRole) for i in selected]
-            for control, field in self._form_container.controls.iteritems():
+            for control, field in self._form_container.controls.items():
                 control.setEnabled(True)
                 values = set(m.get(field) for m in metadata)
                 if 1 < len(values):
@@ -236,8 +236,8 @@ class FormContainer(QWidget):
         elif field.choices_with_data:
             choices = field.choices_with_data
             combo = ChoicesWithDataFieldComboBox(field.name, template,
-                                                 labels=choices.iterkeys(),
-                                                 values=choices.itervalues())
+                                                 labels=iter(choices.keys()),
+                                                 values=iter(choices.values()))
             return combo
         else:
             # Not using Qt's very restrictive QValidator scheme
@@ -300,10 +300,10 @@ class FieldEdit(QLineEdit):
         self.multiple_values = False
 
     def __repr__(self):
-        return u'<FieldEdit [{0}]>'.format(self._field)
+        return '<FieldEdit [{0}]>'.format(self._field)
 
     def __str__(self):
-        return u'FieldEdit [{0}]'.format(self._field)
+        return 'FieldEdit [{0}]'.format(self._field)
 
     def _text_edited(self, text):
         """QLineEdit signal
@@ -414,7 +414,7 @@ class FieldComboBox(QComboBox):
         # Empty item at the top of the list
         self.addItem('')
 
-        for label, value in izip(labels, values):
+        for label, value in zip(labels, values):
             self.addItem(label, value)
 
         # True if selection contains a single non-empty value that is not in the
@@ -422,10 +422,10 @@ class FieldComboBox(QComboBox):
         self.unrecognised_value = False
 
     def __repr__(self):
-        return u'<FieldComboBox [{0}]>'.format(self._field)
+        return '<FieldComboBox [{0}]>'.format(self._field)
 
     def __str__(self):
-        return u'FieldComboBox [{0}]'.format(self._field)
+        return 'FieldComboBox [{0}]'.format(self._field)
 
     @property
     def is_multiple(self):
@@ -596,7 +596,7 @@ class CountryComboBox(FieldComboBox):
     # TODO How to set country and countryCode as user changes selection
 
     def __init__(self, template, parent=None):
-        display = u'{0} ({1})'
+        display = '{0} ({1})'
         codes = sorted(COUNTRIES.keys())
         labels = (display.format(code, COUNTRIES[code]) for code in codes)
         super(CountryComboBox, self).__init__('countryCode', template, labels, codes, parent)
@@ -614,7 +614,7 @@ class LanguageComboBox(FieldComboBox):
     language field is updated.
     """
     def __init__(self, template, parent=None):
-        display = u'{0} ({1})'
+        display = '{0} ({1})'
         codes = sorted(LANGUAGES.keys())
         labels = (display.format(code, LANGUAGES[code]) for code in codes)
         super(LanguageComboBox, self).__init__('language', template, labels, codes, parent)

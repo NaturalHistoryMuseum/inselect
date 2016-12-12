@@ -5,9 +5,9 @@ set -e  # Exit on failure
 
 # Icons needs to be frozen before running inselect.py
 echo Freeze icons
-pyrcc4 icons.qrc > inselect/gui/icons.py
+pyrcc5 icons.qrc > inselect/gui/icons.py
 
-VERSION=`python inselect.py --version 2>&1 | sed 's/inselect.py //g'`
+VERSION=`python -m inselect.scripts.inselect --version 2>&1 | sed 's/inselect.py //g'`
 
 echo Building Inselect $VERSION
 
@@ -22,7 +22,7 @@ python -c "from gouda.engines import LibDMTXEngine; assert LibDMTXEngine.availab
 
 echo Report startup time and check for non-essential binary imports
 mkdir build
-time python -v inselect.py --quit &> build/startup_log
+time python -v -m inselect.scripts.inselect --quit &> build/startup_log
 for module in cv2 numpy libdmtx scipy sklearn zbar; do
     if grep -q $module build/startup_log; then
         echo Non-essential binary $module imported on startup
@@ -33,12 +33,12 @@ done
 echo Tests
 nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
-echo Source build
-./setup.py sdist
-mv dist/inselect-$VERSION.tar.gz .
+echo Wheel build
+./setup.py bdist_wheel --universal
+mv dist/inselect-*.whl .
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Scripts that have additional requirements in theie own spec files
+    # Scripts that have additional requirements in their own spec files
     for script in inselect read_barcodes segment; do
         pyinstaller --clean $script.spec
     done

@@ -20,6 +20,10 @@ Inselect is written in [Python](https://www.python.org/), [Qt](http://www.qt.io/
 and [OpenCV](http://opencv.org/). Read instructions for
 [developing on Mac OS X](DevelopingOnMacOSX.md),
 [developing on Windows](DevelopingOnWindows.md) and [releasing](Releasing.md).
+Versions of Inselect between v0.1.1 to v0.1.34 inclusive run on Python 2.7.
+Starting with v0.1.35, Inselect runs on Python 3 only. This should not affect
+you unless you are running Inselect on Linux - see
+[developing on Linux](DevelopingOnLinux.md) for instructions.
 
 ## License
 

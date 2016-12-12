@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 TESTDATA = Path(__file__).parent.parent / 'test_data'

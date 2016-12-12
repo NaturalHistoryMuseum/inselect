@@ -25,10 +25,10 @@ class TestImagesSuffixesRe(unittest.TestCase):
     """
     def test_images_suffixes_re(self):
         re = IMAGE_SUFFIXES_RE
-        self.assertRegexpMatches('x.jpg', re)
-        self.assertRegexpMatches('x.Jpeg', re)
-        self.assertRegexpMatches('x.TIFF', re)
-        self.assertRegexpMatches('x.Tiff', re)
+        self.assertRegex('x.jpg', re)
+        self.assertRegex('x.Jpeg', re)
+        self.assertRegex('x.TIFF', re)
+        self.assertRegex('x.Tiff', re)
 
         self.assertNotRegexpMatches('x.jpgx', re)
         self.assertNotRegexpMatches('x.jpg ', re)
@@ -49,7 +49,7 @@ class TestIngest(unittest.TestCase):
     def test_ingest_fail(self):
         "Inbox directory does not exist"
         self.assertRaises(InselectError, main,
-                          ['I am not a directory', unicode(self.docs)])
+                          ['I am not a directory', str(self.docs)])
 
     def test_ingest_create_docs(self):
         "Document dir is created on ingest"
@@ -60,7 +60,7 @@ class TestIngest(unittest.TestCase):
         inbox_img = self.inbox / 'x.png'
         shutil.copy(str(TESTDATA / 'shapes.png'), str(inbox_img))
 
-        main([unicode(self.inbox), unicode(docs)])
+        main([str(self.inbox), str(docs)])
 
         self.assertTrue(docs.is_dir())
 
@@ -74,7 +74,7 @@ class TestIngest(unittest.TestCase):
         # Read the image for comparison test
         original_image = cv2.imread(str(inbox_img))
 
-        main([unicode(self.inbox), unicode(self.docs)])
+        main([str(self.inbox), str(self.docs)])
 
         # Document, scan and thumbnail should all exists
         self.assertTrue((self.docs / 'x.inselect').is_file())
@@ -100,7 +100,7 @@ class TestIngest(unittest.TestCase):
         shutil.copy(str(TESTDATA / 'shapes.png'), str(self.inbox / upper))
         shutil.copy(str(TESTDATA / 'shapes.png'), str(self.inbox / title))
 
-        main([unicode(self.inbox), unicode(self.docs)])
+        main([str(self.inbox), str(self.docs)])
 
         # Images should have been removed from inbox
         self.assertFalse((self.inbox / lower).is_file())
@@ -114,12 +114,12 @@ class TestIngest(unittest.TestCase):
 
     def test_cookie_cutter(self):
         "Ingested image with cookie cutter applied"
-        shutil.copy(unicode(TESTDATA / 'shapes.png'),
-                    unicode(self.inbox / 'x.png'))
+        shutil.copy(str(TESTDATA / 'shapes.png'),
+                    str(self.inbox / 'x.png'))
 
         main([
             '--cookie-cutter={0}'.format(TESTDATA / '2x2.inselect_cookie_cutter'),
-            unicode(self.inbox), unicode(self.docs)
+            str(self.inbox), str(self.docs)
         ])
 
         doc = InselectDocument.load(self.docs / 'x.inselect')

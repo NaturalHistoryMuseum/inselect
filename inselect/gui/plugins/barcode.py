@@ -1,4 +1,4 @@
-from itertools import count, izip
+from itertools import count
 
 from qtpy.QtWidgets import QMessageBox
 
@@ -62,8 +62,8 @@ class BarcodePlugin(Plugin):
         image_array = self.document.scanned.array
 
         items = self.document.items
-        for index, item, crop in izip(count(), items, self.document.crops):
-            msg = u'Reading barcodes in box {0} of {1}'.format(1 + index, len(items))
+        for index, item, crop in zip(count(), items, self.document.crops):
+            msg = 'Reading barcodes in box {0} of {1}'.format(1 + index, len(items))
             progress(msg)
             barcodes = self._decode_barcodes(engine, crop, progress)
             if barcodes:
@@ -87,7 +87,12 @@ class BarcodePlugin(Plugin):
             result = strategy(crop, engine)
             if result:
                 strategy, barcodes = result
-                return u' '.join(sorted([b.data for b in barcodes]))
+                # data could be either str or bytes
+                barcodes = (
+                    b.data.decode() if hasattr(b.data, 'decode') else b.data
+                    for b in barcodes
+                )
+                return ' '.join(sorted(barcodes))
         return None
 
     @classmethod

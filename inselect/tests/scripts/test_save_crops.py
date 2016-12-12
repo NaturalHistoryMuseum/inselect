@@ -20,7 +20,7 @@ class TestSaveCrops(unittest.TestCase):
             # Create crops dir
             crops = tempdir / 'shapes_crops'
             crops.mkdir()
-            main([unicode(tempdir)])
+            main([str(tempdir)])
 
             # nose hooks up stdout to a file-like object
             stdout = sys.stdout.getvalue()
@@ -30,7 +30,7 @@ class TestSaveCrops(unittest.TestCase):
         "Save crops"
         with temp_directory_with_files(TESTDATA / 'shapes.inselect',
                                        TESTDATA / 'shapes.png') as tempdir:
-            main([unicode(tempdir)])
+            main([str(tempdir)])
             crops = tempdir / 'shapes_crops'
             self.assertEqual(5, len(list(crops.glob('*jpg'))))
 
@@ -38,8 +38,8 @@ class TestSaveCrops(unittest.TestCase):
         "Save crops using a metadata template"
         with temp_directory_with_files(TESTDATA / 'shapes.inselect',
                                        TESTDATA / 'shapes.png') as tempdir:
-            main([unicode(tempdir),
-                  u'--template={0}'.format(TESTDATA / 'test.inselect_template')])
+            main([str(tempdir),
+                  '--template={0}'.format(TESTDATA / 'test.inselect_template')])
 
             # nose hooks up stdout to a file-like object
             # TODO this is not true if nosetests is run with '--nocapture'

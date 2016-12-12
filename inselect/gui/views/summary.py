@@ -32,7 +32,7 @@ class SummaryView(QAbstractItemView):
         self.widget.setLayout(layout)
 
     def _updated(self, n, selected):
-        template = u'{0} boxes / {1} selected / {2}'
+        template = '{0} boxes / {1} selected / {2}'
         self.info.setText(template.format(
             locale.format("%d", n, grouping=True),
             locale.format("%d", len(selected), grouping=True),
@@ -53,7 +53,7 @@ class SummaryView(QAbstractItemView):
                     model.columnCount())
         super(SummaryView, self).setModel(model)
 
-    def dataChanged(self, topLeft, bottomRight):
+    def dataChanged(self, topLeft, bottomRight, roles=[]):
         """QAbstractItemView virtual
         """
         debug_print('SummaryView.dataChanged')

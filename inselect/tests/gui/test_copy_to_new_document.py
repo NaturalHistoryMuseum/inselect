@@ -5,7 +5,7 @@ from pathlib import Path
 
 from qtpy.QtWidgets import QFileDialog
 
-from gui_test import GUITest
+from .gui_test import GUITest
 from inselect.gui.main_window import MainWindow
 from inselect.tests.utils import temp_directory_with_files
 
@@ -34,7 +34,8 @@ class TestCopyToNewDocument(GUITest):
             image = tempdir / 'other_image.png'
             (tempdir / 'shapes.png').rename(image)
 
-            with patch.object(QFileDialog, 'getOpenFileName', return_value=str(image)) as mock_gofn:
+            retval = str(image), w.IMAGE_FILE_FILTER
+            with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
                 w.copy_to_new_document()
                 self.assertEqual(1, mock_gofn.call_count)
 

@@ -109,18 +109,18 @@ class TestParse(unittest.TestCase):
 class TestParseDegrees(unittest.TestCase):
     def test_units_and_separators(self):
         self.assertEqual(-41.38, parse_latitude('-41.38'))
-        self.assertEqual(-41.38, parse_latitude(u'-41.38°'))
-        self.assertEqual(-41.38, parse_latitude(u'41.38° S'))
+        self.assertEqual(-41.38, parse_latitude('-41.38°'))
+        self.assertEqual(-41.38, parse_latitude('41.38° S'))
         self.assertEqual(-41.38, parse_latitude('41 22.8S'))
         self.assertEqual(-41.38, parse_latitude('41 22 48S'))
         self.assertAlmostEqual(-41.36666666666667, parse_latitude('41:22:00S'))
         self.assertAlmostEqual(-41.380008333333336, parse_latitude('41:22:48.03S'))
         self.assertEqual(-41.38, parse_latitude('41 22\' 48" S'))
         self.assertEqual(-41.38, parse_latitude('41 22\' 48\'\' S'))
-        self.assertEqual(-41.38, parse_latitude(u' 41°  22\'  48"  S  '))
-        self.assertEqual(-41.38, parse_latitude(u'41°22\'48"S'))
-        self.assertEqual(-41.38, parse_latitude(u'41°22′48″S'))
-        self.assertEqual(-41,    parse_latitude(u'41°00′00″S'))
+        self.assertEqual(-41.38, parse_latitude(' 41°  22\'  48"  S  '))
+        self.assertEqual(-41.38, parse_latitude('41°22\'48"S'))
+        self.assertEqual(-41.38, parse_latitude('41°22′48″S'))
+        self.assertEqual(-41,    parse_latitude('41°00′00″S'))
 
     def test_arithmetic(self):
         self.assertEqual(1, parse_latitude('1'))
@@ -210,12 +210,12 @@ class TestParseDegrees(unittest.TestCase):
         regex = re.compile('^[0-9]{5,10}$')
 
         msg = 'A silly value'
-        self.assertRaisesRegexp(ValueError, msg,
+        self.assertRaisesRegex(ValueError, msg,
                                 parse_matches_regex, regex, '123456789101', msg)
 
         msg = 'A silly value [{0}]'
         expected_msg = 'A silly value \\[123456789101\\]'
-        self.assertRaisesRegexp(ValueError, expected_msg,
+        self.assertRaisesRegex(ValueError, expected_msg,
                                 parse_matches_regex, regex, '123456789101', msg)
 
     def test_parse_in_choices(self):

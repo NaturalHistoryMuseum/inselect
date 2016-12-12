@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import errno
 import locale
@@ -6,9 +6,10 @@ import os
 import shutil
 import stat
 import string
+import sys
 
 from collections import Counter
-from itertools import ifilterfalse
+from itertools import filterfalse
 from pathlib import Path
 
 from dateutil.tz import tzlocal
@@ -32,6 +33,24 @@ DEFAULT_LOCALE = None
 def debug_print(*args, **kwargs):
     if DEBUG_PRINT:
         print(*args, **kwargs)
+
+
+def fix_frozen_dll_path():
+    """Fix DLL path when frozen on Windows
+    """
+    if sys.platform == 'win32' and hasattr(sys, 'frozen'):
+        # Patch DLL path so that DLL dependencies of .pyd files in
+        # subdirectories can be found. Shouldn't need to do this.
+        from ctypes import windll
+        windll.kernel32.SetDllDirectoryW(str(Path(sys.executable).parent))
+
+        # gencache does not realise that it is frozen and will not have write
+        # access to the dicts.dat file. These hacks are to prevent gencache
+        # from atempting to write to dicts.dat.
+        # Evil, evil, evil
+        import win32com.client.gencache
+        win32com.client.gencache.is_readonly = True
+        win32com.client.gencache.AddModuleToCache.__defaults__ = (1, False)
 
 
 def get_default_locale():
@@ -66,8 +85,8 @@ def rmtree_readonly(path):
     # http://stackoverflow.com/a/9735134
     def handle_remove_readonly(func, path, exc):
         excvalue = exc[1]
-        if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-
+        # PermissionError
+        if func in (os.rmdir, os.remove, os.unlink) and excvalue.errno == errno.EACCES:
             # ensure parent directory is writeable too
             pardir = os.path.abspath(os.path.join(path, os.path.pardir))
             if not os.access(pardir, os.W_OK):
@@ -90,7 +109,7 @@ def unique_everseen(iterable, key=None):
     seen = set()
     seen_add = seen.add
     if key is None:
-        for element in ifilterfalse(seen.__contains__, iterable):
+        for element in filterfalse(seen.__contains__, iterable):
             seen_add(element)
             yield element
     else:
@@ -105,7 +124,7 @@ def duplicated(v):
     """Returns a generator expression of values within v that appear more than
     once
     """
-    return (x for x, y in Counter(v).items() if y > 1)
+    return (x for x, y in list(Counter(v).items()) if y > 1)
 
 
 class FormatDefault(string.Formatter):
@@ -126,7 +145,7 @@ class FormatDefault(string.Formatter):
         # key will be either an integer or a string. If it is an integer, it
         # represents the index of the positional argument in args; if it is
         # a string, then it represents a named argument in kwargs.
-        if isinstance(key, (int, long)):
+        if isinstance(key, int):
             return super(FormatDefault, self).get_value(key, args, kwds)
         else:
             return kwds.get(key, self.default)
@@ -137,7 +156,7 @@ def user_name():
     """
     if pwd:
         # Strip trailing commas seen on Linux
-        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',').decode('utf8')
+        return pwd.getpwuid(os.getuid()).pw_gecos.rstrip(',')
     elif win32api and pywintypes:
         NameDisplay = 3
         try:
@@ -145,8 +164,7 @@ def user_name():
             return win32api.GetUserNameEx(NameDisplay)
         except pywintypes.error:
             try:
-                # Returns MBCS
-                return unicode(win32api.GetUserName(), 'mbcs')
+                return win32api.GetUserName()
             except pywintypes.error:
                 return ''
     else:
@@ -172,18 +190,13 @@ def format_dt_display(dt):
         language_code, encoding = get_default_locale()
         # Ignoring errors because I am paranoid about the behaviour of the
         # locale functions
-        if encoding:
-            return unicode(v, encoding, 'ignore')
-        else:
-            return unicode(v, errors='ignore')
+        return v
     elif win32api:
         # https://msdn.microsoft.com/en-us/library/dd373901(v=vs.85).aspx
         LOCALE_USER_DEFAULT = 0x0400
         DATE_LONGDATE = 2
         time = win32api.GetTimeFormat(LOCALE_USER_DEFAULT, 0, dt)
-        time = unicode(time, "mbcs")
         date = win32api.GetDateFormat(LOCALE_USER_DEFAULT, DATE_LONGDATE, dt)
-        date = unicode(date, "mbcs")
-        return u'{0} {1}'.format(date, time)
-
-    return dt.isoformat()
+        return '{0} {1}'.format(date, time)
+    else:
+        return dt.isoformat()

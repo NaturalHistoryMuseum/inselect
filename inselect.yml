@@ -1,0 +1,8 @@
+name: inselect
+dependencies:
+- menpo::opencv3=3.1.0
+- mkl=11.3.3
+- numpy=1.11.2
+- pip=9.0.1
+- python=3.5.2
+- scipy=0.17.1    # No binary wheel for Windows at present

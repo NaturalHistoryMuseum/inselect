@@ -7,7 +7,7 @@ def copy_to_clipboard(text):
     QApplication.clipboard().setText(text)
 
 
-def copy_details_box(icon, title, text, details):
+def show_copy_details_box(icon, title, text, details):
     """Shows a QMessageBox with a detail box and a 'Copy details' button
     """
     box = QMessageBox(icon, title, text)

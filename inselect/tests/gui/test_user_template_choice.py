@@ -6,7 +6,7 @@ from pathlib import Path
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 from inselect.gui.user_template_choice import user_template_choice
 from inselect.tests.utils import temp_directory_with_files
@@ -46,7 +46,8 @@ class TestUserTemplateChoice(GUITest):
         w.view_metadata.popup_button.default()
 
         path = TESTDATA / 'test.inselect_template'
-        with patch.object(QFileDialog, 'getOpenFileName', return_value=str(path)) as mock_gofn:
+        retval = str(path), w.view_metadata.popup_button.FILE_FILTER
+        with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
             w.view_metadata.popup_button.choose()
             self.assertEqual(1, mock_gofn.call_count)
 
@@ -57,7 +58,7 @@ class TestUserTemplateChoice(GUITest):
         mock_setvalue.assert_any_call(user_template_choice().PATH_KEY, str(path))
         mock_setvalue.assert_any_call(user_template_choice().DIRECTORY_KEY, str(path.parent))
 
-    @patch.object(QFileDialog, 'getOpenFileName', return_value=None)
+    @patch.object(QFileDialog, 'getOpenFileName', return_value=(None, None))
     def test_cancels_choose_template(self, mock_gofn):
         "User cancels the 'choose template' box"
 
@@ -80,9 +81,9 @@ class TestUserTemplateChoice(GUITest):
         with temp_directory_with_files(TESTDATA / 'test.inselect_template') as tempdir,\
                 patch.object(QSettings, 'setValue') as mock_setvalue:
             path = tempdir / 'test.inselect_template'
-
+            retval = str(path), w.view_metadata.popup_button.FILE_FILTER
             # Load the test template in tempdir
-            with patch.object(QFileDialog, 'getOpenFileName', return_value=str(path)) as mock_gofn:
+            with patch.object(QFileDialog, 'getOpenFileName', return_value=retval) as mock_gofn:
                 w.view_metadata.popup_button.choose()
                 self.assertEqual(1, mock_gofn.call_count)
 
@@ -92,7 +93,7 @@ class TestUserTemplateChoice(GUITest):
                              self.window.view_metadata.popup_button.text())
 
             # Write a new template to the file and refresh
-            template = u"""Name: An updated test template
+            template = """Name: An updated test template
 Fields:
     - Name: catalogNumber
 """

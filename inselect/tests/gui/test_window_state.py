@@ -2,7 +2,7 @@ import unittest
 
 from qtpy.QtCore import QCoreApplication, QSize
 
-from gui_test import GUITest
+from .gui_test import GUITest
 
 
 class TestPersistWindowState(GUITest):
