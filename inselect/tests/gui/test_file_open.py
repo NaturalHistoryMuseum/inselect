@@ -1,4 +1,5 @@
 import shutil
+import sys
 import unittest
 
 from functools import partial
@@ -58,6 +59,10 @@ class TestFileOpen(GUITest):
         self.assertWindowTitleOpenDocument()
         self.assertFalse(self.window.model.is_modified)
 
+    @unittest.skipIf(
+        sys.platform.startswith("win"),
+        "Reading images from non-ascii paths is not available on Windows"
+    )
     def test_open_non_ascii(self):
         "Open an inselect document with non-ascii characters in the filename"
         # Copy the existing 'shapes' file to a temporary with the a non-latin
