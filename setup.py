@@ -64,94 +64,131 @@ setup_data = {
         'Topic :: Scientific/Engineering :: Bio-Informatics'
         'Programming Language :: Python :: 3.5',
     ],
-    'win32': {
-        'executables': [
-            {
-                'script': 'inselect/scripts/inselect.py',
-                'targetName': 'inselect.exe',
-                'icon': 'icons/inselect.ico',
-                'base': 'Win32GUI',
-                'shortcutName': 'Inselect',     # See http://stackoverflow.com/a/15736406
-                'shortcutDir': 'ProgramMenuFolder'
-            }
-        ] + [
-            {
-                'script': 'inselect/scripts/{0}.py'.format(script),
-                'targetName': '{0}.exe'.format(script),
-                'icon': 'icons/inselect.ico',
-                'base': 'Console'
-            }
-            for script in SCRIPTS
-        ],
-        # Strings in braces within 'include_files' tuples expanded in cx_setup
-        'include_files': [
-            # Evil, evil, evil
-            # cx_Freeze breaks pywintypes and pythoncom on Python 3.5
-            # https://bitbucket.org/anthony_tuininga/cx_freeze/issues/194/error-with-frozen-executable-using-35-and
-            ('{environment_root}/Lib/site-packages/win32/lib/pywintypes.py', 'pywintypes.py'),
-            ('{environment_root}/Lib/site-packages/pythoncom.py', 'pythoncom.py'),
-            ('{environment_root}/Library/bin/mkl_core.dll', 'mkl_core.dll'),
-            ('{environment_root}/Library/bin/mkl_intel_thread.dll', 'mkl_intel_thread.dll'),
-            ('{environment_root}/Library/bin/libiomp5md.dll', 'libiomp5md.dll'),
-            ('{project_root}/inselect/gui/inselect.qss', 'inselect.qss'),
-        ],
-        'extra_packages': ['win32com.gen_py', 'win32timezone'],
-        'excludes': [
-            'Tkinter', 'ttk', 'Tkconstants', 'tcl', '_ssl',
-        ]
-    }
 }
 
 
 def setuptools_setup():
     """setuptools setup"""
     from setuptools import setup
-    setup(**{k: v for k, v in setup_data.items() if 'win32' != k})
+    setup(**setup_data)
+
+
+def _qt_files(site_packages):
+    """Returns a list of tuples (src, dest) of Qt dependencies to be installed.
+    Elements are instances of Path.
+    site_packages should be an instance of Path to the site-packages directory.
+
+    IF we leave cx_Freeze to do its thing then the entirety of PyQt5, Qt5 and
+    uic are included in the installer. The only way to avoid horrible bloat is
+    to hand-tune which files we include.
+
+    This whole system is fucked beyond belief.
+    """
+    from pathlib import Path
+
+    return [
+        # Qt DLLs
+        (
+            site_packages.joinpath('PyQt5/Qt/bin').joinpath(dep),
+            dep
+        )
+        for dep in ('Qt5Core.dll', 'Qt5Gui.dll', 'Qt5Widgets.dll')
+    ] + [
+        # Qt plugins
+        (
+            site_packages.joinpath('PyQt5/Qt/plugins/platforms').joinpath(dep),
+            Path('platforms').joinpath(dep)
+        )
+        for dep in ('qwindows.dll',)
+    ] + [
+        # PyQt extension modules
+        (
+            site_packages.joinpath('PyQt5').joinpath(dep),
+            Path('PyQt5').joinpath(dep)
+        )
+        for dep in ('__init__.py', 'Qt.pyd', 'QtCore.pyd', 'QtGui.pyd', 'QtWidgets.pyd')
+    ]
 
 
 def cx_setup():
     """cx_Freeze setup. Used for building Windows installers"""
-    from cx_Freeze import setup, Executable
-    from distutils.sysconfig import get_python_lib
+    import scipy
+
     from pathlib import Path
+    from distutils.sysconfig import get_python_lib
 
-    # Set paths to include files
-    format_strings = {
-        'site_packages': get_python_lib(),
-        'environment_root': Path(sys.executable).parent,
-        'project_root': Path(__file__).parent,
-    }
-    include_files = [
-        (source.format(**format_strings), destination)
-        for source, destination in setup_data['win32']['include_files']
-    ]
+    from cx_Freeze import setup, Executable
 
-    # DLLs that are not detected because they are loaded by ctypes
     from pylibdmtx import pylibdmtx
     from pyzbar import pyzbar
-    include_files += [
+
+    # Useful paths
+    environment_root = Path(sys.executable).parent
+    site_packages = Path(get_python_lib())
+    project_root = Path(__file__).parent
+
+    # Files as tuples (source, dest)
+    include_files = [
+        # Evil, evil, evil
+        # cx_Freeze breaks pywintypes and pythoncom on Python 3.5
+        # https://bitbucket.org/anthony_tuininga/cx_freeze/issues/194/error-with-frozen-executable-using-35-and
+        (site_packages.joinpath('win32/lib/pywintypes.py'), 'pywintypes.py'),
+        (site_packages.joinpath('pythoncom.py'), 'pythoncom.py'),
+
+        # Binary dependencies that are not detected
+        (environment_root.joinpath('Library/bin/mkl_core.dll'), 'mkl_core.dll'),
+        (environment_root.joinpath('Library/bin/mkl_intel_thread.dll'), 'mkl_intel_thread.dll'),
+        (environment_root.joinpath('Library/bin/libiomp5md.dll'), 'libiomp5md.dll'),
+
+        # Stylesheet
+        (project_root.joinpath('inselect/gui/inselect.qss'), 'inselect.qss'),
+    ] + [
+        # DLLs that are not detected because they are loaded by ctypes
         (dep._name, Path(dep._name).name)
         for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
-    ]
+    ] + _qt_files(site_packages)
 
-    # scipy
-    # http://stackoverflow.com/questions/32694052/scipy-and-cx-freeze-error-importing-scipy-you-cannot-import-scipy-while-being
-    import scipy
+    # Convert instances of Path to strs
+    include_files = [(str(source), str(dest)) for source, dest in include_files]
+
+    # Directories as strings
     include_files += [
+        # Fixes scipy freeze
+        # http://stackoverflow.com/a/32822431/1773758
         str(Path(scipy.__file__).parent),
     ]
 
-    # Setup
+    # Packages to exclude.
+    exclude_packages = [
+        str(p.relative_to(site_packages)).replace('\\', '.') for p in
+        site_packages.rglob('*/tests')
+    ]
+
     setup(
         name=setup_data['name'],
         version=setup_data['version'],
         options={
             'build_exe': {
-                'packages': (
-                    setup_data['packages'] +
-                    setup_data['win32']['extra_packages']
-                ),
-                'excludes': setup_data['win32']['excludes'],
+                'packages':
+                    setup_data.get('packages', []) + [
+                        'sklearn.neighbors', 'win32com.gen_py', 'win32timezone',
+                    ],
+                'excludes': [
+                    # '_bz2',    # Required by sklearn
+                    '_decimal', '_elementtree', '_hashlib', '_lzma',
+                    '_ssl', 'curses',
+                    'distutils', 'email', 'http', 'lib2to3', 'mock', 'nose',
+                    'PyQt5',
+                    # 'pydoc',    # Required by sklearn
+                    'tcl', 'Tkinter', 'ttk', 'Tkconstants',
+                    # 'unittest',    # Required by numpy.core.multiarray
+                    'win32com.HTML', 'win32com.test', 'win32evtlog', 'win32pdh',
+                    'win32trace', 'win32wnet',
+                    'xml', 'xmlrpc',
+                    'inselect.tests',
+                ] + exclude_packages,
+                'includes': [
+                ],
                 'include_files': include_files,
                 'include_msvcr': True,
                 'optimize': 2,
@@ -161,8 +198,23 @@ def cx_setup():
             }
         },
         executables=[
-            Executable(**i) for i in setup_data['win32']['executables']
-        ]
+            Executable(
+                script='inselect/scripts/inselect.py',
+                targetName='inselect.exe',
+                icon='icons/inselect.ico',
+                base='Win32GUI',
+                shortcutName='Inselect',     # See http://stackoverflow.com/a/15736406
+                shortcutDir='ProgramMenuFolder'
+            )
+        ] + [
+            Executable(
+                script='inselect/scripts/{0}.py'.format(script),
+                targetName='{0}.exe'.format(script),
+                icon='icons/inselect.ico',
+                base='Console'
+            )
+            for script in SCRIPTS
+        ],
     )
 
 
