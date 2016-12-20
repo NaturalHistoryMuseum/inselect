@@ -63,6 +63,12 @@ Don't worry about the "Can't install shortcuts..." message when you run the
 Download and install the [Inlite ClearImage SDK](http://www.inliteresearch.com/).
 Run the 'Inlite Control Center' application to get an evaluation key.
 
+## Patch `cx_Freeze`
+
+There is a bug in `cx_Freeze` 5.0. Make the change to `finder.py` descibed in the
+[bug report](https://bitbucket.org/anthony_tuininga/cx_freeze/issues/219/incorrect-logic-in-finderpy).
+
+
 ## Test barcode reading libraries
 
 Inselect has optional barcode reading capabilities. The dependent libraries
