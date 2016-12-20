@@ -6,6 +6,7 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
@@ -317,7 +318,7 @@ class TestFileOpen(GUITest):
         "User tries to reopen a document that is already open and not modified"
         w = self.window
 
-        # Open a document again
+        # Open a document
         w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Open the document again
@@ -329,6 +330,25 @@ class TestFileOpen(GUITest):
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
 
+    @patch.object(QPixmap, 'isNull', return_value=True)
+    def test_qimage_of_bgr_null_qpixmap(self, mock_is_null):
+        "QPixmap not created from BGR ndarray"
+        w = self.window
+
+        self.assertIsNone(w.document)
+        self.assertIsNone(w.document_path)
+
+        self.assertRaises(
+            ValueError,
+            w.open_file,
+            path=TESTDATA / 'shapes.inselect',
+        )
+        mock_is_null.assert_called_once_with()
+
+        # Document state should not have changed
+        self.assertIsNone(w.document)
+        self.assertIsNone(w.document_path)
+        self.assertWindowTitleNoDocument()
 
 if __name__ == '__main__':
     unittest.main()

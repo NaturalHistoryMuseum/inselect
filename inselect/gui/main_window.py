@@ -421,11 +421,10 @@ class MainWindow(QMainWindow):
         debug_print('MainWindow.open_document [{0}]'.format(path))
         QSettings().setValue("working_directory", str(path.parent))
 
+        self.model.from_document(document)
+
         self.document = document
         self.document_path = path
-        # TODO Need to roll back if an exception is raised initialising the
-        # model
-        self.model.from_document(self.document)
 
         self.time_doc_opened = datetime.utcnow()
 
