@@ -1,4 +1,5 @@
 # -*- mode: python -*-
+import os
 import sys
 
 from pathlib import Path
@@ -8,7 +9,12 @@ from pyzbar import pyzbar
 
 block_cipher = None
 
+# See https://github.com/pyinstaller/pyinstaller/wiki/Recipe-remove-tkinter-tcl
+# for details of excluding all of the tcl, tk, tkinter shat
+sys.modules['FixTk'] = None
 
+
+print(os.getenv('EXCLUDE_MODULES', []).split(' '))
 a = Analysis(
     ['inselect/scripts/inselect.py'],
     pathex=[str(Path('.').absolute())],
@@ -19,7 +25,7 @@ a = Analysis(
     hiddenimports=['sklearn.neighbors.typedefs'],
     hookspath=[],
     runtime_hooks=[],
-    excludes=[],
+    excludes=os.getenv('EXCLUDE_MODULES', []).split(' '),
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher
@@ -31,7 +37,6 @@ a.binaries += TOC([
     (Path(dep._name).name, dep._name, 'BINARY')
     for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
 ])
-
 
 ICON = 'icons/inselect.icns'
 
