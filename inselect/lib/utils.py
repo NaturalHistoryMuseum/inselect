@@ -1,12 +1,9 @@
-
-
 import errno
 import locale
 import os
 import shutil
 import stat
 import string
-import sys
 
 from collections import Counter
 from itertools import filterfalse
@@ -33,24 +30,6 @@ DEFAULT_LOCALE = None
 def debug_print(*args, **kwargs):
     if DEBUG_PRINT:
         print(*args, **kwargs)
-
-
-def fix_frozen_dll_path():
-    """Fix DLL path when frozen on Windows
-    """
-    if sys.platform == 'win32' and hasattr(sys, 'frozen'):
-        # Patch DLL path so that DLL dependencies of .pyd files in
-        # subdirectories can be found. Shouldn't need to do this.
-        from ctypes import windll
-        windll.kernel32.SetDllDirectoryW(str(Path(sys.executable).parent))
-
-        # gencache does not realise that it is frozen and will not have write
-        # access to the dicts.dat file. These hacks are to prevent gencache
-        # from atempting to write to dicts.dat.
-        # Evil, evil, evil
-        import win32com.client.gencache
-        win32com.client.gencache.is_readonly = True
-        win32com.client.gencache.AddModuleToCache.__defaults__ = (1, False)
 
 
 def get_default_locale():

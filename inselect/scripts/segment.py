@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Segment documents
 """
+from inselect.lib.fix_frozen import fix_frozen
+
+fix_frozen()
+
 import argparse
 import sys
 import traceback
@@ -11,8 +15,7 @@ import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.segment_document import SegmentDocument
-from inselect.lib.utils import debug_print, fix_frozen_dll_path
-
+from inselect.lib.utils import debug_print
 
 # TODO Recursive option
 # TODO Option to resegment documents with existing boxes
@@ -62,5 +65,4 @@ def main(args=None):
 
 
 if __name__ in ('__main__', 'segment__main__'):
-    fix_frozen_dll_path()
     main()

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Post-process
+"""Read barcodes in existing documents
 """
+from inselect.lib.fix_frozen import fix_frozen
+
+fix_frozen()
+
 import argparse
 import sys
 import traceback
@@ -12,7 +16,7 @@ import inselect.lib.utils
 
 from inselect.lib.document import InselectDocument
 from inselect.lib.inselect_error import InselectError
-from inselect.lib.utils import debug_print, fix_frozen_dll_path
+from inselect.lib.utils import debug_print
 
 # Warning: lazy load of gouda via local imports
 
@@ -113,5 +117,4 @@ def main(args=None):
 
 
 if __name__ in ('__main__', 'read_barcodes__main__'):
-    fix_frozen_dll_path()
     main()
