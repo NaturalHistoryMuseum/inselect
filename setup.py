@@ -171,7 +171,8 @@ def cx_setup():
             'build_exe': {
                 'packages':
                     setup_data.get('packages', []) + [
-                        'sklearn.neighbors', 'win32com.gen_py', 'win32timezone',
+                        'urllib', 'sklearn.neighbors', 'win32com.gen_py',
+                        'win32timezone',
                     ],
                 'excludes': [
                     # '_bz2',    # Required by sklearn
@@ -183,7 +184,7 @@ def cx_setup():
                     'tcl', 'Tkinter', 'ttk', 'Tkconstants',
                     # 'unittest',    # Required by numpy.core.multiarray
                     'win32com.HTML', 'win32com.test', 'win32evtlog', 'win32pdh',
-                    'win32trace', 'win32wnet',
+                    'win32trace', 'win32ui', 'win32wnet',
                     'xml', 'xmlrpc',
                     'inselect.tests',
                 ] + exclude_packages,
