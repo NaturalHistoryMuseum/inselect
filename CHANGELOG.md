@@ -3,6 +3,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 Version 0.1.35
 -------------
 - #418 Latest gouda and pylibdmtx
+- #416 User testing / Python 3 - error message when opening document on 32-bit Windows
 - #414 User testing / Python 3 - error message when starting from shortcut
 - #408 Installer bloat
 - #407 Performance impact of 2to3

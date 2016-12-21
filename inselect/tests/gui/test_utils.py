@@ -4,14 +4,22 @@ import subprocess
 import sys
 
 from mock import patch
+from pathlib import Path
 
+import cv2
+
+from PyQt5.QtGui import QImage
 from PyQt5.QtWidgets import QMessageBox
 
 from inselect.gui import copy_box
-from inselect.gui.utils import reveal_path, report_exception_to_user
+from inselect.gui.utils import (reveal_path, report_exception_to_user,
+                                qimage_of_bgr)
 from inselect.tests.utils import temp_directory_with_files
 
 from .gui_test import GUITest
+
+
+TESTDATA = Path(__file__).parent.parent / 'test_data'
 
 
 class TestUtils(GUITest):
@@ -79,6 +87,20 @@ class TestUtils(GUITest):
             mock_critical.call_args[0]
         )
 
+    @patch.object(QImage, 'isNull', return_value=True)
+    def test_qimage_of_bgr_null_qimage(self, mock_is_null):
+        "QImage not created from BGR ndarray"
+        self.assertRaises(
+            ValueError,
+            qimage_of_bgr,
+            cv2.imread(str(TESTDATA.joinpath('shapes.png')))
+        )
+        mock_is_null.assert_called_once_with()
+
+    def test_qimage_of_bgr(self):
+        "QImage created from BGR ndarray"
+        img = qimage_of_bgr(cv2.imread(str(TESTDATA.joinpath('shapes.png'))))
+        self.assertEqual((459, 437), (img.width(), img.height()))
 
 if __name__ == '__main__':
     unittest.main()

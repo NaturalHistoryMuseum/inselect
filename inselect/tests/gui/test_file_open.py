@@ -6,6 +6,7 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 
 from inselect.lib.inselect_error import InselectError
@@ -54,10 +55,12 @@ class TestFileOpen(GUITest):
 
     def test_open_doc(self):
         "Open an inselect document"
-        self.window.open_file(path=TESTDATA / 'shapes.inselect')
+        path = TESTDATA / 'shapes.inselect'
+        self.window.open_file(path)
         self.assertEqual(5, self.window.model.rowCount())
         self.assertWindowTitleOpenDocument()
         self.assertFalse(self.window.model.is_modified)
+        self.assertEqual(path, self.window.document_path)
 
     @unittest.skipIf(
         sys.platform.startswith("win"),
@@ -82,6 +85,7 @@ class TestFileOpen(GUITest):
             self.assertEqual(5, self.window.model.rowCount())
             self.assertWindowTitleOpenDocument(title=stem)
             self.assertFalse(self.window.model.is_modified)
+            self.assertEqual(path, self.window.document_path)
 
     @patch.object(QMessageBox, 'warning', return_value=QMessageBox.Ok)
     def test_open_readonly_doc(self, mock_warning):
@@ -106,6 +110,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(5, self.window.model.rowCount())
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleOpenDocument()
+        self.assertEqual(TESTDATA / 'shapes.inselect', self.window.document_path)
 
     def test_open_thumbnail_of_doc(self):
         """Open the thumbnail image file of an existing inselect document - the
@@ -123,6 +128,7 @@ class TestFileOpen(GUITest):
             self.assertEqual(5, self.window.model.rowCount())
             self.assertFalse(self.window.model.is_modified)
             self.assertWindowTitleOpenDocument()
+            self.assertEqual(tempdir / 'shapes.inselect', self.window.document_path)
 
     @patch.object(MainWindow, 'new_document')
     def test_new_document(self, mock_new_document):
@@ -153,7 +159,7 @@ class TestFileOpen(GUITest):
                                              tempdir / 'shapes.png'))
 
             # New document should have been created
-            self.assertTrue((TESTDATA / 'shapes.inselect').is_file())
+            self.assertTrue((tempdir / 'shapes.inselect').is_file())
 
             # User should have been told about the new document
             self.assertTrue(mock_information.called)
@@ -163,6 +169,7 @@ class TestFileOpen(GUITest):
 
             self.assertFalse(self.window.model.is_modified)
             self.assertWindowTitleOpenDocument()
+            self.assertEqual(tempdir / 'shapes.inselect', self.window.document_path)
 
     def test_open_non_existant_image(self):
         "Try to open a non-existant image file"
@@ -170,18 +177,24 @@ class TestFileOpen(GUITest):
                           path='I do not exist.png')
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
+        self.assertIsNone(self.window.document)
+        self.assertIsNone(self.window.document_path)
 
     def test_open_non_existant_inselect(self):
         "Try to open a non-existant inselect file"
         self.assertRaises(IOError, self.window.open_file, path='I do not exist.inselect')
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
+        self.assertIsNone(self.window.document)
+        self.assertIsNone(self.window.document_path)
 
     def test_open_non_existant_unrecognised(self):
         "Try to open a non-existant file with an unrecognised extension"
         self.assertRaises(InselectError, self.window.open_file, path='I do not exist')
         self.assertFalse(self.window.model.is_modified)
         self.assertWindowTitleNoDocument()
+        self.assertIsNone(self.window.document)
+        self.assertIsNone(self.window.document_path)
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
     def test_open_do_not_save_existing_modified(self, mock_question):
@@ -204,6 +217,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(5, w.model.rowCount())
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
+        self.assertEqual(TESTDATA / 'shapes.inselect', w.document_path)
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_open_save_existing_modified(self, mock_question):
@@ -228,6 +242,7 @@ class TestFileOpen(GUITest):
             self.assertEqual(0, w.model.rowCount())
             self.assertFalse(w.model.is_modified)
             self.assertWindowTitleOpenDocument()
+            self.assertEqual(tempdir / 'shapes.inselect', w.document_path)
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Cancel)
     def test_open_cancel_existing_modified(self, mock_question):
@@ -250,6 +265,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(0, w.model.rowCount())
         self.assertTrue(self.window.model.is_modified)
         self.assertWindowTitleOpenDocument()
+        self.assertEqual(TESTDATA / 'shapes.inselect', w.document_path)
 
         # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
@@ -269,6 +285,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(0, w.model.rowCount())
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleNoDocument()
+        self.assertIsNone(w.document_path)
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.Yes)
     def test_reopen_replace_modified(self, mock_question):
@@ -288,6 +305,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(5, w.model.rowCount())
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
+        self.assertEqual(TESTDATA / 'shapes.inselect', w.document_path)
 
     @patch.object(QMessageBox, 'question', return_value=QMessageBox.No)
     def test_reopen_do_notreplace_modified(self, mock_question):
@@ -307,6 +325,7 @@ class TestFileOpen(GUITest):
         self.assertEqual(0, w.model.rowCount())
         self.assertTrue(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
+        self.assertEqual(TESTDATA / 'shapes.inselect', w.document_path)
 
         # Clean up by closing the document
         with patch.object(QMessageBox, 'question', return_value=QMessageBox.No):
@@ -317,7 +336,7 @@ class TestFileOpen(GUITest):
         "User tries to reopen a document that is already open and not modified"
         w = self.window
 
-        # Open a document again
+        # Open a document
         w.open_file(path=TESTDATA / 'shapes.inselect')
 
         # Open the document again
@@ -329,6 +348,28 @@ class TestFileOpen(GUITest):
         self.assertFalse(w.model.is_modified)
         self.assertWindowTitleOpenDocument()
 
+    @patch.object(QPixmap, 'isNull', return_value=True)
+    def test_qimage_of_bgr_null_qpixmap(self, mock_is_null):
+        "QPixmap not created from BGR ndarray"
+        w = self.window
+
+        self.assertFalse(w.model.is_modified)
+        self.assertIsNone(w.document)
+        self.assertIsNone(w.document_path)
+        self.assertWindowTitleNoDocument()
+
+        self.assertRaises(
+            ValueError,
+            w.open_file,
+            path=TESTDATA / 'shapes.inselect',
+        )
+        mock_is_null.assert_called_once_with()
+
+        # Document state should not have changed
+        self.assertFalse(w.model.is_modified)
+        self.assertIsNone(w.document)
+        self.assertIsNone(w.document_path)
+        self.assertWindowTitleNoDocument()
 
 if __name__ == '__main__':
     unittest.main()

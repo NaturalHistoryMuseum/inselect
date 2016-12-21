@@ -62,14 +62,17 @@ class Model(QAbstractItemModel):
             image_array = document.scanned.array
 
         pixmap = QPixmap.fromImage(qimage_of_bgr(image_array))
-        data = self._boxes_from_items(
-            document.items, pixmap.width(), pixmap.height()
-        )
+        if pixmap.isNull():
+            raise ValueError('Unable to create QPixmap')
+        else:
+            data = self._boxes_from_items(
+                document.items, pixmap.width(), pixmap.height()
+            )
 
-        # Inform views
-        self.beginResetModel()
-        self._data, self._image_array, self._pixmap = data, image_array, pixmap
-        self.endResetModel()
+            # Inform views
+            self.beginResetModel()
+            self._data, self._image_array, self._pixmap = data, image_array, pixmap
+            self.endResetModel()
 
     def _boxes_from_items(self, items, image_width=None, image_height=None):
         """Returns a list of boxes, suitable for use as self._data, created
