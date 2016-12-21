@@ -4,7 +4,7 @@ numpy==1.11.2
 #TODO How to specify OpenCV? 'cv2==3.1.0',
 Pillow==3.4.2
 psutil==5.0.0
-pylibdmtx==0.1.5
+pylibdmtx==0.1.6
 PyQt5==5.7
 python-dateutil==2.6.0
 pytz==2016.7
@@ -19,7 +19,7 @@ six==1.10.0
 unicodecsv==0.14.1
 
 # Not from PyPI
-https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.11/gouda-0.1.11-py2.py3-none-any.whl
+https://github.com/NaturalHistoryMuseum/gouda/releases/download/v0.1.13/gouda-0.1.13-py2.py3-none-any.whl
 
 # Development
 coveralls>=1.1
