@@ -2,6 +2,7 @@ This is an overview of major changes. Refer to the git repository for a full log
 
 Version 0.1.35
 -------------
+- #420 zbar decoder on Mac OS X
 - #418 Latest gouda and pylibdmtx
 - #416 User testing / Python 3 - error message when opening document on 32-bit Windows
 - #414 User testing / Python 3 - error message when starting from shortcut
