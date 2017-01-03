@@ -38,6 +38,17 @@ a.binaries += TOC([
     for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
 ])
 
+# A dependency of libzbar.dylib that PyInstaller does not detect, most likely
+# because of the hacky nastiness above
+MISSING_DYLIBS = (
+    Path('/usr/local/lib/libjpeg.8.dylib'),
+)
+a.binaries += TOC([
+    (lib.name, str(lib.resolve()), 'BINARY') for lib in MISSING_DYLIBS
+])
+
+
+
 ICON = 'icons/inselect.icns'
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
