@@ -7,6 +7,7 @@ import humanize
 import psutil
 
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QDialog, QLabel, QPushButton, QSizePolicy,
                              QVBoxLayout)
 
@@ -83,20 +84,27 @@ def show_about_box(parent=None):
 
        <p>
          Segmentation, validation and annotation of images of museum objects.
+
+         See the <a href="https://naturalhistorymuseum.github.io/inselect/">
+           {application} home page
+          </a> for documentation and news. The source code is hosted in a
+         <a href="https://github.com/NaturalHistoryMuseum/inselect/">
+            github
+         </a> repo.
          Please use our
-         <a href="https://github.com/NaturalHistoryMuseum/inselect">
+         <a href="https://github.com/NaturalHistoryMuseum/inselect/issues">
            issues page
          </a>
          to report problems and provide suggestions.
        </p>
 
        <p>
-         Copyright (c) 2014-2016, The Trustees of the Natural History
+         Copyright (c) 2014-2017, The Trustees of the Natural History
          Museum, London and licensed under the
          <a href="https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md">
            Modified BSD License
          </a>.
-         Inselect was developed by Alice Heaton, Lawrence Hudson, Pieter
+         {application} was developed by Alice Heaton, Lawrence Hudson, Pieter
          Holtzhausen and Stéfan van der Walt.
        </p>
 
@@ -128,6 +136,9 @@ def show_about_box(parent=None):
 
     label = QLabel(HTML_LINK_TEMPLATE.format(body))
     label.setWordWrap(True)
+    label.setTextFormat(Qt.RichText)
+    label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+    label.setOpenExternalLinks(True)
     vlayout.addWidget(label)
 
     close = QPushButton('OK')
