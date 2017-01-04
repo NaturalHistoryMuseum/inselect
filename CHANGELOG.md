@@ -28,6 +28,7 @@ Version 0.1.35
 - #367 Reveal file doesn't work on Windows
 - #344 Not enough room for toolbar text on Mac retina display
 - #343 Missing resource compiler on Mac
+- #309 Put web URL in prominent place
 - #292 Mac OS X installer bloat
 - #273 Inselect as a package
 - #95 Python 3
