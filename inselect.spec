@@ -7,6 +7,7 @@ from pathlib import Path
 from pylibdmtx import pylibdmtx
 from pyzbar import pyzbar
 
+
 block_cipher = None
 
 # See https://github.com/pyinstaller/pyinstaller/wiki/Recipe-remove-tkinter-tcl
@@ -14,7 +15,6 @@ block_cipher = None
 sys.modules['FixTk'] = None
 
 
-print(os.getenv('EXCLUDE_MODULES', []).split(' '))
 a = Analysis(
     ['inselect/scripts/inselect.py'],
     pathex=[str(Path('.').absolute())],
@@ -25,7 +25,7 @@ a = Analysis(
     hiddenimports=['sklearn.neighbors.typedefs'],
     hookspath=[],
     runtime_hooks=[],
-    excludes=os.getenv('EXCLUDE_MODULES', []).split(' '),
+    excludes=os.getenv('EXCLUDE_MODULES', '').split(' '),
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher
@@ -38,15 +38,13 @@ a.binaries += TOC([
     for dep in pylibdmtx.EXTERNAL_DEPENDENCIES + pyzbar.EXTERNAL_DEPENDENCIES
 ])
 
-# A dependency of libzbar.dylib that PyInstaller does not detect, most likely
-# because of the hacky nastiness above
+# A dependency of libzbar.dylib that PyInstaller does not detect
 MISSING_DYLIBS = (
     Path('/usr/local/lib/libjpeg.8.dylib'),
 )
 a.binaries += TOC([
     (lib.name, str(lib.resolve()), 'BINARY') for lib in MISSING_DYLIBS
 ])
-
 
 
 ICON = 'icons/inselect.icns'
