@@ -31,7 +31,7 @@ class TestUtils(GUITest):
         "User reveals a path"
         with temp_directory_with_files() as tempdir:
             path = tempdir / 'xyz'
-            path.open('w')
+            path.touch()
             reveal_path(path)
             expected = "explorer.exe /select,{0}".format(path.resolve())
             mock_subprocess.assert_called_once_with(expected)
@@ -42,7 +42,7 @@ class TestUtils(GUITest):
         "User reveals a path"
         with temp_directory_with_files() as tempdir:
             path = tempdir / 'xyz'
-            path.open('w')
+            path.touch()
             reveal_path(path)
             expected = [
                 '/usr/bin/osascript',

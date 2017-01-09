@@ -25,8 +25,8 @@ class TestExportCSV(GUITest):
         csv = doc.document_path.with_suffix('.csv')
 
         # Check CSV contents
-        with csv.open('rb') as f:
-            res = unicodecsv.DictReader(f, encoding='utf-8')
+        with csv.open('rb') as infile:
+            res = unicodecsv.DictReader(infile, encoding='utf-8')
             for index, item, row in zip(count(), doc.items, res):
                 expected = item['fields']
                 expected.update({
@@ -73,7 +73,7 @@ class TestExportCSV(GUITest):
                                        TESTDATA / 'shapes.png') as tempdir:
 
             # Create a CSV file to force the GUI to prompt for over-write
-            (tempdir / 'shapes.csv').open('w')
+            (tempdir / 'shapes.csv').touch()
 
             # Load document and export CSV file
             w.open_document(path=tempdir / 'shapes.inselect')
@@ -102,14 +102,15 @@ class TestExportCSV(GUITest):
                                        TESTDATA / 'shapes.png') as tempdir:
 
             # Create a CSV file to force the GUI to prompt for over-write
-            (tempdir / 'shapes.csv').open('w')
+            (tempdir / 'shapes.csv').touch()
 
             # Load document and export CSV file
             w.open_document(tempdir / 'shapes.inselect')
             w.export_csv(user_template=DWC)
 
             # File should not have been altered
-            self.assertEqual('', (tempdir / 'shapes.csv').open().read())
+            with (tempdir / 'shapes.csv').open() as infile:
+                self.assertEqual('', infile.read())
 
             # User should not have been told about the export
             self.assertFalse(mock_information.called)

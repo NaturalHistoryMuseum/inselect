@@ -50,9 +50,9 @@ class TestUtils(unittest.TestCase):
         d = tempfile.mkdtemp()
         path = Path(d)
         try:
-            (path / 'a file').open('w')
+            (path / 'a file').touch()
             (path / 'a directory').mkdir()
-            (path / 'a directory' / 'another file').open('w')
+            (path / 'a directory' / 'another file').touch()
             make_readonly(path)
             self.assertTrue(path.is_dir())
         finally:

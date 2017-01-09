@@ -220,43 +220,46 @@ class InselectDocument(object):
         path = Path(path)
 
         # Sniff the first few bytes - file must look like a json document
-        if not re.match(b'^{[ (\n)|(\r\n)]*"', path.open('rb').read(20)):
-            raise InselectError('Not an inselect document')
-        else:
-            doc = json.load(path.open(encoding='utf8'))
-            v = doc.get('inselect version')
-
-            if not v:
+        with path.open('rb') as infile:
+            if not re.match(b'^{[ (\n)|(\r\n)]*"', infile.read(20)):
                 raise InselectError('Not an inselect document')
-            elif v not in cls.FILE_VERSIONS:
-                raise InselectError('Unsupported version [{0}]'.format(v))
-            else:
-                if 1 == v:
-                    # Version 1 contained just three illustrative fields -
-                    # convert these to Darwin Core fields
-                    for item in doc['items']:
-                        fields = item['fields']
-                        if fields.get('Taxonomic group'):
-                            fields['scientificName'] = fields.pop('Taxonomic group')
-                        if fields.get('Location'):
-                            fields['otherCatalogNumbers'] = fields.pop('Location')
-                        if fields.get('Specimen number'):
-                            fields['catalogNumber'] = fields.pop('Specimen number')
-                        item['fields'] = fields
 
-                scanned = path.with_suffix(doc['scanned extension'])
+        with path.open(encoding='utf8') as infile:
+            doc = json.load(infile)
 
-                properties = doc.get('properties', {})
+        v = doc.get('inselect version')
 
-                # Parse datetimes
-                for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
-                    properties[dt] = cls._parse_datetime(properties[dt])
+        if not v:
+            raise InselectError('Not an inselect document')
+        elif v not in cls.FILE_VERSIONS:
+            raise InselectError('Unsupported version [{0}]'.format(v))
+        else:
+            if 1 == v:
+                # Version 1 contained just three illustrative fields -
+                # convert these to Darwin Core fields
+                for item in doc['items']:
+                    fields = item['fields']
+                    if fields.get('Taxonomic group'):
+                        fields['scientificName'] = fields.pop('Taxonomic group')
+                    if fields.get('Location'):
+                        fields['otherCatalogNumbers'] = fields.pop('Location')
+                    if fields.get('Specimen number'):
+                        fields['catalogNumber'] = fields.pop('Specimen number')
+                    item['fields'] = fields
 
-                msg = 'Loaded [{0}] items from [{1}]'
-                debug_print(msg.format(len(doc['items']), path))
+            scanned = path.with_suffix(doc['scanned extension'])
 
-                return cls(scanned_path=scanned, items=doc['items'],
-                           properties=properties)
+            properties = doc.get('properties', {})
+
+            # Parse datetimes
+            for dt in {'Saved on', 'Created on'}.intersection(properties.keys()):
+                properties[dt] = cls._parse_datetime(properties[dt])
+
+            msg = 'Loaded [{0}] items from [{1}]'
+            debug_print(msg.format(len(doc['items']), path))
+
+            return cls(scanned_path=scanned, items=doc['items'],
+                       properties=properties)
 
     def save(self):
         "Saves to self.document_path"
