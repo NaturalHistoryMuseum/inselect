@@ -123,21 +123,22 @@ class TestDocument(unittest.TestCase):
         source = TESTDATA / 'shapes.inselect'
         with temp_directory_with_files(TESTDATA / 'shapes.inselect') as tempdir:
             doc_temp = tempdir / 'shapes.inselect'
-            doc_temp.open('w').write(source.open().read())
+            with doc_temp.open('w') as outfile, source.open() as infile:
+                outfile.write(infile.read())
 
             # Document load with neither scanned image file nor thumbnail
             self.assertRaises(InselectError, InselectDocument.load, doc_temp)
 
             # Document load with thumbnail but no scanned image file
             thumbnail_temp = tempdir / 'shapes_thumbnail.jpg'
-            thumbnail_temp.open('w')       # File only needs to exist
+            thumbnail_temp.touch()       # File only needs to exist
             doc = InselectDocument.load(doc_temp)
             self.assertFalse(doc.scanned.available)
             self.assertTrue(doc.thumbnail.available)
 
             # Document load with both scanned and thumbnail files
             scanned_temp = tempdir / 'shapes.png'
-            scanned_temp.open('w')       # File only needs to exist
+            scanned_temp.touch()       # File only needs to exist
             actual = InselectDocument.load(doc_temp)
             self.assertEqual(InselectDocument.load(source).items, actual.items)
             self.assertTrue(actual.scanned.available)
@@ -278,13 +279,13 @@ class TestDocument(unittest.TestCase):
     def test_path_is_thumbnail_file(self):
         with temp_directory_with_files() as tempdir:
             thumbnail = tempdir / 'xx_thumbnail.jpg'
-            thumbnail.open('w')       # File only needs to exist
+            thumbnail.touch()       # File only needs to exist
 
             # Thumbnail file exists but there is no corresponding .inselect doc
             self.assertFalse(InselectDocument.path_is_thumbnail_file(thumbnail))
 
             doc = tempdir / 'xx.inselect'
-            doc.open('w')       # File only needs to exist
+            doc.touch()       # File only needs to exist
 
             # Thumbnail file and corresponding .inselect file both exist
             self.assertTrue(InselectDocument.path_is_thumbnail_file(thumbnail))

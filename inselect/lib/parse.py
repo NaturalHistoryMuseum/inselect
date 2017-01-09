@@ -289,8 +289,12 @@ def parse_in_choices(choices, value):
     else:
         return value
 
-# Populate dict {name: parse function}.
+# Populate dict {name: parse function}. See comment alongside the first
+# declaration of the PARSERS global, towards the top of this file.
 PARSERS = inspect.getmembers(sys.modules[__name__], inspect.isfunction)
 PARSERS = filter(lambda v: re.match(r'^parse_.+$', v[0]), PARSERS)
-PARSERS = filter(lambda v: ['value'] == inspect.getargspec(v[1]).args, PARSERS)
+PARSERS = filter(
+    lambda v: ['value'] == list(inspect.signature(v[1]).parameters.keys()),
+    PARSERS
+)
 PARSERS = dict(PARSERS)

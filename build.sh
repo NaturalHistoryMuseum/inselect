@@ -32,7 +32,7 @@ for module in cv2 numpy libdmtx scipy sklearn zbar; do
 done
 
 echo Tests
-nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
+PYTHONWARNINGS=module nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
 echo Wheel build
 ./setup.py bdist_wheel --universal

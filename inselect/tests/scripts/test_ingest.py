@@ -30,9 +30,9 @@ class TestImagesSuffixesRe(unittest.TestCase):
         self.assertRegex('x.TIFF', re)
         self.assertRegex('x.Tiff', re)
 
-        self.assertNotRegexpMatches('x.jpgx', re)
-        self.assertNotRegexpMatches('x.jpg ', re)
-        self.assertNotRegexpMatches('x.txt', re)
+        self.assertNotRegex('x.jpgx', re)
+        self.assertNotRegex('x.jpg ', re)
+        self.assertNotRegex('x.txt', re)
 
 
 class TestIngest(unittest.TestCase):
