@@ -18,22 +18,15 @@ git pull
 * Build the Windows 64-bit Installer; start a Miniconda64 prompt:
 
 ```
-cd c:\Users\<you Windows username>\projects\inselect
+cd c:\Users\<your Windows username>\projects\inselect
 git pull
 build.bat
 ```
 
 * Archive `dist\inselect-0.1.18-amd64.msi`
 
-* Build the Windows 32-bit Installer; start an Miniconda32 prompt:
-
-```
-cd c:\Users\<you Windows username>\projects\inselect
-git pull
-build.bat
-```
-
-* Archive `dist\inselect-0.1.18-win32.msi`
+* Start an Miniconda32 prompt, run the same as above and archive
+  `dist\inselect-0.1.18-win32.msi`
 
 * Tag
 
@@ -45,3 +38,5 @@ git push origin master --tags
 * Draft a new release on
   [the Inselect github releases page](https://github.com/NaturalHistoryMuseum/inselect/releases)
   and upload the installers.
+
+* Add a news article to the website
