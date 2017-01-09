@@ -1,4 +1,4 @@
-]This is an overview of major changes. Refer to the git repository for a full log change.
+This is an overview of major changes. Refer to the git repository for a full log change.
 
 Version 0.1.35
 -------------
@@ -32,6 +32,7 @@ Version 0.1.35
 - #309 Put web URL in prominent place
 - #292 Mac OS X installer bloat
 - #273 Inselect as a package
+- #223 Error creating new Inselect document from a jpg
 - #95 Python 3
 - #83 Architecture and code organisation
 
