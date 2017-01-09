@@ -27,7 +27,7 @@ you unless you are running Inselect on Linux - see
 
 ## License
 
-Inselect is Copyright (c) 2014-2016, The Trustees of the Natural History Museum,
+Inselect is Copyright (c) 2014-2017, The Trustees of the Natural History Museum,
 London and licensed under the Modified BSD License. See the
 [LICENSE](https://github.com/NaturalHistoryMuseum/inselect/blob/master/LICENSE.md)
 file for more information.
