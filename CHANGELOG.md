@@ -26,11 +26,14 @@ Version 0.1.35
 - #369 Keyboard shortcuts box too tall on some displays
 - #368 Ugly error message when creating a new inselect document on Mac OS X
 - #367 Reveal file doesn't work on Windows
+- #356 Error on running subsegment on Ubuntu 14.04
 - #344 Not enough room for toolbar text on Mac retina display
 - #343 Missing resource compiler on Mac
+- #324 Drag-and-drop to open files doesn't work on Mac OS X
 - #309 Put web URL in prominent place
 - #292 Mac OS X installer bloat
 - #273 Inselect as a package
+- #223 Error creating new Inselect document from a jpg
 - #95 Python 3
 - #83 Architecture and code organisation
 
