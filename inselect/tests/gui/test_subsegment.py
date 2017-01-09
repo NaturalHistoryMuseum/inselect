@@ -4,11 +4,14 @@ from functools import partial
 from mock import patch
 from pathlib import Path
 
+import cv2
+
 from PyQt5.QtCore import QPointF, QRect
 from PyQt5.QtWidgets import QMessageBox
 
 from inselect.gui.roles import MetadataRole, RectRole
 from inselect.gui.sort_document_items import SortDocumentItems
+from inselect.lib.segment import segment_grabcut
 
 from .gui_test import GUITest
 
@@ -94,6 +97,11 @@ class TestSubsegment(GUITest):
                     'seed points')
         self.assertTrue(expected in mock_warning.call_args[0])
 
+
+    def test_subsegment_grabcut_fail(self):
+        "Subsegment image that has caused problems for cv2's grabcut function"
+        # https://github.com/NaturalHistoryMuseum/inselect/issues/370
+        segment_grabcut(cv2.imread(str(TESTDATA / 'grabcut_problem.jpg')))
 
 if __name__ == '__main__':
     unittest.main()
