@@ -272,7 +272,8 @@ def _assemble_dms(degrees, minutes, seconds, direction, is_latitude):
 
 
 def parse_matches_regex(regex, value, error_message='Unmatched value [{0}]'):
-    """Raises ValueError(error_message) if value does not match regex.
+    """Raises ValueError(error_message.format(value)) if value does not match
+    regex.
     """
     res = regex.match(value)
     if not res:
@@ -282,7 +283,7 @@ def parse_matches_regex(regex, value, error_message='Unmatched value [{0}]'):
 
 
 def parse_in_choices(choices, value):
-    """Raise ValueError(error_message) if value is not in choices
+    """Raise ValueError if value is not in choices
     """
     if value not in choices:
         raise ValueError('Invalid value [{0}]: not in choices'.format(value))
