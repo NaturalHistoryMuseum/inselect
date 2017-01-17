@@ -35,7 +35,7 @@ echo Tests
 PYTHONWARNINGS=module nosetests --with-coverage --cover-html --cover-inclusive --cover-erase --cover-tests --cover-package=inselect inselect
 
 echo Wheel build
-./setup.py bdist_wheel --universal
+./setup.py bdist_wheel
 mv dist/inselect-*.whl .
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
