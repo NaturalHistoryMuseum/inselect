@@ -1,5 +1,9 @@
 This is an overview of major changes. Refer to the git repository for a full log change.
 
+Version 0.1.36
+-------------
+- #429 Code layout
+
 Version 0.1.35
 -------------
 - #425 Warnings

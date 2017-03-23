@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QGridLayout, QSizePolicy, QToolBar, QToolButton,
                              QWidget)
 

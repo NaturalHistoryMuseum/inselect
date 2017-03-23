@@ -97,14 +97,14 @@ class SegmentDocument(object):
         # Sort items by user's most recent preference
         new_items = sort_document_items(new_items, self.sort_by_columns)
 
-        items[row:(1+row)] = new_items
+        items[row:(1 + row)] = new_items
 
         # Segmentation image
         h, w = img.array.shape[:2]
         display_image = np.zeros((h, w, 3), dtype=np.uint8)
 
         x, y, w, h = window
-        display_image[y:y+h, x:x+w] = display
+        display_image[y:y + h, x:x + w] = display
 
         return items, display_image
 

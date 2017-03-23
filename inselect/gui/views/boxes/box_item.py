@@ -3,7 +3,7 @@ import sys
 from itertools import chain
 
 from PyQt5.QtCore import Qt, QRect, QRectF
-from PyQt5.QtGui import QPen, QBrush
+from PyQt5.QtGui import QPen
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
 from inselect.lib.utils import debug_print

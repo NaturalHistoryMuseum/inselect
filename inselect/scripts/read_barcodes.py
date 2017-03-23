@@ -20,6 +20,7 @@ from inselect.lib.utils import debug_print
 
 # Warning: lazy load of gouda via local imports
 
+
 class BarcodeReader(object):
     def __init__(self, engine, strategies):
         self.engine = engine

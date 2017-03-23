@@ -28,7 +28,7 @@ class Reticle(QGraphicsItem):
         """QGraphicsItem virtual
         """
         size = self.SIZE
-        return QRectF(-size/2, -size/2, size, size)
+        return QRectF(-size / 2, -size / 2, size, size)
 
     def paint(self, painter, option, widget):
         """QGraphicsItem virtual

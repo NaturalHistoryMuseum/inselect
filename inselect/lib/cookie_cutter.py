@@ -20,7 +20,7 @@ class CookieCutter(object):
 
     def __init__(self, name, boxes):
         if (not all(4 == len(box) for box in boxes) or
-            not all(isinstance(v, float) for v in chain(*boxes))):
+                not all(isinstance(v, float) for v in chain(*boxes))):
             raise ValueError('Must be a list of numeric coordinates')
         else:
             self._boxes = deepcopy(boxes)

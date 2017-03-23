@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QAbstractItemView
 from inselect.lib.inselect_error import InselectError
 from inselect.lib.utils import debug_print
 from inselect.gui.roles import PixmapRole, RectRole, MetadataValidRole
-from inselect.gui.utils import unite_rects, update_selection_model
+from inselect.gui.utils import update_selection_model
 
 from .boxes_scene import BoxesScene
 

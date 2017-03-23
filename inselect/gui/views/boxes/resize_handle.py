@@ -47,7 +47,7 @@ class ResizeHandle(QGraphicsItem):
         """QGraphicsItem virtual
         """
         size = 20   # Local coordinate units
-        return QRectF(-size/2, -size/2, size, size)
+        return QRectF(-size / 2, -size / 2, size, size)
 
     def mousePressEvent(self, event):
         """QGraphicsItem virtual

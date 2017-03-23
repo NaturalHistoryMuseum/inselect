@@ -86,10 +86,12 @@ class Model(QAbstractItemModel):
         for index, item in enumerate(items):
             # Convert normalised coords to pixel coords for pixmap
             rect = item['rect']
-            rect = QRect(int(round(rect[0] * image_width)),
-                         int(round(rect[1] * image_height)),
-                         int(round(rect[2] * image_width)),
-                         int(round(rect[3] * image_height)))
+            rect = QRect(
+                int(round(rect[0] * image_width)),
+                int(round(rect[1] * image_height)),
+                int(round(rect[2] * image_width)),
+                int(round(rect[3] * image_height))
+            )
             data[index] = {
                 "fields": item.get('fields', {}),
                 "rect": rect,
@@ -106,12 +108,14 @@ class Model(QAbstractItemModel):
             self.removeRows(0, self.rowCount())
 
         if new:
-            self.beginInsertRows(QModelIndex(), 0, len(new)-1)
+            self.beginInsertRows(QModelIndex(), 0, len(new) - 1)
             self._data = new
             self.set_modified(True)
             self.endInsertRows()
-            self.dataChanged.emit(self.index(0, 0),
-                                  self.index(len(new)-1, 0))
+            self.dataChanged.emit(
+                self.index(0, 0),
+                self.index(len(new) - 1, 0)
+            )
 
     @property
     def image_array(self):
@@ -143,10 +147,12 @@ class Model(QAbstractItemModel):
             # TODO LH Better to use InselectImage to convert to normalised?
             rect = box['rect']
             items.append({
-                'rect': (rect.left() / w,
-                         rect.top() / h,
-                         rect.width() / w,
-                         rect.height() / h),
+                'rect': (
+                    rect.left() / w,
+                    rect.top() / h,
+                    rect.width() / w,
+                    rect.height() / h
+                ),
                 'fields': box['fields'],
                 'rotation': box['rotation'],
             })
@@ -242,7 +248,7 @@ class Model(QAbstractItemModel):
                 current = self._data[index.row()]['rotation']
 
                 # Constrain angle to be in range 0:360
-                value = (value+360) % 360
+                value = (value + 360) % 360
 
                 msg = 'Model.setData rotation for [{0}] from [{1}] to [{2}]'
                 debug_print(msg.format(index.row(), current, value))
@@ -297,9 +303,11 @@ class Model(QAbstractItemModel):
             # not 'count' different dict instances
             new_rows = [None] * count
             for i in range(0, count):
-                new_rows[i] = {"fields": {},
-                               "rect": QRect(0, 0, 0, 0),
-                               "rotation": 0}
+                new_rows[i] = {
+                    "fields": {},
+                    "rect": QRect(0, 0, 0, 0),
+                    "rotation": 0
+                }
 
             self._data[row:row] = new_rows
             self.set_modified(True)
@@ -316,7 +324,7 @@ class Model(QAbstractItemModel):
         if row < 0 or row > len(self._data) or count < 1:
             raise ValueError('Bad row [{0}] or count [{1}]'.format(row, count))
         else:
-            first, last = row, row+count
+            first, last = row, row + count
 
             self.beginRemoveRows(parent, first, last)
             del self._data[first:last]
@@ -331,5 +339,7 @@ class Model(QAbstractItemModel):
         """
         debug_print('Model.user_template_changed')
         if self._data:
-            self.dataChanged.emit(self.index(0, 0),
-                                  self.index(self.rowCount()-1, 0))
+            self.dataChanged.emit(
+                self.index(0, 0),
+                self.index(self.rowCount() - 1, 0)
+            )

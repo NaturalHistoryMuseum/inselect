@@ -1,5 +1,4 @@
-from PyQt5.QtCore import (QRect, QSize, QPoint, Qt, QItemSelection,
-                          QItemSelectionModel)
+from PyQt5.QtCore import QRect, QSize, QPoint, Qt, QItemSelectionModel
 from PyQt5.QtGui import QBrush, QColor, QPen, QFont, QTransform
 from PyQt5.QtWidgets import (QAbstractItemView, QAction, QActionGroup,
                              QListView, QStyle, QStyledItemDelegate)
@@ -152,11 +151,11 @@ class CropDelegate(QStyledItemDelegate):
         # Draw rotated
         if angle:
             t = QTransform()
-            t.translate(option.rect.width() / 2+option.rect.left(),
-                        option.rect.height() / 2+option.rect.top())
+            t.translate(option.rect.width() / 2 + option.rect.left(),
+                        option.rect.height() / 2 + option.rect.top())
             t.rotate(angle)
-            t.translate(-option.rect.width() / 2-option.rect.left(),
-                        -option.rect.height() / 2-option.rect.top())
+            t.translate(-option.rect.width() / 2 - option.rect.left(),
+                        -option.rect.height() / 2 - option.rect.top())
 
         with painter_state(painter):
             if angle:
