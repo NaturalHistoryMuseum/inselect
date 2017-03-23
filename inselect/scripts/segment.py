@@ -20,6 +20,7 @@ from inselect.lib.utils import debug_print
 # TODO Recursive option
 # TODO Option to resegment documents with existing boxes
 
+
 def segment(dir, sort_by_columns):
     dir = Path(dir)
     segment_doc = SegmentDocument(sort_by_columns)

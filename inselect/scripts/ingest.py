@@ -20,6 +20,7 @@ from inselect.lib.inselect_error import InselectError
 
 # TODO Recursive option
 
+
 def ingest_from_directory(inbox, docs,
                           thumbnail_width_pixels=InselectDocument.THUMBNAIL_DEFAULT_WIDTH,
                           cookie_cutter=None):
@@ -60,12 +61,14 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser(description='Ingests images into Inselect')
-    parser.add_argument("inbox", type=Path,
-                        help='Source directory containing scanned images')
+    parser.add_argument(
+        "inbox", type=Path, help='Source directory containing scanned images'
+    )
     parser.add_argument(
         "docs", type=Path, help='Destination directory to which images '
         'will be moved and in which Inselect documents will be created. Can be '
-        'the same as inbox.')
+        'the same as inbox.'
+    )
     parser.add_argument(
         '-c', '--cookie-cutter', type=Path, help="Path to a '{0}' file "
         'that will be applied to new Inselect '

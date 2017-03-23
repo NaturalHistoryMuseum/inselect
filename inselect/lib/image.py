@@ -104,14 +104,14 @@ class InselectImage(object):
                 crop = self.array[y0:y1, x0:x1]
             else:
                 # Box is out of bounds -create a new array, all zeroes (black)
-                crop_w, crop_h = x1-x0, y1-y0
+                crop_w, crop_h = x1 - x0, y1 - y0
                 crop = np.zeros((crop_h, crop_w, self.array.shape[2]),
                                 dtype=self.array.dtype)
                 if any(x_in_bounds) and any(y_in_bounds):
                     # Partial overlap
                     overlapping = self.array[max(y0, 0):min(y1, h),
                                              max(x0, 0):min(x1, w)]
-                    dest_y, dest_x = max(0, 0-y0), max(0, 0-x0)
+                    dest_y, dest_x = max(0, 0 - y0), max(0, 0 - x0)
                     crop[dest_y:(dest_y + overlapping.shape[0]),
                          dest_x:(dest_x + overlapping.shape[1])] = overlapping
 

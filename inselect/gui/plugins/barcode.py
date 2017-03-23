@@ -96,6 +96,6 @@ class BarcodePlugin(Plugin):
         return None
 
     @classmethod
-    def config(self, parent):
+    def config(cls, parent):
         dlg = BarcodeDialog(parent)
         dlg.exec_()

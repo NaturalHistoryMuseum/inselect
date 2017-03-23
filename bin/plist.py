@@ -11,11 +11,12 @@ import inselect
 plist = plistlib.readPlist(sys.argv[1])
 plist['CFBundleShortVersionString'] = inselect.__version__
 plist['CFBundleDisplayName'] = 'Inselect'
-plist['CFBundleDocumentTypes'] = [{'CFBundleTypeName' : 'Inselect document',
-                                   'CFBundleTypeIconFile': 'inselect.icns',
-                                   'CFBundleTypeExtensions': ['inselect'],
-                                   'CFBundleTypeRole': 'Editor',
-                                   'LSTypeIsPackage': 'False',
-                                  }]
+plist['CFBundleDocumentTypes'] = [{
+    'CFBundleTypeName': 'Inselect document',
+    'CFBundleTypeIconFile': 'inselect.icns',
+    'CFBundleTypeExtensions': ['inselect'],
+    'CFBundleTypeRole': 'Editor',
+    'LSTypeIsPackage': 'False',
+}]
 
 plistlib.writePlist(plist, sys.argv[1])

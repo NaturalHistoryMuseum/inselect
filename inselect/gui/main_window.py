@@ -10,7 +10,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import (Qt, QEvent, QSettings, QItemSelection,
                           QItemSelectionModel, QStandardPaths)
 from PyQt5.QtGui import (QColor, QFont, QIcon, QImageWriter, QKeySequence,
-                         QPixmap, QScreen)
+                         QPixmap)
 from PyQt5.QtWidgets import (QAction, QActionGroup, QFileDialog, QLabel,
                              QMainWindow, QMenu, QMessageBox, QSizePolicy,
                              QSplitter, QStackedWidget, QVBoxLayout, QWidget)
@@ -463,9 +463,9 @@ class MainWindow(QMainWindow):
                           QMessageBox.No | QMessageBox.Yes)
         box.setDefaultButton(QMessageBox.No)
 
-        SHOW_AT_MOST = 5
-        report_problems = problems[:SHOW_AT_MOST]
-        if SHOW_AT_MOST <= len(problems):
+        show_at_most = 5
+        report_problems = problems[:show_at_most]
+        if show_at_most <= len(problems):
             msg = ('The document contains {n_problems} validation problems. '
                    'The first {show_at_most} are shown below. Click "Show '
                    'details" to see all of them.\n'
@@ -482,7 +482,7 @@ class MainWindow(QMainWindow):
                    '{question}')
 
         box.setText(msg.format(n_problems=len(problems),
-                               show_at_most=SHOW_AT_MOST,
+                               show_at_most=show_at_most,
                                problems='\n'.join(report_problems),
                                question=question))
 
@@ -854,8 +854,10 @@ class MainWindow(QMainWindow):
         """
         sm = self.view_object.selectionModel()
         m = self.model
-        sm.select(QItemSelection(m.index(0, 0), m.index(m.rowCount()-1, 0)),
-                  QItemSelectionModel.Select)
+        sm.select(
+            QItemSelection(m.index(0, 0), m.index(m.rowCount() - 1, 0)),
+            QItemSelectionModel.Select
+        )
 
     def select_none(self, checked=False):
         sm = self.view_object.selectionModel()
@@ -893,7 +895,7 @@ class MainWindow(QMainWindow):
         if select == self.model.rowCount():
             select = 0
         elif -1 == select:
-            select = self.model.rowCount()-1
+            select = self.model.rowCount() - 1
 
         debug_print('Will move selection [{0}] from [{1}]'.format(current, select))
         select = self.model.index(select, 0)
