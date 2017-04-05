@@ -592,7 +592,7 @@ class MainWindow(QMainWindow):
         }
 
         # Only some of these make sense. For example, do not offer the user
-        # the change to save an eps, which is a format supported by QImageWriter
+        # the chance to save to eps, which is a format supported by QImageWriter
         extensions = sorted(extensions.intersection(IMAGE_PATTERNS))
 
         filter = 'Images ({0})'.format(' '.join(extensions))
@@ -633,8 +633,6 @@ class MainWindow(QMainWindow):
 
             # Write using QImageWriter, which makes richer error information
             # avaible than QPixmap.save()
-            from pprint import pprint
-            pprint(path)
             writer = QImageWriter(path)
             if not writer.write(pm.toImage()):
                 msg = 'An error occurred writing to [{0}]: [{1}]'
