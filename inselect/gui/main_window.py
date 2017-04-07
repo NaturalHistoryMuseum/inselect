@@ -609,8 +609,6 @@ class MainWindow(QMainWindow):
                 default_extension = e
                 break
         else:
-            # Use the first available extension
-            print(111, repr(extensions))
             default_extension = extensions[0][1:]
 
         default_fname = Path(default_fname).with_suffix(default_extension)
