@@ -4,7 +4,7 @@ Title: FAQs
 > Hudson LN, Blagoderov V, Heaton A, Holtzhausen P, Livermore L, Price BW,
 van der Walt S and Smith VS. 2015. *Inselect: automating the digitization of
 natural history collections*. PLOS ONE. 10 (11), e0143402.
-[10.1371/journal.pone.0143402](http://dx.doi.org/10.1371/journal.pone.0143402).
+[10.1371/journal.pone.0143402](https://doi.org/10.1371/journal.pone.0143402).
 
 ### What license does Inselect use?
 The Inselect software is licensed under a

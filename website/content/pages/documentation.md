@@ -6,11 +6,11 @@ You can find out about Inselect from
 * the [iDigBio](https://www.idigbio.org/) webinar, *Insights into Inselect:
 automating image processing, barcode reading, and validation of user-defined
 metadata*, available as a
-[video](https://dx.doi.org/10.6084/m9.figshare.3208021.v2) and via
+[video](https://doi.org/10.6084/m9.figshare.3208021.v2) and via
 [Adobe Connect](https://idigbio.adobeconnect.com/p7qo63aeo4a/) (additional
 software required), and
 * the PLOS ONE paper
-[*Inselect: automating the digitization of natural history collections*](https://dx.doi.org/10.1371/journal.pone.0143402).
+[*Inselect: automating the digitization of natural history collections*](https://doi.org/10.1371/journal.pone.0143402).
 
 ### Exercises
 We plan to create comprehensive user documentation for Inselect.
