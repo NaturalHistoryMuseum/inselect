@@ -13,13 +13,13 @@
 <link rel="canonical" href="https://naturalhistorymuseum.github.io/inselect/pages/image-handling-file-handling-and-bounding-boxes.html">
 
         <meta name="author" content="Trustees of the Natural History Museum, London" />
-        <meta name="description" content="Objective: to place a bounding box around each object in an image and export each image crop to its own JPG file. This example will cover Inselect&#39;s image and file handling, how to create and edit bounding boxes, how to automatically segment images and how to subsegment boxes round ..." />
+        <meta name="description" content="Objective: to place a bounding box around each object in an image and export each image crop to its own JPG file. This example will cover Inselect&#39;s image and file handling, how to create and edit bounding boxes, how to automatically segment images and how to subsegment boxes round overlapping …" />
 
     <meta property="og:site_name" content="Inselect" />
     <meta property="og:type" content="article"/>
     <meta property="og:title" content="Image handling, file handling and bounding boxes"/>
     <meta property="og:url" content="https://naturalhistorymuseum.github.io/inselect/pages/image-handling-file-handling-and-bounding-boxes.html"/>
-    <meta property="og:description" content="Objective: to place a bounding box around each object in an image and export each image crop to its own JPG file. This example will cover Inselect&#39;s image and file handling, how to create and edit bounding boxes, how to automatically segment images and how to subsegment boxes round ..." />
+    <meta property="og:description" content="Objective: to place a bounding box around each object in an image and export each image crop to its own JPG file. This example will cover Inselect&#39;s image and file handling, how to create and edit bounding boxes, how to automatically segment images and how to subsegment boxes round overlapping …" />
 
 
     <!-- Bootstrap -->
@@ -92,7 +92,7 @@ each image crop to its own <code>JPG</code> file.</p>
 <li>drag-and-drop (at the time of writing, this doesn't work on Mac - we
 will fix this in a future release).</li>
 </ul>
-<p><img alt="Insect soup" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup.jpg" /></p>
+<p><img alt="Insect soup" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup.jpg"></p>
 <h2>Created files</h2>
 <p>Inselect has created two files
 1. <code>Img0920+LG+C2.inselect</code></p>
@@ -157,7 +157,7 @@ computer to do the hard work for us. Run Inselect's segmentation algorithm</p>
 <p>Inselect will attempt to detect individual objects within the image and place a
 bounding box around each. It uses a general purpose algorithm that works well
 with many of the different specimen types that we tried. </p>
-<p><img alt="Insect soup with bounding boxes" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_segmented.jpg" /></p>
+<p><img alt="Insect soup with bounding boxes" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_segmented.jpg"></p>
 <p>The segmentation does a reasonable job but is not perfect - some manual
 refinement is required.</p>
 <h2>Refining the results of segmentation</h2>
@@ -199,13 +199,13 @@ resize the large box and create new ones but this is uneccesary manual work.</p>
 Inselect marks each point with a crosshair</li>
 <li>You can remove crosshair by unselecting the box</li>
 </ul>
-<p><img alt="Flies with overlapping wings" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_subsegment.jpg" /></p>
+<p><img alt="Flies with overlapping wings" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_subsegment.jpg"></p>
 <p>Run the 'Subsegment box', either from the toolbar or with <code>F6</code></p>
-<p><img alt="Subsegmented flies" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_subsegmented.jpg" /></p>
+<p><img alt="Subsegmented flies" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_subsegmented.jpg"></p>
 <h2>Export crops</h2>
 <p>Once you are happy with the bounding boxes, click on 'Save crops' in the
 'Export' section of the toolbar.</p>
-<p><img alt="Insect soup with fully refined bounding boxes" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_refined.jpg" /></p>
+<p><img alt="Insect soup with fully refined bounding boxes" src="https://naturalhistorymuseum.github.io/inselect/images/exercises/soup_refined.jpg"></p>
 <ul>
 <li>Inselect loads the original full-resolution image</li>
 <li>It applies bounding boxes to the original full-resolution image and crops
