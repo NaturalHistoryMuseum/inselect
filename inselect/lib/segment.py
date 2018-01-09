@@ -369,15 +369,19 @@ def segment_grabcut(image, window=None, seeds=[]):
     initial = np.zeros((h, w), np.uint8)
     initial[:] = cv2.GC_BGD
     initial[mag0 == 255] = cv2.GC_FGD
-    for i, rect in enumerate(rects):
+    for rect in rects:
         cv2.drawContours(initial, [rect[4]], -1, int(cv2.GC_FGD), -1)
 
     initial[display[:, :, 0] > 0] = cv2.GC_PR_FGD
+    if 0 not in initial:
+        # Crude solution to https://github.com/NaturalHistoryMuseum/inselect/issues/370
+        # See also http://stackoverflow.com/a/7546787/1773758
+        # Only ever seen in one image
+        initial[0, :] = 0
     bgmodel = np.zeros((1, 65), np.float64)
     fgmodel = np.zeros((1, 65), np.float64)
     mask = initial
-    rect = None
-    cv2.grabCut(image, mask, rect, bgmodel, fgmodel, 1, cv2.GC_INIT_WITH_MASK)
+    cv2.grabCut(image, mask, None, bgmodel, fgmodel, 1, cv2.GC_INIT_WITH_MASK)
     mask2 = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
 
     contours, hierarchy = _find_contours(mask2.copy(),
