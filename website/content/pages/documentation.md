@@ -16,7 +16,7 @@ software required), and
 We plan to create comprehensive user documentation for Inselect.
 The following documentation is written as exercises for you to follow.
 The files for exercises are available in
-[a zipfile](https://www.dropbox.com/s/wm864xrcskj4p0c/InselectDocumentationFiles.zip?dl=0)
+[a zipfile](https://nhm.box.com/s/0oo5vaabypxsgt9zzcz7b6o5xg4yjrba)
 (250MB).
 Many digitisation pipelines use `TIFF` images. Whole-drawer `TIFF` images can
 be extremely large - files of up to 800MB are common. These examples use `JPG`
